@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="robots" content="noindex,nofollow">
+    <title>Woordrelaties -- Help</title>
+    <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="wordrel.css">
+    <base target="_blank">
+  </head>
+  <body>
+    <h1>Woordrelaties</h1>
+
+Inhoud:
+<ul>
+<li><a href="#intro" target="_self">Inleiding</a>
+<li><a href="#rel" target="_self">Soorten relaties</a>
+<li><a href="#voorb" target="_self">Zoekvoorbeelden</a>
+</ul>
+
+<hr>
+    <h2 id="intro">Inleiding</h2>
+
+Met deze toepassing kun je zoeken naar woord-paren in delen van de
+Lassy treebanks. De Lassy treebanks bestaan uit Nederlandstalige
+zinnen die voorzien zijn van hun syntactische ontleding. In de Lassy
+Klein treebank (1 miljoen woorden) is voor elke zin de
+syntactische ontleding handmatig gecheckt. In de Lassy Groot treebank
+(700 miljoen woorden) is de syntactische ontleding automatisch
+toegevoegd door de automatische parser Alpino.
+<p>
+In de toepassing kun je zoeken naar woord-paren en hun syntactische
+relatie (zoals onderwerp, lijdend voorwerp, bepaling). In welke zinnen
+komt
+<a href="/?word=auto&amp;rel=obj1&amp;hword=stelen">het
+	  woord <em>auto</em> voor als lijdend voorwerp van het
+	  werkwoord <em>stelen</em></a>?
+In welke zinnen komen
+<a href="/?word=beschuit&amp;rel=cnj%2Fcnj&amp;hword=appel">de woorden <em>beschuit</em> en <em>appel</em> voor
+als conjuncten in een coordinatie</a>?
+In welke zinnen komt
+<a href="/?word=geen&amp;rel=det&amp;hword=toekomst&amp;postag=&amp;hpostag=">het woord <em>geen</em>
+voor als determiner bij het woord <em>toekomst</em></a>?
+<p>
+Voor elke zoekvraag kun je dus twee woorden specificeren, en eventueel
+de gezochte syntactische relatie. Je kunt van elk woord ook de
+woordsoort (werkwoord, bijvoeglijk naamwoord, zelfstandig naamwoord)
+nader beperken. Omdat je elk van de vijf velden ook oningevuld kunt
+laten, kun je ook vragen als de volgende formuleren: In welke zinnen
+komt
+<a href="/?rel=obj1&amp;hword=stelen">een lijdend
+	    voorwerp bij het werkwoord <em>stelen</em></a> voor?
+In welke
+zinnen komt
+<a href="/?word=&amp;rel=su&amp;hword=beslissen&amp;postag=&amp;hpostag=">een onderwerp bij het werkwoord <em>beslissen</em></a> voor?
+In welke zinnen komt
+<a href="/?postag=bw&amp;rel=mod&amp;hpostag=ww">een bijwoord voor als bepaling bij een werkwoord</a>?
+<p>
+Op de bladzijde met de gevonden zinnen kun je per zin de preciese
+syntactische structuur bekijken door op de <em>boom</em>-link te klikken. Je
+kunt op de <em>statistiek</em>-knop klikken om de frequentie-informatie van
+alle gevonden zinnen en woord-paren te zien te krijgen.
+<p>
+De Lassy treebanks zijn gemaakt door de KU Leuven en de
+Rijksuniversiteit Groningen door middel van een financiering van de
+Nederlandse Taalunie. De treebanks kunnen worden verkregen bij de TST
+Centrale.
+
+	      <h3>Links</h3>
+
+<a href="http://tst-centrale.org">TST Centrale</a><br>
+<a href="http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66">Lassy Klein</a><br>
+<a href="http://tst-centrale.org/producten/corpora/lassy-groot-corpus/6-67">Lassy Groot</a><br>
+<a href="http://www.let.rug.nl/vannoord/Lassy/">Achtergrondinformatie over Lassy</a><br>
+<a href="http://www.let.rug.nl/vannoord/alp/Alpino/">Achtergrondinformatie over Alpino</a>
+
+<hr>
+
+    <h2 id="rel">Soorten relaties</h2>
+
+<dl>
+
+<dt><span class="wrd">app</span>
+<dd>hoofd met een appositie, zoals in 
+  <div class="vb">
+   <span class="hfd">premier</span> <span class="wrd">Kok</span><br>
+   <span class="hfd">Piet</span>, een aardige <span class="wrd">man</span>
+  </div>
+
+<dt><span class="wrd">body</span>/<span class="hfd">cmp</span>
+
+<dd>rompzin met voegwoord, zoals in
+  <div class="vb">
+   <span class="hfd">omdat</span> hij geen zin <span class="wrd">had</span>
+</div>
+
+<dt><span class="wrd">body</span>/<span class="hfd">rhd</span>
+
+<dd>voor relatieve bijzinnen: de rompzin en het relatieve deel, zoals in
+  <div class="vb">
+   <span class="hfd">die</span> in Amsterdam <span class="wrd">woont</span>
+</div>
+
+<dt><span class="wrd">body</span>/<span class="hfd">whd</span>
+
+<dd>voor vraagzinnen: de rompzin en het vraagwoord, zoals in
+  <div class="vb">
+   <span class="hfd">wie</span> heb je daar <span class="wrd">ontmoet</span>
+</div>
+
+<dt><span class="wrd">cmp</span>/-
+
+<dd>voor voegwoorden die het hoofd van de zin zijn, zoals in
+  <div class="vb">
+   <span class="wrd">Omdat</span> ik geen zin heb.
+</div>
+
+<dt><span class="wrd">cnj</span>/<span class="hfd">cnj</span>
+
+<dd>voor conjuncten die samen in een conjunctie voorkomen, zoals in
+  <div class="vb">
+<span class="wrd">appels</span> en <span class="hfd">peren</span>
+</div>
+
+<dt><span class="wrd">cnj</span>/<span class="hfd">crd</span>
+
+<dd>voor de relatie tussen een conjunct en de coordinator in een conjunctie, zoals in
+  <div class="vb">
+<span class="wrd">appels</span> <span class="hfd">en</span> peren<br>
+appels <span class="hfd">en</span> <span class="wrd">peren</span>
+</div>
+
+<dt><span class="wrd">crd</span>/<span class="hfd">cnj</span>
+<dd>idem
+
+<dt><span class="wrd">crd</span>/<span class="hfd">crd</span>
+
+<dd>voor de relatie tussen twee coordinatoren in een conjunctie, zoals
+  <div class="vb">
+<span class="wrd">zowel</span> Jan <span class="hfd">als</span> Piet
+</div>
+
+<dt><span class="wrd">det</span>
+
+<dd>de determinator bij een hoofd, zoals in
+  <div class="vb">
+<span class="wrd">het</span> <span class="hfd">boek</span>
+</div>
+
+<dt><span class="wrd">dlink</span>/-
+
+<dd>Voor zinnen die met een coordinator beginnen, zoals in
+  <div class="vb">
+<span class="wrd">En</span> ik kom niet!<br>
+<span class="wrd">Maar</span> hij luisterde niet...
+</div>
+
+<dt><span class="wrd">dp</span>/-
+
+<dd>Voor delen van de zin die geen syntactische relatie met de rest van de zin hebben, zoals in
+  <div class="vb">
+<span class="wrd">Vanochtend</span> veel zon
+</div>
+
+<dt><span class="wrd">hd</span>/-
+
+<dd>Voor het hoofd van de zin, zoals in:
+  <div class="vb">
+Hij <span class="wrd">vertrekt</span>.<br>
+Een <span class="wrd">stap</span> die veel ophef veroorzaakt.
+</div>
+
+<dt><span class="wrd">hdf</span>
+
+<dd>Voor een hoofd met een postpositie, zoals in
+  <div class="vb">
+<span class="hfd">Tot</span> nu <span class="wrd">toe</span>
+</div>
+
+<dt><span class="wrd">ld</span>
+
+<dd>Voor een hoofd met een locatief/directioneel complement
+  <div class="vb">
+Hij <span class="hfd">fietste</span> <span class="wrd">naar</span> Zweden.<br>
+Hij <span class="hfd">rende</span> <span class="wrd">het</span> bos in.
+</div>
+
+<dt><span class="wrd">me</span>
+
+<dd>Voor een hoofd met een maat-complement, zoals in
+  <div class="vb">
+Dat <span class="hfd">duurde</span> drie <span class="wrd">uur</span>.<br>
+De aardappelen <span class="hfd">wegen</span> twee <span class="wrd">kilo</span>.
+</div>
+
+<dt><span class="wrd">mod</span>
+
+<dd>Voor een hoofd met een modifier, zoals in
+  <div class="vb">
+Een <span class="wrd">aardige</span> <span class="hfd">jongen</span>.<br>
+Hij <span class="hfd">kwam</span> <span class="wrd">om</span> half zes.
+</div>
+
+<dt><span class="wrd">mod</span>/<span class="hfd">cmp</span>
+
+<dd>Voor een modifier bij een ingebedde bijzin, zoals in
+  <div class="vb">
+<span class="wrd">Vooral</span> <span class="hfd">omdat</span> hij te laat arriveerde.
+</div>
+
+<dt><span class="wrd">nucl</span>/-
+
+<dd>Voor een nucleus die als hoofd van de zin fugeert, zoals in
+  <div class="vb">
+<span class="wrd">Stromingen</span>: twee types kun je onderscheiden
+</div>
+
+<dt><span class="wrd">nucl</span>/<span class="hfd">dlink</span>
+
+<dd>Voor de relatie tussen de coordinator en de rompzin in een zin die met een coordinator begint, zoals in
+  <div class="vb">
+<span class="hfd">En</span> dat <span class="wrd">is</span> wel hard nodig.
+</div>
+
+<dt><span class="wrd">obcomp</span>
+
+<dd>Voor de relatie van een hoofd met een comparatief-complement, zoals in
+  <div class="vb">
+<span class="hfd">harder</span> <span class="wrd">dan</span> ooit
+</div>
+
+<dt><span class="wrd">obj1</span>
+
+<dd>Voor de relatie van een hoofd met een direct object, zoals in
+  <div class="vb">
+Hij <span class="hfd">sloeg</span> zijn <span class="wrd">kinderen</span><br>
+<span class="hfd">In</span> <span class="wrd">april</span>
+</div>
+
+<dt><span class="wrd">obj1</span>/<span class="hfd">su</span>
+
+<dd>Voor de relatie tussen een lijdend voorwerp en een onderwerp
+  <div class="vb">
+<span class="hfd">Hij</span> sloeg zijn <span class="wrd">kinderen</span>
+</div>
+
+<dt><span class="wrd">obj2</span>
+
+<dd>Voor de relatie tussen een hoofd en een indirect object, zoals in
+  <div class="vb">
+Hij <span class="hfd">gaf</span> de <span class="wrd">leerlingen</span> een kadootje.
+</div>
+
+<dt><span class="wrd">obj2</span>/<span class="hfd">su</span>
+<dd>Voor de relatie tussen een indirect object en het onderwerp, zoals in
+  <div class="vb">
+<span class="hfd">Hij</span> gaf de <span class="wrd">leerlingen</span> een kadootje.
+</div>
+
+<dt><span class="wrd">pc</span>
+
+<dd>Voor een hoofd met een voorzetselvoorwerp, zoals in
+  <div class="vb">
+Hij <span class="hfd">rekent</span> <span class="wrd">op</span> zijn flexibiliteit.
+</div>
+
+<dt><span class="wrd">pobj1</span>
+
+<dd>Voor de relatie tussen een hoofd en het voorlopige lijdend voorwerp, zoals in
+  <div class="vb">
+Hij <span class="hfd">betreurt</span> <span class="wrd">het</span> dat je komt<br>
+Hij is <span class="wrd">er</span> trots <span class="hfd">op</span> dat je komt
+</div>
+
+<dt><span class="wrd">predc</span>
+
+<dd>Voor de relatie tussen een hoofd en een predicatief complement (het naamwoordelijk deel van het gezegde), zoals in
+  <div class="vb">
+Hij <span class="hfd">is</span> de <span class="wrd">baas</span><br>
+Ik <span class="hfd">vond</span> hem <span class="wrd">irritant</span>
+</div>
+
+<dt><span class="wrd">predm</span>
+
+<dd>Voor de relatie tussen een hoofd en een predicatieve modifier (dubbelverbonden bepaling, bepaling van gesteldheid),
+  <div class="vb">
+Hij <span class="hfd">kwam</span> <span class="wrd">dronken</span> thuis<br>
+Hij <span class="hfd">verft</span> de kozijnen <span class="wrd">geel</span>
+</div>
+
+<dt><span class="wrd">sat</span>/-
+
+<dd>Voor een sateliet die als hoofd van een zin fungeert, zoals in:
+  <div class="vb">
+Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
+</div>
+
+<dt><span class="wrd">se</span>
+
+<dd>Voor de relatie van een hoofd met een reflexief, zoals in
+  <div class="vb">
+Hij <span class="hfd">bevindt</span> <span class="wrd">zich</span> in een grot
+</div>
+
+<dt><span class="wrd">su</span>
+
+<dd>Voor de relatie tussen een hoofd en het onderwerp
+  <div class="vb">
+<span class="wrd">Ik</span> <span class="hfd">besta</span>.
+</div>
+
+<dt><span class="wrd">su</span>/<span class="hfd">obj1</span>
+<dd>zie boven
+
+<dt><span class="wrd">su</span>/<span class="hfd">obj2</span>
+<dd>zie boven
+
+<dt><span class="wrd">sup</span>
+
+<dd>Voor de relatie tussen een hoofd en het voorlopige onderwerp
+  <div class="vb">
+<span class="wrd">Het</span> <span class="hfd">is</span> een feit dat hij niet kwam.
+</div>
+
+<dt><span class="wrd">svp</span>
+
+<dd>Voor de relatie tussen een hoofd en een scheidbaar deel van het werkwoord of een deel van een idioom:
+  <div class="vb">
+Hij <span class="hfd">belde</span> me <span class="wrd">op</span><br>
+Het <span class="hfd">gaat</span> het <span class="wrd">voor de wind</span>
+</div>
+
+<dt><span class="wrd">tag</span>/-
+
+<dd>Een tag die als hoofd van de zin voorkomt, zoals:
+  <div class="vb">
+<span class="wrd">1.</span> Voeten vegen.<br>
+<span class="wrd">Kok</span>: We overleggen nog.
+</div>
+
+<dt><span class="wrd">vc</span>
+
+<dd>Voor de relatie tussen een hoofd en een verbaal complement
+  <div class="vb">
+Ik <span class="hfd">verwacht</span> <span class="wrd">dat</span> hij komt<br>
+Ik <span class="hfd">hoopte</span> hem <span class="wrd">te</span> ontmoeten<br>
+Ik <span class="hfd">wil</span> hem niet langer de hand boven het hoofd <span class="wrd">houden</span>
+</div>
+
+</dl>
+<hr>
+
+    <h2 id="voorb">Zoekvoorbeelden</h2>
+    <h3>Zoeken naar woorden</h3>
+    Zoek naar het woord <em>fiets</em>, inclusief vervoegingen en
+    varianten in collocatie (hoofdletters/kleine letters, met/zonder accenten):
+    <div class="example">
+     <span class="wrd">woord</span>: <a href="/?word=fiets">fiets</a>
+    </div>
+    Zoek naar het woord <em>FiÉtŠ</em>, inclusief varianten in
+    collocatie (hoofdletters/kleine letters, met/zonder accenten):
+    <div class="example">
+      <span class="wrd">woord</span>:  <a href="/?word=%3fFi%c3%89t%c5%a0">?FiÉtŠ</a>
+    </div>
+    Zoek naar woorden bij het lemma <em>fiets</em>
+    <div class="example">
+      <span class="wrd">woord</span>: <a href="/?word=%2bfiets">+fiets</a>
+    </div>
+    Zoek naar vervoegingen van het woord <em>weglopen</em>
+    <div class="example">
+      <span class="wrd">woord</span>: <a href="/?word=%40loop_weg">@loop_weg</a>
+    </div>
+
+    Zoek naar het exacte woord <em>Fietsen</em> (hoofdletter- en accentgevoelig):
+    <div class="example">
+      <span class="wrd">woord</span>: <a href="/?word=%3dFietsen">=Fietsen</a>
+    </div>
+    Zoek naar woorden die beginnen met <em>fiets</em>:
+    <div class="example">
+      <span class="wrd">woord</span>: <a href="/?word=fiets%25">fiets%</a>
+    </div>
+    <h3>Complexere voorbeelden</h3>
+    Wat er gestolen wordt:
+    <div class="example">
+      <span class="wrd">woord</span>, postag: n <br>
+      relatie: obj1<br>
+      <span class="hfd">hoofdwoord</span>: <a href="/?rel=obj1&amp;hword=stelen&amp;postag=n&amp;hpostag=ww">stelen</a>, postag: ww
+    </div>
+  </body>
+</html>

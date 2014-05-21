@@ -1,0 +1,83 @@
+body {
+   background:#eeeeee;
+   font-family:verdana;
+   margin-left:20%;
+   margin-right:20%;
+}
+a {
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+#stats {
+   background:#e0e0e0;
+   padding: 10px;
+   font-size: small;
+}
+td.right {
+  text-align: right;
+}
+td.ok {
+    background-color: #80ff80;
+}
+td.error {
+    background-color: #ff8080;
+}
+div.example, div.vb {
+    padding: 1em 2em;
+    margin: 1em 0px 2em 0px;;
+    background-color: white;
+    border: 1px solid lightgrey;
+    line-height: 1.5em;
+}
+dt {
+   font-weight: bold;
+}
+dd {
+   margin-top: .5em;
+   margin-bottom: 1.5em;
+}
+span.hfd {
+  background-color: lightgreen;
+}
+span.wrd {
+  background-color: yellow;
+}
+
+li.li1 {
+    margin-top: 1em;
+}
+
+li.li2 {
+    margin-top: .3em;
+}
+
+div.home {
+    font-size: small;
+    border-bottom: 1px solid grey;
+    padding-bottom: .5em;
+    margin-bottom: 1.5em;
+    width: 36em;
+}
+
+div.next {
+    font-size: small;
+    border-top: 1px solid grey;
+    padding-top: .5em;
+    margin-top: 1.5em;
+    width: 36em;
+}
+
+div.foot, div.login {
+    text-align: right;
+    font-size: small;
+}
+
+img.noborder {
+    border: 0px;
+}
+.hide {
+    display: none;
+    visibility: hidden;
+}

@@ -1,0 +1,523 @@
+package main
+
+//. C-code voor omzetten van dot naar svg
+
+/*
+#cgo LDFLAGS: -Wl,-rpath=/net/aps/64/opt/graphviz-2.30.1/lib -L/net/aps/64/opt/graphviz-2.30.1/lib -lgvc
+#cgo CFLAGS: -I/net/aps/64/opt/graphviz-2.30.1/include -I/net/aps/64/opt/graphviz-2.30.1/include/graphviz
+#include <graphviz/gvc.h>
+#include <graphviz/cgraph.h>
+#include <stdlib.h>
+
+char *makeGraph(char *data) {
+	Agraph_t *G;
+	char *s;
+	unsigned int n;
+	GVC_t *gvc;
+
+	s = NULL;
+	gvc = gvContext();
+	G = agmemread(data);
+	free(data);
+	if (G == NULL) {
+		gvFreeContext(gvc);
+		return s;
+	}
+	gvLayout(gvc, G, "dot");
+	gvRenderData(gvc, G, "svg", &s, &n);
+	gvFreeLayout(gvc, G);
+	agclose(G);
+	gvFreeContext(gvc);
+
+	return s;
+}
+*/
+import "C"
+
+//. Imports
+
+import (
+	"github.com/pebbe/compactcorpus"
+	"github.com/pebbe/dbxml"
+
+	"encoding/xml"
+	"fmt"
+	"html"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
+	"unsafe"
+)
+
+//. Main
+
+func tree(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+
+	db, err := connect()
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+	defer db.Close()
+
+	ctx := &TreeContext{
+		yellow: make(map[int]bool),
+		green:  make(map[int]bool),
+		marks:  make(map[string]bool),
+		refs:   make(map[string]bool),
+		words:  make([]string, 0),
+	}
+
+	var data []byte
+	var dot bool
+
+	err = r.ParseForm()
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+
+	prefix := first(r, "db")
+	file, err := strconv.Atoi(first(r, "file"))
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+	arch, err := strconv.Atoi(first(r, "arch"))
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+
+	archive := ""
+	if arch >= 0 {
+		rows, err := db.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", PRE, prefix, arch))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		if rows.Next() {
+			err := rows.Scan(&archive)
+			if err != nil {
+				writeErr(w, err)
+				return
+			}
+			rows.Close()
+		}
+	}
+
+	filename := ""
+	rows, err := db.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", PRE, prefix, file))
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+	if rows.Next() {
+		err := rows.Scan(&filename)
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		rows.Close()
+	}
+
+	// xml-bestand inlezen
+	if archive != "" {
+		if strings.HasSuffix(archive, ".dact") {
+			reader, err := dbxml.Open(archive)
+			if err != nil {
+				writeErr(w, err)
+				return
+			}
+			d, err := reader.Get(filename)
+			reader.Close()
+			if err != nil {
+				writeErr(w, err)
+				return
+			}
+			data = []byte(d)
+		} else {
+			reader, err := compactcorpus.Open(archive)
+			if err != nil {
+				writeErr(w, err)
+				return
+			}
+			data, err = reader.Get(filename)
+			if err != nil {
+				writeErr(w, err)
+				return
+			}
+		}
+	} else {
+		data, err = ioutil.ReadFile(filename)
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+	}
+
+	// markeringen voor gewone woorden
+	ctx.yellow = indexes(first(r, "yl"))
+
+	// markeringen voor hoofdwoorden
+	ctx.green = indexes(first(r, "gr"))
+
+	// markeringen van nodes
+	for _, m := range strings.Split(first(r, "ms"), ",") {
+		ctx.marks[m] = true
+	}
+
+	// uitvoer als dot i.p.v. html ?
+	if first(r, "dot") != "" {
+		dot = true
+	}
+
+	alpino := Alpino_ds{}
+	err = xml.Unmarshal(data, &alpino)
+	if err != nil {
+		writeErr(w, err)
+		return
+	}
+
+	title := html.EscapeString(alpino.Sentence)
+	ctx.words = strings.Fields(title)
+
+	// Multi-word units "ineenvouwen".
+	// Past ook 'words' aan, bijv: "Koninkrijk" "der" "Nederlanden" -> "Koninkrijk der Nederlanden" "" ""
+	mwu(ctx, alpino.Node0)
+
+	// Uitvoer content-type.
+	// Als niet 'dot', dan ook de kop van het HTML-bestand, inclusief zin met gekleurde woorden.
+	if dot {
+		w.Header().Set("Content-type", "application/x-dot; charset=utf-8")
+		w.Header().Set("Content-disposition", "attachment; filename=tree.dot")
+	} else {
+		w.Header().Set("Content-type", "text/html; charset=utf-8")
+
+		for i, w := range ctx.words {
+			if ctx.yellow[i] {
+				if ctx.green[i] {
+					ctx.words[i] = "<span style=\"background-color: #00ffff;\">" + w + "</span>"
+				} else {
+					ctx.words[i] = "<span style=\"background-color: #ffff00;\">" + w + "</span>"
+				}
+			} else if ctx.green[i] {
+				ctx.words[i] = "<span style=\"background-color: #90ee90;\">" + w + "</span>"
+			}
+		}
+		fmt.Fprintf(w, `<!DOCTYPE html>
+<html>
+<head>
+<meta name="robots" content="noindex,nofollow">
+<title>LASSY: %s</title>
+<link rel="stylesheet" type="text/css" href="../tooltip.css" />
+<script type="text/javascript" src="../tooltip.js"></script>
+</head>
+<body>
+<em>%s</em>
+<p>
+`, title, strings.Join(ctx.words, " "))
+
+	}
+
+	// BEGIN: definitie van dot-bestand aanmaken.
+
+	ctx.graph.WriteString(`strict graph gr {
+
+    ranksep=".25 equally"
+    nodesep=.05
+    ordering=out
+
+    node [shape=plaintext, height=0, width=0, fontsize=12, fontname="Helvetica"];
+
+`)
+
+	// Registreer alle markeringen van nodes met een verwijzing.
+	set_refs(ctx, alpino.Node0)
+
+	// Nodes
+	print_nodes(ctx, alpino.Node0)
+
+	// Terminals
+	ctx.graph.WriteString("\n    node [fontname=\"Helvetica-Oblique\", shape=box, color=\"#d3d3d3\", style=filled];\n\n")
+	ctx.start = 0
+	terms := print_terms(ctx, alpino.Node0)
+	sames := strings.Split(strings.Join(terms, " "), "|")
+	for _, same := range sames {
+		same = strings.TrimSpace(same)
+		if same != "" {
+			ctx.graph.WriteString("\n    {rank=same; " + same + " }\n")
+		}
+	}
+
+	// Edges
+	ctx.graph.WriteString("\n    edge [sametail=true, color=\"#d3d3d3\"];\n\n")
+	print_edges(ctx, alpino.Node0)
+
+	ctx.graph.WriteString("}\n")
+
+	// EINDE: definitie van dot-bestand aanmaken.
+
+	// Als gebruiker dot wil, dan print dot, en exit.
+	if dot {
+		fmt.Fprint(w, ctx.graph.String())
+		return
+	}
+
+	// Dot omzetten naar svg.
+	// De C-string wordt in de C-code ge'free'd.
+	s := C.makeGraph(C.CString(ctx.graph.String()))
+	svg := C.GoString(s)
+	C.free(unsafe.Pointer(s))
+
+	// BEGIN: svg nabewerken en printen
+
+	// XML-declaratie en DOCtype overslaan
+	svg = svg[strings.Index(svg, "<svg"):]
+
+	a := ""
+	for _, line := range strings.SplitAfter(svg, "\n") {
+		// alles wat begint met <title> weghalen
+		i := strings.Index(line, "<title")
+		if i >= 0 {
+			line = line[:i] + "\n"
+		}
+
+		// <a xlink> omzetten in tooltip
+		i = strings.Index(line, "<a xlink")
+		if i >= 0 {
+			s := line[i:]
+			line = line[:i] + "\n"
+			i = strings.Index(s, "\"")
+			s = s[i+1:]
+			i = strings.LastIndex(s, "\"")
+			a = strings.TrimSpace(s[:i])
+
+		}
+		if strings.HasPrefix(line, "<text ") && a != "" {
+			line = "<text onmouseover=\"tooltip.show('" + html.EscapeString(a) + "')\" onmouseout=\"tooltip.hide()\"" + line[5:]
+		}
+		if strings.HasPrefix(line, "</a>") {
+			line = ""
+			a = ""
+		}
+
+		fmt.Fprint(w, line)
+	}
+	// EIND: svg nabewerken en printen
+
+	fmt.Fprintf(w, "<p>\nopslaan als: <a href=\"/tree?%s&amp;dot=1\">dot</a>\n", r.URL.RawQuery)
+
+	fmt.Fprint(w, "\n</body>\n</html>\n")
+
+}
+
+//. Multi-word units "ineenvouwen".
+
+// Deze code verschilt aan die in wordrel.go doordat hier niet alleen 'node' wordt
+// aangepast, maar ook de globale variabele 'words'
+// Hier wordt node.Root niet aangepast, omdat Root niet gebruikt wordt.
+// Verder worden hier postags verzameld voor de tooltip, waarbij Lemma leeg gemaakt wordt.
+func mwu(ctx *TreeContext, node *Node) {
+	if node.Cat == "mwu" {
+		/*
+			Voorwaardes:
+			- De dochters moeten op elkaar aansluiten, en heel het bereik van de parentnode beslaan.
+			- Er mogen geen indexen in gebruikt zijn (met of zonder inhoud)
+		*/
+		p1 := node.Begin
+		p2 := node.End
+		ok := true
+		for _, n := range node.NodeList {
+			if n.Index != "" {
+				ok = false
+				break
+			}
+			if n.Begin != p1 {
+				ok = false
+				break
+			}
+			p1 = n.End
+		}
+		if ok && p1 == p2 {
+			node.Cat = ""
+			node.Pt = "mwu"
+			wrds := make([]string, 0, node.End-node.Begin) // not 'words' !
+			postags := make([]string, 0, node.End-node.Begin)
+			for _, n := range node.NodeList {
+				wrds = append(wrds, n.Word)
+				postags = append(postags, fmt.Sprintf("%s:%s", n.Lemma, n.Postag))
+			}
+			node.Word = strings.Join(wrds, " ")
+			node.Lemma = ""
+			node.Postag = strings.Join(postags, " ")
+			node.NodeList = node.NodeList[0:0]
+
+			// aanpassing 'words', code die ontbreekt in wordrel.go
+			ctx.words[node.Begin] = strings.Join(ctx.words[node.Begin:node.End], " ")
+			for i := node.Begin + 1; i < node.End; i++ {
+				ctx.words[i] = ""
+			}
+		}
+	}
+	for _, n := range node.NodeList {
+		mwu(ctx, n)
+	}
+
+}
+
+//. Genereren van dot
+
+// Registreer alle markeringen van nodes met een verwijzing:
+// Als node X gemarkeerd is, en deze node wijst naar node X, dan deze node ook
+// markeren voor weergave in vet (maar niet voor een vette egde naar de parent node).
+// (Een node met inhoud EN index verwijst naar zichzelf.)
+func set_refs(ctx *TreeContext, node *Node) {
+	if node.Index != "" && ctx.marks[node.Id] {
+		ctx.refs[node.Index] = true
+	}
+	for _, d := range node.NodeList {
+		set_refs(ctx, d)
+	}
+}
+
+func print_nodes(ctx *TreeContext, node *Node) {
+	idx := ""
+	style := ""
+
+	// Als dit een node met inhoud EN index is, dan in vierkant zetten.
+	// Als de node gemarkeerd is, dan in zwart, anders in lichtgrijs.
+	// Index als nummer in label zetten.
+	if (len(node.NodeList) > 0 || node.Word != "") && node.Index != "" {
+		idx = fmt.Sprintf("%s\\n", node.Index)
+		style = ", shape=box"
+		if !ctx.refs[node.Index] {
+			style += ", color=\"#d3d3d3\""
+		}
+	}
+
+	lbl := dotquote(node.Rel)
+	if node.Cat != "" && node.Cat != node.Rel {
+		lbl += "\\n" + dotquote(node.Cat)
+	} else if node.Pt != "" && node.Pt != node.Rel {
+		lbl += "\\n" + dotquote(node.Pt)
+	}
+
+	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v%v\"%s];\n", node.Id, idx, lbl, style))
+	for _, d := range node.NodeList {
+		print_nodes(ctx, d)
+	}
+}
+
+// Geeft een lijst terminals terug die op hetzelfde niveau moeten komen te staan,
+// met "|" ingevoegd voor onderbrekingen in niveaus.
+func print_terms(ctx *TreeContext, node *Node) []string {
+	terms := make([]string, 0)
+
+	if len(node.NodeList) == 0 {
+		if node.Word != "" {
+			// Een terminal
+			idx := ""
+			col := ""
+			if ctx.yellow[node.Begin] {
+				if ctx.green[node.Begin] {
+					col = ", color=\"#00ffff\""
+				} else {
+					col = ", color=\"#ffff00\""
+				}
+			} else if ctx.green[node.Begin] {
+				col = ", color=\"#90ee90\""
+			}
+			if node.Begin != ctx.start {
+				// Onderbeking
+				terms = append(terms, "|")
+				// Onzichtbare node invoegen om te scheiden van node die links staat
+				ctx.graph.WriteString(fmt.Sprintf("    e%v [label=\" \", tooltip=\" \", style=invis];\n", node.Id))
+				terms = append(terms, fmt.Sprintf("e%v", node.Id))
+				node.skip = true
+			}
+			ctx.start = node.End
+			terms = append(terms, fmt.Sprintf("t%v", node.Id))
+			if node.Lemma == "" {
+				ctx.graph.WriteString(fmt.Sprintf("    t%v [label=\"%s%s\", tooltip=\"%s\"%s];\n",
+					node.Id, idx, dotquote(node.Word), dotquote2(node.Postag), col))
+			} else {
+				ctx.graph.WriteString(fmt.Sprintf("    t%v [label=\"%s%s\", tooltip=\"%s:%s\"%s];\n",
+					node.Id, idx, dotquote(node.Word), dotquote2(node.Lemma), dotquote(node.Postag), col))
+			}
+		} else {
+			// Een lege node met index
+			col := ""
+			if ctx.marks[node.Id] {
+				col = ", color=black"
+			}
+			ctx.graph.WriteString(fmt.Sprintf("    t%v [fontname=\"Helvetica\", label=\"%s\", style=solid%s];\n", node.Id, node.Index, col))
+		}
+	} else {
+		for _, d := range node.NodeList {
+			t := print_terms(ctx, d)
+			terms = append(terms, t...)
+		}
+	}
+	return terms
+}
+
+func print_edges(ctx *TreeContext, node *Node) {
+	if len(node.NodeList) == 0 {
+		if node.skip {
+			// Extra: Onzichtbare edge naar extra onzichtbare terminal
+			ctx.graph.WriteString(fmt.Sprintf("    n%v -- e%v [style=invis];\n", node.Id, node.Id))
+		}
+		if ctx.marks[node.Id] || (ctx.refs[node.Index] && node.Word != "") {
+			// Vette edge naar terminal
+			ctx.graph.WriteString(fmt.Sprintf("    n%v -- t%v [color=black];\n", node.Id, node.Id))
+		} else {
+			// Gewone edge naar terminal
+			ctx.graph.WriteString(fmt.Sprintf("    n%v -- t%v;\n", node.Id, node.Id))
+		}
+	} else {
+		// Edges naar dochters
+		for _, d := range node.NodeList {
+			if ctx.marks[d.Id] {
+				// Vette edge naar dochter
+				ctx.graph.WriteString(fmt.Sprintf("    n%v -- n%v [color=black];\n", node.Id, d.Id))
+			} else {
+				// Gewone edge naar dochter
+				ctx.graph.WriteString(fmt.Sprintf("    n%v -- n%v;\n", node.Id, d.Id))
+			}
+		}
+		for _, d := range node.NodeList {
+			print_edges(ctx, d)
+		}
+	}
+}
+
+func dotquote(s string) string {
+	s = strings.Replace(s, "\\", "\\\\", -1)
+	s = strings.Replace(s, "\"", "\\\"", -1)
+	return s
+}
+
+func dotquote2(s string) string {
+	s = strings.Replace(s, "\\", "\\\\\\\\", -1)
+	s = strings.Replace(s, "\"", "\\\"", -1)
+	return s
+}
+
+// Zet lijst van indexen (string met komma's) om in map[int]bool
+func indexes(s string) map[int]bool {
+	m := make(map[int]bool)
+	for _, i := range strings.Split(s, ",") {
+		j, err := strconv.Atoi(i)
+		if err == nil {
+			m[j] = true
+		}
+	}
+	return m
+}
