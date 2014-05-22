@@ -3,13 +3,12 @@ package main
 //. Imports
 
 import (
+	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
 
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -36,9 +35,8 @@ var (
 //. Main
 
 func main() {
-	data, err := ioutil.ReadFile(os.Args[1])
+	_, err := toml.DecodeFile(os.Args[1], &Cfg)
 	util.CheckErr(err)
-	util.CheckErr(json.Unmarshal(data, &Cfg))
 
 	util.CheckErr(os.Chdir(Cfg.Data))
 

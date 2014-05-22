@@ -10,5 +10,5 @@ then
     sleep 2
     echo Restarting pqserve
     cat pqserve.out
-    pqserve/pqserve setup-zardoz.json &> pqserve.out &
+    pqserve/pqserve setup-zardoz.toml &> pqserve.out &
 fi

@@ -3,6 +3,7 @@ package main
 //. Imports
 
 import (
+	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/compactcorpus"
 	"github.com/pebbe/dbxml"
@@ -11,7 +12,6 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -169,9 +169,8 @@ Opties:
 	owner = strings.TrimSpace(os.Args[4])
 	public = strings.TrimSpace(os.Args[5])
 
-	data, err := ioutil.ReadFile(configfile)
+	_, err := toml.DecodeFile(configfile, &Cfg)
 	util.CheckErr(err)
-	util.CheckErr(json.Unmarshal(data, &Cfg))
 
 	if desc == "" {
 		util.CheckErr(fmt.Errorf("De omschrijving mag niet leeg zijn"))

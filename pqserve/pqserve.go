@@ -3,11 +3,10 @@ package main
 //. Imports
 
 import (
+	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -28,9 +27,9 @@ func main() {
 		}
 		os.Args = append(os.Args[:1], os.Args[2:]...)
 	}
-	data, err := ioutil.ReadFile(os.Args[1])
+
+	_, err := toml.DecodeFile(os.Args[1], &Cfg)
 	util.CheckErr(err)
-	util.CheckErr(json.Unmarshal(data, &Cfg))
 
 	go logger()
 
