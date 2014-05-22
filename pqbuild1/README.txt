@@ -27,16 +27,16 @@ Het eerste argument na het commando pqbuild1 is de naam van een bestand
 waarin de string staat om in te loggen op een MySQL-server. Voorbeelden
 van zo'n string:
 
-    tcp:zardoz.service.rug.nl:3306*lassy/alfa/geheim
+    username:geheim@tcp(zardoz.service.rug.nl:3306)/paqu1
 
 Dit logt in op de MySQL-server die draait op zardoz.service.rug.nl,
-poort 3306, op de database 'lassy', van de gebruiker 'alfa' met password
+poort 3306, op de database 'paqu1', van de gebruiker 'username' met password
 'geheim'.
 
-    lassy/alfa/geheim
+    username:geheim@/paqu1
 
 Dit logt in op de default server op de huidige machine, op de database
-'lassy', van de gebruiker 'alfa' met password 'geheim'.
+'paqu1', van de gebruiker 'username' met password 'geheim'.
 
 ----
 
