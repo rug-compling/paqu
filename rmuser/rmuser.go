@@ -77,6 +77,9 @@ func main() {
 		util.CheckErr(err)
 	}
 
+	_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `user` = %q", Cfg.Prefix, user))
+	util.CheckErr(err)
+
 	result, err := db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 	util.CheckErr(err)
 	if n, _ := result.RowsAffected(); n > 0 {
