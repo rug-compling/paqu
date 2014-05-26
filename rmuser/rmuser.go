@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 )
 
 //. Types
@@ -36,8 +37,13 @@ func main() {
 	util.CheckErr(err)
 
 	user := os.Args[2]
-	corpora := make([]string, 0)
 
+	if strings.Index(user, "@") < 0 {
+		fmt.Printf("Gebruiker %s kan niet verwijderd worden\n", user)
+		return
+	}
+
+	corpora := make([]string, 0)
 	rows, err := db.Query(fmt.Sprintf("SELECT `id`, `status` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
 	util.CheckErr(err)
 	for rows.Next() {
@@ -56,9 +62,6 @@ func main() {
 		_, err := db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
-		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, corpus))
-		util.CheckErr(err)
-
 		_, err = db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`",
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
@@ -69,6 +72,9 @@ func main() {
 
 		util.CheckErr(os.RemoveAll(path.Join(Cfg.Data, corpus)))
 
+		// deze pas als de rest goed ging
+		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, corpus))
+		util.CheckErr(err)
 	}
 
 	result, err := db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
