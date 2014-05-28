@@ -1,6 +1,9 @@
 
+# Pas dit bestand aan en bewaar als 'Makefile.cfg'
+
 # variabelen die gezet moet worden voor de aanroep van 'go'
-VARS = GOPATH=$(HOME)/go
+#VARS = GOPATH=$(HOME)/go
+VARS =
 
 # extra opties voor 'go'
 OPTS = 
