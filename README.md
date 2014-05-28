@@ -38,45 +38,78 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
 
 ----------------------------------------------------------------
 
-## Te doen, ideeën ##
+## Te doen ##
+
+### Hoofdtaken ###
+
+  - Quota
+    - Corpora
+      - voor elke gebruiker of per gebruiker
+      - max aantal tokens (woorden)
+      - maximum lengte in tokens per zin, of:
+      - maximale verwerktijd van een zin (alleen bij gebruik lokale parser?)
+    - Geheugen
+      - globaal instellen dmv `ulimit -v`
+    - Processortijd
+      - Max aantal corpora dat tegelijk verwerkt wordt, met de aanname
+        dat hierbij een processor voor 100% gebruikt wordt.
+        - Wanneer corpus geparst wordt door een alpino-server, dan gebruikt
+          dit misschien maar een paar procent van een processor
+          (afhankelijk van snelheid van server). Je zou dan al de
+          tweede fase (verwerking voor MySQL) parallel kunnen starten. En
+          dan kom je misschien nog niet aan de 100% van een processor.
+      - Scheduler: als er meerdere corpora van een enkele gerbuiker in de
+        wachtrij staan de verwerking afwisselen met verwerking corpora van
+        andere gebruikers.
+  - Toegang
+    - deny/allow op basis van ip-adressen
+    - deny/allow op basis van e-mailpatroon
+    - leesrechten: alleen raadpplegen van algemene corpora
+    - inlogrechten: mag zelf corpora uploaden
+    - downloadrechten, alleen wie is ingelogd
+      - eigen corpora
+      - corpora die door anderen gedeeld zijn en vrijgegeven voor downloaden
+  - Alpino-server
+    - Aanpassen aan API van de server (huidige server is te oud)
+  - Middelen voor beheerder
+    - Statistiek
+      - pqstatus
+      - handler voor interne status (NumGoroutine, MemStat)
+    - Gebruiker verwijderen
+    - E-mail aan beheerder bij problemen
+  - Adminhandleiding
+    - installatie
+    - (account-)beheer
+  - Gebruikershandleiding
+    - Introtekst op hoofdpagina
+    - Tekst achter Meer info...
+  - Interface
+    - Algemene opmaak
+    - Beheer van corpora
+      - uploaden: tekst in zip, dact
+      - downloaden: xml in zip, dact, compact...
+      - browse: zinnen, stdout, stderr
+      - modernere interface
+    - Keuze van corpus
+      - Menu met submenu's: algemeen; eigen corpora; anderen -> gedeelde corpora
+  - Code
+    - Organisatie + documentatie
+
+### Diversen ###
 
 alles:
 
   - alle tekst in het Nederlands
-  - code documenteren
-  - installatiehandleiding
   - logo
 
 `pqserve`:
 
+  - benaming "Woordrelaties" overal vervangen door "PaQu" of "paqu" of logo
+  - config-optie `cookiepath` verwijderen, afleiden uit `url`
   - is het beter de optie "delen met iedereen" uit te schakelen?
   - foutafhandeling als gebruiker submit doet zonder bestand gekozen te hebben
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
     stderr gebruiken als melding aan de gebruiker
-  - optie: gebruik van een Alpinoserver, is gedaan, maar moet nog
-       aangepast worden aan uitvoerformaat van de server (huidige is te oud)
-  - keuze van corpus: sticky
-    * query zonder db → default uit setup
-    * geen query en geen db → uit cookie
-  - https
-  - alpino draaien met debug=1
-  - uploaden van documenten in andere formaten, zoals zipbestand, dactbestanden
-  - download corpus als dactbestand
-  - browse zinnen, stdout, stderr
-  - config: deny/allow op basis van e-mailpatroon
-   - lees/query-rechten
-   - schrijfrechten (wie een account mag aanmaken)
-   - downloadrechten (alleen eigenaar van een corpus)
-  - handler voor internse status (NumGoroutine, MemStat, data van pqstatus)
-  - limieten
-   - geheugen (totaal)
-   - processorgebruik (totaal)
-   - schijfruimte (totaal, per gebruiker)
-   - ruimte in database (totaal, per gebruiker)
-  - beheerdersfuncties:
-   - gebruik van resources bekijken
-   - accounts beheren
-   - e-mail aan beheerder bij problemen
 
 `pqstatus`:
 
