@@ -64,7 +64,7 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
   - Toegang
     - deny/allow op basis van ip-adressen
     - deny/allow op basis van e-mailpatroon
-    - leesrechten: alleen raadpplegen van algemene corpora
+    - leesrechten: alleen raadplegen van algemene corpora
     - inlogrechten: mag zelf corpora uploaden
     - downloadrechten, alleen wie is ingelogd
       - eigen corpora
@@ -94,6 +94,7 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
       - Menu met submenu's: algemeen; eigen corpora; anderen -> gedeelde corpora
   - Code
     - Organisatie + documentatie
+  - Licentie
 
 ### Diversen ###
 
@@ -134,7 +135,7 @@ pakketten:
 
 overige software:
 
- - Oracle Berkeley DB XML: libs en headers geïnstalleerd op een standaardlokatie
- - Go versie 1.2 of hoger
- - Alpino: tokenizer
+ - [Oracle Berkeley DB XML](http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads): libs en headers geïnstalleerd op een standaardlokatie
+ - [Go](http://golang.org/) versie 1.2 of hoger
+ - [Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/): tokenizer
  - Alpinoparser of toegang tot een alpinoserver
