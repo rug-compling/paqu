@@ -33,6 +33,8 @@ func main() {
 
 	go logger()
 
+	logf("Met DbXML: %v", has_dbxml)
+
 	db, err := dbopen()
 	util.CheckErr(err)
 	rows, err := db.Query("SELECT `VARIABLE_VALUE` FROM `information_schema`.`GLOBAL_VARIABLES` WHERE `VARIABLE_NAME` = \"VERSION\"")

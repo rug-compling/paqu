@@ -38,7 +38,6 @@ import "C"
 
 import (
 	"github.com/pebbe/compactcorpus"
-	"github.com/pebbe/dbxml"
 
 	"encoding/xml"
 	"fmt"
@@ -130,18 +129,12 @@ func tree(w http.ResponseWriter, r *http.Request) {
 	// xml-bestand inlezen
 	if archive != "" {
 		if strings.HasSuffix(archive, ".dact") {
-			reader, err := dbxml.Open(archive)
+			var err error
+			data, err = get_dact(archive, filename)
 			if err != nil {
 				writeErr(w, err)
 				return
 			}
-			d, err := reader.Get(filename)
-			reader.Close()
-			if err != nil {
-				writeErr(w, err)
-				return
-			}
-			data = []byte(d)
 		} else {
 			reader, err := compactcorpus.Open(archive)
 			if err != nil {

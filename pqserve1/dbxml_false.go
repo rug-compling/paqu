@@ -1,0 +1,15 @@
+// +build nodbxml
+
+package main
+
+import (
+	"errors"
+)
+
+const (
+	has_dbxml = false
+)
+
+func get_dact(archive, filename string) ([]byte, error) {
+	return []byte{}, errors.New("Het dact-formaat wordt niet ondersteund")
+}

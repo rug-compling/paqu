@@ -5,7 +5,6 @@ package main
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/compactcorpus"
-	"github.com/pebbe/dbxml"
 	"github.com/pebbe/util"
 
 	"bufio"
@@ -309,17 +308,8 @@ Opties:
 			data, err := ioutil.ReadFile(filename)
 			util.CheckErr(err)
 			do_data("", filename, data)
-		} else if strings.HasSuffix(filename, ".dact") {
-			reader, err := dbxml.Open(filename)
-			util.CheckErr(err)
-			fmt.Println(">>>", filename)
-			docs, err := reader.All()
-			util.CheckErr(err)
-			for docs.Next() {
-				do_data(filename, docs.Name(), []byte(docs.Content()))
-			}
-			showmemstats()
-			reader.Close()
+		} else if has_dbxml && strings.HasSuffix(filename, ".dact") {
+			do_dact(filename)
 		} else if strings.HasSuffix(filename, ".data.dz") {
 			reader, err := compactcorpus.Open(filename)
 			util.CheckErr(err)
