@@ -1,0 +1,6 @@
+
+# variabelen die gezet moet worden voor de aanroep van 'go'
+VARS = GOPATH=$(HOME)/go
+
+# extra opties voor 'go'
+OPTS = 

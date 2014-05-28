@@ -1,4 +1,6 @@
 
+include ../../Makefile.cfg
+
 DEPS = \
 	busy.gif \
 	clarinnl.png \
@@ -18,4 +20,4 @@ DEPS = \
 	./mkstatic $(DEPS) > $@
 
 mkstatic: mkstatic.go
-	go build $^
+	$(VARS) go build $(OPTS) $^

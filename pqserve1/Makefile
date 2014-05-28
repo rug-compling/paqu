@@ -1,18 +1,12 @@
 
-ifeq ($(dbxml), true)
-  DBXML = ok
-  TAGS =
-else ifeq ($(dbxml), false)
-  DBXML = ok
-  TAGS = -tags nodbxml
+include ../Makefile.cfg
+
+ifeq ($(shell go list github.com/pebbe/dbxml), github.com/pebbe/dbxml)
+ TAGS =
 else
-  DBXML = fout
+ TAGS = -tags nodbxml
 endif
 
-all: check pqserve1
-
-pqserve1: *.go
-	LIBRARY_PATH=/net/aps/64/lib go build $(TAGS) .
-
-check:
-	@if [ $(DBXML) != ok ]; then echo "\nGebruik:\n\n  dbxml=true make\n  dbxml=false make\n"; exit 1; fi
+pqserve1: *.go static/*.*
+	make -C static
+	$(VARS) go build $(TAGS) $(OPTS) .

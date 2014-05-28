@@ -1,6 +1,8 @@
 
+include ../Makefile.cfg
+
 % : %.go
-	go build $<
+	$(VARS) go build $(OPTS) $<
 
 all: alpino prepare testdoc-ascii.txt testdoc-latin.txt testdoc-utf16.txt testdoc-windows.txt
 

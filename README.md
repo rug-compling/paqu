@@ -138,6 +138,6 @@ overige software:
  - (optioneel, nodig voor verwerking van dact-bestanden)
    [Oracle Berkeley DB XML](http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads):
    libs en headers geïnstalleerd op een standaardlokatie.
- - [Go](http://golang.org/) versie 1.2 of hoger
+ - [Go](http://golang.org/): als met DB XML, dan versie 1.2 of hoger, anders versie 1.0 of hoger
  - [Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/): tokenizer
  - Alpinoparser of toegang tot een alpinoserver
