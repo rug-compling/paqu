@@ -76,7 +76,8 @@ Syntax: %s login_file port_number
 	handleFunc("stats", stats)
 	handleFunc("clarinnl.png", static_clarinnl_png)
 	handleFunc("jquery.js", static_jquery_js)
-	handleFunc("wordrel.css", static_wordrel_css)
+	handleFunc("paqu.css", static_paqu_css)
+	handleFunc("paqu.png", static_paqu_png)
 	handleFunc("tooltip.css", static_tooltip_css)
 	handleFunc("tooltip.js", static_tooltip_js)
 

@@ -393,7 +393,7 @@ func html_header(q *Context) {
 <html>
 <head>
 <meta name="robots" content="noindex,nofollow">
-<title>Woordrelaties</title>
+<title>PaQu</title>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
   $.fn.stats = function(url) {
@@ -412,7 +412,7 @@ func html_header(q *Context) {
     f.hword.value = "";
   }
   //--></script>
-<link rel="stylesheet" type="text/css" href="wordrel.css">
+<link rel="stylesheet" type="text/css" href="paqu.css">
 </head>
 <body>
 <div class="login">
@@ -464,7 +464,7 @@ func html_form(q *Context) (has_query bool) {
 		first(q.r, "hpostag") == "" &&
 		first(q.r, "hword") == "" {
 		has_query = false
-		fmt.Fprintln(q.w, "<H1>Woordrelaties</h1>")
+		fmt.Fprintln(q.w, "<img src=\"paqu.png\" class=\"logo\"><br>")
 	}
 
 	fmt.Fprint(q.w, `

@@ -208,7 +208,7 @@ func tree(q *Context) {
 <html>
 <head>
 <meta name="robots" content="noindex,nofollow">
-<title>LASSY: %s</title>
+<title>PaQu: %s</title>
 <link rel="stylesheet" type="text/css" href="tooltip.css" />
 <script type="text/javascript" src="tooltip.js"></script>
 </head>

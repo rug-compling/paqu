@@ -7,13 +7,13 @@ DEPS = \
 	favicon.ico \
 	info.html \
 	jquery.js \
+	paqu.css \
+	paqu.png \
 	rename.html \
 	robots.txt \
 	share.html \
 	tooltip.css \
 	tooltip.js \
-	wordrel.css \
-
 
 
 ../static_data.go: mkstatic $(DEPS)

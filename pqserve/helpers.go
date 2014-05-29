@@ -45,8 +45,8 @@ func writeHead(q *Context, title string) {
 	fmt.Fprintf(q.w, `<!DOCTYPE html>
 <html>
 <head>
-<title>%s</title>
-<link rel="stylesheet" type="text/css" href="wordrel.css">
+<title>PaQu -- %s</title>
+<link rel="stylesheet" type="text/css" href="paqu.css">
 <meta name="robots" content="noindex,nofollow">
 </head>
 <body>

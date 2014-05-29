@@ -208,7 +208,7 @@ func tree(w http.ResponseWriter, r *http.Request) {
 <html>
 <head>
 <meta name="robots" content="noindex,nofollow">
-<title>LASSY: %s</title>
+<title>PaQu1: %s</title>
 <link rel="stylesheet" type="text/css" href="../tooltip.css" />
 <script type="text/javascript" src="../tooltip.js"></script>
 </head>

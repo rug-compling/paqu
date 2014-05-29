@@ -101,13 +101,14 @@ func main() {
 	handleFunc("delete", remove)
 	handleFunc("delete2", remove2)
 
-	handleStatic("info.html", static_info_html)
 	handleStatic("busy.gif", static_busy_gif)
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)
+	handleStatic("info.html", static_info_html)
 	handleStatic("jquery.js", static_jquery_js)
+	handleStatic("paqu.css", static_paqu_css)
+	handleStatic("paqu.png", static_paqu_png)
 	handleStatic("robots.txt", static_robots_txt)
-	handleStatic("wordrel.css", static_wordrel_css)
 	handleStatic("tooltip.css", static_tooltip_css)
 	handleStatic("tooltip.js", static_tooltip_js)
 

@@ -77,8 +77,8 @@ func handleFunc(url string, handler func(*Context)) {
 			defer q.db.Close()
 
 			// Is de gebruiker ingelogd?
-			mail, err1 := r.Cookie("wordrel-mail")
-			auth, err2 := r.Cookie("wordrel-auth")
+			mail, err1 := r.Cookie("paqu-mail")
+			auth, err2 := r.Cookie("paqu-auth")
 			if err1 == nil && err2 == nil {
 				rows, err := q.db.Query(fmt.Sprintf("SELECT SQL_CACHE 1 FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail.Value))
 				if err != nil {

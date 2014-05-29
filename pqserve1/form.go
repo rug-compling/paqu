@@ -366,7 +366,7 @@ func html_header(w http.ResponseWriter) {
 <html>
 <head>
 <meta name="robots" content="noindex,nofollow">
-<title>Woordrelaties</title>
+<title>PaQu1</title>
 <script type="text/javascript" src="/jquery.js"></script>
 <script type="text/javascript"><!--
   $.fn.stats = function(url) {
@@ -400,7 +400,7 @@ func html_form(w http.ResponseWriter, r *http.Request) (has_query bool) {
 		first(r, "hpostag") == "" &&
 		first(r, "hword") == "" {
 		has_query = false
-		fmt.Fprintln(w, "<H1>Woordrelaties</h1>")
+		fmt.Fprintln(w, "<img src=\"paqu.png\" class=\"logo\"><br>")
 	}
 
 	fmt.Fprint(w, `

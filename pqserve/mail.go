@@ -7,7 +7,7 @@ import (
 )
 
 func sendmail(to, subject, body string) (err error) {
-	msg := fmt.Sprintf(`From: Woordvergelijker <%s>
+	msg := fmt.Sprintf(`From: PaQu <%s>
 To: %s
 Subject: %s
 
