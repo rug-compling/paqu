@@ -20,7 +20,6 @@ type Splitter struct {
 var (
 	opt_a = flag.String("a", "", "ALPINO_HOME")
 	opt_d = flag.String("d", "xml", "Directory voor uitvoer")
-	opt_f = flag.String("f", "", "Formaat, een van: run, lines")
 	opt_s = flag.String("s", "", "Alpino server")
 )
 
@@ -28,11 +27,8 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `
 Syntax: %s [opties] datafile
 
-Verplichte opties:
+Verplichte optie:
   -a directory : ALPINO_HOME
-  -f formaat   : Soort invoertekst:
-                  run = doorlopende tekst
-                  lines = elke zin op een aparte regel
 
 Overige opties:
   -d directory : Directory waar uitvoer wordt geplaatst (default: xml)
@@ -57,59 +53,8 @@ func main() {
 		fmt.Println("Optie -a ontbreekt")
 		return
 	}
-	if *opt_f == "" {
-		fmt.Println("Optie -f ontbreekt")
-		return
-	}
-	if *opt_f != "run" && *opt_f != "lines" {
-		fmt.Println("Ongeldife waarde voor optie -f, moet 'run' of 'lines' zijn")
-		return
-	}
 
 	util.CheckErr(os.Mkdir(*opt_d, 0777))
-
-	// TOKENISEREN
-
-	var prepare, tok string
-	if *opt_f == "run" {
-		tok = "tokenize.sh"
-		prepare = "-r"
-	} else {
-		tok = "tokenize_no_breaks.sh"
-	}
-	cmd := exec.Command(
-		"/bin/sh",
-		"-c",
-		fmt.Sprintf("prepare %s %s | $ALPINO_HOME/Tokenization/%s", prepare, filename, tok))
-	cmd.Env = []string{
-		"ALPINO_HOME=" + *opt_a,
-		"PATH=" + os.Getenv("PATH"),
-		"LANG=en_US.utf8",
-		"LANGUAGE=en_US.utf8",
-		"LC_ALL=en_US.utf8",
-	}
-	cmd.Stderr = os.Stderr
-	r, err := cmd.StdoutPipe()
-	util.CheckErr(err)
-	util.CheckErr(cmd.Start())
-
-	// uitvoer nummeren
-	fp, err := os.Create(filename + ".lines")
-	util.CheckErr(err)
-	lineno := 0
-	reader := util.NewReader(r)
-	for {
-		line, err := reader.ReadLineString()
-		if err == io.EOF {
-			break
-		}
-		util.CheckErr(err)
-		lineno++
-		fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
-	}
-	fp.Close()
-
-	util.CheckErr(cmd.Wait())
 
 	// PARSEN
 
@@ -118,7 +63,7 @@ func main() {
 			"/bin/bash",
 			"-c",
 			"$ALPINO_HOME/bin/Alpino -fast -flag treebank "+*opt_d+
-				" end_hook=xml user_max=900000 -parse < "+filename+".lines")
+				" end_hook=xml user_max=900000 -parse < "+filename)
 		cmd.Env = []string{
 			"ALPINO_HOME=" + *opt_a,
 			"PATH=" + os.Getenv("PATH"),

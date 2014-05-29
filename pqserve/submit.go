@@ -39,7 +39,7 @@ func submit(q *Context) {
 
 	rows, err := q.db.Query(
 		fmt.Sprintf(
-			"SELECT `id`, `description`, `status`, `nline`, `msg`, `shared` FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
+			"SELECT `id`, `description`, `status`, `nline`, `nword`, `msg`, `shared` FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
 			Cfg.Prefix,
 			q.user))
 	if doErr(q, err) {
@@ -47,10 +47,11 @@ func submit(q *Context) {
 	}
 
 	n := 0
+	gebruikt := 0
 	var id, desc, status, msg, shared string
-	var zinnen int
+	var zinnen, woorden int
 	for rows.Next() {
-		err := rows.Scan(&id, &desc, &status, &zinnen, &msg, &shared)
+		err := rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared)
 		if err != nil {
 			if n > 0 {
 				fmt.Fprintln(q.w, "</table>")
@@ -58,6 +59,7 @@ func submit(q *Context) {
 			doErr(q, err)
 			return
 		}
+		gebruikt += woorden
 		n++
 		if n == 1 {
 			fmt.Fprintln(q.w, "<table border=\"1\" cellpadding=\"4\">")
@@ -95,8 +97,11 @@ func submit(q *Context) {
 		fmt.Fprintln(q.w, "</table>")
 	}
 
+	fmt.Fprintln(q.w, "<h2>Nieuw corpus maken</h2>")
+	if q.quotum > 0 {
+		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n<p>\n", q.quotum - gebruikt)
+	}
 	fmt.Fprint(q.w, `
-  <h2>Nieuw corpus maken</h2>
     <form action="submit" method="post" enctype="multipart/form-data">
         De tekst die je uploadt moet platte tekst zijn, zonder opmaak (geen Word of zo), gecodeerd in utf-8.
         <p>

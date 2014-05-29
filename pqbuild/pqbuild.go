@@ -259,6 +259,7 @@ Opties:
 		status      enum('QUEUED','WORKING','FINISHED','FAILED') NOT NULL DEFAULT 'QUEUED',
 		msg         varchar(256) NOT NULL,
 		nline       int          NOT NULL DEFAULT 0,
+		nword       int          NOT NULL DEFAULT 0,
 		params      varchar(128) NOT NULL,
 		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -286,6 +287,7 @@ Opties:
 		mail   varchar(64) NOT NULL,
 		pw     char(16)    NOT NULL,
 		active datetime    NOT NULL,
+		quotum int         NOT NULL DEFAULT 0,
 		UNIQUE INDEX (mail),
 		INDEX (active))
 		DEFAULT CHARACTER SET utf8;`)

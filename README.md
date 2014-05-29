@@ -45,7 +45,7 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
   - Quota
     - Corpora
       - voor elke gebruiker of per gebruiker
-      - max aantal tokens (woorden)
+      - ✔ max aantal tokens (woorden)
       - maximum lengte in tokens per zin, of:
       - maximale verwerktijd van een zin (alleen bij gebruik lokale parser?)
     - Geheugen
@@ -101,11 +101,10 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
 alles:
 
   - alle tekst in het Nederlands
-  - logo
+  - ander logo?
 
 `pqserve`:
 
-  - benaming "Woordrelaties" overal vervangen door "PaQu" of "paqu" of logo
   - is het beter de optie "delen met iedereen" uit te schakelen?
   - foutafhandeling als gebruiker submit doet zonder bestand gekozen te hebben
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
@@ -115,6 +114,7 @@ alles:
 
   - gebruikers zonder corpora
   - corpora zonder gebruikers
+  - compacte weergave
 
 ----------------------------------------------------------------
 

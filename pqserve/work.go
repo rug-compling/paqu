@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -21,7 +22,7 @@ func quote(s string) string {
 func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	logf("WORKING: " + task.id)
 
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"WORKING\" WHERE `id` = %q",
+	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"WORKING\", `nword` = 0 WHERE `id` = %q",
 		Cfg.Prefix, task.id))
 	if err != nil {
 		return
@@ -55,35 +56,111 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	default:
 	}
 
+	var prepare, tok string
+	switch params {
+	case "run":
+		tok = "tokenize.sh"
+		prepare = "-r"
+	case "line":
+		tok = "tokenize_no_breaks.sh"
+	default:
+		err = errors.New("Not implemented: " + params)
+		return
+	}
+	cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2> %s", prepare, data, tok, stderr)
+	chPipe := make(chan string)
+	chTokens := make(chan int, 1)
+	var fp *os.File
+	fp, err = os.Create(data + ".lines")
+	if err != nil {
+		return
+	}
+	go func() {
+		var tokens, lineno int
+		for line := range chPipe {
+			tokens += len(strings.Fields(line))
+			lineno++
+			fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
+		}
+		fp.Close()
+		chTokens <- tokens
+	}()
+	err = run(cmd, task.chKill, chPipe)
+	if err != nil {
+		return
+	}
+	tokens := <-chTokens
+
+	quotumLock.Lock()
+	quotum := 0
+	gebruikt := 0
+	rows, err = db.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
+	if err != nil {
+		quotumLock.Unlock()
+		return
+	}
+	if rows.Next() {
+		err = rows.Scan(&quotum)
+		rows.Close()
+		if err != nil {
+			quotumLock.Unlock()
+			return
+		}
+	} else {
+		err = fmt.Errorf("MySQL: Can't find quotum")
+		quotumLock.Unlock()
+		return
+	}
+	if quotum > 0 {
+		rows, err = db.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
+		if err != nil {
+			quotumLock.Unlock()
+			return
+		}
+		for rows.Next() {
+			var n int
+			err = rows.Scan(&n)
+			if err != nil {
+				quotumLock.Unlock()
+				return
+			}
+			gebruikt += n
+		}
+	}
+
+	if quotum > 0 && quotum-gebruikt < tokens {
+		err = fmt.Errorf("Ruimte voor %d tokens. Nieuw corpus bevat %d tokens.", quotum-gebruikt, tokens)
+		os.Remove(data)
+		os.Remove(data + ".lines")
+		quotumLock.Unlock()
+		return
+	}
+
+	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
+		Cfg.Prefix, tokens, task.id))
+	quotumLock.Unlock()
+
+	if err != nil {
+		return
+	}
+
 	// kan er nog staan na onderbroken run
 	os.RemoveAll(xml)
 
-	var cmd *exec.Cmd
-	var f string
-	switch params {
-	case "run":
-		f = "run"
-	case "line":
-		f = "lines"
-	default:
-		err = errors.New("Not implemented: " + params)
-		logerr(err)
-		return
-	}
 	cmd = shell(
-		`alpino -a %s -d %s -f %s %s > %s 2> %s`,
-		Cfg.Alpino,	xml, f, data, stdout, stderr)
-	err = run(cmd, task.chKill)
+		`alpino -a %s -d %s %s.lines > %s 2>> %s`,
+		Cfg.Alpino, xml, data, stdout, stderr)
+	err = run(cmd, task.chKill, nil)
 	if err != nil {
 		return
 	}
 
 	cmd = shell(
-		// optie -w i.v.m. revocer()
+		// optie -w i.v.m. recover()
 		`find %s -name '*.xml' | pqbuild -w %s %s %s 0 >> %s 2>> %s`,
 		dirname,
 		path.Base(dirname), quote(title), quote(user), stdout, stderr)
-	err = run(cmd, task.chKill)
+	err = run(cmd, task.chKill, nil)
 	if err != nil {
 		return
 	}
@@ -92,14 +169,51 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 }
 
 // Run command, maar onderbreek het als input via chKill
-func run(cmd *exec.Cmd, chKill chan bool) error {
+func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	chRet := make(chan error)
 	go func() {
+		if chPipe == nil {
+			cmd.Start()
+			chRet <- nil
+			err := cmd.Wait()
+			chRet <- err
+			return
+		}
+
+		pipe, err := cmd.StdoutPipe()
+		if err != nil {
+			chRet <- nil
+			chRet <- err
+			return
+		}
 		cmd.Start()
 		chRet <- nil
-		err := cmd.Wait()
-		chRet <- err
+
+		var err1, err2 error
+
+		rd := util.NewReader(pipe)
+		for {
+			var line string
+			line, err1 = rd.ReadLineString()
+			if err1 == io.EOF {
+				err1 = nil
+				break
+			}
+			if err1 != nil {
+				break
+			}
+			chPipe <- line
+		}
+		close(chPipe)
+
+		err2 = cmd.Wait()
+
+		if err1 != nil {
+			chRet <- err1
+		} else {
+			chRet <- err2
+		}
 	}()
 	<-chRet
 	pgid, err := syscall.Getpgid(cmd.Process.Pid)

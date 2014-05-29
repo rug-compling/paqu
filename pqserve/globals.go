@@ -27,6 +27,7 @@ type Config struct {
 	Prefix string
 
 	Maxjob int
+	Maxwrd int
 	Maxmem int64 // voor het parsen post data, in bytes
 
 	Secret string
@@ -127,6 +128,7 @@ var (
 	processes = make(map[string]*Process)
 
 	dirnameLock sync.Mutex
+	quotumLock  sync.Mutex
 
 	reQuote = regexp.MustCompile("%[0-9A-F-a-f][0-9A-F-a-f]") // voor urldecode()
 	reMail  = regexp.MustCompile("^[-.a-z0-9!#$%&'*+/=?^_`{|}~]+@[-.a-z0-9]+$")

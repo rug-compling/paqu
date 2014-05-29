@@ -53,20 +53,25 @@ func login1(q *Context) {
 		return
 	}
 
-	_, err := q.db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
-		return
-	}
-
 	a := make([]byte, 16)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < 16; i++ {
 		a[i] = byte(97 + rnd.Intn(24))
 	}
 	auth := string(a)
-	_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `pw`) VALUES (%q, %q)", Cfg.Prefix, mail, auth))
+
+	rows, err := q.db.Query(fmt.Sprintf("SELECT * from `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail))
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
+		return
+	}
+	if rows.Next() {
+		rows.Close()
+		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = %q WHERE `mail` = %q" , Cfg.Prefix, auth, mail))
+	} else {
+		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `pw`, `quotum`) VALUES (%q, %q, %d)", Cfg.Prefix, mail, auth, Cfg.Maxwrd))
+	}
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)

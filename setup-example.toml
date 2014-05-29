@@ -13,6 +13,7 @@ login  = "username:password@/paqu"
 prefix = "pq"
 
 maxjob = 10
+maxwrd = 1000000
 maxmem = 54098268160
 
 sh     = "/bin/sh"

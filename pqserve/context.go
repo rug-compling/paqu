@@ -18,6 +18,7 @@ type Context struct {
 	r          *http.Request
 	user       string
 	auth       bool
+	quotum     int
 	db         *sql.DB
 	opt_db     []string
 	prefixes   map[string]bool
@@ -80,13 +81,19 @@ func handleFunc(url string, handler func(*Context)) {
 			mail, err1 := r.Cookie("paqu-mail")
 			auth, err2 := r.Cookie("paqu-auth")
 			if err1 == nil && err2 == nil {
-				rows, err := q.db.Query(fmt.Sprintf("SELECT SQL_CACHE 1 FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail.Value))
+				rows, err := q.db.Query(fmt.Sprintf("SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail.Value))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
 				if rows.Next() {
+					err := rows.Scan(&q.quotum)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
+						return
+					}
 					rows.Close()
 					if authcookie.Login(auth.Value, []byte(Cfg.Secret+mail.Value+getRemote(q))) != "" {
 						q.auth = true
