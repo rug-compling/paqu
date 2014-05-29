@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -141,9 +142,9 @@ func main() {
 		os.Args = append(os.Args[:1], os.Args[2:]...)
 	}
 
-	if len(os.Args) != 6 || util.IsTerminal(os.Stdin) {
+	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] configfile id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] id description owner public < bestandnamen
 
 Opties:
 
@@ -151,7 +152,6 @@ Opties:
  -w : bestaande database overschrijven
  -i : geen tabel van woord naar lemmas aanmaken
 
-  configfile:
   id:
   description:
   owner:       e-mail address
@@ -162,13 +162,16 @@ Opties:
 		return
 	}
 
-	configfile = strings.TrimSpace(os.Args[1])
-	prefix = strings.TrimSpace(os.Args[2])
-	desc = strings.TrimSpace(os.Args[3])
-	owner = strings.TrimSpace(os.Args[4])
-	public = strings.TrimSpace(os.Args[5])
+	prefix = strings.TrimSpace(os.Args[1])
+	desc = strings.TrimSpace(os.Args[2])
+	owner = strings.TrimSpace(os.Args[3])
+	public = strings.TrimSpace(os.Args[4])
 
-	_, err := toml.DecodeFile(configfile, &Cfg)
+	paqudir := os.Getenv("PAQU")
+	if paqudir == "" {
+		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+	}
+	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if desc == "" {

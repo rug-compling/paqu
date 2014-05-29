@@ -17,26 +17,29 @@ import (
 //. Types
 
 type Config struct {
-	Data   string
 	Login  string
 	Prefix string
 }
 
 func main() {
 
-	if len(os.Args) != 3 {
-		fmt.Printf("\nSyntax: %s configbestand e-mail\n\n", os.Args[0])
+	if len(os.Args) != 2 {
+		fmt.Printf("\nSyntax: %s e-mail\n\n", os.Args[0])
 		return
 	}
 
 	var Cfg Config
-	_, err := toml.DecodeFile(os.Args[1], &Cfg)
+	paqudir := os.Getenv("PAQU")
+	if paqudir == "" {
+		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+	}
+	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
 
-	user := os.Args[2]
+	user := os.Args[1]
 
 	if strings.Index(user, "@") < 0 {
 		fmt.Printf("Gebruiker %s kan niet verwijderd worden\n", user)
@@ -70,7 +73,7 @@ func main() {
 			Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
-		util.CheckErr(os.RemoveAll(path.Join(Cfg.Data, corpus)))
+		util.CheckErr(os.RemoveAll(path.Join(paqudir, "data", corpus)))
 
 		// deze pas als de rest goed ging
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, corpus))

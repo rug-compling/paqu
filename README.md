@@ -106,7 +106,6 @@ alles:
 `pqserve`:
 
   - benaming "Woordrelaties" overal vervangen door "PaQu" of "paqu" of logo
-  - config-optie `cookiepath` verwijderen, afleiden uit `url`
   - is het beter de optie "delen met iedereen" uit te schakelen?
   - foutafhandeling als gebruiker submit doet zonder bestand gekozen te hebben
   - fout van shell: niet de errorcode, maar de laatste regel(s) van

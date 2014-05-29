@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -19,8 +20,6 @@ import (
 //. Types
 
 type Config struct {
-	Data string
-
 	Login  string
 	Prefix string
 
@@ -35,10 +34,14 @@ var (
 //. Main
 
 func main() {
-	_, err := toml.DecodeFile(os.Args[1], &Cfg)
+	paqudir := os.Getenv("PAQU")
+	if paqudir == "" {
+		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+	}
+	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
-	util.CheckErr(os.Chdir(Cfg.Data))
+	util.CheckErr(os.Chdir(path.Join(paqudir, "data")))
 
 	diskuse := make(map[string]int)
 	totaldiskuse := 0

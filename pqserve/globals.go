@@ -13,11 +13,9 @@ import (
 //. Types
 
 type Config struct {
-	Port       int
-	Url        string
-	Cookiepath string
+	Port int
+	Url  string
 
-	Data    string
 	Default string
 
 	Mailfrom string
@@ -37,8 +35,7 @@ type Config struct {
 	Path   string
 	Alpino string
 
-	Logfile string
-	Remote  bool
+	Remote bool
 
 	Querytimeout int // in secondes
 }
@@ -118,6 +115,9 @@ const (
 //. Variabelen
 
 var (
+	paqudir    string
+	cookiepath string
+
 	Cfg     Config
 	verbose bool
 

@@ -159,7 +159,7 @@ func submit2(q *Context) {
 		dirname = d
 		break
 	}
-	fulldirname := path.Join(Cfg.Data, dirname)
+	fulldirname := path.Join(paqudir, "data", dirname)
 	err := os.Mkdir(fulldirname, 0700)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)

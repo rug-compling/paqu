@@ -1,9 +1,7 @@
 
 port = 9876
 url  = "http://paqu.domain.nl:9876/"
-cookiepath = "/"
 
-data    = "/local/opt/paqu/data"
 default = "lassysmall"
 
 mailfrom = "maintainer@domain.nl"
@@ -20,8 +18,6 @@ maxmem = 54098268160
 sh     = "/bin/sh"
 path   = "/local/opt/paqu/pqbuild:/local/opt/paqu/alpino:/bin:/usr/bin"
 alpino = "/local/opt/Alpino"
-
-logfile = "/local/opt/paqu/pqserve.log"
 
 secret = "Verander dit in een andere willekeurige tekst"
 remote = true

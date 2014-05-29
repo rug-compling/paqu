@@ -31,17 +31,19 @@ func logerr(err error) {
 
 func logger() {
 
+	logfile := path.Join(paqudir, "pqserve.log")
+
 	rotate := func() {
 		for i := 4; i > 1; i-- {
 			os.Rename(
-				fmt.Sprintf("%s%d", Cfg.Logfile, i-1),
-				fmt.Sprintf("%s%d", Cfg.Logfile, i))
+				fmt.Sprintf("%s%d", logfile, i-1),
+				fmt.Sprintf("%s%d", logfile, i))
 		}
-		os.Rename(Cfg.Logfile, Cfg.Logfile+"1")
+		os.Rename(logfile, logfile+"1")
 	}
 
 	rotate()
-	fp, err := os.Create(Cfg.Logfile)
+	fp, err := os.Create(logfile)
 	util.CheckErr(err)
 
 	n := 0
@@ -57,7 +59,7 @@ func logger() {
 		if n == 10000 {
 			fp.Close()
 			rotate()
-			fp, _ = os.Create(Cfg.Logfile)
+			fp, _ = os.Create(logfile)
 			n = 0
 		}
 	}

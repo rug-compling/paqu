@@ -107,6 +107,7 @@ func iformat(i int) string {
 func shell(format string, a ...interface{}) *exec.Cmd {
 	cmd := exec.Command(Cfg.Sh, "-c", fmt.Sprintf(format, a...))
 	cmd.Env = []string{
+		"PAQU=" + paqudir,
 		"ALPINO_HOME=" + Cfg.Alpino,
 		"PATH=" + Cfg.Path,
 		"LANG=en_US.utf8",

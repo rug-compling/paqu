@@ -102,8 +102,8 @@ func setcookie(q *Context) {
 	if q.auth {
 		exp := time.Now().AddDate(0, 0, 14)
 		au := authcookie.New(q.user, exp, []byte(Cfg.Secret+q.user+getRemote(q)))
-		http.SetCookie(q.w, &http.Cookie{Name: "wordrel-auth", Value: au, Path: Cfg.Cookiepath, Expires: exp})
-		http.SetCookie(q.w, &http.Cookie{Name: "wordrel-mail", Value: q.user, Path: Cfg.Cookiepath, Expires: exp})
+		http.SetCookie(q.w, &http.Cookie{Name: "wordrel-auth", Value: au, Path: cookiepath, Expires: exp})
+		http.SetCookie(q.w, &http.Cookie{Name: "wordrel-mail", Value: q.user, Path: cookiepath, Expires: exp})
 	}
 }
 

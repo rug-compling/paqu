@@ -42,7 +42,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 	}
 
-	dirname := path.Join(Cfg.Data, task.id)
+	dirname := path.Join(paqudir, "data", task.id)
 	data := path.Join(dirname, "data")
 	xml := path.Join(dirname, "xml")
 	stdout := path.Join(dirname, "stdout.txt")
@@ -80,9 +80,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	cmd = shell(
 		// optie -w i.v.m. revocer()
-		`find %s -name '*.xml' | pqbuild -w %s %s %s %s 0 >> %s 2>> %s`,
+		`find %s -name '*.xml' | pqbuild -w %s %s %s 0 >> %s 2>> %s`,
 		dirname,
-		os.Args[1], path.Base(dirname), quote(title), quote(user), stdout, stderr)
+		path.Base(dirname), quote(title), quote(user), stdout, stderr)
 	err = run(cmd, task.chKill)
 	if err != nil {
 		return

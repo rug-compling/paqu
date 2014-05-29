@@ -8,10 +8,13 @@ import (
 
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"regexp"
 	"runtime"
 	"strconv"
+	"strings"
 )
 
 //. Main
@@ -28,8 +31,19 @@ func main() {
 		os.Args = append(os.Args[:1], os.Args[2:]...)
 	}
 
-	_, err := toml.DecodeFile(os.Args[1], &Cfg)
+	paqudir = os.Getenv("PAQU")
+	if paqudir == "" {
+		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+	}
+	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
+
+	p, err := url.Parse(Cfg.Url)
+	util.CheckErr(err)
+	cookiepath = p.Path
+	if !strings.HasPrefix(cookiepath, "/") {
+		cookiepath = "/" + cookiepath
+	}
 
 	go logger()
 
