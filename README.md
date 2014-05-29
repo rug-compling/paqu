@@ -102,6 +102,9 @@ alles:
 
   - alle tekst in het Nederlands
   - ander logo?
+  - bronbestand logo toevoegen aan github (eps-bestand met daarin
+      ttf-bestand omgezet in t42)
+  - zie TODO in diverse bestanden
 
 `pqserve`:
 

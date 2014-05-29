@@ -76,7 +76,7 @@ func main() {
 		util.CheckErr(cmd.Run())
 	} else {
 		cmd := exec.Command(
-			"/usr/bin/curl", "-s", "--upload-file", filename+".lines", *opt_s)
+			"/usr/bin/curl", "-s", "--upload-file", filename, *opt_s)
 		cmd.Stderr = os.Stderr
 		reader, err := cmd.StdoutPipe()
 		util.CheckErr(err)
