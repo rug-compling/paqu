@@ -1,0 +1,15 @@
+
+// usage: fontforge -lang=ff -script font.script
+
+Open("Gabriola.ttf")
+
+Select(0x0020)
+SelectMore(0x0050)
+SelectMore(0x0051)
+SelectMore(0x0061)
+SelectMore(0x0075)
+
+SelectInvert()
+DetachAndRemoveGlyphs()
+Generate("tmp.pfa", "", 0)
+Generate("tmp.ttf", "", 256)
