@@ -250,7 +250,11 @@ func work(task *Process) {
 		return
 	}
 
-	defer delete(processes, task.id)
+	defer func() {
+		processLock.Lock()
+		delete(processes, task.id)
+		processLock.Unlock()
+	}()
 
 	db, err := dbopen()
 	if err != nil {
@@ -272,7 +276,10 @@ func work(task *Process) {
 }
 
 func kill(id string) {
-	if task, ok := processes[id]; ok {
+	processLock.Lock()
+	task, ok := processes[id]
+	processLock.Unlock()
+	if ok {
 		done := false
 
 		task.lock.Lock()
@@ -284,14 +291,19 @@ func kill(id string) {
 
 		if done {
 			logf("UNQUEUED: %v", id)
+			processLock.Lock()
 			delete(processes, task.id)
+			processLock.Unlock()
 			return
 		}
 
 		task.chKill <- true
 		for {
 			time.Sleep(500 * time.Millisecond)
-			if _, ok := processes[id]; !ok {
+			processLock.Lock()
+			_, ok := processes[id]
+			processLock.Unlock()
+			if !ok {
 				logf("KILLED: %v", id)
 				return
 			}
@@ -308,13 +320,16 @@ func recover() {
 	for rows.Next() {
 		var id string
 		util.CheckErr(rows.Scan(&id))
-		processes[id] = &Process{
+		p := &Process{
 			id:     id,
 			chKill: make(chan bool, 10),
 			queued: true,
 		}
+		processLock.Lock()
+		processes[id] = p
+		processLock.Unlock()
 		go func() {
-			chWork <- processes[id]
+			chWork <- p
 		}()
 	}
 	util.CheckErr(rows.Err())

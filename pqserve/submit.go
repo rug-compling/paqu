@@ -205,13 +205,16 @@ func submit2(q *Context) {
 	}
 
 	logf("QUEUED: " + dirname)
-	processes[dirname] = &Process{
+	p := &Process{
 		id:     dirname,
 		chKill: make(chan bool, 10),
 		queued: true,
 	}
+	processLock.Lock()
+	processes[dirname] = p
+	processLock.Unlock()
 	go func() {
-		chWork <- processes[dirname]
+		chWork <- p
 	}()
 
 	writeHtml(

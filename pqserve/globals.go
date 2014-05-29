@@ -129,6 +129,7 @@ var (
 
 	dirnameLock sync.Mutex
 	quotumLock  sync.Mutex
+	processLock sync.Mutex
 
 	reQuote = regexp.MustCompile("%[0-9A-F-a-f][0-9A-F-a-f]") // voor urldecode()
 	reMail  = regexp.MustCompile("^[-.a-z0-9!#$%&'*+/=?^_`{|}~]+@[-.a-z0-9]+$")
