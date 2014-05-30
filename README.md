@@ -75,6 +75,7 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
     - Statistiek
       - pqstatus
       - handler voor interne status (NumGoroutine, MemStat)
+	  - package `expvar`
     - Gebruiker verwijderen
     - E-mail aan beheerder bij problemen
   - Adminhandleiding
@@ -94,6 +95,9 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
       - Menu met submenu's: algemeen; eigen corpora; anderen -> gedeelde corpora
   - Code
     - Organisatie + documentatie
+	- Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
+  - Dependencies
+	- externe go-pakketten opnemen onder directory `_vendor`
   - Licentie
 
 ### Diversen ###

@@ -6,6 +6,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
+	_ "expvar"
 	"fmt"
 	"net/http"
 	"net/url"
