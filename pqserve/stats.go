@@ -248,6 +248,11 @@ func interneFoutRegel(q *Context, err error, is_html bool) {
 	fmt.Fprintln(q.w, "Interne fout:", s)
 }
 
+////////////////////////////////////////////////////////////////
+//
+// Wat volgt wordt ook door de hoofdfunctie in form.go gebruikt
+//
+
 // cancel query niet alleen bij timeout, maar ook als request wordt verbroken
 func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, error) {
 
@@ -266,19 +271,19 @@ func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, err
 		timeout = false // laat timeout door MySQL-server doen
 	}
 
-	ch := make(chan bool, 1)
-	defer func() { ch <- true }()
-	go cancelQuery(id, timeout, ch, chClose)
+	chFinished := make(chan bool, 1)
+	defer func() { chFinished <- true }()
+	go cancelQuery(id, timeout, chFinished, chClose)
 
 	return q.db.Query(query)
 }
 
 // cancel query niet alleen bij timeout, maar ook als request wordt verbroken
-func cancelQuery(id string, timeout bool, ch chan bool, chClose <-chan bool) {
+func cancelQuery(id string, timeout bool, chFinished chan bool, chClose <-chan bool) {
 
 	if timeout && Cfg.Querytimeout > 0 {
 		select {
-		case <-ch:
+		case <-chFinished:
 			// query is klaar
 			return
 		case <-chClose:
@@ -288,7 +293,7 @@ func cancelQuery(id string, timeout bool, ch chan bool, chClose <-chan bool) {
 		}
 	} else {
 		select {
-		case <-ch:
+		case <-chFinished:
 			// query is klaar
 			return
 		case <-chClose:

@@ -23,13 +23,10 @@ import (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	for len(os.Args) > 1 {
-		if os.Args[1] == "-v" {
+	for _, arg := range os.Args[1:] {
+		if arg == "-v" {
 			verbose = true
-		} else {
-			break
 		}
-		os.Args = append(os.Args[:1], os.Args[2:]...)
 	}
 
 	paqudir = os.Getenv("PAQU")

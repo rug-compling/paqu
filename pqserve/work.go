@@ -276,9 +276,9 @@ func work(task *Process) {
 }
 
 func kill(id string) {
-	processLock.Lock()
+	processLock.RLock()
 	task, ok := processes[id]
-	processLock.Unlock()
+	processLock.RUnlock()
 	if ok {
 		done := false
 
@@ -300,9 +300,9 @@ func kill(id string) {
 		task.chKill <- true
 		for {
 			time.Sleep(500 * time.Millisecond)
-			processLock.Lock()
+			processLock.RLock()
 			_, ok := processes[id]
-			processLock.Unlock()
+			processLock.RUnlock()
 			if !ok {
 				logf("KILLED: %v", id)
 				return
@@ -315,11 +315,24 @@ func recover() {
 	db, err := dbopen()
 	util.CheckErr(err)
 	defer db.Close()
+
+	ids := make([]string, 0)
+
 	rows, err := db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" OR `status` = \"WORKING\" ORDER BY `created`")
 	util.CheckErr(err)
 	for rows.Next() {
 		var id string
 		util.CheckErr(rows.Scan(&id))
+		ids = append(ids, id)
+	}
+	util.CheckErr(rows.Err())
+
+	for _, id := range ids {
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = 0 WHERE `id` = %q", Cfg.Prefix, id))
+		util.CheckErr(err)
+	}
+
+	for _, id := range ids {
 		p := &Process{
 			id:     id,
 			chKill: make(chan bool, 10),
@@ -332,5 +345,4 @@ func recover() {
 			chWork <- p
 		}()
 	}
-	util.CheckErr(rows.Err())
 }
