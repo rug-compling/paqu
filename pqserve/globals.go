@@ -8,7 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"runtime"
 	"sync"
+	"time"
 )
 
 //. Types
@@ -154,6 +156,8 @@ var (
 	version       [3]int
 
 	hasMaxStatementTime bool
+
+	started = time.Now()
 )
 
 func (p ProcessMap) String() string {
@@ -163,9 +167,36 @@ func (p ProcessMap) String() string {
 	var comma string
 	fmt.Fprint(&buf, "{")
 	for key, val := range p {
-		fmt.Fprintf(&buf, "%s%q:{\"killed\":%v,\"queued\":%v}", comma, key, val.killed, val.queued)
+		st := "working"
+		if val.killed {
+			st = "killed"
+		} else if val.queued {
+			st = "queued"
+		}
+		fmt.Fprintf(&buf, "%s%q:%q", comma, key, st)
 		comma = ","
 	}
 	fmt.Fprint(&buf, "}")
 	return buf.String()
+}
+
+type Info struct {
+	NumCPU       int
+	NumCgoCall   int64
+	NumGoroutine int
+	Uptime       time.Duration
+	UptimeString string
+	Version      string
+}
+
+func GetInfo() interface{} {
+	d := time.Now().Sub(started)
+	return Info{
+		NumCPU:       runtime.NumCPU(),
+		NumCgoCall:   runtime.NumCgoCall(),
+		NumGoroutine: runtime.NumGoroutine(),
+		Uptime:       d,
+		UptimeString: d.String(),
+		Version:      runtime.Version(),
+	}
 }

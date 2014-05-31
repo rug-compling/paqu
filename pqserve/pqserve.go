@@ -19,7 +19,8 @@ import (
 )
 
 func init() {
-	expvar.Publish("processes", ProcessMap(processes))
+	expvar.Publish("tasks", ProcessMap(processes))
+	expvar.Publish("info", expvar.Func(GetInfo))
 }
 
 //. Main

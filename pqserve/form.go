@@ -352,7 +352,7 @@ func form(q *Context) {
 		urlencode(first(q.r, "rel")),
 		urlencode(first(q.r, "hpostag")),
 		urlencode(first(q.r, "hword")),
-		urlencode(first(q.r, "db")))
+		urlencode(prefix))
 
 	html_footer(q)
 
