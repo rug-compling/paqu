@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"regexp"
 	"sync"
 )
@@ -103,6 +104,8 @@ type Process struct {
 	lock   sync.Mutex
 }
 
+type ProcessMap map[string]*Process
+
 //. Constanten
 
 const (
@@ -152,3 +155,17 @@ var (
 
 	hasMaxStatementTime bool
 )
+
+func (p ProcessMap) String() string {
+	processLock.RLock()
+	defer processLock.RUnlock()
+	var buf bytes.Buffer
+	var comma string
+	fmt.Fprint(&buf, "{")
+	for key, val := range p {
+		fmt.Fprintf(&buf, "%s%q:{\"killed\":%v,\"queued\":%v}", comma, key, val.killed, val.queued)
+		comma = ","
+	}
+	fmt.Fprint(&buf, "}")
+	return buf.String()
+}

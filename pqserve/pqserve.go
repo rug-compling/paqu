@@ -6,7 +6,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
-	_ "expvar"
+	"expvar"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -17,6 +17,10 @@ import (
 	"strconv"
 	"strings"
 )
+
+func init() {
+	expvar.Publish("processes", ProcessMap(processes))
+}
 
 //. Main
 
