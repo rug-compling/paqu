@@ -68,7 +68,7 @@ func login1(q *Context) {
 	}
 	if rows.Next() {
 		rows.Close()
-		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = %q WHERE `mail` = %q" , Cfg.Prefix, auth, mail))
+		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = %q WHERE `mail` = %q", Cfg.Prefix, auth, mail))
 	} else {
 		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `pw`, `quotum`) VALUES (%q, %q, %d)", Cfg.Prefix, mail, auth, Cfg.Maxwrd))
 	}
@@ -99,16 +99,14 @@ func login1(q *Context) {
 
 func logout(q *Context) {
 	http.SetCookie(q.w, &http.Cookie{Name: "paqu-auth", Path: "/", MaxAge: -1})
-	http.SetCookie(q.w, &http.Cookie{Name: "paqu-mail", Path: "/", MaxAge: -1})
 	writeHtml(q, "Uitgelogd", "Je bent uitgelogd", ".")
 }
 
 func setcookie(q *Context) {
 	if q.auth {
 		exp := time.Now().AddDate(0, 0, 14)
-		au := authcookie.New(q.user, exp, []byte(Cfg.Secret+q.user+getRemote(q)))
+		au := authcookie.New(q.user, exp, []byte(getRemote(q)+Cfg.Secret))
 		http.SetCookie(q.w, &http.Cookie{Name: "paqu-auth", Value: au, Path: cookiepath, Expires: exp})
-		http.SetCookie(q.w, &http.Cookie{Name: "paqu-mail", Value: q.user, Path: cookiepath, Expires: exp})
 	}
 }
 

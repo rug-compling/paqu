@@ -78,16 +78,19 @@ func handleFunc(url string, handler func(*Context)) {
 			defer q.db.Close()
 
 			// Is de gebruiker ingelogd?
-			mail, err1 := r.Cookie("paqu-mail")
-			auth, err2 := r.Cookie("paqu-auth")
-			if err1 == nil && err2 == nil {
-				rows, err := q.db.Query(fmt.Sprintf("SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail.Value))
+			if auth, err := r.Cookie("paqu-auth"); err == nil {
+				q.user = authcookie.Login(auth.Value, []byte(getRemote(q)+Cfg.Secret))
+			}
+			if q.user != "" {
+				rows, err := q.db.Query(fmt.Sprintf("SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, q.user))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
-				if rows.Next() {
+				if !rows.Next() {
+					q.user = ""
+				} else {
 					err := rows.Scan(&q.quotum)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -95,15 +98,12 @@ func handleFunc(url string, handler func(*Context)) {
 						return
 					}
 					rows.Close()
-					if authcookie.Login(auth.Value, []byte(Cfg.Secret+mail.Value+getRemote(q))) != "" {
-						q.auth = true
-						q.user = mail.Value
-						_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `active` = NOW() WHERE `mail` = %q", Cfg.Prefix, q.user))
-						if err != nil {
-							http.Error(w, err.Error(), http.StatusInternalServerError)
-							logerr(err)
-							return
-						}
+					q.auth = true
+					_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `active` = NOW() WHERE `mail` = %q", Cfg.Prefix, q.user))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
+						return
 					}
 				}
 			}
