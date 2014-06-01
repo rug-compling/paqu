@@ -165,7 +165,7 @@ func (p ProcessMap) String() string {
 	defer processLock.RUnlock()
 	var buf bytes.Buffer
 	var comma string
-	fmt.Fprint(&buf, "{")
+	fmt.Fprint(&buf, "[")
 	for key, val := range p {
 		st := "working"
 		if val.killed {
@@ -173,10 +173,10 @@ func (p ProcessMap) String() string {
 		} else if val.queued {
 			st = "queued"
 		}
-		fmt.Fprintf(&buf, "%s%q:%q", comma, key, st)
+		fmt.Fprintf(&buf, "%s{\"id\":%q,\"status\":%q}", comma, key, st)
 		comma = ","
 	}
-	fmt.Fprint(&buf, "}")
+	fmt.Fprint(&buf, "]")
 	return buf.String()
 }
 
