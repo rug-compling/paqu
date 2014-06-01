@@ -168,10 +168,12 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	return
 }
 
-// Run command, maar onderbreek het als input via chKill
+// Run command, maar onderbreek het als chKill gesloten is
 func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	chRet := make(chan error)
+
+	chRet := make(chan error, 2)
+	// deze functie schrijft twee keer op chRet
 	go func() {
 		if chPipe == nil {
 			cmd.Start()
@@ -215,25 +217,28 @@ func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
 			chRet <- err2
 		}
 	}()
-	<-chRet
+
+	<-chRet // commando is gestart
+
 	pgid, err := syscall.Getpgid(cmd.Process.Pid)
 	if err != nil {
 		// misschien betekent een fout alleen maar dat het process net klaar is
 		logf("BIG TROUBLE: syscall.Getpgid(cmd.Process.Pid) error: %v", err)
 		pgid = 0
 	}
+
 	for {
 		select {
 		case err := <-chRet:
 			return err
 		case <-chKill:
+			chKill = nil // niet opnieuw van lezen
 			err = syscall.Kill(-pgid, 15)
 			if err != nil {
 				logf("syscall.Kill(-pgid, 15) error: %v", err)
 			}
 		}
 	}
-	panic("Can't reach")
 }
 
 func work(task *Process) {
@@ -297,7 +302,7 @@ func kill(id string) {
 			return
 		}
 
-		task.chKill <- true
+		close(task.chKill)
 		for {
 			time.Sleep(500 * time.Millisecond)
 			processLock.RLock()
@@ -335,7 +340,7 @@ func recover() {
 	for _, id := range ids {
 		p := &Process{
 			id:     id,
-			chKill: make(chan bool, 10),
+			chKill: make(chan bool),
 			queued: true,
 		}
 		processLock.Lock()

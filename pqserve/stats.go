@@ -271,8 +271,8 @@ func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, err
 		timeout = false // laat timeout door MySQL-server doen
 	}
 
-	chFinished := make(chan bool, 1)
-	defer func() { chFinished <- true }()
+	chFinished := make(chan bool)
+	defer close(chFinished)
 	go cancelQuery(id, timeout, chFinished, chClose)
 
 	return q.db.Query(query)

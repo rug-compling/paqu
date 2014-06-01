@@ -207,7 +207,7 @@ func submit2(q *Context) {
 	logf("QUEUED: " + dirname)
 	p := &Process{
 		id:     dirname,
-		chKill: make(chan bool, 10),
+		chKill: make(chan bool),
 		queued: true,
 	}
 	processLock.Lock()
