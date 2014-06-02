@@ -30,16 +30,16 @@ querytimeout = 120
 
 [[view]]
 allow = false
-addr  = "all"
+addr  = [ "all" ]
 
 [[view]]
 allow = true
-addr  = "127.0.0.1/8"
+addr  = [ "127.0.0.1/8", "123.123.123.123" ]
 
 [[access]]
 allow = false
-mail  = "all"
+mail  = [ "all" ]
 
 [[access]]
 allow = true
-mail  = "@(xs4all|rug)\\.nl$"
+mail  = [ "@xs4all\\.nl$", "@rug\\.nl$" ]  # kleine letters

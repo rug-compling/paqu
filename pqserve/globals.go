@@ -50,17 +50,17 @@ type Config struct {
 
 type ViewType struct {
 	Allow bool
-	Addr  string
+	Addr  []string
 	all   bool
-	ip    net.IP
-	ipnet *net.IPNet
+	ip    []net.IP
+	ipnet []*net.IPNet
 }
 
 type AccessType struct {
 	Allow bool
-	Mail  string
+	Mail  []string
 	all   bool
-	re    *regexp.Regexp
+	re    []*regexp.Regexp
 }
 
 // een dependency relation, geretourneerd door SQL
