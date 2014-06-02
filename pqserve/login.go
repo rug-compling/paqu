@@ -46,6 +46,7 @@ func login1(q *Context) {
 	mail := strings.ToLower(first(q.r, "mail"))
 
 	if !accessLogin(mail) {
+		logf("LOGIN DENIED: %s %s %s", q.r.RemoteAddr, q.r.Method, q.r.URL)
 		http.Error(q.w, "Access denied", http.StatusForbidden)
 		return
 	}

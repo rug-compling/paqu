@@ -126,10 +126,11 @@ func main() {
 
 func Log(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
 		if accessView(r.RemoteAddr) {
+			logf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
 			handler.ServeHTTP(w, r)
 		} else {
+			logf("ACCESS DENIED: %s %s %s", r.RemoteAddr, r.Method, r.URL)
 			http.Error(w, "Access denied", http.StatusForbidden)
 		}
 	})
