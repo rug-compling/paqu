@@ -44,8 +44,14 @@ func login(q *Context) {
 func login1(q *Context) {
 
 	mail := strings.ToLower(first(q.r, "mail"))
+
+	if !accessLogin(mail) {
+		http.Error(q.w, "Access denied", http.StatusForbidden)
+		return
+	}
+
 	if mail == "" {
-		writeHtml(q, "Fout", "E-mailadres ontbreeekt", ".")
+		writeHtml(q, "Fout", "E-mailadres ontbreekt", ".")
 		return
 	}
 	if !reMail.MatchString(mail) {

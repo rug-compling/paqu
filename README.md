@@ -62,10 +62,8 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
         wachtrij staan de verwerking afwisselen met verwerking corpora van
         andere gebruikers.
   - Toegang
-    - deny/allow op basis van ip-adressen
-    - deny/allow op basis van e-mailpatroon
-    - leesrechten: alleen raadplegen van algemene corpora
-    - inlogrechten: mag zelf corpora uploaden
+    - ✔ leesrechten: deny/allow op basis van ip-adressen (IPv6?)
+    - ✔ inlogrechten: deny/allow op basis regexp mail-adressen
     - downloadrechten, alleen wie is ingelogd
       - eigen corpora
       - corpora die door anderen gedeeld zijn en vrijgegeven voor downloaden

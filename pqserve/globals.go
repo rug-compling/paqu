@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"net"
 	"regexp"
 	"runtime"
 	"sync"
@@ -42,6 +43,24 @@ type Config struct {
 	Remote bool
 
 	Querytimeout int // in secondes
+
+	View   []ViewType
+	Access []AccessType
+}
+
+type ViewType struct {
+	Allow bool
+	Addr  string
+	all   bool
+	ip    net.IP
+	ipnet *net.IPNet
+}
+
+type AccessType struct {
+	Allow bool
+	Mail  string
+	all   bool
+	re    *regexp.Regexp
 }
 
 // een dependency relation, geretourneerd door SQL

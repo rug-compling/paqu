@@ -41,14 +41,16 @@ func main() {
 	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
+	go logger()
+
+	accessSetup()
+
 	p, err := url.Parse(Cfg.Url)
 	util.CheckErr(err)
 	cookiepath = p.Path
 	if !strings.HasPrefix(cookiepath, "/") {
 		cookiepath = "/" + cookiepath
 	}
-
-	go logger()
 
 	logf("Met DbXML: %v", has_dbxml)
 
@@ -125,7 +127,11 @@ func main() {
 func Log(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
-		handler.ServeHTTP(w, r)
+		if accessView(r.RemoteAddr) {
+			handler.ServeHTTP(w, r)
+		} else {
+			http.Error(w, "Access denied", http.StatusForbidden)
+		}
 	})
 }
 

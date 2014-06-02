@@ -1,4 +1,7 @@
 
+# Dit bestand is in toml-formaat
+# Zie: https://github.com/mojombo/toml
+
 port = 9876
 url  = "http://paqu.domain.nl:9876/"
 
@@ -25,3 +28,18 @@ remote = true
 
 querytimeout = 120
 
+[[view]]
+allow = false
+addr  = "all"
+
+[[view]]
+allow = true
+addr  = "127.0.0.1/8"
+
+[[access]]
+allow = false
+mail  = "all"
+
+[[access]]
+allow = true
+mail  = "@(xs4all|rug)\\.nl$"
