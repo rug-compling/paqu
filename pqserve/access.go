@@ -67,46 +67,37 @@ func accessView(addr string) bool {
 		return true
 	}
 
-	access := true
-VIEW:
 	for _, a := range Cfg.View {
 		if a.all {
-			access = a.Allow
-			continue VIEW
+			return a.Allow
 		}
 		for _, ipnet := range a.ipnet {
 			if ipnet.Contains(ip) {
-				access = a.Allow
-				continue VIEW
+				return a.Allow
 			}
 		}
 		for _, aip := range a.ip {
 			if aip.Equal(ip) {
-				access = a.Allow
-				continue VIEW
+				return a.Allow
 			}
 		}
 	}
-	return access
+	return true
 }
 
 func accessLogin(mail string) bool {
 	if len(Cfg.Access) == 0 {
 		return true
 	}
-	access := true
-ACCESS:
 	for _, a := range Cfg.Access {
 		if a.all {
-			access = a.Allow
-			continue ACCESS
+			return a.Allow
 		}
 		for _, re := range a.re {
 			if re.MatchString(mail) {
-				access = a.Allow
-				continue ACCESS
+				return a.Allow
 			}
 		}
 	}
-	return access
+	return true
 }

@@ -29,17 +29,18 @@ remote = true
 querytimeout = 120
 
 [[view]]
+allow = true
+addr  = [ "127.0.0.1/8", "123.123.123.123" ]
+
+[[view]]
 allow = false
 addr  = [ "all" ]
 
-[[view]]
+[[access]]
 allow = true
-addr  = [ "127.0.0.1/8", "123.123.123.123" ]
+mail  = [ "@xs4all\\.nl$", "@rug\\.nl$" ]  # kleine letters
 
 [[access]]
 allow = false
 mail  = [ "all" ]
 
-[[access]]
-allow = true
-mail  = [ "@xs4all\\.nl$", "@rug\\.nl$" ]  # kleine letters
