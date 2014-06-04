@@ -7,7 +7,6 @@ import (
 	"html"
 	"math/rand"
 	"net/http"
-	"path"
 	"strings"
 	"time"
 )
@@ -90,7 +89,7 @@ func login1(q *Context) {
 		"Log in",
 		fmt.Sprintf(
 			"Visit this URL to log in: %s?mail=%s&pw=%s",
-			path.Join(Cfg.Url, "login"), urlencode(mail), urlencode(auth)))
+			urlJoin(Cfg.Url, "login"), urlencode(mail), urlencode(auth)))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)

@@ -137,3 +137,23 @@ func minversion(major, minor, patch int) bool {
 func dbopen() (*sql.DB, error) {
 	return sql.Open("mysql", Cfg.Login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }
+
+func urlJoin(elem ...string) string {
+	p := elem[0]
+	for _, e := range elem[1:] {
+		if strings.HasSuffix(p, "/") {
+			if strings.HasPrefix(e, "/") {
+				p += e[1:]
+			} else {
+				p += e
+			}
+		} else {
+			if strings.HasPrefix(e, "/") {
+				p += e
+			} else {
+				p += "/" + e
+			}
+		}
+	}
+	return p
+}

@@ -88,9 +88,10 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
       - uploaden: tekst in zip, dact
       - downloaden: xml in zip, dact, compact...
       - browse: zinnen, stdout, stderr
-      - modernere interface
+      - ✔ modernere interface: verwijderen, opties
+	  - modernere interface voor afhandeling van opties
     - Keuze van corpus
-      - Menu met submenu's: algemeen; eigen corpora; anderen -> gedeelde corpora
+      - ✘ Menu met submenu's: algemeen; eigen corpora; anderen -> gedeelde corpora
   - Code
     - Organisatie + documentatie
 	- Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
@@ -103,7 +104,7 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
 alles:
 
   - alle tekst in het Nederlands
-  - ander logo?
+  - logo weghalen, vervangen door kopregel op elke pagina
   - zie TODO in diverse bestanden
 
 `pqserve`:
