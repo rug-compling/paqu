@@ -109,6 +109,7 @@ alles:
 `pqserve`:
 
   - is het beter de optie "delen met iedereen" uit te schakelen?
+  - delen beperken: alleen corpora met een minimu grootte?
   - foutafhandeling als gebruiker submit doet zonder bestand gekozen te hebben
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
     stderr gebruiken als melding aan de gebruiker

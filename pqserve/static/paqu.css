@@ -85,3 +85,138 @@ img.noborder {
 img.logo {
     margin-bottom: 2em;
 }
+
+td.odd, td.even, td.ok, td.error {
+    margin: 0px;
+    border: 0px;
+    padding: .3em 1em;
+}
+th {
+    margin: 0px;
+    border: 0px;
+    padding: .3em;
+}
+
+tr.odd td.odd {
+     background-color: #ffffff;
+}
+tr.odd td.even {
+     background-color: #ffffff;
+}
+tr.even td.odd {
+     background-color: #e8e8e8;
+}
+tr.even td.even {
+     background-color: #e8e8e8;
+}
+
+tr.odd:hover td.odd,
+tr.odd:hover td.even,
+tr.odd:hover td.ok,
+tr.odd:hover td.error,
+tr.even:hover td.odd,
+tr.even:hover td.even,
+tr.even:hover td.ok,
+tr.even:hover td.error {
+    background-color: #e0e0ff;
+}
+
+td.odd,
+td.even,
+td.ok,
+td.error
+{
+    border-right: 1px solid lightgrey;
+}
+td.first { border-left: 1px solid lightgrey; }
+
+td.delete {
+    margin: 0px;
+    border: 0px;
+    padding: .3em .4em .3em .2em;
+    color: #c00000;
+}
+a.delete:link,
+a.delete:visited,
+a.delete:active,
+a.delete:hover
+{
+    text-decoration: none;
+    color: #c00000;
+}
+
+td.more {
+    margin: 0px;
+    border: 0px;
+    padding: .3em .2em;
+    color: #0000c0;
+}
+a.opties:link,
+a.opties:visited,
+a.opties:active,
+a.opties:hover
+{
+    text-decoration: none;
+    color: ##0000c0;
+}
+
+table.corpora {
+    background-color: #f3f3f3;
+    padding: .5em;
+    border-spacing: 0px;
+    border: 1px solid lightgrey;
+}
+
+table.corpora td {
+    vertical-align: top;
+}
+
+tr.first td.even,
+tr.first td.odd,
+tr.first td.ok,
+tr.first td.error {
+    border-top: 1px solid lightgrey;
+}
+
+tr.last td.even,
+tr.last td.odd,
+tr.last td.ok,
+tr.last td.error {
+    border-bottom: 1px solid lightgrey;
+}
+
+/****************************************************************/
+
+div.submenu {
+  background: #fff;
+  position: absolute;
+  width: 135px;
+  display: none;
+  margin: -1.5em 0px 0px 1em;
+  padding: 5px 0;
+  border: 1px solid grey;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.submenu li a {
+  color: #555555;
+  display: block;
+  font-family: arial;
+  font-weight: bold;
+  padding: 6px 15px;
+  text-decoration: none;
+}
+
+.submenu li a:hover{
+    background: #0000c0;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+.optielijst {
+  list-style:none;
+  margin:0px;
+  padding:0px;
+  font-size: 11px;
+  padding: 0px;
+}
