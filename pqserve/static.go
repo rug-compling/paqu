@@ -5,18 +5,28 @@ import (
 	"strings"
 )
 
+func contentType(q *Context, ct string) {
+	q.w.Header().Set("Content-type", ct)
+}
+func cache(q *Context) {
+	q.w.Header().Set("Cache-Control", "public, max-age=86400")
+}
+
 func static_busy_gif(q *Context) {
-	q.w.Header().Set("Content-type", "image/gif")
+	contentType(q, "image/gif")
+	cache(q)
 	fmt.Fprint(q.w, file__busy__gif)
 }
 
 func static_clarinnl_png(q *Context) {
-	q.w.Header().Set("Content-type", "image/png")
+	contentType(q, "image/png")
+	cache(q)
 	fmt.Fprint(q.w, file__clarinnl__png)
 }
 
 func static_favicon_ico(q *Context) {
-	q.w.Header().Set("Content-type", "image/x-icon")
+	contentType(q, "image/x-icon")
+	cache(q)
 	fmt.Fprint(q.w, file__favicon__ico)
 }
 
@@ -27,31 +37,37 @@ func static_info_html(q *Context) {
 }
 
 func static_jquery_js(q *Context) {
-	q.w.Header().Set("Content-type", "application/javascript")
+	contentType(q, "application/javascript")
+	cache(q)
 	fmt.Fprint(q.w, file__jquery__js)
 }
 
 func static_paqu_css(q *Context) {
-	q.w.Header().Set("Content-type", "text/css")
+	contentType(q, "text/css")
+	cache(q)
 	fmt.Fprint(q.w, file__paqu__css)
 }
 
 func static_paqu_png(q *Context) {
-	q.w.Header().Set("Content-type", "image/png")
+	contentType(q, "image/png")
+	cache(q)
 	fmt.Fprint(q.w, file__paqu__png)
 }
 
 func static_robots_txt(q *Context) {
-	q.w.Header().Set("Content-type", "text/plain")
+	contentType(q, "text/plain")
+	cache(q)
 	fmt.Fprint(q.w, file__robots__txt)
 }
 
 func static_tooltip_css(q *Context) {
-	q.w.Header().Set("Content-type", "text/css")
+	contentType(q, "text/css")
+	cache(q)
 	fmt.Fprint(q.w, file__tooltip__css)
 }
 
 func static_tooltip_js(q *Context) {
-	q.w.Header().Set("Content-type", "application/javascript")
+	contentType(q, "application/javascript")
+	cache(q)
 	fmt.Fprint(q.w, file__tooltip__js)
 }
