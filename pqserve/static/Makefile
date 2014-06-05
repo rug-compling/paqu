@@ -9,9 +9,7 @@ DEPS = \
 	jquery.js \
 	paqu.css \
 	paqu.png \
-	rename.html \
 	robots.txt \
-	share.html \
 	tooltip.css \
 	tooltip.js \
 

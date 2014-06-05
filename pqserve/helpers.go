@@ -38,32 +38,48 @@ func doErr(q *Context, err error) bool {
 	return true
 }
 
-func writeHead(q *Context, title string) {
+func writeHead(q *Context, title string, tab int) {
 	q.w.Header().Set("Content-type", "text/html; charset=utf-8")
 	q.w.Header().Set("Cache-Control", "no-cache")
 	q.w.Header().Add("Pragma", "no-cache")
+	if title == "" {
+		title = "PaQu"
+	} else {
+		title = "PaQu -- " + title
+	}
 	fmt.Fprintf(q.w, `<!DOCTYPE html>
 <html>
 <head>
-<title>PaQu -- %s</title>
+<title>%s</title>
 <link rel="stylesheet" type="text/css" href="paqu.css">
 <meta name="robots" content="noindex,nofollow">
 </head>
 <body>
+<div id="login">
 `, title)
+	if q.auth {
+		fmt.Fprintf(q.w, "<form action=\"logout\">%s &nbsp; <input type=\"submit\" value=\"Log uit\"></form>\n", html.EscapeString(q.user))
+	} else {
+		fmt.Fprintln(q.w, "<form action=\"login1\">E-mail: <input type=\"text\" name=\"mail\"> <input type=\"submit\" value=\"Log in\"></form>")
+	}
+
+	var t [4]string
+	t[tab] = " class=\"selected\""
+	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\"" + t[1] + ">Begin</a>")
+	if q.auth {
+		fmt.Fprintln(q.w, "<a href=\"corpora\"" + t[2] + ">Corpora</a>")
+	}
+	fmt.Fprintln(q.w, "<a href=\"info.html\"" + t[3] + ">Info</a>\n</div>\n")
 }
 
-func writeHtml(q *Context, title, msg, verder string) {
-	writeHead(q, title)
+func writeHtml(q *Context, title, msg string) {
+	writeHead(q, title, 0)
 	fmt.Fprintf(q.w, `
 <h1>%s</h1>
 %s
-<div class="next">
-<a href="%s">Verder</a>
-</div>
 </body>
 </html>
-`, title, msg, verder)
+`, title, msg)
 }
 
 func first(r *http.Request, opt string) string {

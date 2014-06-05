@@ -19,10 +19,18 @@ func rename(q *Context) {
 		return
 	}
 
-	q.w.Header().Set("Content-type", "text/html; charset=utf-8")
-	q.w.Header().Set("Cache-Control", "no-cache")
-	q.w.Header().Add("Pragma", "no-cache")
-	fmt.Fprintf(q.w, file__rename__html, id, html.EscapeString(q.desc[id]))
+	writeHead(q, "Corpus hernoemen", 0)
+	fmt.Fprintf(q.w, `
+<h1>Corpus hernoemen</h1>
+<form action="rename2" method="get">
+  <input type="hidden" name="id" value="%s">
+  Nieuwe naam: <input type="text" name="desc" value="%s" size="80">
+<p>
+<input type="submit">
+</form>
+</body>
+</html>
+`, id, html.EscapeString(q.desc[id]))
 }
 
 func rename2(q *Context) {
@@ -39,7 +47,7 @@ func rename2(q *Context) {
 
 	d2 := strings.TrimSpace(first(q.r, "desc"))
 	if d2 == "" {
-		writeHtml(q, "Corpus niet hernoemd", "Corpus is niet hernoemd", "corpora")
+		writeHtml(q, "Corpus niet hernoemd", "Corpus is niet hernoemd")
 	} else {
 		_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q WHERE `id` = %q", Cfg.Prefix, d2, id))
 		if err != nil {
@@ -53,8 +61,7 @@ func rename2(q *Context) {
 			fmt.Sprintf(`
 Van: <em>%s</em><br>
 Naar: <em>%s</em>
-`, html.EscapeString(q.desc[id]), html.EscapeString(d2)),
-			"corpora")
+`, html.EscapeString(q.desc[id]), html.EscapeString(d2)))
 
 	}
 }

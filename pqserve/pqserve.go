@@ -109,7 +109,7 @@ func main() {
 	handleStatic("busy.gif", static_busy_gif)
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)
-	handleStatic("info.html", static_info_html)
+	handleFunc("info.html", static_info_html)
 	handleStatic("jquery.js", static_jquery_js)
 	handleStatic("paqu.css", static_paqu_css)
 	handleStatic("paqu.png", static_paqu_png)

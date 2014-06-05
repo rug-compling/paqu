@@ -1,9 +1,48 @@
 body {
-   background:#eeeeee;
+   background-color :#eeeeee;
+   background-image: url("paqu.png");
+   background-postion: top left;
+   background-attachment: scroll;
+   background-repeat: no-repeat;
    font-family:verdana;
+   margin-top: 8em;
    margin-left:20%;
    margin-right:20%;
 }
+
+#topmenu {  left: 20%; }
+#login   {  right: 20%; }
+#topmenu, #login {
+    position: absolute;
+    top: .2em;
+    font-family: helvetica, arial;
+}
+
+#topmenu a,
+#login form {
+    display: inline-block;
+    height: 1.3em;
+    padding: .5em 1em;
+    border: 1px solid black;
+    border-bottom: 2px solid black;
+    margin: 0px;
+    background-color: white;
+}
+#topmenu a { color: black; }
+#login a   { color: #0000c0; }
+#topmenu a.selected,
+#topmenu a:hover {
+    background-color: #e0e0e0;
+    //color: #FFFFFF;
+    text-decoration: none;
+}
+
+#login input {
+    margin: 0px;
+}
+
+
+
 a {
     text-decoration: none;
 }
@@ -69,7 +108,7 @@ div.next {
     width: 36em;
 }
 
-div.foot, div.login {
+div.foot {
     text-align: right;
     font-size: small;
 }
@@ -80,10 +119,6 @@ img.noborder {
 .hide {
     display: none;
     visibility: hidden;
-}
-
-img.logo {
-    margin-bottom: 2em;
 }
 
 td.odd, td.even, td.ok, td.error {
@@ -202,7 +237,7 @@ div.submenu {
 .submenu li a {
   color: #555555;
   display: block;
-  font-family: arial;
+  font-family: helvetica, arial;
   font-weight: bold;
   padding: 6px 15px;
   text-decoration: none;

@@ -34,9 +34,9 @@ func login(q *Context) {
 		q.auth = true
 		q.user = mail
 		setcookie(q)
-		writeHtml(q, "OK", "Je bent ingelogd", ".")
+		writeHtml(q, "OK", "Je bent ingelogd")
 	} else {
-		writeHtml(q, "Fout", "Log-in mislukt", ".")
+		writeHtml(q, "Fout", "Log-in mislukt")
 	}
 }
 
@@ -51,11 +51,11 @@ func login1(q *Context) {
 	}
 
 	if mail == "" {
-		writeHtml(q, "Fout", "E-mailadres ontbreekt", ".")
+		writeHtml(q, "Fout", "E-mailadres ontbreekt")
 		return
 	}
 	if !reMail.MatchString(mail) {
-		writeHtml(q, "Fout", "Dat ziet er niet uit als een geldig e-mailadress", ".")
+		writeHtml(q, "Fout", "Dat ziet er niet uit als een geldig e-mailadress")
 		return
 	}
 
@@ -99,13 +99,13 @@ func login1(q *Context) {
 	writeHtml(
 		q,
 		"Mail verzonden",
-		fmt.Sprintf("Een bericht is verstuurd naar %s. Ga naar de link in dat bericht om in te loggen.", html.EscapeString(mail)),
-		".")
+		fmt.Sprintf("Een bericht is verstuurd naar %s. Ga naar de link in dat bericht om in te loggen.", html.EscapeString(mail)))
 }
 
 func logout(q *Context) {
 	http.SetCookie(q.w, &http.Cookie{Name: "paqu-auth", Path: "/", MaxAge: -1})
-	writeHtml(q, "Uitgelogd", "Je bent uitgelogd", ".")
+	q.auth = false
+	writeHtml(q, "Uitgelogd", "Je bent uitgelogd")
 }
 
 func setcookie(q *Context) {

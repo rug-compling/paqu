@@ -71,13 +71,8 @@ func submit(q *Context) {
 		})
 	}
 
-	writeHead(q, "Mijn corpora")
-	fmt.Fprint(q.w, `
-<div class="home">
-<a href=".">Start</a>
-</div>
-<h1>Mijn corpora</h1>
-`)
+	writeHead(q, "Corpora", 2)
+	fmt.Fprintln(q.w, "<h1>Mijn corpora</h1>")
 
 	if len(corpora) == 0 {
 		fmt.Fprintln(q.w, "Je hebt nog geen corpora")
@@ -320,8 +315,7 @@ Je document wordt verwerkt. Als het klaar is zie je op de hoofdpagina een nieuw 
 Let op: Dit kan even duren. Minuten, uren, of dagen, afhankelijk van de grootte van je document.
 <p>
 <b>Je krijgt een e-mail als het corpus klaar is.</b>
-`,
-		"corpora")
+`)
 }
 
 func abc(i int) string {

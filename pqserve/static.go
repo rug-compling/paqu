@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func static_busy_gif(q *Context) {
@@ -20,8 +21,9 @@ func static_favicon_ico(q *Context) {
 }
 
 func static_info_html(q *Context) {
-	q.w.Header().Set("Content-type", "text/html; charset=utf-8")
-	fmt.Fprint(q.w, file__info__html)
+	writeHead(q, "Info", 3)
+	i := strings.Index(file__info__html, "<body>")
+	fmt.Fprint(q.w, file__info__html[i+6:])
 }
 
 func static_jquery_js(q *Context) {

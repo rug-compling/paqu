@@ -19,6 +19,7 @@ func form(q *Context) {
 	}
 
 	// HTML-uitvoer van begin van de pagina
+	writeHead(q, "", 1)
 	html_header(q)
 
 	// HTML-uitvoer van het formulier
@@ -386,14 +387,7 @@ func make_query_string(word, postag, rel, hpostag, hword, db string) string {
 //. HTML
 
 func html_header(q *Context) {
-	q.w.Header().Set("Content-type", "text/html; charset=utf-8")
-	q.w.Header().Set("Cache-Control", "no-cache")
-	q.w.Header().Add("Pragma", "no-cache")
-	fmt.Fprint(q.w, `<!DOCTYPE html>
-<html>
-<head>
-<meta name="robots" content="noindex,nofollow">
-<title>PaQu</title>
+	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
   $.fn.stats = function(url) {
@@ -412,17 +406,7 @@ func html_header(q *Context) {
     f.hword.value = "";
   }
   //--></script>
-<link rel="stylesheet" type="text/css" href="paqu.css">
-</head>
-<body>
-<div class="login">
 `)
-	if q.auth {
-		fmt.Fprintf(q.w, "Ingelogd als: %s &nbsp;|&nbsp; <a href=\"logout\">Log uit</a> &nbsp;|&nbsp; <a href=\"corpora\">Mijn corpora</a>\n", q.user)
-	} else {
-		fmt.Fprintln(q.w, "<form action=\"login1\">E-mail: <input type=\"text\" name=\"mail\"> <input type=\"submit\" value=\"Log in\"></form>")
-	}
-	fmt.Fprintln(q.w, "</div>\n<hr>\n")
 }
 
 func html_uitleg(q *Context) {
@@ -464,7 +448,6 @@ func html_form(q *Context) (has_query bool) {
 		first(q.r, "hpostag") == "" &&
 		first(q.r, "hword") == "" {
 		has_query = false
-		fmt.Fprintln(q.w, "<img src=\"paqu.png\" class=\"logo\"><br>")
 	}
 
 	fmt.Fprint(q.w, `

@@ -65,10 +65,31 @@ func share(q *Context) {
 	case "PUBLIC":
 		checked3 = checked
 	}
-	q.w.Header().Set("Content-type", "text/html; charset=utf-8")
-	q.w.Header().Set("Cache-Control", "no-cache")
-	q.w.Header().Add("Pragma", "no-cache")
-	fmt.Fprintf(q.w, file__share__html,
+	writeHead(q, "Corpus delen", 0)
+	fmt.Fprintf(q.w, `<h1>Corpus delen</h1>
+    Corpus:
+    <blockquote>
+      <b>%s</b><br>
+      %s zinnen
+    </blockquote>
+    Delen met:
+    <blockquote>
+      <form action="share2" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="corpus" value="%s">
+        <input type="radio" name="share" value="none%s">niemand
+        <p>
+          <input type="radio" name="share" value="some%s">deze mensen (e-mailadressen):
+          <br>
+          <textarea id="mail" style="margin-left:4em;" name="mail" rows="8" cols="40">%s</textarea>
+        <p>
+          <input type="radio" name="share" value="all%s">iedereen
+        <p>
+          <input type="submit">
+      </form>
+    </blockquote>
+  </body>
+<html>
+`,
 		html.EscapeString(q.desc[id]),
 		iformat(q.lines[id]),
 		id,
@@ -100,7 +121,7 @@ func share2(q *Context) {
 	case "all":
 		sh = "PUBLIC"
 	default:
-		writeHtml(q, "Fout", "Waarde voor share is ongeldig of ontbreekt", "corpora")
+		writeHtml(q, "Fout", "Waarde voor share is ongeldig of ontbreekt")
 		return
 	}
 
@@ -183,6 +204,5 @@ func share2(q *Context) {
 	writeHtml(
 		q,
 		"Corpus gedeeld",
-		fmt.Sprintf("Corpus <b>%s</b> gedeeld met %s%s", html.EscapeString(q.desc[id]), html.EscapeString(wie), fout),
-		"corpora")
+		fmt.Sprintf("Corpus <b>%s</b> gedeeld met %s%s", html.EscapeString(q.desc[id]), html.EscapeString(wie), fout))
 }

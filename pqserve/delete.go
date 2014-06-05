@@ -45,7 +45,7 @@ func remove(q *Context) {
 		return
 	}
 
-	writeHead(q, "Verwijder corpus")
+	writeHead(q, "Verwijder corpus", 0)
 	fmt.Fprintf(q.w, `
 <h1>Verwijder corpus</h1>
 Corpus: <b>%s</b>
@@ -122,6 +122,5 @@ func remove2(q *Context) {
 	writeHtml(
 		q,
 		"Corpus verwijderd",
-		fmt.Sprintf("Het corpus <em>%s</em> is verwijderd", html.EscapeString(desc)),
-		"corpora")
+		fmt.Sprintf("Het corpus <em>%s</em> is verwijderd", html.EscapeString(desc)))
 }
