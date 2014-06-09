@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-func form(q *Context) {
+// TAB: begin
+func home(q *Context) {
 
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
@@ -53,76 +54,10 @@ func form(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr>")
 
-	// BEGIN: Opstellen van de query
-	// Deze code moet gelijk zijn aan die in het programma 'lassystats'
-	parts := make([]string, 0, 6)
-	for _, p := range []string{"", "h"} {
-		if first(q.r, p+"word") != "" {
-			wrd := first(q.r, p+"word")
-			if wrd[0] == '+' {
-				parts = append(parts, fmt.Sprintf("`"+p+"lemma` = %q", wrd[1:]))
-			} else if wrd[0] == '@' {
-				parts = append(parts, fmt.Sprintf("`"+p+"root` = %q", wrd[1:]))
-			} else if wrd[0] == '=' {
-				parts = append(parts, fmt.Sprintf("`"+p+"word` = %q COLLATE \"utf8_bin\"", wrd[1:]))
-			} else if wrd[0] == '?' {
-				parts = append(parts, fmt.Sprintf("`"+p+"word` = %q", wrd[1:]))
-			} else if strings.Index(wrd, "%") >= 0 {
-				parts = append(parts, fmt.Sprintf("`"+p+"word` LIKE %q", wrd))
-			} else {
-				var s string
-				select {
-				case <-chClose:
-					logerr(ConnectionClosed)
-					return
-				default:
-				}
-				rows, err := q.db.Query(fmt.Sprintf("SELECT `lemma` FROM `%s_c_%s_word` WHERE `word` = %q",
-					Cfg.Prefix, prefix, wrd))
-				if doErr(q, err) {
-					return
-				}
-				lset := make(map[string]bool)
-				for rows.Next() {
-					err := rows.Scan(&s)
-					if doErr(q, err) {
-						return
-					}
-					for _, i := range strings.Split(s, "\t") {
-						lset[fmt.Sprintf("%q", i)] = true
-					}
-				}
-				err = rows.Err()
-				if doErr(q, err) {
-					return
-				}
-				if len(lset) > 0 {
-					ll := make([]string, 0, len(lset))
-					for key := range lset {
-						ll = append(ll, key)
-					}
-					if len(ll) == 1 {
-						parts = append(parts, "`"+p+"lemma` = "+ll[0])
-					} else {
-						parts = append(parts, "`"+p+"lemma` IN ("+strings.Join(ll, ", ")+")")
-					}
-				} else {
-					parts = append(parts, fmt.Sprintf("`"+p+"word` = %q", wrd))
-				}
-			}
-		}
+	query, err := makeQuery(q, prefix, chClose)
+	if doErr(q, err) {
+		return
 	}
-	if s := first(q.r, "postag"); s != "" {
-		parts = append(parts, fmt.Sprintf("`postag` = %q", s))
-	}
-	if s := first(q.r, "rel"); s != "" {
-		parts = append(parts, fmt.Sprintf("`rel` = %q", s))
-	}
-	if s := first(q.r, "hpostag"); s != "" {
-		parts = append(parts, fmt.Sprintf("`hpostag` = %q", s))
-	}
-	query := strings.Join(parts, " AND ")
-	// EINDE: Opstellen van de query
 
 	// DEBUG: HTML-uitvoer van de query
 	fmt.Fprint(q.w, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
@@ -145,7 +80,7 @@ func form(q *Context) {
 	rows, err := timeoutQuery(q, chClose,
 		"SELECT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" GROUP BY `arch`,`file` LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
 	if doErr(q, err) {
-		clear(q)
+		busyClear(q)
 		return
 	}
 	zinnen := make([]*Sentence, 0, ZINMAX)
@@ -153,14 +88,14 @@ func form(q *Context) {
 	for rows.Next() {
 		err := rows.Scan(&a, &f)
 		if doErr(q, err) {
-			clear(q)
+			busyClear(q)
 			return
 		}
 		zinnen = append(zinnen, &Sentence{arch: a, file: f, items: make([]Row, 0)})
 	}
 	err = rows.Err()
 	if doErr(q, err) {
-		clear(q)
+		busyClear(q)
 		return
 	}
 
@@ -177,13 +112,13 @@ func form(q *Context) {
 		rows, err := q.db.Query(fmt.Sprintf("SELECT `sent` FROM `%s_c_%s_sent` WHERE `arch` = %d AND `file`= %d",
 			Cfg.Prefix, prefix, zin.arch, zin.file))
 		if doErr(q, err) {
-			clear(q)
+			busyClear(q)
 			return
 		}
 		if rows.Next() {
 			err := rows.Scan(&s)
 			if doErr(q, err) {
-				clear(q)
+				busyClear(q)
 				return
 			}
 			zin.words = strings.Fields(s)
@@ -204,7 +139,7 @@ func form(q *Context) {
 			"SELECT `word`,`lemma`,`postag`,`rel`,`hpostag`,`hlemma`,`hword`,`begin`,`end`,`hbegin`,`hend`,`mark` FROM `%s_c_%s_deprel` WHERE `arch` = %d AND `file`= %d AND %s ORDER BY `begin`,`hbegin`,`rel`",
 			Cfg.Prefix, prefix, zin.arch, zin.file, query))
 		if doErr(q, err) {
-			clear(q)
+			busyClear(q)
 			return
 		}
 		for rows.Next() {
@@ -223,19 +158,19 @@ func form(q *Context) {
 				&r.hend,
 				&r.mark)
 			if doErr(q, err) {
-				clear(q)
+				busyClear(q)
 				return
 			}
 			zin.items = append(zin.items, r)
 		}
 		err = rows.Err()
 		if doErr(q, err) {
-			clear(q)
+			busyClear(q)
 			return
 		}
 	}
 
-	clear(q)
+	busyClear(q)
 	// Verwerking en HTML-uitvoer van zinnen en dependency relations
 	fmt.Fprintln(q.w, "<ol>")
 	for i, zin := range zinnen {
@@ -571,7 +506,7 @@ func getprefix(q *Context) string {
 	return Cfg.Default
 }
 
-func clear(q *Context) {
+func busyClear(q *Context) {
 	fmt.Fprint(q.w, `<script type="text/javascript"><!--
 document.getElementById('busy').className = 'hide';
 //--></script>

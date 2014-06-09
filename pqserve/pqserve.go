@@ -89,7 +89,7 @@ func main() {
 	}
 	recover()
 
-	handleFunc("", form)
+	handleFunc("", home)
 	handleFunc("tree", tree)
 	handleFunc("stats", stats)
 
@@ -97,19 +97,19 @@ func main() {
 	handleFunc("login", login)
 	handleFunc("login1", login1)
 
-	handleFunc("corpora", submit)
-	handleFunc("submit", submit2)
+	handleFunc("corpora", corpora)
+	handleFunc("submitcorpus", submitCorpus)
 	handleFunc("share", share)
 	handleFunc("share2", share2)
 	handleFunc("rename", rename)
 	handleFunc("rename2", rename2)
 	handleFunc("delete", remove)
-	handleFunc("delete2", remove2)
+
+	handleFunc("info.html", static_info_html)
 
 	handleStatic("busy.gif", static_busy_gif)
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)
-	handleFunc("info.html", static_info_html)
 	handleStatic("jquery.js", static_jquery_js)
 	handleStatic("paqu.css", static_paqu_css)
 	handleStatic("paqu.png", static_paqu_png)

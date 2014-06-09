@@ -29,6 +29,7 @@ type Context struct {
 	form       *multipart.Form
 }
 
+// Wrap handler in minimale context, net genoeg voor afhandelen statische pagina's
 func handleStatic(url string, handler func(*Context)) {
 	url = path.Join("/", url)
 	http.HandleFunc(
@@ -46,6 +47,7 @@ func handleStatic(url string, handler func(*Context)) {
 		})
 }
 
+// Wrap handler in complete context
 func handleFunc(url string, handler func(*Context)) {
 	url = path.Join("/", url)
 	http.HandleFunc(
@@ -141,7 +143,7 @@ func handleFunc(url string, handler func(*Context)) {
 					return
 				}
 				if group == "C" {
-					q.opt_db = append(q.opt_db, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen", id, desc, coded(owner), iformat(zinnen)))
+					q.opt_db = append(q.opt_db, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
 				} else {
 					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
 				}
@@ -188,7 +190,8 @@ func handleFunc(url string, handler func(*Context)) {
 		})
 }
 
-func coded(s string) string {
+// Laat niet meer dan een deel van een e-mailadres zien
+func displayEmail(s string) string {
 	p1 := strings.Index(s, "@")
 	p2 := strings.LastIndex(s, ".")
 	if p1 < 0 || p2 < 0 {

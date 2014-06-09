@@ -9,27 +9,6 @@ import (
 	"time"
 )
 
-func myCorpus(q *Context, id string) (bool, string) {
-	rows, err := q.db.Query(fmt.Sprintf(
-		"SELECT `description` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
-		Cfg.Prefix, id, q.user))
-	if err != nil {
-		logerr(err)
-		return false, ""
-	}
-	var desc string
-	if rows.Next() {
-		err := rows.Scan(&desc)
-		if err == nil {
-			rows.Close()
-			return true, desc
-		} else {
-			logerr(err)
-		}
-	}
-	return false, ""
-}
-
 func remove(q *Context) {
 
 	if !q.auth {
@@ -39,44 +18,29 @@ func remove(q *Context) {
 
 	id := first(q.r, "id")
 
-	my, desc := myCorpus(q, id)
-	if !my {
-		http.Error(q.w, "Dat is niet je corpus", http.StatusUnauthorized)
+	rows, err := q.db.Query(fmt.Sprintf(
+		"SELECT `description` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
+		Cfg.Prefix, id, q.user))
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
 		return
 	}
 
-	writeHead(q, "Verwijder corpus", 0)
-	fmt.Fprintf(q.w, `
-<h1>Verwijder corpus</h1>
-Corpus: <b>%s</b>
-<p>
-Weet je zeker dat je dit corpus wilt verwijderen?
-<p>
-<form action="delete2">
-<input type="hidden" name="id" value="%v">
-<button type="submit">Verwijder corpus</button>
-</form>
-<div class="next">
-<a href="corpora">Terug</a>
-</div>
-</body>
-</html>
-`,
-		html.EscapeString(desc),
-		id)
-
-}
-
-func remove2(q *Context) {
-
-	if !q.auth {
-		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
-		return
+	my := false
+	var desc string
+	if rows.Next() {
+		err := rows.Scan(&desc)
+		if err == nil {
+			rows.Close()
+			my = true
+		} else {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
 	}
 
-	id := first(q.r, "id")
-
-	my, desc := myCorpus(q, id)
 	if !my {
 		http.Error(q.w, "Dat is niet je corpus", http.StatusUnauthorized)
 		return
@@ -105,7 +69,7 @@ func remove2(q *Context) {
 		}
 	}()
 
-	_, err := q.db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch` , `%s_c_%s_word`",
+	_, err = q.db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch` , `%s_c_%s_word`",
 		Cfg.Prefix, id,
 		Cfg.Prefix, id,
 		Cfg.Prefix, id,

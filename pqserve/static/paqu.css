@@ -21,7 +21,7 @@ body {
 #topmenu a,
 #login form {
     display: inline-block;
-    height: 1.3em;
+    // height: 1.3em;
     padding: .5em 1em;
     border: 1px solid black;
     border-bottom: 2px solid black;
@@ -33,7 +33,6 @@ body {
 #topmenu a.selected,
 #topmenu a:hover {
     background-color: #e0e0e0;
-    //color: #FFFFFF;
     text-decoration: none;
 }
 

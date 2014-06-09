@@ -31,7 +31,8 @@ var (
 	}
 )
 
-func submit(q *Context) {
+// TAB: Corpora
+func corpora(q *Context) {
 
 	if !q.auth {
 		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
@@ -115,7 +116,7 @@ corpora = [`)
 		fmt.Fprint(q.w, `];
 function rm(idx) {
     if (window.confirm("Verwijderen: " + corpora[idx].title)) {
-	window.location.assign("delete2?id=" + corpora[idx].id);
+	window.location.assign("delete?id=" + corpora[idx].id);
         return false;
     }
     return false;
@@ -191,7 +192,7 @@ function rm(idx) {
 		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n<p>\n", q.quotum-gebruikt)
 	}
 	fmt.Fprint(q.w, `
-    <form action="submit" method="post" enctype="multipart/form-data">
+    <form action="submitcorpus" method="post" enctype="multipart/form-data">
         De tekst die je uploadt moet platte tekst zijn, zonder opmaak (geen Word of zo), gecodeerd in utf-8.
         <p>
     Titel:<br>
@@ -214,7 +215,7 @@ function rm(idx) {
 
 }
 
-func submit2(q *Context) {
+func submitCorpus(q *Context) {
 
 	if !q.auth {
 		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)

@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Voorbereiding voor access-functies, aangeroepen vanuit main()
 func accessSetup() {
 
 	for i, view := range Cfg.View {
@@ -48,6 +49,7 @@ func accessSetup() {
 	}
 }
 
+// Toegang op basis van ip-adress: algemene toegang tot de site
 func accessView(addr string) bool {
 	if len(Cfg.View) == 0 {
 		return true
@@ -85,6 +87,7 @@ func accessView(addr string) bool {
 	return true
 }
 
+// Toegang op basis van e-mailadress: wie mag inloggen
 func accessLogin(mail string) bool {
 	if len(Cfg.Access) == 0 {
 		return true
