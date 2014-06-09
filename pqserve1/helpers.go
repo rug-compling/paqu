@@ -63,7 +63,7 @@ func escape(is_html bool, s string) string {
 }
 
 func connect() (*sql.DB, error) {
-	return sql.Open("mysql", login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	return sql.Open("mysql", login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }
 
 func first(r *http.Request, opt string) string {

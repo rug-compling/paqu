@@ -36,7 +36,7 @@ func main() {
 	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
-	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
 
 	user := os.Args[1]

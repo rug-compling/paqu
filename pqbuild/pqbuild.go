@@ -1103,7 +1103,7 @@ func value(i int) string {
 }
 
 func connect() *sql.DB {
-	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
 	return db
 }

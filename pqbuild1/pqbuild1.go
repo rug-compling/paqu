@@ -1031,7 +1031,7 @@ func connect() *sql.DB {
 	data, err := ioutil.ReadFile(login)
 	util.CheckErr(err)
 	s := strings.TrimSpace(string(data))
-	db, err := sql.Open("mysql", s+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	db, err := sql.Open("mysql", s+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
 	return db
 }

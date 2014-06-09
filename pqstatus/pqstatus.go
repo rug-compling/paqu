@@ -205,5 +205,5 @@ func iformat(i int) string {
 }
 
 func dbopen() (*sql.DB, error) {
-	return sql.Open("mysql", Cfg.Login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	return sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }

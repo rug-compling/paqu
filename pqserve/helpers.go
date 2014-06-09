@@ -151,7 +151,7 @@ func minversion(major, minor, patch int) bool {
 }
 
 func dbopen() (*sql.DB, error) {
-	return sql.Open("mysql", Cfg.Login+"?charset=utf8mb4,utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	return sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }
 
 func urlJoin(elem ...string) string {
