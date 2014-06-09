@@ -18,6 +18,8 @@ func remove(q *Context) {
 
 	id := first(q.r, "id")
 
+	// Kan myprefixes niet gebruiken omdat daar alleen corpora in staan die al klaar zijn
+
 	rows, err := q.db.Query(fmt.Sprintf(
 		"SELECT `description` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
 		Cfg.Prefix, id, q.user))

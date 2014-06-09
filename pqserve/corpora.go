@@ -121,6 +121,23 @@ function rm(idx) {
     }
     return false;
 }
+
+function trim(stringToTrim) {
+  return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+
+function formtest() {
+  var f = document.newcorpus;
+  if (trim(f.title.value) == '') {
+    alert('Titel ontbreekt');
+    return false;
+  }
+  if (trim(f.data.value) == '') {
+    alert('Geen document gekozen');
+    return false;
+  }
+  return true;
+}
 //--></script>
 <table class="corpora">
 <tr><th><th><th>Status
@@ -192,7 +209,7 @@ function rm(idx) {
 		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n<p>\n", q.quotum-gebruikt)
 	}
 	fmt.Fprint(q.w, `
-    <form action="submitcorpus" method="post" enctype="multipart/form-data">
+    <form name="newcorpus" action="submitcorpus" method="post" enctype="multipart/form-data" onsubmit="javascript:return formtest()">
         De tekst die je uploadt moet platte tekst zijn, zonder opmaak (geen Word of zo), gecodeerd in utf-8.
         <p>
     Titel:<br>
