@@ -63,7 +63,7 @@ func main() {
 			"/bin/bash",
 			"-c",
 			"$ALPINO_HOME/bin/Alpino -fast -flag treebank "+*opt_d+
-				" end_hook=xml user_max=900000 -parse < "+filename)
+				" debug=1 end_hook=xml user_max=900000 -parse < "+filename)
 		cmd.Env = []string{
 			"ALPINO_HOME=" + *opt_a,
 			"PATH=" + os.Getenv("PATH"),

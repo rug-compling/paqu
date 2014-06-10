@@ -103,6 +103,7 @@ func main() {
 	handleFunc("share2", share2)
 	handleFunc("rename", rename)
 	handleFunc("rename2", rename2)
+	handleFunc("download", download)
 	handleFunc("delete", remove)
 
 	handleFunc("info.html", static_info_html)

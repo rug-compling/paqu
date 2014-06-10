@@ -162,16 +162,26 @@ function formtest() {
 			fmt.Fprintf(q.w, "<tr class=\"%s%s\">\n", o, e)
 
 			fmt.Fprint(q.w, "<td class=\"more\">")
-			if corpus.status == "gereed" {
+			if corpus.status == "gereed" || corpus.status == "fout" {
 				id := urlencode(corpus.id)
 				fmt.Fprintf(q.w, `<a href="javascript:void(0)" onclick="javascript:menu(%d)" class="opties a%d" title="opties">&#10020;</a>
 <div class="submenu a%d" style="display: none;">
 <ul class="optielijst">
+`, i, i, i)
+				if corpus.status == "gereed" {
+					fmt.Fprintf(q.w, `
 <li><a href="rename?id=%s">hernoemen</a>
 <li><a href="share?id=%s">delen</a>
+<li><a href="download?dl=zinnen&id=%s">download zinnen</a>
+<li><a href="download?dl=xml&id=%s">download xml</a>
+`, id, id, id, id)
+				}
+				fmt.Fprintf(q.w, `
+<li><a href="download?dl=stdout&id=%s">download stdout</a>
+<li><a href="download?dl=stderr&id=%s">download stderr</a>
 </ul>
 </div>
-`, i, i, i, id, id)
+`, id, id)
 			} else {
 				fmt.Fprintln(q.w)
 			}

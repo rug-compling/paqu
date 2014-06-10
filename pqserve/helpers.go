@@ -39,7 +39,7 @@ func doErr(q *Context, err error) bool {
 }
 
 func writeHead(q *Context, title string, tab int) {
-	q.w.Header().Set("Content-type", "text/html; charset=utf-8")
+	q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	q.w.Header().Set("Cache-Control", "no-cache")
 	q.w.Header().Add("Pragma", "no-cache")
 	if title == "" {

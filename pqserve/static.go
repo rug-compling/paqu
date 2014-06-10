@@ -6,7 +6,7 @@ import (
 )
 
 func contentType(q *Context, ct string) {
-	q.w.Header().Set("Content-type", ct)
+	q.w.Header().Set("Content-Type", ct)
 }
 func cache(q *Context) {
 	q.w.Header().Set("Cache-Control", "public, max-age=86400")
