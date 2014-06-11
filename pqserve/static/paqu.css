@@ -48,11 +48,17 @@ a {
 a:hover {
     text-decoration: underline;
 }
-#stats {
+#stats, #statsrel {
    background:#e0e0e0;
    padding: 10px;
    font-size: small;
 }
+
+#statresults td {
+    padding: 0px .5em;
+}
+
+
 td.right {
   text-align: right;
 }

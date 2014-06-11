@@ -44,37 +44,36 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
 
   - Quota
     - Corpora
-      - voor elke gebruiker of per gebruiker
+      - ✔ default voor elke gebruiker in setup, door admin aan te passen
+        per gebruiker
       - ✔ max aantal tokens (woorden)
-      - maximum lengte in tokens per zin, of:
-      - maximale verwerktijd van een zin (alleen bij gebruik lokale parser?)
+      - maximale verwerktijd van een zin (alleen bij gebruik lokale
+        parser): in setup
     - Geheugen
       - globaal instellen dmv `ulimit -v`
     - Processortijd
-      - Max aantal corpora dat tegelijk verwerkt wordt, met de aanname
+      - ✔  Max aantal corpora dat tegelijk verwerkt wordt, met de aanname
         dat hierbij een processor voor 100% gebruikt wordt.
-        - Wanneer corpus geparst wordt door een alpino-server, dan gebruikt
-          dit misschien maar een paar procent van een processor
-          (afhankelijk van snelheid van server). Je zou dan al de
-          tweede fase (verwerking voor MySQL) parallel kunnen starten. En
-          dan kom je misschien nog niet aan de 100% van een processor.
-      - Scheduler: als er meerdere corpora van een enkele gerbuiker in de
-        wachtrij staan de verwerking afwisselen met verwerking corpora van
-        andere gebruikers.
+      - Wanneer corpus geparst wordt door een alpino-server: verdere
+        verwerking in parallel met verwerking door de alpinoserver
+      - Pas als blijkt dat dit nodig is: Scheduler: als er meerdere
+        corpora van een enkele gerbuiker in de wachtrij staan de
+        verwerking afwisselen met verwerking corpora van andere
+        gebruikers.
   - Toegang
-    - ✔ leesrechten: deny/allow op basis van ip-adressen (IPv6?)
-    - ✔ inlogrechten: deny/allow op basis regexp mail-adressen
-    - downloadrechten, alleen wie is ingelogd
-      - eigen corpora
-      - corpora die door anderen gedeeld zijn en vrijgegeven voor downloaden
+    - ✔ leesrechten: deny/allow op basis van ip-adressen
+      - IPv6?
+    - ✔ inlogrechten: deny/allow op basis van regexp mail-adressen
+    - ✔ downloadrechten, alleen wie is ingelogd, alleen eigen corpora
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
   - Middelen voor beheerder
     - Statistiek
       - pqstatus
       - handler voor interne status (NumGoroutine, MemStat)
-	  - package `expvar`
-    - Gebruiker verwijderen
+      - package `expvar`
+    - ✔ Gebruiker verwijderen
+    - Quotum voor specifieke gebruiker veranderen
     - E-mail aan beheerder bij problemen
   - Adminhandleiding
     - installatie
@@ -85,33 +84,43 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
   - Interface
     - Algemene opmaak
     - Beheer van corpora
-      - uploaden: tekst in zip, dact
-      - downloaden: xml in zip, dact, compact...
-      - browse: zinnen, stdout, stderr
+      - uploaden:
+        - meerdere tekstdocumenten in een zipbestand
+        - dact
+        - regels die al een label hebben
+      - downloaden:
+        - ✔ xml in zip
+        - dact
+      - ✔ browse: zinnen, stdout, stderr
       - ✔ modernere interface: verwijderen, opties
-	  - modernere interface voor afhandeling van opties
+      - modernere interface voor afhandeling van opties
     - Keuze van corpus
-      - ✘ Menu met submenu's: algemeen; eigen corpora; anderen -> gedeelde corpora
+      - Lijst van beschikbare (gedeelde) corpora die
+        toegevoegd/verwijderd kunnen worden in menu
   - Code
     - Organisatie + documentatie
-	- Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
+    - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
   - Dependencies
-	- externe go-pakketten opnemen onder directory `_vendor`
+    - externe go-pakketten opnemen onder directory `_vendor`
+  - Voor later
+    - Misschien: subboompjes met statistiek en zoeklink, vergt meer info in database
+  - pqserve1 en pqbuild1 verplaatsen? naar ander repository?
   - Licentie
+
 
 ### Diversen ###
 
 alles:
 
   - alle tekst in het Nederlands
-  - logo weghalen, vervangen door kopregel op elke pagina
+  - logo + balk wijzigen (pqserve, pqserve1)
   - zie TODO in diverse bestanden
 
 `pqserve`:
 
   - is het beter de optie "delen met iedereen" uit te schakelen?
-  - delen beperken: alleen corpora met een minimu grootte?
-  - foutafhandeling als gebruiker submit doet zonder bestand gekozen te hebben
+  - delen beperken: alleen corpora met een minimum grootte?
+  - foutafhandeling als gebruiker een leeg bestand uploadt
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
     stderr gebruiken als melding aan de gebruiker
 

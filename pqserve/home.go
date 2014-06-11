@@ -62,7 +62,7 @@ func home(q *Context) {
 	// DEBUG: HTML-uitvoer van de query
 	fmt.Fprint(q.w, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
 
-	fmt.Fprint(q.w, "<div id=\"busy\"><img src=\"busy.gif\"></div>\n")
+	fmt.Fprint(q.w, "<div id=\"busy\"><img src=\"busy.gif\" alt=\"aan het werk...\"></div>\n")
 
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
@@ -277,10 +277,10 @@ func home(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr><small>tijd:", time.Now().Sub(now), "</small><hr>")
 
-	// Link naar statistieken
+	// Links naar statistieken
 	fmt.Fprintf(q.w, `<p>
 		<div id="stats">
-		<button onclick="javascript:$.fn.stats('/stats?word=%s&amp;postag=%s&amp;rel=%s&amp;hpostag=%s&amp;hword=%s&amp;db=%s')">statistiek</button>
+		<button onclick="javascript:$.fn.stats('stats?word=%s&amp;postag=%s&amp;rel=%s&amp;hpostag=%s&amp;hword=%s&amp;db=%s')">statistiek &mdash; algemeen</button>
 		</div>
 `,
 		urlencode(first(q.r, "word")),
@@ -289,6 +289,45 @@ func home(q *Context) {
 		urlencode(first(q.r, "hpostag")),
 		urlencode(first(q.r, "hword")),
 		urlencode(prefix))
+
+	fmt.Fprintf(q.w, `<p>
+		<div id="statsrel">
+		<form action="javascript:$.fn.statsrel()" name="statsrelform" onsubmit="javascript:return statftest()">
+		<input type="hidden" name="word" value="%s">
+		<input type="hidden" name="postag" value="%s">
+		<input type="hidden" name="rel" value="%s">
+		<input type="hidden" name="hpostag" value="%s">
+		<input type="hidden" name="hword" value="%s">
+		<input type="hidden" name="db" value="%s">
+		Selecteer twee of meer elementen om ze te koppelen:
+		<p>
+		<table>
+		<tr>
+		  <td style="background-color: yellow"><input type="checkbox" name="cword" value="1">woord
+		  <td>
+		  <td style="background-color: lightgreen"><input type="checkbox" name="chword" value="1">hoofdwoord
+		<tr>
+		  <td><input type="checkbox" name="clemma" value="1">lemma
+		  <td><input type="checkbox" name="crel" value="1">relatie
+		  <td><input type="checkbox" name="chlemma" value="1">lemma
+		<tr>
+		  <td><input type="checkbox" name="cpostag" value="1">postag
+		  <td>
+		  <td><input type="checkbox" name="chpostag" value="1">postag
+		</table>
+		<p>
+		<input type="submit" value="statistiek &mdash; gerelateerd">
+		</form>
+		<div id="statresults">
+		</div>
+		</div>
+`,
+		html.EscapeString(first(q.r, "word")),
+		html.EscapeString(first(q.r, "postag")),
+		html.EscapeString(first(q.r, "rel")),
+		html.EscapeString(first(q.r, "hpostag")),
+		html.EscapeString(first(q.r, "hword")),
+		html.EscapeString(prefix))
 
 	html_footer(q)
 
@@ -326,19 +365,43 @@ func html_header(q *Context) {
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
   $.fn.stats = function(url) {
-    $("#stats").html('<img src="busy.gif">');
+    $("#stats").html('<img src="busy.gif" alt="aan het werk...">');
     $.get(url, function(data) {
       $("#stats").html(data);
     }).fail(function(e) {
       $("#stats").html(e.responseText);
     });
   }
-  formclear = function(f) {
+  $.fn.statsrel = function() {
+    $("#statresults").html('<img src="busy.gif">');
+    $.get("statsrel?" + $(document.statsrelform).serialize(), function(data) {
+      $("#statresults").html(data);
+    }).fail(function(e) {
+      $("#statresults").html(e.responseText);
+    });
+  }
+  function formclear(f) {
     f.word.value = "";
     f.postag.value = "";
     f.rel.value = "";
     f.hpostag.value = "";
     f.hword.value = "";
+  }
+  function statftest() {
+    var f = document.statsrelform;
+    var n = 0;
+    if (f.cword.checked   ) { n++; }
+    if (f.clemma.checked  ) { n++; }
+    if (f.cpostag.checked ) { n++; }
+    if (f.crel.checked    ) { n++; }
+    if (f.chword.checked  ) { n++; }
+    if (f.chlemma.checked ) { n++; }
+    if (f.chpostag.checked) { n++; }
+    if (n < 2) {
+      alert("Selecteer minimaal twee elementen");
+      return false;
+    }
+    return true;
   }
   //--></script>
 `)
@@ -392,46 +455,49 @@ func html_form(q *Context) (has_query bool) {
   <td colspan="3" style="padding-bottom:1em">corpus: <select name="db">
 `)
 	html_opts(q, q.opt_db, getprefix(q), "corpus")
+	fmt.Fprintln(q.w, "</select>")
+	if q.auth {
+		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
+	}
 	fmt.Fprintf(q.w, `
-</select>
 	   <tr>
-	     <td style="background-color: yellow">woord
-	     <td>
-	     <td style="background-color: lightgreen">hoofdwoord
+		 <td style="background-color: yellow">woord
+		 <td>
+		 <td style="background-color: lightgreen">hoofdwoord
 	   <tr>
-	     <td><input type="text" name="word" size="20" value="%s">
+		 <td><input type="text" name="word" size="20" value="%s">
 	   `, html.EscapeString(first(q.r, "word")))
 	fmt.Fprint(q.w, `
-	     <td>
-	       <select name="rel">
+		 <td>
+		   <select name="rel">
 	   `)
 	html_opts(q, opt_rel, first(q.r, "rel"), "relatie")
 	fmt.Fprintf(q.w, `
-	       </select>
-	     <td><input type="text" name="hword" size="20" value="%s">
+		   </select>
+		 <td><input type="text" name="hword" size="20" value="%s">
 	   `, html.EscapeString(first(q.r, "hword")))
 	fmt.Fprint(q.w, `
 	   <tr>
-	     <td>
-	       <select name="postag" style="width: 100%">
+		 <td>
+		   <select name="postag" style="width: 100%">
 	   `)
 	html_opts(q, opt_postag, first(q.r, "postag"), "postag")
 	fmt.Fprintf(q.w, `
-	       </select>
-	     <td>
-	     <td>
-	       <select name="hpostag" style="width:100%%" >
+		   </select>
+		 <td>
+		 <td>
+		   <select name="hpostag" style="width:100%%" >
 	   `)
 	html_opts(q, opt_hpostag, first(q.r, "hpostag"), "postag")
 	fmt.Fprint(q.w, `
-	       </select>
+		   </select>
 	   <tr>
-	     <td style="padding-top:1em">
-	       <input type="button" value="help" onClick="javascript:window.open('info.html')">
-	     <td colspan="2" class="right" style="padding-top:1em">
-	       <input type="submit" value="Zoeken">
-	       <input type="button" value="Wissen" onClick="javascript:formclear(form)">
-	       <input type="reset" value="Reset">
+		 <td style="padding-top:1em">
+		   <input type="button" value="help" onClick="javascript:window.open('info.html')">
+		 <td colspan="2" class="right" style="padding-top:1em">
+		   <input type="submit" value="Zoeken">
+		   <input type="button" value="Wissen" onClick="javascript:formclear(form)">
+		   <input type="reset" value="Reset">
 	   </table>
 	   </form>
 	   `)

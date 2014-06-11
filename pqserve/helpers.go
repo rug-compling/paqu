@@ -65,7 +65,7 @@ func writeHead(q *Context, title string, tab int) {
 
 	var t [4]string
 	t[tab] = " class=\"selected\""
-	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\"" + t[1] + ">Begin</a>")
+	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\"" + t[1] + ">Zoeken</a>")
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpora\"" + t[2] + ">Corpora</a>")
 	}

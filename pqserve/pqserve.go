@@ -92,6 +92,7 @@ func main() {
 	handleFunc("", home)
 	handleFunc("tree", tree)
 	handleFunc("stats", stats)
+	handleFunc("statsrel", statsrel)
 
 	handleFunc("logout", logout)
 	handleFunc("login", login)
