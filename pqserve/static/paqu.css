@@ -40,8 +40,6 @@ body {
     margin: 0px;
 }
 
-
-
 a {
     text-decoration: none;
 }
@@ -57,7 +55,6 @@ a:hover {
 #statresults td {
     padding: 0px .5em;
 }
-
 
 td.right {
   text-align: right;
@@ -95,22 +92,6 @@ li.li1 {
 
 li.li2 {
     margin-top: .3em;
-}
-
-div.home {
-    font-size: small;
-    border-bottom: 1px solid grey;
-    padding-bottom: .5em;
-    margin-bottom: 1.5em;
-    width: 36em;
-}
-
-div.next {
-    font-size: small;
-    border-top: 1px solid grey;
-    padding-top: .5em;
-    margin-top: 1.5em;
-    width: 36em;
 }
 
 div.foot {

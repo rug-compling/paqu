@@ -175,7 +175,7 @@ function formtest() {
 <li><a href="share?id=%s">delen</a>
 <li><a href="download?dl=zinnen&id=%s">download zinnen</a>
 <li><a href="download?dl=xml&id=%s">download xml</a>
-`, id, id, id, id)
+`, id, id, id, id, id)
 				}
 				fmt.Fprintf(q.w, `
 <li><a href="download?dl=stdout&id=%s">download stdout</a>
