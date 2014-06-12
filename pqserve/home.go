@@ -318,6 +318,7 @@ func home(q *Context) {
 		<p>
 		<input type="submit" value="statistiek &mdash; gerelateerd">
 		</form>
+		<p>
 		<div id="statresults">
 		</div>
 		</div>

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html"
 	"net/http"
@@ -125,14 +126,7 @@ func share2(q *Context) {
 		return
 	}
 
-	_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `shared` = %q WHERE `id` = %q", Cfg.Prefix, sh, id))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
-		return
-	}
-
-	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
+	_, err := q.db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -154,9 +148,9 @@ func share2(q *Context) {
 	if sh == "SHARED" {
 		e = 1
 	}
-	userlist := make([]string, 0)
 	fouten := make([]string, 0)
 	seen := make(map[string]bool)
+	count := 0
 	for _, user := range strings.Fields(strings.Replace(firstf(q.form, "mail"), ",", " ", -1)) {
 		user = strings.ToLower(user)
 		if user == "all" || user == q.user {
@@ -165,6 +159,7 @@ func share2(q *Context) {
 		if seen[user] {
 			continue
 		}
+		count++
 		seen[user] = true
 		rows, err := q.db.Query(fmt.Sprintf("SELECT `mail` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 		if err != nil {
@@ -174,21 +169,26 @@ func share2(q *Context) {
 		}
 		if rows.Next() {
 			rows.Close()
-			_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_corpora` (`user`, `prefix`, `enabled`) VALUES (%q, %q, %d)", Cfg.Prefix, user, id, e))
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			userlist = append(userlist, user)
 		} else {
 			fouten = append(fouten, user)
 		}
+		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_corpora` (`user`, `prefix`, `enabled`) VALUES (%q, %q, %d)", Cfg.Prefix, user, id, e))
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
 	}
 
-	fout := ""
-	if len(fouten) > 0 {
-		fout = "\n<p>\nOnbekende gebruiker(s): " + html.EscapeString(strings.Join(fouten, " "))
+	if sh == "SHARED" && count == 0 {
+		sh = "PRIVATE"
+	}
+
+	_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `shared` = %q WHERE `id` = %q", Cfg.Prefix, sh, id))
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
+		return
 	}
 
 	var wie string
@@ -196,13 +196,33 @@ func share2(q *Context) {
 	case "PRIVATE":
 		wie = "niemand"
 	case "SHARED":
-		wie = "deze mensen: " + strings.Join(userlist, " ")
+		s := "personen"
+		if count == 1 {
+			s = "persoon"
+		}
+		wie = fmt.Sprintf("%d %s", count, s)
 	case "PUBLIC":
 		wie = "iedereen"
+	}
+
+	var buf bytes.Buffer
+
+	fmt.Fprintf(&buf, "Corpus <b>%s</b> gedeeld met %s", html.EscapeString(q.desc[id]), html.EscapeString(wie))
+
+	if len(fouten) > 0 {
+		s := "Onbekende personen"
+		if len(fouten) == 1 {
+			s = "Onbekend persoon"
+		}
+		fmt.Fprintf(&buf, "<div class=\"warning\">\n%s:\n<ul>\n", s)
+		for _, f := range fouten {
+			fmt.Fprintf(&buf, "<li>%s\n", html.EscapeString(f))
+		}
+		fmt.Fprint(&buf, "</ul>\n</div>\n")
 	}
 
 	writeHtml(
 		q,
 		"Corpus gedeeld",
-		fmt.Sprintf("Corpus <b>%s</b> gedeeld met %s%s", html.EscapeString(q.desc[id]), html.EscapeString(wie), fout))
+		buf.String())
 }
