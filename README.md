@@ -12,29 +12,16 @@ In ontwikkeling, maar al bruikbaar via http://zardoz.service.rug.nl:8067/
 
 ## Overzicht ##
 
-Een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen
-laten analyseren, en vervolgens onderzoeken op woordrelaties.
+PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten
+kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.
 
-### PaQu ###
-
-Dit is een server voor meerdere gebruikers. Iedereen kan er de publieke
-corpora ondervragen, maar na het aanmaken van een account kan een
-gebruiker ook zelf documenten uploaden en laten verwerken tot een nieuw
-corpus. Vervolgens kan de gebruiker dat nieuwe corpus alleen zelf
-raadplegen, of delen met andere gebruikers die het dan ook kunnen
-raadplegen.
+Iedereen kan er de publieke corpora ondervragen, maar na het aanmaken
+van een account kan een gebruiker ook zelf documenten uploaden en laten
+verwerken tot een nieuw corpus. Vervolgens kan de gebruiker dat nieuwe
+corpus alleen zelf raadplegen, of delen met andere gebruikers die het
+dan ook kunnen raadplegen.
 
 Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
-
-### PaQu1 ###
-
-PaQu1 is PaQu voor een enkele gebruiker. Er zijn geen accounts. De
-gebruiker moet zelf een account hebben op MySQL, en moet zelf corpora
-laten parsen door Alpino. Met `pqbuild1` wordt een corpus verwerkt en
-klaargezet. Vervolgens kan met `pqserve1` een server gestart worden om
-de corpora te raadplegen.
-
-Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
 
 ----------------------------------------------------------------
 
@@ -104,7 +91,6 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
     - externe go-pakketten opnemen onder directory `_vendor`
   - Voor later
     - Misschien: subboompjes met statistiek en zoeklink, vergt meer info in database
-  - pqserve1 en pqbuild1 verplaatsen? naar ander repository?
   - Licentie
 
 
@@ -113,13 +99,11 @@ Het database-formaat in MySQL van PaQu1 is niet compatibel met dat van PaQu.
 alles:
 
   - alle tekst in het Nederlands
-  - logo + balk wijzigen (pqserve, pqserve1)
   - zie TODO in diverse bestanden
 
 `pqserve`:
 
-  - is het beter de optie "delen met iedereen" uit te schakelen?
-  - delen beperken: alleen corpora met een minimum grootte?
+  - logo + balk wijzigen
   - foutafhandeling als gebruiker een leeg bestand uploadt
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
     stderr gebruiken als melding aan de gebruiker
