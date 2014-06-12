@@ -44,6 +44,8 @@ type Config struct {
 
 	Querytimeout int // in secondes
 
+	Directories []string
+
 	View   []ViewType
 	Access []AccessType
 }

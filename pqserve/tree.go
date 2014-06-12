@@ -44,6 +44,7 @@ import (
 	"html"
 	"io/ioutil"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -305,7 +306,34 @@ func tree(q *Context) {
 	}
 	// EIND: svg nabewerken en printen
 
-	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"/tree?%s&amp;dot=1\">dot</a>\n", q.r.URL.RawQuery)
+	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"/tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
+
+	dirnames := make([]string, len(Cfg.Directories)+1)
+	copy(dirnames, Cfg.Directories)
+	dirnames[len(Cfg.Directories)] = path.Join(paqudir, "data", prefix, "xml")
+	for i, d := range dirnames {
+		if !strings.HasSuffix(d, "/") {
+			dirnames[i] = d + "/"
+		}
+	}
+
+	if archive != "" {
+		for _, p := range dirnames {
+			if strings.HasPrefix(archive, p) {
+				archive = archive[len(p):]
+				break
+			}
+		}
+		fmt.Fprintf(q.w, "archief: %s<br>bestand: %s\n", html.EscapeString(archive), html.EscapeString(filename))
+	} else {
+		for _, p := range dirnames {
+			if strings.HasPrefix(filename, p) {
+				filename = filename[len(p):]
+				break
+			}
+		}
+		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(filename))
+	}
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")
 

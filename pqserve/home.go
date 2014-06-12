@@ -228,7 +228,7 @@ func home(q *Context) {
 		for m := range mark {
 			ms = append(ms, m)
 		}
-		fmt.Fprintf(q.w, "\n(<a href=\"/tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%s&amp;gr=%s&amp;ms=%s\">boom</a>)\n<ul>\n",
+		fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%s&amp;gr=%s&amp;ms=%s\">&nbsp;&#9741;&nbsp;</a>\n<ul>\n",
 			prefix,
 			zin.arch,
 			zin.file,

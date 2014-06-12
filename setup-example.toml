@@ -28,6 +28,11 @@ remote = true
 
 querytimeout = 120
 
+directories = [
+  "/net/corpora/LassySmall/Treebank",
+  "/net/corpora/LassyLarge/NLWIKI20110804/DACT"
+]
+
 [[view]]
 allow = true
 addr  = [ "127.0.0.1/8", "123.123.123.123" ]
