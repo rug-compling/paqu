@@ -170,6 +170,7 @@ function formtest() {
 `, i, i, i)
 				if corpus.status == "gereed" {
 					fmt.Fprintf(q.w, `
+<li><a href=".?db=%s">doorzoeken</a>
 <li><a href="rename?id=%s">hernoemen</a>
 <li><a href="share?id=%s">delen</a>
 <li><a href="download?dl=zinnen&id=%s">download zinnen</a>
