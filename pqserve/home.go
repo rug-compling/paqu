@@ -567,10 +567,24 @@ func html_opts(q *Context, opts []string, value, title string) {
 }
 
 func getprefix(q *Context) string {
+	var db string
 	if p := first(q.r, "db"); p != "" {
-		return p
+		if p == "_default" {
+			db = Cfg.Default
+		} else {
+			db = p
+		}
+	} else if prev, err := q.r.Cookie("paqu-prev"); err == nil {
+		if p := prev.Value; q.prefixes[p] {
+			db = p
+		}
 	}
-	return Cfg.Default
+	if db == "" {
+		db = Cfg.Default
+	}
+	exp := time.Now().AddDate(0, 0, 14)
+	http.SetCookie(q.w, &http.Cookie{Name: "paqu-prev", Value: db, Path: cookiepath, Expires: exp})
+	return db
 }
 
 func busyClear(q *Context) {
