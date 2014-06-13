@@ -36,7 +36,7 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
       - ✔ max aantal tokens (woorden)
       - ✔ maximale verwerktijd van een zin (alleen bij gebruik lokale
         parser): in setup
-    - Geheugen
+    - ✔ Geheugen
       - ✔ globaal instellen dmv `ulimit -v`
     - Processortijd
       - ✔  Max aantal corpora dat tegelijk verwerkt wordt, met de aanname

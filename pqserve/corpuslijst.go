@@ -89,18 +89,18 @@ function opslaan() {
     $("#submit").attr("disabled", "disabled");
     var lines = "";
     for (i in data) {
-	if (!data[i].show) {
-	    lines += data[i].id + "\n";
-	}
+        if (!data[i].show) {
+            lines += data[i].id + "\n";
+        }
     }
     var jqxhr = $.post(
-	"corsave",
-	lines,
-	function(result) {
- 	    $("#msg").html(result);
-	}).fail(function(jqXHR, textStatus, errorThrown) {
-	    $("#msg").html(errorThrown);
-	});
+    "corsave",
+    lines,
+    function(result) {
+        $("#msg").html(result);
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        $("#msg").html(errorThrown);
+    });
 
 }
 
@@ -112,92 +112,105 @@ function toggle(idx) {
 
 function redraw () {
     var lines = "";
-    $.each( data, function( index, value ){
-	var c = "";
-	var eo = "odd";
-	if (index % 2 == 0) {
-	    eo = "even";
-	}
-	if (index == 0) {
-	    eo += " first";
-	}
-	if (index == data.length - 1) {
-	    eo += " last";
-	}
-	if (value.show) {
-	    c = " checked=\"checked\"";
-	}
-	lines += "<tr class=\"" + eo + "\"><td><input type=\"checkbox\"" + c + " onchange=\"toggle(" + index + ")\"><td class=\"odd first\">" + value.title + "<td class=\" even right\">" + value.liness + "<td class=\"odd\">" + value.owner + "\n";
+    $.each(data, function(index, value) {
+        var c = "";
+        var eo = "odd";
+        if (index % 2 == 0) {
+            eo = "even";
+        }
+        if (index == 0) {
+            eo += " first";
+        }
+        if (index == data.length - 1) {
+            eo += " last";
+        }
+        if (value.show) {
+            c = " checked=\"checked\"";
+        }
+        lines += "<tr class=\"" + eo + "\"><td><input type=\"checkbox\"" + c + " onchange=\"toggle(" + index + ")\"><td class=\"odd first\">" + value.title + "<td class=\" even right\">" + value.liness + "<td class=\"odd\">" + value.owner + "\n";
     });
     $("#items").html(lines);
+    $("#title").html("");
+    $("#lines").html("");
+    $("#owner").html("");
+    var pijl = "&darr;";
+    if (reverse) {
+        pijl = "&uarr;";
+    }
+    if (field == "title") {
+        $("#title").html(pijl);
+    }
+    if (field == "lines") {
+        $("#lines").html(pijl);
+    }
+    if (field == "owner") {
+        $("#owner").html(pijl);
+    }
 }
 
 function doTitle() {
     if (field == "title") {
-	reverse = !reverse;
+        reverse = !reverse;
     } else {
-	field = "title";
-        reverse = false;
+        field = "title";
     }
     if (reverse) {
-        data.sort(function(a, b) {return a.lower < b.lower;} )
+        data.sort(function(a, b) {return a.lower < b.lower;});
     } else {
-        data.sort(function(a, b) {return a.lower > b.lower;} )
+        data.sort(function(a, b) {return a.lower > b.lower;});
     }
     redraw();
 }
 
-function doLine() {
-    if (field == "line") {
-	reverse = !reverse;
+function doLines() {
+    if (field == "lines") {
+        reverse = !reverse;
     } else {
-	field = "line";
-        reverse = false;
+        field = "lines";
     }
     if (reverse) {
-	data.sort(function(a, b) {
-	    if (a.lines == b.lines) {
-		return a.lower > b.lower;
-	    }
-	    return a.lines < b.lines;
-	});
+        data.sort(function(a, b) {
+            if (a.lines == b.lines) {
+                return a.lower > b.lower;
+            }
+            return a.lines < b.lines;
+        });
     } else {
-	data.sort(function(a, b) {
-	    if (a.lines == b.lines) {
-		return a.lower > b.lower;
-	    }
-	    return a.lines > b.lines;
-	});
+        data.sort(function(a, b) {
+            if (a.lines == b.lines) {
+                return a.lower > b.lower;
+            }
+            return a.lines > b.lines;
+        });
     }
     redraw();
 }
 
 function doOwner() {
     if (field == "owner") {
-	reverse = !reverse;
+        reverse = !reverse;
     } else {
-	field = "owner";
-        reverse = false;
+        field = "owner";
     }
     if (reverse) {
-	data.sort(function(a, b) {
-	    if (a.owner == b.owner) {
-		return a.lower > b.lower;
-	    }
-	    return a.owner < b.owner;
-	});
+        data.sort(function(a, b) {
+            if (a.owner == b.owner) {
+                return a.lower > b.lower;
+            }
+            return a.owner < b.owner;
+        });
     } else {
-	data.sort(function(a, b) {
-	    if (a.owner == b.owner) {
-		return a.lower > b.lower;
-	    }
-	    return a.owner > b.owner;
-	});
+        data.sort(function(a, b) {
+            if (a.owner == b.owner) {
+                return a.lower > b.lower;
+            }
+            return a.owner > b.owner;
+        });
     }
     redraw();
 }
 
-$( document ).ready( redraw );
+$(document).ready(redraw);
 
 //--></script>
 Hieronder zie je een lijst van corpora die door anderen met je zijn gedeeld.
@@ -209,9 +222,9 @@ Selecteer welke corpora je in het menu wilt zien.
 <thead>
 <tr>
   <th>
-  <th><a href="javascript:void(0)" onclick="javascript:doTitle()">Titel</a>
-  <th><a href="javascript:void(0)" onclick="javascript:doLine()">Regels</a>
-  <th><a href="javascript:void(0)" onclick="javascript:doOwner()">Eigenaar</a>
+  <th><a href="javascript:void(0)" onclick="javascript:doTitle()">Titel<span id="title"></span></a>
+  <th><a href="javascript:void(0)" onclick="javascript:doLines()">Regels<span id="lines"></span></a>
+  <th><a href="javascript:void(0)" onclick="javascript:doOwner()">Eigenaar<span id="owner"></span></a>
 </tr>
 </thead>
 <tbody id="items">
@@ -220,7 +233,7 @@ Selecteer welke corpora je in het menu wilt zien.
 <input id="submit" type="submit" value="Opslaan" disabled="disabled">
 <span id="msg"></span>
 </form>
-  </body>
+</body>
 </html>
 `)
 
