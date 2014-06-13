@@ -65,6 +65,9 @@ func main() {
 		_, err := db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
+		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `prefix` = %q", Cfg.Prefix, corpus))
+		util.CheckErr(err)
+
 		_, err = db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`",
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
@@ -81,6 +84,9 @@ func main() {
 	}
 
 	_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `user` = %q", Cfg.Prefix, user))
+	util.CheckErr(err)
+
+	_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, user))
 	util.CheckErr(err)
 
 	result, err := db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))

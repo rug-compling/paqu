@@ -2,12 +2,12 @@
 For parts written by others, see:
 
 pqserve/static/jquery.LICENSE.txt
-_vendor/github.com/BurntSushi/toml/COPYING
-_vendor/github.com/dchest/authcookie/LICENSE
-_vendor/github.com/go-sql-driver/mysql/LICENSE
-_vendor/github.com/pebbe/compactcorpus/LICENSE.txt
-_vendor/github.com/pebbe/dbxml/LICENSE.txt
-_vendor/github.com/pebbe/util/LICENSE.txt
+_vendor/src/github.com/BurntSushi/toml/COPYING
+_vendor/src/github.com/dchest/authcookie/LICENSE
+_vendor/src/github.com/go-sql-driver/mysql/LICENSE
+_vendor/src/github.com/pebbe/compactcorpus/LICENSE.txt
+_vendor/src/github.com/pebbe/dbxml/LICENSE.txt
+_vendor/src/github.com/pebbe/util/LICENSE.txt
 
 ================================================================
 For all other stuff:

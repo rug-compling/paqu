@@ -6,4 +6,5 @@
 VARS =
 
 # extra opties voor 'go'
-OPTS = 
+OPTS = -v
+

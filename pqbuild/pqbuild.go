@@ -283,6 +283,13 @@ Opties:
 		DEFAULT CHARACTER SET utf8;`)
 	util.CheckErr(err)
 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_ignore (
+		user    varchar(64) NOT NULL,
+		prefix  varchar(64) NOT NULL,
+		INDEX (user),
+		INDEX (prefix));`)
+	util.CheckErr(err)
+
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_users (
 		mail   varchar(64) NOT NULL,
 		pw     char(16)    NOT NULL,

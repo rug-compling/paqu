@@ -98,6 +98,9 @@ func main() {
 	handleFunc("login", login)
 	handleFunc("login1", login1)
 
+	handleFunc("corpuslijst", corpuslijst)
+	handleFunc("corsave", corsave)
+
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)
 	handleFunc("share", share)

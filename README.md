@@ -52,6 +52,7 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
       - IPv6?
     - ✔ inlogrechten: deny/allow op basis van regexp mail-adressen
     - ✔ downloadrechten, alleen wie is ingelogd, alleen eigen corpora
+    - https
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
   - Middelen voor beheerder
@@ -81,8 +82,8 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
       - ✔ browse: zinnen, stdout, stderr
       - ✔ modernere interface: verwijderen, opties
       - modernere interface voor afhandeling van opties
-    - Keuze van corpus
-      - Lijst van beschikbare (gedeelde) corpora die
+    - ✔ Keuze van corpus
+      - ✔ Lijst van beschikbare (gedeelde) corpora die
         toegevoegd/verwijderd kunnen worden in menu
   - Code
     - Organisatie + documentatie

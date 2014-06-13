@@ -21,6 +21,7 @@ type Context struct {
 	quotum     int
 	db         *sql.DB
 	opt_db     []string
+	ignore     map[string]bool
 	prefixes   map[string]bool
 	myprefixes map[string]bool
 	desc       map[string]string
@@ -111,6 +112,27 @@ func handleFunc(url string, handler func(*Context)) {
 			}
 
 			// Laad lijsten van corpora
+
+			q.ignore = make(map[string]bool)
+			if q.auth {
+				rows, err := q.db.Query(fmt.Sprintf("SELECT `prefix` FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
+				if err != nil {
+					http.Error(q.w, err.Error(), http.StatusInternalServerError)
+					logerr(err)
+					return
+				}
+				for rows.Next() {
+					var s string
+					err := rows.Scan(&s)
+					if err != nil {
+						http.Error(q.w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
+						return
+					}
+					q.ignore[s] = true
+				}
+			}
+
 			s := "\"Z\""
 			where := ""
 			o := "2"
@@ -119,7 +141,7 @@ func handleFunc(url string, handler func(*Context)) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 				o = "6, 2"
 			}
-			rows, err := q.db.Query(fmt.Sprintf(
+			rows, err = q.db.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`,  "+s+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
@@ -143,11 +165,14 @@ func handleFunc(url string, handler func(*Context)) {
 					return
 				}
 				if group == "C" {
-					q.opt_db = append(q.opt_db, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
+					if !q.ignore[id] {
+						q.opt_db = append(q.opt_db, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
+						q.prefixes[id] = true
+					}
 				} else {
 					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
+					q.prefixes[id] = true
 				}
-				q.prefixes[id] = true
 				q.desc[id] = desc
 				q.lines[id] = zinnen
 				q.shared[id] = shared
@@ -166,17 +191,19 @@ func handleFunc(url string, handler func(*Context)) {
 					return
 				}
 			case "POST":
-				reader, err := r.MultipartReader()
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					logerr(err)
-					return
-				}
-				q.form, err = reader.ReadForm(Cfg.Maxmem / 10)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					logerr(err)
-					return
+				if url != "/corsave" {
+					reader, err := r.MultipartReader()
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
+						return
+					}
+					q.form, err = reader.ReadForm(Cfg.Maxmem / 10)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
+						return
+					}
 				}
 			default:
 				http.Error(w, "Method "+r.Method+" is not allowd", http.StatusMethodNotAllowed)

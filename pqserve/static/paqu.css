@@ -52,7 +52,8 @@ a:hover {
    font-size: small;
 }
 
-#statresults td {
+#statresults td,
+#corpustabel td {
     padding: 0px .5em;
 }
 
