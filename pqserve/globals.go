@@ -36,9 +36,10 @@ type Config struct {
 
 	Secret string
 
-	Sh     string
-	Path   string
-	Alpino string
+	Sh      string
+	Path    string
+	Alpino  string
+	Timeout int
 
 	Remote bool
 

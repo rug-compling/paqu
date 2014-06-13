@@ -30,14 +30,14 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
 ### Hoofdtaken ###
 
   - Quota
-    - Corpora
+    - ✔ Corpora
       - ✔ default voor elke gebruiker in setup, door admin aan te passen
         per gebruiker
       - ✔ max aantal tokens (woorden)
-      - maximale verwerktijd van een zin (alleen bij gebruik lokale
+      - ✔ maximale verwerktijd van een zin (alleen bij gebruik lokale
         parser): in setup
     - Geheugen
-      - globaal instellen dmv `ulimit -v`
+      - ✔ globaal instellen dmv `ulimit -v`
     - Processortijd
       - ✔  Max aantal corpora dat tegelijk verwerkt wordt, met de aanname
         dat hierbij een processor voor 100% gebruikt wordt.

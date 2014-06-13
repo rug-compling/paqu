@@ -154,8 +154,8 @@ Opties:
 
   id:
   description:
-  owner:       e-mail address
-  public:      0 (private) or 1 (public)
+  owner:       'none' of een e-mailadres
+  public:      0 (private) of 1 (public)
 
 
 `, os.Args[0])
@@ -178,8 +178,8 @@ Opties:
 		util.CheckErr(fmt.Errorf("De omschrijving mag niet leeg zijn"))
 	}
 
-	if owner == "" {
-		util.CheckErr(fmt.Errorf("De eigenaar mag niet leeg zijn"))
+	if owner != "none" && strings.Index(owner, "@") < 0 {
+		util.CheckErr(fmt.Errorf("De eigenaar moet 'none' zijn of een e-mailadres"))
 	}
 
 	if prefix == "" {

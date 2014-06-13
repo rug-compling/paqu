@@ -19,9 +19,10 @@ maxjob = 10
 maxwrd = 1000000
 maxmem = 54098268160
 
-sh     = "/bin/sh"
-path   = "/local/opt/paqu/pqbuild:/local/opt/paqu/alpino:/bin:/usr/bin"
-alpino = "/local/opt/Alpino"
+sh      = "/bin/sh"
+path    = "/local/opt/paqu/pqbuild:/local/opt/paqu/alpino:/bin:/usr/bin"
+alpino  = "/local/opt/Alpino"
+timeout = 900
 
 secret = "Verander dit in een andere willekeurige tekst"
 remote = true

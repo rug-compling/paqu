@@ -21,6 +21,7 @@ var (
 	opt_a = flag.String("a", "", "ALPINO_HOME")
 	opt_d = flag.String("d", "xml", "Directory voor uitvoer")
 	opt_s = flag.String("s", "", "Alpino server")
+	opt_t = flag.Int("t", 900, "Time-out in seconden per regel")
 )
 
 func usage() {
@@ -34,6 +35,7 @@ Overige opties:
   -d directory : Directory waar uitvoer wordt geplaatst (default: xml)
   -s server    : Alpino-server ZONDER TOKENISATIE, als deze ontbreekt wordt
                  een lokale versie van Alpino gebruikt
+  -t seconden  : Time-out per regel (default: 900), geen effect in combinatie met -s
 
 `, os.Args[0])
 }
@@ -62,8 +64,9 @@ func main() {
 		cmd := exec.Command(
 			"/bin/bash",
 			"-c",
-			"$ALPINO_HOME/bin/Alpino -fast -flag treebank "+*opt_d+
-				" debug=1 end_hook=xml user_max=900000 -parse < "+filename)
+			fmt.Sprintf(
+				"$ALPINO_HOME/bin/Alpino -fast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
+				*opt_d, *opt_t * 1000, filename))
 		cmd.Env = []string{
 			"ALPINO_HOME=" + *opt_a,
 			"PATH=" + os.Getenv("PATH"),

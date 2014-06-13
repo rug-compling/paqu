@@ -147,9 +147,13 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	// kan er nog staan na onderbroken run
 	os.RemoveAll(xml)
 
+	var timeout string
+	if Cfg.Timeout > 0 {
+		timeout = fmt.Sprint("-t ", Cfg.Timeout)
+	}
 	cmd = shell(
-		`alpino -a %s -d %s %s.lines > %s 2>> %s`,
-		Cfg.Alpino, xml, data, stdout, stderr)
+		`alpino -a %s -d %s %s %s.lines > %s 2>> %s`,
+		Cfg.Alpino, xml, timeout, data, stdout, stderr)
 	err = run(cmd, task.chKill, nil)
 	if err != nil {
 		return
