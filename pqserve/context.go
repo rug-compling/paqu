@@ -141,7 +141,7 @@ func handleFunc(url string, handler func(*Context)) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 				o = "6, 2"
 			}
-			rows, err = q.db.Query(fmt.Sprintf(
+			rows, err := q.db.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`,  "+s+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
