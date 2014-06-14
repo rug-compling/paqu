@@ -169,7 +169,7 @@ func handleFunc(url string, handler func(*Context)) {
 						q.opt_db = append(q.opt_db, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
 						q.prefixes[id] = true
 					}
-				} else {
+				} else if q.auth || owner == "none" {
 					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
 					q.prefixes[id] = true
 				}

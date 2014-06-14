@@ -83,7 +83,7 @@ func share(q *Context) {
           <br>
           <textarea id="mail" style="margin-left:4em;" name="mail" rows="8" cols="40">%s</textarea>
         <p>
-          <input type="radio" name="share" value="all%s">iedereen
+          <input type="radio" name="share" value="all%s">iedereen die is ingelogd
         <p>
           <input type="submit">
       </form>
