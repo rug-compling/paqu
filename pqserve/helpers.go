@@ -13,6 +13,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"unicode/utf8"
 )
 
 func doErr(q *Context, err error) bool {
@@ -65,11 +66,11 @@ func writeHead(q *Context, title string, tab int) {
 
 	var t [4]string
 	t[tab] = " class=\"selected\""
-	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\"" + t[1] + ">Zoeken</a>")
+	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\""+t[1]+">Zoeken</a>")
 	if q.auth {
-		fmt.Fprintln(q.w, "<a href=\"corpora\"" + t[2] + ">Corpora</a>")
+		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[2]+">Corpora</a>")
 	}
-	fmt.Fprintln(q.w, "<a href=\"info.html\"" + t[3] + ">Info</a>\n</div>\n")
+	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[3]+">Info</a>\n</div>\n")
 }
 
 func writeHtml(q *Context, title, msg string) {
@@ -172,4 +173,20 @@ func urlJoin(elem ...string) string {
 		}
 	}
 	return p
+}
+
+func maxtitlelen(s string) string {
+	if utf8.RuneCountInString(s) <= MAXTITLELEN {
+		return s
+	}
+	r := make([]rune, MAXTITLELEN)
+	p := 0
+	for _, c := range s {
+		r[p] = c
+		p++
+		if p == MAXTITLELEN {
+			break
+		}
+	}
+	return string(r)
 }

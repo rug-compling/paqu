@@ -251,14 +251,11 @@ func submitCorpus(q *Context) {
 	}
 
 	how := firstf(q.form, "how")
-	title := firstf(q.form, "title")
+	title := maxtitlelen(firstf(q.form, "title"))
 
 	if title == "" {
 		http.Error(q.w, "Titel ontbreekt", http.StatusPreconditionFailed)
 		return
-	}
-	if len(title) > MAXTITLELEN {
-		title = title[:MAXTITLELEN]
 	}
 
 	dirname := reNoAz.ReplaceAllString(strings.ToLower(title), "")

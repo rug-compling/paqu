@@ -45,10 +45,7 @@ func rename2(q *Context) {
 		return
 	}
 
-	d2 := strings.TrimSpace(first(q.r, "desc"))
-	if len(d2) > MAXTITLELEN {
-		d2 = d2[:MAXTITLELEN]
-	}
+	d2 := maxtitlelen(strings.TrimSpace(first(q.r, "desc")))
 	if d2 == "" {
 		writeHtml(q, "Corpus niet hernoemd", "Corpus is niet hernoemd")
 	} else {
