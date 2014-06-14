@@ -56,7 +56,7 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
   - Middelen voor beheerder
-    - Statistiek
+    - ✔ Statistiek
       - ✔ pqstatus
       - ✔ handler voor interne status (NumGoroutine, MemStat)
     - ✔ Gebruiker verwijderen
