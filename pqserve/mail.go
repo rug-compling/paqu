@@ -10,6 +10,7 @@ func sendmail(to, subject, body string) (err error) {
 	msg := fmt.Sprintf(`From: PaQu <%s>
 To: %s
 Subject: %s
+Content-type: text/plain; charset=UTF-8
 
 %s
 `, Cfg.Mailfrom, to, subject, body)
