@@ -22,7 +22,7 @@ func rename(q *Context) {
 	writeHead(q, "Corpus hernoemen", 0)
 	fmt.Fprintf(q.w, `
 <h1>Corpus hernoemen</h1>
-<form action="rename2" method="get">
+<form action="rename2" method="get" accept-charset="utf-8">
   <input type="hidden" name="id" value="%s">
   Nieuwe naam: <input type="text" name="desc" value="%s" size="%d" maxlength="%d">
 <p>
