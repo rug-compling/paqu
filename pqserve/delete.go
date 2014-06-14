@@ -80,6 +80,8 @@ func remove(q *Context) {
 	logerr(err)
 	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
 	logerr(err)
+	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `prefix` = %q", Cfg.Prefix, id))
+	logerr(err)
 	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, id))
 	logerr(err)
 
