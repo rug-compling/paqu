@@ -24,13 +24,13 @@ func rename(q *Context) {
 <h1>Corpus hernoemen</h1>
 <form action="rename2" method="get">
   <input type="hidden" name="id" value="%s">
-  Nieuwe naam: <input type="text" name="desc" value="%s" size="80">
+  Nieuwe naam: <input type="text" name="desc" value="%s" size="%d" maxlength="%d">
 <p>
 <input type="submit">
 </form>
 </body>
 </html>
-`, id, html.EscapeString(q.desc[id]))
+`, id, html.EscapeString(q.desc[id]), MAXTITLELEN+MAXTITLELEN/4, MAXTITLELEN)
 }
 
 func rename2(q *Context) {
@@ -46,6 +46,9 @@ func rename2(q *Context) {
 	}
 
 	d2 := strings.TrimSpace(first(q.r, "desc"))
+	if len(d2) > MAXTITLELEN {
+		d2 = d2[:MAXTITLELEN]
+	}
 	if d2 == "" {
 		writeHtml(q, "Corpus niet hernoemd", "Corpus is niet hernoemd")
 	} else {

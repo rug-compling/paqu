@@ -133,11 +133,12 @@ type ProcessMap map[string]*Process
 //. Constanten
 
 const (
-	ZINMAX = 10
-	WRDMAX = 250
-	YELLOW = "<span style=\"background-color: yellow\">"
-	GREEN  = "<span style=\"background-color: lightgreen\">"
-	YELGRN = "<span style=\"background-color: cyan\">"
+	MAXTITLELEN = 64
+	ZINMAX      = 10
+	WRDMAX      = 250
+	YELLOW      = "<span style=\"background-color: yellow\">"
+	GREEN       = "<span style=\"background-color: lightgreen\">"
+	YELGRN      = "<span style=\"background-color: cyan\">"
 )
 
 //. Variabelen

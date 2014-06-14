@@ -451,16 +451,14 @@ func html_form(q *Context) (has_query bool) {
 
 	fmt.Fprint(q.w, `
 <form action="." method="get" accept-charset="utf-8">
-<table>
-<tr>
-  <td colspan="3" style="padding-bottom:1em">corpus: <select name="db">
+corpus: <select name="db">
 `)
 	html_opts(q, q.opt_db, getprefix(q), "corpus")
 	fmt.Fprintln(q.w, "</select>")
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
 	}
-	fmt.Fprintf(q.w, `
+	fmt.Fprintf(q.w, `<p><table>
 	   <tr>
 		 <td style="background-color: yellow">woord
 		 <td>

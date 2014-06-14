@@ -219,12 +219,12 @@ function formtest() {
 	if q.quotum > 0 {
 		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n<p>\n", q.quotum-gebruikt)
 	}
-	fmt.Fprint(q.w, `
+	fmt.Fprintf(q.w, `
     <form name="newcorpus" action="submitcorpus" method="post" enctype="multipart/form-data" onsubmit="javascript:return formtest()">
         De tekst die je uploadt moet platte tekst zijn, zonder opmaak (geen Word of zo), gecodeerd in utf-8.
         <p>
     Titel:<br>
-	<input type="text" name="title">
+	<input type="text" name="title" size="%d" maxlength="%d">
     <p>
 	Upload document:<br>
 	<input type="file" name="data">
@@ -239,7 +239,7 @@ function formtest() {
     </form>
 </body>
 </html>
-`)
+`, MAXTITLELEN + MAXTITLELEN / 4, MAXTITLELEN)
 
 }
 
@@ -256,6 +256,9 @@ func submitCorpus(q *Context) {
 	if title == "" {
 		http.Error(q.w, "Titel ontbreekt", http.StatusPreconditionFailed)
 		return
+	}
+	if len(title) > MAXTITLELEN {
+		title = title[:MAXTITLELEN]
 	}
 
 	dirname := reNoAz.ReplaceAllString(strings.ToLower(title), "")
