@@ -57,11 +57,10 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
     - Aanpassen aan API van de server (huidige server is te oud)
   - Middelen voor beheerder
     - Statistiek
-      - pqstatus
-      - handler voor interne status (NumGoroutine, MemStat)
-      - package `expvar`
+      - ✔ pqstatus
+      - ✔ handler voor interne status (NumGoroutine, MemStat)
     - ✔ Gebruiker verwijderen
-    - Quotum voor specifieke gebruiker veranderen
+    - ✔ Quotum voor specifieke gebruiker veranderen
     - E-mail aan beheerder bij problemen
   - Adminhandleiding
     - installatie
@@ -110,12 +109,6 @@ alles:
   - foutafhandeling als gebruiker een leeg bestand uploadt
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
     stderr gebruiken als melding aan de gebruiker
-
-`pqstatus`:
-
-  - gebruikers zonder corpora
-  - corpora zonder gebruikers
-  - compacte weergave
 
 ----------------------------------------------------------------
 

@@ -5,3 +5,4 @@ all:
 	make -C pqserve
 	make -C pqstatus
 	make -C rmuser
+	make -C setquota
