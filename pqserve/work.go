@@ -312,7 +312,7 @@ func work(task *Process) {
 	user, title, err := dowork(db, task)
 	if err == nil {
 		logf("FINISHED: " + task.id)
-		sendmail(user, "Corpus Ready", fmt.Sprintf("Your corpus \"%s\" is ready at %s", title, Cfg.Url))
+		sendmail(user, "Corpus Ready", fmt.Sprintf("Your corpus \"%s\" is ready at %s", title, urlJoin(Cfg.Url, "/?db=" + task.id)))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
 		if !task.killed {
