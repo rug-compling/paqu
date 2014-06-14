@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -50,14 +51,22 @@ func download(q *Context) {
 	}
 
 	if filename != "" {
-		fp, err := os.Open(path.Join(datadir, filename))
+		fp, err := os.Open(path.Join(datadir, filename+".gz"))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
+		r, err := gzip.NewReader(fp)
+		if err != nil {
+			fp.Close()
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
 		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		io.Copy(q.w, fp)
+		io.Copy(q.w, r)
+		r.Close()
 		fp.Close()
 		return
 	}
@@ -76,22 +85,34 @@ func download(q *Context) {
 
 	w := zip.NewWriter(q.w)
 	for _, file := range files {
-		name := file.Name()
+		gzname := file.Name()
+		name := gzname[:len(gzname)-3]
+		fh, err := zip.FileInfoHeader(file)
 		if err != nil {
 			logerr(err)
 			return
 		}
-		f, err := w.Create(path.Join("xml", name))
+		fh.Name = path.Join("xml", name)
+		f, err := w.CreateHeader(fh)
 		if err != nil {
 			logerr(err)
 			return
 		}
-		fp, err := os.Open(path.Join(datadir, name))
+
+		fp, err := os.Open(path.Join(datadir, gzname))
 		if err != nil {
 			logerr(err)
 			return
 		}
-		io.Copy(f, fp)
+		r, err := gzip.NewReader(fp)
+		if err != nil {
+			fp.Close()
+			logerr(err)
+			return
+		}
+
+		io.Copy(f, r)
+		r.Close()
 		fp.Close()
 	}
 	err = w.Close()

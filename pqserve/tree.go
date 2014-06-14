@@ -39,11 +39,13 @@ import "C"
 import (
 	"github.com/pebbe/compactcorpus"
 
+	"compress/gzip"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -149,9 +151,27 @@ func tree(q *Context) {
 	} else {
 		data, err = ioutil.ReadFile(filename)
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			return
+			fp, err := os.Open(filename + ".gz")
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			r, err := gzip.NewReader(fp)
+			if err != nil {
+				fp.Close()
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			data, err = ioutil.ReadAll(r)
+			r.Close()
+			fp.Close()
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
 		}
 	}
 

@@ -3,10 +3,12 @@ package main
 import (
 	"github.com/pebbe/util"
 
+	"compress/gzip"
 	"database/sql"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -48,6 +50,42 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	xml := path.Join(dirname, "xml")
 	stdout := path.Join(dirname, "stdout.txt")
 	stderr := path.Join(dirname, "stderr.txt")
+
+	defer func() {
+		gz := func (filename string) {
+			fpin, e := os.Open(filename)
+			if e != nil {
+				err = e
+				return
+			}
+			fpout, e := os.Create(filename + ".gz")
+			if e != nil {
+				fpin.Close()
+				err = e
+				return
+			}
+			w := gzip.NewWriter(fpout)
+			_, e = io.Copy(w, fpin)
+			if e != nil {
+				err = e
+			}
+			w.Close()
+			fpout.Close()
+			fpin.Close()
+			os.Remove(filename)
+		}
+		for _, f := range []string{data, data + ".lines", stdout, stderr} {
+			gz(f)
+		}
+		files, e := ioutil.ReadDir(xml)
+		if e != nil {
+			err = e
+			return
+		}
+		for _, file := range files {
+			gz(path.Join(xml, file.Name()))
+		}
+	}()
 
 	select {
 	case <-task.chKill:
