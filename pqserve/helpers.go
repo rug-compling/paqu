@@ -4,11 +4,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"bytes"
+	"compress/gzip"
 	"database/sql"
 	"fmt"
 	"html"
+	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"os/exec"
 	"path"
 	"runtime"
@@ -189,4 +192,25 @@ func maxtitlelen(s string) string {
 		}
 	}
 	return string(r)
+}
+
+func gz(filename string) error {
+	fpin, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer fpin.Close()
+	fpout, err := os.Create(filename + ".gz")
+	if err != nil {
+		return err
+	}
+	defer fpout.Close()
+	w := gzip.NewWriter(fpout)
+	defer w.Close()
+	_, err = io.Copy(w, fpin)
+	if err != nil {
+		return err
+	}
+	os.Remove(filename)
+	return nil
 }

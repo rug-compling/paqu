@@ -14,9 +14,9 @@ func logf(format string, v ...interface{}) {
 	chLog <- fmt.Sprintf(format, v...)
 }
 
-func logerr(err error) {
+func logerr(err error) bool {
 	if err == nil {
-		return
+		return false
 	}
 	var msg string
 	_, filename, lineno, ok := runtime.Caller(1)
@@ -26,7 +26,7 @@ func logerr(err error) {
 		msg = err.Error()
 	}
 	chLog <- msg
-	return
+	return true
 }
 
 func logger() {

@@ -83,6 +83,8 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
       - ✔ browse: zinnen, stdout, stderr
       - ✔ modernere interface: verwijderen, opties
       - modernere interface voor afhandeling van opties
+      - Voordat er iets gedownload wordt controleren of er nog
+        onge'gzip'te bestanden zijn
     - ✔ Keuze van corpus
       - ✔ Lijst van beschikbare (gedeelde) corpora die
         toegevoegd/verwijderd kunnen worden in menu

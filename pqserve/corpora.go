@@ -200,7 +200,18 @@ function formtest() {
 			default:
 				cl = "odd"
 			}
-			fmt.Fprintf(q.w, "<td class=\"%s first\">%s\n", cl, corpus.status)
+			st := corpus.status
+			if st == "wachtrij" {
+				processLock.Lock()
+				n := taskWorkNr
+				m := n + 1
+				if c, ok := processes[corpus.id]; ok {
+					m = c.nr
+				}
+				processLock.Unlock()
+				st = fmt.Sprintf("%s (%d)", st, m-n-1)
+			}
+			fmt.Fprintf(q.w, "<td class=\"%s first\">%s\n", cl, st)
 			fmt.Fprintf(q.w, "<td class=\"even\">%s\n", html.EscapeString(corpus.description))
 
 			if corpus.status == "gereed" {
@@ -240,7 +251,7 @@ function formtest() {
     </form>
 </body>
 </html>
-`, MAXTITLELEN + MAXTITLELEN / 4, MAXTITLELEN)
+`, MAXTITLELEN+MAXTITLELEN/4, MAXTITLELEN)
 
 }
 
@@ -330,6 +341,8 @@ func submitCorpus(q *Context) {
 		queued: true,
 	}
 	processLock.Lock()
+	taskWaitNr++
+	p.nr = taskWaitNr
 	processes[dirname] = p
 	processLock.Unlock()
 	go func() {

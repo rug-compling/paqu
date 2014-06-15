@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/pebbe/util"
 
-	"compress/gzip"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -23,6 +22,17 @@ func quote(s string) string {
 
 func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	logf("WORKING: " + task.id)
+
+	processLock.Lock()
+	if task.nr > taskWorkNr {
+		taskWorkNr = task.nr
+		if taskWaitNr == taskWorkNr {
+			// queue is leeg: reset counters om (ooit) overflow te voorkomen
+			taskWaitNr = 0
+			taskWorkNr = 0
+		}
+	}
+	processLock.Unlock()
 
 	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"WORKING\", `nword` = 0 WHERE `id` = %q",
 		Cfg.Prefix, task.id))
@@ -52,52 +62,17 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	stderr := path.Join(dirname, "stderr.txt")
 
 	defer func() {
-		var ok bool
-		if err == nil {
-			ok = true
-		}
 		select {
 		case <-chGlobalExit:
 			return
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
-		gz := func(filename string) {
-			fpin, e := os.Open(filename)
-			if e != nil {
-				if ok {
-					err = e
-				}
-				return
-			}
-			fpout, e := os.Create(filename + ".gz")
-			if e != nil {
-				fpin.Close()
-				if ok {
-					err = e
-				}
-				return
-			}
-			w := gzip.NewWriter(fpout)
-			_, e = io.Copy(w, fpin)
-			if e != nil {
-				if ok {
-					err = e
-				}
-			}
-			w.Close()
-			fpout.Close()
-			fpin.Close()
-			os.Remove(filename)
-		}
 		for _, f := range []string{data, data + ".lines", stdout, stderr} {
-			gz(f)
+			logerr(gz(f))
 		}
 		files, e := ioutil.ReadDir(xml)
-		if e != nil {
-			if ok {
-				err = e
-			}
+		if logerr(e) {
 			return
 		}
 		for _, file := range files {
@@ -106,7 +81,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				return
 			default:
 			}
-			gz(path.Join(xml, file.Name()))
+			logerr(gz(path.Join(xml, file.Name())))
 		}
 	}()
 
@@ -485,6 +460,8 @@ func recover() {
 			queued: true,
 		}
 		processLock.Lock()
+		taskWaitNr++
+		p.nr = taskWaitNr
 		processes[id] = p
 		processLock.Unlock()
 		chWork <- p

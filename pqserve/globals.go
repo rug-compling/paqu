@@ -122,6 +122,7 @@ type TreeContext struct {
 
 type Process struct {
 	id     string
+	nr     int
 	chKill chan bool
 	killed bool
 	queued bool
@@ -179,6 +180,9 @@ var (
 	version       [3]int
 
 	hasMaxStatementTime bool
+
+	taskWaitNr int
+	taskWorkNr int
 
 	started = time.Now()
 
