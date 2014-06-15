@@ -11,11 +11,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"path"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 )
 
 func init() {
@@ -41,7 +44,27 @@ func main() {
 	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
-	go logger()
+	go func() {
+		wgLogger.Add(1)
+		logger()
+		wgLogger.Done()
+	}()
+
+	go func() {
+		chSignal := make(chan os.Signal, 1)
+		signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+		sig := <-chSignal
+		logf("Signal: %v", sig)
+
+		close(chGlobalExit)
+		wg.Wait()
+
+		logf("Uptime: %v", time.Now().Sub(started))
+		close(chLoggerExit)
+		wgLogger.Wait()
+
+		os.Exit(0)
+	}()
 
 	accessSetup()
 
@@ -81,13 +104,25 @@ func main() {
 	logf("MySQL server version: %v (%s)", version, versionstring)
 
 	for i := 0; i < Cfg.Maxjob; i++ {
+		wg.Add(1)
 		go func() {
-			for task := range chWork {
-				work(task)
+			defer wg.Done()
+			for {
+				select {
+				case <-chGlobalExit:
+					return
+				case task := <-chWork:
+					select {
+					case <-chGlobalExit:
+						return
+					default:
+						work(task)
+					}
+				}
 			}
 		}()
 	}
-	recover()
+	go recover()
 
 	handleFunc("", home)
 	handleFunc("tree", tree)
@@ -131,12 +166,19 @@ func main() {
 
 func Log(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if accessView(r.RemoteAddr) {
-			logf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
-			handler.ServeHTTP(w, r)
-		} else {
-			logf("ACCESS DENIED: %s %s %s", r.RemoteAddr, r.Method, r.URL)
-			http.Error(w, "Access denied", http.StatusForbidden)
+		select {
+		case <-chGlobalExit:
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		default:
+			wg.Add(1)
+			defer wg.Done()
+			if accessView(r.RemoteAddr) {
+				logf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
+				handler.ServeHTTP(w, r)
+			} else {
+				logf("ACCESS DENIED: %s %s %s", r.RemoteAddr, r.Method, r.URL)
+				http.Error(w, "Access denied", http.StatusForbidden)
+			}
 		}
 	})
 }

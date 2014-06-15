@@ -52,7 +52,12 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	stderr := path.Join(dirname, "stderr.txt")
 
 	defer func() {
-		gz := func (filename string) {
+		select {
+		case <-chGlobalExit:
+			return
+		default:
+		}
+		gz := func(filename string) {
 			fpin, e := os.Open(filename)
 			if e != nil {
 				err = e
@@ -88,6 +93,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	}()
 
 	select {
+	case <-chGlobalExit:
+		err = fmt.Errorf("Global Exit")
+		return
 	case <-task.chKill:
 		err = fmt.Errorf("Killed")
 		return
@@ -210,7 +218,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	return
 }
 
-// Run command, maar onderbreek het als chKill gesloten is
+// Run command, maar onderbreek het als chKill of chGlobalExit gesloten is
 func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
@@ -269,18 +277,23 @@ func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
 		pgid = 0
 	}
 
+FORSELECT:
 	for {
 		select {
-		case err := <-chRet:
+		case err = <-chRet:
 			return err
+		case <-chGlobalExit:
+			break FORSELECT
 		case <-chKill:
-			chKill = nil // niet opnieuw van lezen
-			err = syscall.Kill(-pgid, 15)
-			if err != nil {
-				logf("syscall.Kill(-pgid, 15) error: %v", err)
-			}
+			break FORSELECT
 		}
 	}
+	err = syscall.Kill(-pgid, 9)
+	if err != nil {
+		logf("syscall.Kill(-pgid, 9) error: %v", err)
+	}
+	err = <-chRet
+	return err
 }
 
 func work(task *Process) {
@@ -312,13 +325,18 @@ func work(task *Process) {
 	user, title, err := dowork(db, task)
 	if err == nil {
 		logf("FINISHED: " + task.id)
-		sendmail(user, "Corpus Ready", fmt.Sprintf("Your corpus \"%s\" is ready at %s", title, urlJoin(Cfg.Url, "/?db=" + task.id)))
+		sendmail(user, "Corpus Ready", fmt.Sprintf("Your corpus \"%s\" is ready at %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
-		if !task.killed {
-			sendmail(user, "Corpus error", fmt.Sprintf("There was an error with your corpus \"%s\": %v", title, err))
+		select {
+		case <-chGlobalExit:
+			// niks
+		default:
+			if !task.killed {
+				sendmail(user, "Corpus error", fmt.Sprintf("There was an error with your corpus \"%s\": %v", title, err))
+			}
+			db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
 		}
-		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
 	}
 }
 
@@ -361,11 +379,14 @@ func kill(id string) {
 func recover() {
 	db, err := dbopen()
 	util.CheckErr(err)
-	defer db.Close()
 
 	ids := make([]string, 0)
 
-	rows, err := db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" OR `status` = \"WORKING\" ORDER BY `created`")
+	_, err = db.Exec(
+		"UPDATE `" + Cfg.Prefix + "_info` SET `nword` = 0, `status` = \"QUEUED\" WHERE `status` = \"WORKING\"")
+	util.CheckErr(err)
+
+	rows, err := db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" ORDER BY `created`")
 	util.CheckErr(err)
 	for rows.Next() {
 		var id string
@@ -374,10 +395,7 @@ func recover() {
 	}
 	util.CheckErr(rows.Err())
 
-	for _, id := range ids {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = 0 WHERE `id` = %q", Cfg.Prefix, id))
-		util.CheckErr(err)
-	}
+	db.Close()
 
 	for _, id := range ids {
 		p := &Process{
@@ -388,8 +406,6 @@ func recover() {
 		processLock.Lock()
 		processes[id] = p
 		processLock.Unlock()
-		go func() {
-			chWork <- p
-		}()
+		chWork <- p
 	}
 }

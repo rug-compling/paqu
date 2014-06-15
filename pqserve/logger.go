@@ -47,20 +47,26 @@ func logger() {
 	util.CheckErr(err)
 
 	n := 0
-	for msg := range chLog {
-		now := time.Now()
-		s := fmt.Sprintf("%04d-%02d-%02d %d:%02d:%02d %s", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), msg)
-		fmt.Fprintln(fp, s)
-		fp.Sync()
-		if verbose {
-			fmt.Println(s)
-		}
-		n++
-		if n == 10000 {
+	for {
+		select {
+		case msg := <-chLog:
+			now := time.Now()
+			s := fmt.Sprintf("%04d-%02d-%02d %d:%02d:%02d %s", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), msg)
+			fmt.Fprintln(fp, s)
+			fp.Sync()
+			if verbose {
+				fmt.Println(s)
+			}
+			n++
+			if n == 10000 {
+				fp.Close()
+				rotate()
+				fp, _ = os.Create(logfile)
+				n = 0
+			}
+		case <-chLoggerExit:
 			fp.Close()
-			rotate()
-			fp, _ = os.Create(logfile)
-			n = 0
+			return
 		}
 	}
 }

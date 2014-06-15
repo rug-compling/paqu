@@ -181,6 +181,11 @@ var (
 	hasMaxStatementTime bool
 
 	started = time.Now()
+
+	wg           sync.WaitGroup
+	wgLogger     sync.WaitGroup
+	chGlobalExit = make(chan bool)
+	chLoggerExit = make(chan bool)
 )
 
 func (p ProcessMap) String() string {
