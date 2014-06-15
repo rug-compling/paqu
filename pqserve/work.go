@@ -52,6 +52,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	stderr := path.Join(dirname, "stderr.txt")
 
 	defer func() {
+		var ok bool
+		if err == nil {
+			ok = true
+		}
 		select {
 		case <-chGlobalExit:
 			return
@@ -61,19 +65,25 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		gz := func(filename string) {
 			fpin, e := os.Open(filename)
 			if e != nil {
-				err = e
+				if ok {
+					err = e
+				}
 				return
 			}
 			fpout, e := os.Create(filename + ".gz")
 			if e != nil {
 				fpin.Close()
-				err = e
+				if ok {
+					err = e
+				}
 				return
 			}
 			w := gzip.NewWriter(fpout)
 			_, e = io.Copy(w, fpin)
 			if e != nil {
-				err = e
+				if ok {
+					err = e
+				}
 			}
 			w.Close()
 			fpout.Close()
@@ -85,10 +95,17 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		files, e := ioutil.ReadDir(xml)
 		if e != nil {
-			err = e
+			if ok {
+				err = e
+			}
 			return
 		}
 		for _, file := range files {
+			select {
+			case <-chGlobalExit:
+				return
+			default:
+			}
 			gz(path.Join(xml, file.Name()))
 		}
 	}()
@@ -156,7 +173,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 
 	} else { // if !reuse
-
 		var prepare, tok string
 		switch params {
 		case "run":
@@ -386,20 +402,22 @@ func work(task *Process) {
 	}
 	defer db.Close()
 	user, title, err := dowork(db, task)
+
+	select {
+	case <-chGlobalExit:
+		return
+	default:
+	}
+
 	if err == nil {
 		logf("FINISHED: " + task.id)
 		sendmail(user, "Corpus Ready", fmt.Sprintf("Your corpus \"%s\" is ready at %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
-		select {
-		case <-chGlobalExit:
-			// niks
-		default:
-			if !task.killed {
-				sendmail(user, "Corpus error", fmt.Sprintf("There was an error with your corpus \"%s\": %v", title, err))
-			}
-			db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
+		if !task.killed {
+			sendmail(user, "Corpus error", fmt.Sprintf("There was an error with your corpus \"%s\": %v", title, err))
 		}
+		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
 	}
 }
 

@@ -108,17 +108,21 @@ func main() {
 		go func() {
 			defer wg.Done()
 			for {
+
+				// prioriteit voor chGlobalExit
+				select {
+				case <-chGlobalExit:
+					return
+				default:
+				}
+
 				select {
 				case <-chGlobalExit:
 					return
 				case task := <-chWork:
-					select {
-					case <-chGlobalExit:
-						return
-					default:
-						work(task)
-					}
+					work(task)
 				}
+
 			}
 		}()
 	}
