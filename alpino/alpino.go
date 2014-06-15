@@ -56,7 +56,7 @@ func main() {
 		return
 	}
 
-	util.CheckErr(os.Mkdir(*opt_d, 0777))
+	os.Mkdir(*opt_d, 0777)
 
 	// PARSEN
 

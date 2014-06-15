@@ -57,6 +57,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			return
 		default:
 		}
+		os.Remove(data + ".lines.tmp")
 		gz := func(filename string) {
 			fpin, e := os.Open(filename)
 			if e != nil {
@@ -102,110 +103,172 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	default:
 	}
 
-	var prepare, tok string
-	switch params {
-	case "run":
-		tok = "tokenize.sh"
-		prepare = "-r"
-	case "line":
-		tok = "tokenize_no_breaks.sh"
-	default:
-		err = errors.New("Not implemented: " + params)
-		return
-	}
-	cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2> %s", prepare, data, tok, stderr)
-	chPipe := make(chan string)
-	chTokens := make(chan int, 1)
-	var fp *os.File
-	fp, err = os.Create(data + ".lines")
-	if err != nil {
-		return
-	}
-	go func() {
-		var tokens, lineno int
-		for line := range chPipe {
-			tokens += len(strings.Fields(line))
-			lineno++
-			fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
+	reuse := false
+	reuse_more := false
+	if files, e := ioutil.ReadDir(xml); e == nil && len(files) > 0 {
+		reuse = true
+		done := make(map[string]bool)
+		for _, f := range files {
+			b, e := ioutil.ReadFile(path.Join(xml, f.Name()))
+			if e != nil {
+				err = e
+				return
+			}
+			if strings.Index(string(b), "</alpino_ds>") > 0 {
+				done[f.Name()] = true
+			}
 		}
-		fp.Close()
-		chTokens <- tokens
-	}()
-	err = run(cmd, task.chKill, chPipe)
-	if err != nil {
-		return
-	}
-	tokens := <-chTokens
+		fpin, e := os.Open(data + ".lines")
+		if e != nil {
+			err = e
+			return
+		}
+		fpout, e := os.Create(data + ".lines.tmp")
+		if e != nil {
+			fpin.Close()
+			err = e
+			return
+		}
+		nword := 0
+		r := util.NewReader(fpin)
+		for {
+			line, e := r.ReadLineString()
+			if e != nil {
+				fpout.Close()
+				fpin.Close()
+				if e != io.EOF {
+					err = e
+					return
+				}
+				break
+			}
+			nword += len(strings.Fields(line))
+			key := line[:strings.Index(line, "|")]
+			if !done[key+".xml"] {
+				fmt.Fprintln(fpout, line)
+				reuse_more = true
+			}
+		}
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
+			Cfg.Prefix, nword, task.id))
+		if err != nil {
+			return
+		}
 
-	quotumLock.Lock()
-	quotum := 0
-	gebruikt := 0
-	rows, err = db.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
-	if err != nil {
-		quotumLock.Unlock()
-		return
-	}
-	if rows.Next() {
-		err = rows.Scan(&quotum)
-		rows.Close()
+	} else { // if !reuse
+
+		var prepare, tok string
+		switch params {
+		case "run":
+			tok = "tokenize.sh"
+			prepare = "-r"
+		case "line":
+			tok = "tokenize_no_breaks.sh"
+		default:
+			err = errors.New("Not implemented: " + params)
+			return
+		}
+		cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", prepare, data, tok, stderr)
+		chPipe := make(chan string)
+		chTokens := make(chan int, 1)
+		var fp *os.File
+		fp, err = os.Create(data + ".lines")
+		if err != nil {
+			return
+		}
+		go func() {
+			var tokens, lineno int
+			for line := range chPipe {
+				tokens += len(strings.Fields(line))
+				lineno++
+				fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
+			}
+			fp.Close()
+			chTokens <- tokens
+		}()
+		err = run(cmd, task.chKill, chPipe)
+		if err != nil {
+			return
+		}
+		tokens := <-chTokens
+
+		quotumLock.Lock()
+		quotum := 0
+		gebruikt := 0
+		rows, err = db.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 		if err != nil {
 			quotumLock.Unlock()
 			return
 		}
-	} else {
-		err = fmt.Errorf("MySQL: Can't find quotum")
-		quotumLock.Unlock()
-		return
-	}
-	if quotum > 0 {
-		rows, err = db.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
-		if err != nil {
-			quotumLock.Unlock()
-			return
-		}
-		for rows.Next() {
-			var n int
-			err = rows.Scan(&n)
+		if rows.Next() {
+			err = rows.Scan(&quotum)
+			rows.Close()
 			if err != nil {
 				quotumLock.Unlock()
 				return
 			}
-			gebruikt += n
+		} else {
+			err = fmt.Errorf("MySQL: Can't find quotum")
+			quotumLock.Unlock()
+			return
 		}
-	}
+		if quotum > 0 {
+			rows, err = db.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
+			if err != nil {
+				quotumLock.Unlock()
+				return
+			}
+			for rows.Next() {
+				var n int
+				err = rows.Scan(&n)
+				if err != nil {
+					quotumLock.Unlock()
+					return
+				}
+				gebruikt += n
+			}
+		}
 
-	if quotum > 0 && quotum-gebruikt < tokens {
-		err = fmt.Errorf("Ruimte voor %d tokens. Nieuw corpus bevat %d tokens.", quotum-gebruikt, tokens)
-		os.Remove(data)
-		os.Remove(data + ".lines")
+		if quotum > 0 && quotum-gebruikt < tokens {
+			err = fmt.Errorf("Ruimte voor %d tokens. Nieuw corpus bevat %d tokens.", quotum-gebruikt, tokens)
+			os.Remove(data)
+			os.Remove(data + ".lines")
+			quotumLock.Unlock()
+			return
+		}
+
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
+			Cfg.Prefix, tokens, task.id))
 		quotumLock.Unlock()
-		return
+
+		if err != nil {
+			return
+		}
+
+	} // end if !reuse
+
+	if !reuse || reuse_more {
+
+		var ext string
+		if reuse {
+			ext = ".tmp"
+		}
+
+		var timeout string
+		if Cfg.Timeout > 0 {
+			timeout = fmt.Sprint("-t ", Cfg.Timeout)
+		}
+		cmd := shell(
+			`alpino -a %s -d %s %s %s.lines%s >> %s 2>> %s`,
+			Cfg.Alpino, xml, timeout, data, ext, stdout, stderr)
+		err = run(cmd, task.chKill, nil)
+		if err != nil {
+			return
+		}
+
 	}
 
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
-		Cfg.Prefix, tokens, task.id))
-	quotumLock.Unlock()
-
-	if err != nil {
-		return
-	}
-
-	// kan er nog staan na onderbroken run
-	os.RemoveAll(xml)
-
-	var timeout string
-	if Cfg.Timeout > 0 {
-		timeout = fmt.Sprint("-t ", Cfg.Timeout)
-	}
-	cmd = shell(
-		`alpino -a %s -d %s %s %s.lines > %s 2>> %s`,
-		Cfg.Alpino, xml, timeout, data, stdout, stderr)
-	err = run(cmd, task.chKill, nil)
-	if err != nil {
-		return
-	}
-
-	cmd = shell(
+	cmd := shell(
 		// optie -w i.v.m. recover()
 		`find %s -name '*.xml' | pqbuild -w %s %s %s 0 >> %s 2>> %s`,
 		dirname,
