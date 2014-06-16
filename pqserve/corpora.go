@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -202,14 +203,21 @@ function formtest() {
 			}
 			st := corpus.status
 			if st == "wachtrij" {
-				processLock.Lock()
+				processLock.RLock()
 				n := taskWorkNr
 				m := n + 1
 				if c, ok := processes[corpus.id]; ok {
 					m = c.nr
 				}
-				processLock.Unlock()
-				st = fmt.Sprintf("%s (%d)", st, m-n-1)
+				processLock.RUnlock()
+				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
+			} else if st == "bezig" {
+				p := 0
+				files, err := ioutil.ReadDir(path.Join(paqudir, "data", corpus.id, "xml"))
+				if err == nil {
+					p = 1 + int(float64(len(files)) / float64(corpus.nline) * 98 + .5)
+				}
+				st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 			}
 			fmt.Fprintf(q.w, "<td class=\"%s first\">%s\n", cl, st)
 			fmt.Fprintf(q.w, "<td class=\"even\">%s\n", html.EscapeString(corpus.description))
@@ -218,7 +226,11 @@ function formtest() {
 				fmt.Fprintf(q.w, "<td class=\"odd right\">%d\n", corpus.nline)
 				fmt.Fprintf(q.w, "<td class=\"even\">%s\n", corpus.shared)
 			} else {
-				fmt.Fprint(q.w, "<td class=\"odd right\">\n<td class=\"even\">\n")
+				n := ""
+				if corpus.nline > 0 {
+					n = fmt.Sprint(corpus.nline)
+				}
+				fmt.Fprintf(q.w, "<td class=\"odd right\">%s\n<td class=\"even\">\n", n)
 			}
 			fmt.Fprintf(q.w, "<td class=\"odd\">%s\n", html.EscapeString(corpus.msg))
 		}

@@ -213,6 +213,8 @@ func (p ProcessMap) String() string {
 }
 
 type Info struct {
+	QueueLen     int
+	QueueCap     int
 	NumCPU       int
 	NumCgoCall   int64
 	NumGoroutine int
@@ -224,6 +226,8 @@ type Info struct {
 func GetInfo() interface{} {
 	d := time.Now().Sub(started)
 	return Info{
+		QueueLen:     len(chWork),
+		QueueCap:     cap(chWork),
 		NumCPU:       runtime.NumCPU(),
 		NumCgoCall:   runtime.NumCgoCall(),
 		NumGoroutine: runtime.NumGoroutine(),

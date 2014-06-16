@@ -161,7 +161,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", prepare, data, tok, stderr)
 		chPipe := make(chan string)
-		chTokens := make(chan int, 1)
+		chTokens := make(chan int, 2)
 		var fp *os.File
 		fp, err = os.Create(data + ".lines")
 		if err != nil {
@@ -176,12 +176,14 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			fp.Close()
 			chTokens <- tokens
+			chTokens <- lineno
 		}()
 		err = run(cmd, task.chKill, chPipe)
 		if err != nil {
 			return
 		}
 		tokens := <-chTokens
+		nlines := <-chTokens
 
 		quotumLock.Lock()
 		quotum := 0
@@ -228,8 +230,8 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			return
 		}
 
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
-			Cfg.Prefix, tokens, task.id))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d, `nline` = %d WHERE `id` = %q",
+			Cfg.Prefix, tokens, nlines, task.id))
 		quotumLock.Unlock()
 
 		if err != nil {

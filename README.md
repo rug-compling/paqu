@@ -96,6 +96,10 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
   - Voor later
     - Misschien: subboompjes met statistiek en zoeklink, vergt meer info in database
   - Licentie
+  - Queue
+    - Wat als permanent sneller corpora worden geüpload dan er verwerkt
+      kunnen worden. Moet er een maximum op de grootte van de queue? En
+      wat moet er dan gebeuren als de queue vol is?
 
 
 ### Diversen ###
