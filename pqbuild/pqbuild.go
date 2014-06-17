@@ -293,6 +293,7 @@ Opties:
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_users (
 		mail   varchar(64) NOT NULL,
 		pw     char(16)    NOT NULL,
+		sec    char(16)    NOT NULL,
 		active datetime    NOT NULL,
 		quotum int         NOT NULL DEFAULT 0,
 		UNIQUE INDEX (mail),
