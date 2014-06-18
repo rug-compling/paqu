@@ -38,6 +38,8 @@ func download(q *Context) {
 	datadir := path.Join(paqudir, "data", id)
 	var filename string
 	switch dl {
+	case "summary":
+		filename = "summary.txt"
 	case "stdout":
 		filename = "stdout.txt"
 	case "stderr":

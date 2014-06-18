@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path"
 	"strings"
 )
 
@@ -33,7 +35,12 @@ func static_favicon_ico(q *Context) {
 func static_info_html(q *Context) {
 	writeHead(q, "Info", 3)
 	i := strings.Index(file__info__html, "<body>")
-	fmt.Fprint(q.w, file__info__html[i+6:])
+	s  := file__info__html[i+6:]
+	data, err := ioutil.ReadFile(path.Join(paqudir, "contact.html"))
+	if err == nil {
+		s = strings.Replace(s, "<!--##CONTACT##-->", string(data), 1)
+	}
+	fmt.Fprint(q.w, s)
 }
 
 func static_jquery_js(q *Context) {

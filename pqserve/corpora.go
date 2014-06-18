@@ -111,13 +111,20 @@ $(document).mouseup(
 corpora = [`)
 		p := ""
 		for _, corpus := range corpora {
-			fmt.Fprintf(q.w, "%s\n{\"id\": \"%s\", \"title\": %q}", p, corpus.id, corpus.description)
+			fmt.Fprintf(q.w, "%s\n{\"id\": \"%s\", \"title\": %q, \"lines\": %d}", p, corpus.id, corpus.description, corpus.nline)
 			p = ","
 		}
 		fmt.Fprint(q.w, `];
 function rm(idx) {
     if (window.confirm("Verwijderen: " + corpora[idx].title)) {
-	window.location.assign("delete?id=" + corpora[idx].id);
+        var del = true;
+        if (corpora[idx].lines > 500) {
+            del = window.confirm('Het corpus "' + corpora[idx].title + '" heeft ' + corpora[idx].lines +
+                ' regels\n\nWeet je zeker dat je dit wilt verwijderen?')
+        }
+        if (del) {
+            window.location.assign("delete?id=" + corpora[idx].id);
+        }
         return false;
     }
     return false;
@@ -174,6 +181,7 @@ function formtest() {
 <li><a href=".?db=%s">doorzoeken</a>
 <li><a href="rename?id=%s">hernoemen</a>
 <li><a href="share?id=%s">delen</a>
+<li><a href="download?dl=summary&id=%s">overzicht</a>
 <li><a href="download?dl=zinnen&id=%s">download zinnen</a>
 <li><a href="download?dl=xml&id=%s">download xml</a>
 `, id, id, id, id, id)

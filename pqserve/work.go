@@ -60,6 +60,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	xml := path.Join(dirname, "xml")
 	stdout := path.Join(dirname, "stdout.txt")
 	stderr := path.Join(dirname, "stderr.txt")
+	summary := path.Join(dirname, "summary.txt")
 
 	defer func() {
 		select {
@@ -68,7 +69,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
-		for _, f := range []string{data, data + ".lines", stdout, stderr} {
+		for _, f := range []string{data, data + ".lines", stdout, stderr, summary} {
 			logerr(gz(f))
 		}
 		files, e := ioutil.ReadDir(xml)
@@ -260,6 +261,56 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 
 	}
+
+	// TODO: inlezen uit xml-bestanden als er een Alpino-server wordt gebruikt
+	nlines := 0
+	errlines := make([]string, 0)
+	fp, e := os.Open(stderr)
+	if e != nil {
+		err = e
+		return
+	}
+	rd := util.NewReader(fp)
+	for {
+		line, e := rd.ReadLineString()
+		if e != nil {
+			fp.Close()
+			if e == io.EOF {
+				break
+			} else {
+				err = e
+				return
+			}
+		}
+		if strings.HasPrefix(line, "Q#") {
+			nlines++
+			if strings.Index(line, "|1|1|") < 0 {
+				errlines = append(errlines, line)
+			}
+		}
+	}
+	fp, err = os.Create(summary)
+	if err != nil {
+		return
+	}
+	if len(errlines) == 0 {
+		fmt.Fprintf(fp, "Alle %d regels zijn succesvol geparst\n", nlines)
+	} else {
+		fmt.Fprintf(
+			fp,
+			"%d van de %d regels zijn succesvol geparst\n\nEr waren problemen met de volgende %d regels:\n\n",
+			nlines-len(errlines),
+			nlines,
+			len(errlines))
+		for _, line := range errlines {
+			a := strings.Split(line, "|")
+			if len(a) > 5 {
+				a[1] = strings.Join(a[1:len(a)-3], "|")
+			}
+			fmt.Fprintf(fp, "%s\t%s\n", a[0][2:], a[1])
+		}
+	}
+	fp.Close()
 
 	cmd := shell(
 		// optie -w i.v.m. recover()
