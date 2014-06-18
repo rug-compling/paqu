@@ -44,7 +44,6 @@ func login(q *Context) {
 		}
 		q.auth = true
 		q.user = mail
-		q.sec = sec
 		setcookie(q)
 		writeHtml(q, "OK", "Je bent ingelogd")
 	} else {
@@ -122,21 +121,26 @@ func logout(q *Context) {
 func setcookie(q *Context) {
 	if q.auth {
 		exp := time.Now().AddDate(0, 0, 14)
-		au := authcookie.New(q.sec+"|"+q.user, exp, []byte(getRemote(q)+Cfg.Secret))
+		au := authcookie.New(q.user, exp, []byte(getRemote(q)+Cfg.Secret))
 		http.SetCookie(q.w, &http.Cookie{Name: "paqu-auth", Value: au, Path: cookiepath, Expires: exp})
 	}
 }
 
 func getRemote(q *Context) string {
-	/* TODO
+	a := make([]string, 0, 2)
 	if Cfg.Forwarded {
-		return ...
+		if s := q.r.Header.Get("X-Forwarded-For"); s != "" {
+			a = append(a, q.r.Header.Get("X-Forwarded-For"))
+		}
 	}
-	*/
 	if Cfg.Remote {
-		return strings.Split(q.r.RemoteAddr, ":")[0]
+		s := q.r.RemoteAddr
+		if i := strings.LastIndex(s, ":"); i > -1 {
+			s = s[:i]
+		}
+		a = append(a, s)
 	}
-	return ""
+	return strings.Join(a, ", ")
 }
 
 func rand16() string {

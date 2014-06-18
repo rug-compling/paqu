@@ -2,6 +2,7 @@
 ## Dit bestand is in toml-formaat, zie: https://github.com/mojombo/toml
 ##
 ## Dit is de setup voor deze programma's:
+##  - dbinit
 ##  - pqbuild
 ##  - pqserve
 ##  - pqstatus
@@ -23,16 +24,16 @@ port = 9876
 url = "http://paqu.domain.nl:9876/"
 
 # Het defaultcorpus. Dit moet een globaal corpus zijn, geïnstalleerd
-# door de beheerder. Dit corpus wordt geselecteerd als de gebruiker
-# zelf nog geen corpus heeft gekozen, en voor de voorbeelden in de
-# uitleg. Dit moet dus een corpus zijn waarin voor alle voorbeelden
-# minstens één resultaat is.
+# door de beheerder. Dit corpus wordt geselecteerd als de gebruiker zelf
+# nog geen corpus heeft gekozen, en voor de voorbeelden in de uitleg.
+# Dit moet dus een corpus zijn waarin voor alle voorbeelden minstens één
+# resultaat is.
 default = "lassysmall"
 
 # Gegevens die gebruikt worden om mail naar gebruikers te sturen.
 # De waarde van 'smtpserv' is verplicht met een poortnummer.
-# Als 'smtpuser' en 'smtppass' leeg zijn is het een mailserver
-# waarop niet ingelogd hoeft te worden (door degene die `pqserve` draait).
+# Als 'smtpuser' en 'smtppass' leeg zijn is het een mailserver waarop
+# niet ingelogd hoeft te worden (door degene die `pqserve` draait).
 mailfrom = "maintainer@domain.nl"
 smtpserv = "smtp.domain.nl:25"
 smtpuser = ""
@@ -45,8 +46,9 @@ smtppass = ""
 # Voorbeeld met server op lokale machine:
 login = "username:password@/paqu"
 
-# Elke table in MySQL krijgt dit als prefix, gevolgd door een underscore,
-# om conflicten met andere tepassingen in dezelfde database te vermijden.
+# Elke table in MySQL krijgt dit als prefix, gevolgd door een
+# underscore, om conflicten met andere tepassingen in dezelfde database
+# te vermijden.
 prefix = "pq"
 
 # Maximum aantal corpora dat gelijktijdig wordt verwerkt.
@@ -77,40 +79,58 @@ sh = "/bin/sh"
 # met uitzondering van programma's onder ALPINO_PATH.
 path = "/local/opt/paqu/pqbuild:/local/opt/paqu/alpino:/bin:/usr/bin"
 
-# De root-directory van Alpino (ALPINO_PATH). Ook als er een Alpino-server
-# wordt gebruikt, is dit nodig, omdat de tokenizer van Alpino lokaal
-# gebruikt moet worden.
+# De root-directory van Alpino (ALPINO_PATH). Ook als er een
+# Alpino-server wordt gebruikt, is dit nodig, omdat de tokenizer van
+# Alpino lokaal gebruikt moet worden.
 alpino = "/local/opt/Alpino"
 
 # Timeout voor Alpino voor de bewerking van één regel. In seconden.
 # Dit heeft geen effect als er een Alpino-server wordt gebruikt.
 timeout = 900
 
-# Een willekeurige tekst die wordt gebruikt voor versleuteling bij het inloggen.
+# Een willekeurige tekst die wordt gebruikt voor versleuteling bij het
+# inloggen.
 # VERANDER DIT IN EEN ANDERE TEKST.
-# Als je opnieuw de tekst verandert moet iedere gebruiker opnieuw inloggen.
+# Als je opnieuw de tekst verandert moet iedere gebruiker opnieuw
+# inloggen.
 secret = "Verander dit in een andere willekeurige tekst"
 
-# Moet het remote ip-adres van de gebruiker mede gebruikt worden bij het inloggen?
-# Dit biedt een extra beveiliging, want al onderschept iemand het cookie waarmee
-# iemand inlogt, kan dit op een andere machine niet gebruikt worden.
-# Nadeel is dat iemand iedere keer als zijn ip-adres verandert opnieuw moet inloggen,
-# bijvoorbeeld op een laptop die steeds van een ander netwerk gebruik maakt.
-# TODO: Klopt die laatste bewerking?
+# Https gebruiken? In dat geval moet je zorgen voor de bestanden
+# `cert.pem` en `key.pem` in de directory die aangegeven wordt door
+# $PAQU. Laat het certificaat ondertekenen door een Certificaatautoriteit,
+# zie: http://nl.wikipedia.org/wiki/Certificaatautoriteit
+https = false
+
+# Als extra veiligheidsmaatregel kan het remote ip-adres gebruikt worden
+# als deel van de identificatie van de gebruiker. Een log-in is dan
+# alleen geldig op hetzelfde ip-adres, en een onderschept cookie kan
+# niet op een andere machine gebruikt worden.
+# Nadeel is dat je als gebruiker opnieuw moet inloggen als je ip-adres
+# verandert (bijvoorbeeld met een laptop die je meeneemt naar een ander
+# netwerk).
+# Als je https gebruikt is deze maatregel waarschijnlijk niet nodig.
 remote = true
 
-# Hoe lang mag een query via de website bezig zijn voordat een timeout wordt gegeven.
+# Als `pqserve` via een proxy-server verbonden is met de buitenwereld
+# heeft de optie `remote` geen effect, want het remote ip-adres is dan
+# altijd dat van de proxy-server. In dat geval kun je de volgende optie
+# op 'true' zetten, en dan wordt de waarde van de header X-Forwarded-For
+# gebruikt.
+forwarded = false
+
+# Hoe lang mag een query via de website bezig zijn voordat een timeout
+# wordt gegeven.
 # In seconden.
 # Als de waarde 0 is wordt er geen timeout gebruikt.
-# Als een gebruiker de pagina voor de query verlaat dan wordt de query ook onderbroken.
+# Als een gebruiker de pagina voor de query verlaat dan wordt de query
+# ook onderbroken.
 querytimeout = 120
 
 # Prefixen van globale corpora.
-# Een globaal corpus is een corpus dat apart is geïnstalleerd
-# door de beheerder, niet door een gebruiker via de website.
-# De prefixen worden gestript van bestandnamen die worden
-# getoond aan de gebruiker op de pagina met de boomweergave
-# van een zin.
+# Een globaal corpus is een corpus dat apart is geïnstalleerd door de
+# beheerder, niet door een gebruiker via de website.
+# De prefixen worden gestript van bestandnamen die worden getoond aan de
+# gebruiker op de pagina met de boomweergave van een zin.
 directories = [
   "/net/corpora/LassySmall/Treebank",
   "/net/corpora/LassyLarge/NLWIKI20110804/DACT"
@@ -123,6 +143,9 @@ directories = [
 # Voor CIDR, zie: http://nl.wikipedia.org/wiki/Classless_Inter-Domain_Routing .
 # De EERSTE regel die matcht bepaalt of de bezoeker toegang heeft.
 # Als geen enkele regel matcht heeft de gebruiker toegang.
+# Als `pqserve` via een proxy-server met de buitenwereld is verbonden
+# kun je dit niet gebruiken. In dat geval moet je de toegang in de
+# proxy-server regelen.
 
 [[view]]
 allow = true

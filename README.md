@@ -57,9 +57,9 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
 	  - zie ook TODOs in work.go
   - Beveiliging
     - opties in setup:
-	  - ✔ gebruik remote ip-adres
-	  - log-uit en nieuwe log-in maken allebei elke oude log-in ongeldig
-	  - https
+	  - https gebruiken
+	  - ✔ remote ip-adres gebruiken als deel van identificatie van gebruiker
+	  - ✔ x-forwarded-for gebruiken als deel van identificatie van gebruiker
   - Middelen voor beheerder
     - ✔ Statistiek
       - ✔ pqstatus

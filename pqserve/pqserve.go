@@ -179,10 +179,10 @@ func Log(handler http.Handler) http.Handler {
 			wg.Add(1)
 			defer wg.Done()
 			if accessView(r.RemoteAddr) {
-				logf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
+				logf("[%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
 				handler.ServeHTTP(w, r)
 			} else {
-				logf("ACCESS DENIED: %s %s %s", r.RemoteAddr, r.Method, r.URL)
+				logf("ACCESS DENIED: [%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
 				http.Error(w, "Access denied", http.StatusForbidden)
 			}
 		}

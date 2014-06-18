@@ -40,7 +40,9 @@ type Config struct {
 	Alpino  string
 	Timeout int
 
-	Remote bool
+	Https     bool
+	Remote    bool
+	Forwarded bool
 
 	Querytimeout int // in secondes
 
