@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -148,6 +149,8 @@ const (
 var (
 	paqudir    string
 	cookiepath string
+
+	tlsConfig = &tls.Config{}
 
 	Cfg     Config
 	verbose bool

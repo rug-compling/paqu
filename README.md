@@ -55,9 +55,9 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
 	  - zie ook TODOs in work.go
-  - Beveiliging
-    - opties in setup:
-	  - https gebruiken
+  - ✔ Beveiliging
+    - ✔ opties in setup:
+	  - ✔ https gebruiken
 	  - ✔ remote ip-adres gebruiken als deel van identificatie van gebruiker
 	  - ✔ x-forwarded-for gebruiken als deel van identificatie van gebruiker
   - Middelen voor beheerder

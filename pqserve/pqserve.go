@@ -6,8 +6,11 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
+	"crypto/tls"
 	"expvar"
 	"fmt"
+	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -167,7 +170,38 @@ func main() {
 
 	logf("Serving on %s", Cfg.Url)
 
-	logerr(http.ListenAndServe(fmt.Sprint(":", Cfg.Port), Log(http.DefaultServeMux)))
+	addr := fmt.Sprint(":", Cfg.Port)
+	if Cfg.Https {
+		// Dit is ingewikkeld omdat ik zowel http als https wil afhandelen.
+		// Anders zou ik gewoon ListenAndServeTLS kunnen gebruiken.
+		// Http wordt omgezet in redirect naar https.
+		if tlsConfig.NextProtos == nil {
+			tlsConfig.NextProtos = []string{"http/1.1"}
+		}
+		tlsConfig.Certificates = make([]tls.Certificate, 1)
+		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(path.Join(paqudir, "cert.pem"), path.Join(paqudir, "key.pem"))
+		util.CheckErr(err)
+		ln, err := net.Listen("tcp", addr)
+		util.CheckErr(err)
+		logerr(http.Serve(
+			&SplitListener{Listener: ln},
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.TLS == nil {
+					u := url.URL{
+						Scheme:   "https",
+						Host:     r.Host,
+						Path:     r.URL.Path,
+						RawQuery: r.URL.RawQuery,
+						Fragment: r.URL.Fragment,
+					}
+					http.Redirect(w, r, u.String(), http.StatusMovedPermanently)
+				} else {
+					Log(http.DefaultServeMux).ServeHTTP(w, r)
+				}
+			})))
+	} else {
+		logerr(http.ListenAndServe(addr, Log(http.DefaultServeMux)))
+	}
 }
 
 func Log(handler http.Handler) http.Handler {
@@ -194,4 +228,52 @@ func up(q *Context) {
 	q.w.Header().Set("Cache-Control", "no-cache")
 	q.w.Header().Add("Pragma", "no-cache")
 	fmt.Fprintln(q.w, "up")
+}
+
+type Conn struct {
+	net.Conn
+	b byte
+	e error
+	f bool
+}
+
+func (c *Conn) Read(b []byte) (int, error) {
+	if c.f {
+		c.f = false
+		b[0] = c.b
+		if len(b) > 1 && c.e == nil {
+			n, e := c.Conn.Read(b[1:])
+			if e != nil {
+				c.Conn.Close()
+			}
+			return n + 1, e
+		} else {
+			return 1, c.e
+		}
+	}
+	return c.Conn.Read(b)
+}
+
+type SplitListener struct {
+	net.Listener
+}
+
+func (l *SplitListener) Accept() (net.Conn, error) {
+	c, err := l.Listener.Accept()
+	if err != nil {
+		return nil, err
+	}
+	b := make([]byte, 1)
+	_, err = c.Read(b)
+	if err != nil {
+		c.Close()
+		if err != io.EOF {
+			return nil, err
+		}
+	}
+	con := &Conn{Conn: c, b: b[0], e: err, f: true}
+	if b[0] == 22 {
+		return tls.Server(con, tlsConfig), nil
+	}
+	return con, nil
 }
