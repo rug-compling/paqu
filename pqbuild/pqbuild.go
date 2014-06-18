@@ -250,57 +250,6 @@ Opties:
 		}
 	}
 
-	// set up database
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_info (
-		id          varchar(128) NOT NULL,
-		description varchar(128) NOT NULL COLLATE utf8_unicode_ci,
-		owner       varchar(128) NOT NULL DEFAULT 'none',
-		status      enum('QUEUED','WORKING','FINISHED','FAILED') NOT NULL DEFAULT 'QUEUED',
-		msg         varchar(256) NOT NULL,
-		nline       int          NOT NULL DEFAULT 0,
-		nword       int          NOT NULL DEFAULT 0,
-		params      varchar(128) NOT NULL,
-		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
-		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		active      datetime     NOT NULL,
-		UNIQUE INDEX (id),
-		INDEX (description),
-		INDEX (owner),
-		INDEX (status),
-		INDEX (created),
-		INDEX (active))
-		DEFAULT CHARACTER SET utf8;`)
-	util.CheckErr(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_corpora (
-		user    varchar(64) NOT NULL,
-		prefix  varchar(64) NOT NULL,
-		enabled tinyint     NOT NULL DEFAULT 1,
-		INDEX (user),
-		INDEX (prefix),
-		INDEX (enabled))
-		DEFAULT CHARACTER SET utf8;`)
-	util.CheckErr(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_ignore (
-		user    varchar(64) NOT NULL,
-		prefix  varchar(64) NOT NULL,
-		INDEX (user),
-		INDEX (prefix));`)
-	util.CheckErr(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS ` + Cfg.Prefix + `_users (
-		mail   varchar(64) NOT NULL,
-		pw     char(16)    NOT NULL,
-		sec    char(16)    NOT NULL,
-		active datetime    NOT NULL,
-		quotum int         NOT NULL DEFAULT 0,
-		UNIQUE INDEX (mail),
-		INDEX (active))
-		DEFAULT CHARACTER SET utf8;`)
-	util.CheckErr(err)
-
 	share := "PRIVATE"
 	if public == "1" {
 		share = "PUBLIC"
