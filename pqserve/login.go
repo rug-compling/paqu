@@ -15,13 +15,12 @@ func login(q *Context) {
 
 	mail := first(q.r, "mail")
 	pw := first(q.r, "pw")
-	sec := ""
 
 	if pw == "" {
 		pw = "none" // anders kan iemand na een eerdere inlog zonder password inloggen
 	}
 
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `sec` FROM `%s_users` WHERE `mail` = %q AND `pw` = %q", Cfg.Prefix, mail, pw))
+	rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_users` WHERE `mail` = %q AND `pw` = %q", Cfg.Prefix, mail, pw))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -29,12 +28,6 @@ func login(q *Context) {
 	}
 
 	if rows.Next() {
-		err := rows.Scan(&sec)
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			return
-		}
 		rows.Close()
 		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = '' WHERE `mail` = %q", Cfg.Prefix, mail))
 		if err != nil {
@@ -71,7 +64,6 @@ func login1(q *Context) {
 	}
 
 	auth := rand16()
-	sec := rand16()
 
 	rows, err := q.db.Query(fmt.Sprintf("SELECT * from `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail))
 	if err != nil {
@@ -81,9 +73,9 @@ func login1(q *Context) {
 	}
 	if rows.Next() {
 		rows.Close()
-		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = %q, `sec` = %q WHERE `mail` = %q", Cfg.Prefix, auth, sec, mail))
+		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = %q WHERE `mail` = %q", Cfg.Prefix, auth, mail))
 	} else {
-		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `pw`, `sec`, `quotum`) VALUES (%q, %q, %q, %d)", Cfg.Prefix, mail, auth, sec, Cfg.Maxwrd))
+		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `pw`, `quotum`) VALUES (%q, %q, %d)", Cfg.Prefix, mail, auth, Cfg.Maxwrd))
 	}
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
@@ -110,10 +102,7 @@ func login1(q *Context) {
 }
 
 func logout(q *Context) {
-	if q.auth {
-		q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `sec` = \"x\" WHERE `mail` = %q", Cfg.Prefix, q.user))
-		q.auth = false
-	}
+	q.auth = false
 	http.SetCookie(q.w, &http.Cookie{Name: "paqu-auth", Path: "/", MaxAge: -1})
 	writeHtml(q, "Uitgelogd", "Je bent uitgelogd")
 }
