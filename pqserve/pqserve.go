@@ -151,6 +151,8 @@ func main() {
 
 	handleFunc("info.html", static_info_html)
 
+	handleStatic("debug/env", environment)
+
 	handleStatic("busy.gif", static_busy_gif)
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)

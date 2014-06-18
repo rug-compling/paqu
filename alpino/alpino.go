@@ -65,7 +65,7 @@ func main() {
 			"/bin/bash",
 			"-c",
 			fmt.Sprintf(
-				"$ALPINO_HOME/bin/Alpino -fast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
+				"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
 				*opt_d, *opt_t * 1000, filename))
 		cmd.Env = []string{
 			"ALPINO_HOME=" + *opt_a,

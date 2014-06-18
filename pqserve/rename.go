@@ -46,22 +46,13 @@ func rename2(q *Context) {
 	}
 
 	d2 := maxtitlelen(strings.TrimSpace(first(q.r, "desc")))
-	if d2 == "" {
-		writeHtml(q, "Corpus niet hernoemd", "Corpus is niet hernoemd")
-	} else {
+	if d2 != "" {
 		_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q WHERE `id` = %q", Cfg.Prefix, d2, id))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
-		writeHtml(
-			q,
-			"Corpus hernoemd",
-			fmt.Sprintf(`
-Van: <em>%s</em><br>
-Naar: <em>%s</em>
-`, html.EscapeString(q.desc[id]), html.EscapeString(d2)))
-
 	}
+	http.Redirect(q.w, q.r, urlJoin(Cfg.Url, "corpora"), http.StatusTemporaryRedirect)
 }

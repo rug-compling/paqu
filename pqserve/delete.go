@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"net/http"
 	"os"
 	"path"
@@ -87,8 +86,5 @@ func remove(q *Context) {
 
 	logf("DELETED: %v", id)
 
-	writeHtml(
-		q,
-		"Corpus verwijderd",
-		fmt.Sprintf("Het corpus <em>%s</em> is verwijderd", html.EscapeString(desc)))
+	http.Redirect(q.w, q.r, urlJoin(Cfg.Url, "corpora"), http.StatusTemporaryRedirect)
 }

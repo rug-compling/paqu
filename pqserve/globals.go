@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net"
 	"regexp"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -210,29 +209,4 @@ func (p ProcessMap) String() string {
 	}
 	fmt.Fprint(&buf, "]")
 	return buf.String()
-}
-
-type Info struct {
-	QueueLen     int
-	QueueCap     int
-	NumCPU       int
-	NumCgoCall   int64
-	NumGoroutine int
-	Uptime       time.Duration
-	UptimeString string
-	Version      string
-}
-
-func GetInfo() interface{} {
-	d := time.Now().Sub(started)
-	return Info{
-		QueueLen:     len(chWork),
-		QueueCap:     cap(chWork),
-		NumCPU:       runtime.NumCPU(),
-		NumCgoCall:   runtime.NumCgoCall(),
-		NumGoroutine: runtime.NumGoroutine(),
-		Uptime:       d,
-		UptimeString: d.String(),
-		Version:      runtime.Version(),
-	}
 }
