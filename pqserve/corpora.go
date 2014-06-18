@@ -118,7 +118,7 @@ corpora = [`)
 function rm(idx) {
     if (window.confirm("Verwijderen: " + corpora[idx].title)) {
         var del = true;
-        if (corpora[idx].lines > 500) {
+        if (corpora[idx].lines >= 500) {
             del = window.confirm('Het corpus "' + corpora[idx].title + '" heeft ' + corpora[idx].lines +
                 ' regels\n\nWeet je zeker dat je dit wilt verwijderen?')
         }

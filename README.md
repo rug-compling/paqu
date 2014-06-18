@@ -52,7 +52,6 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
       - IPv6?
     - ✔ inlogrechten: deny/allow op basis van regexp mail-adressen
     - ✔ downloadrechten, alleen wie is ingelogd, alleen eigen corpora
-    - https
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
 	  - zie ook TODOs in work.go

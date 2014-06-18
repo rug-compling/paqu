@@ -5,9 +5,7 @@ body {
    background-attachment: scroll;
    background-repeat: no-repeat;
    font-family:verdana;
-   margin-top: 8em;
-   margin-left:20%;
-   margin-right:20%;
+   margin: 8em 20%;
 }
 
 #topmenu {  left: 20%; }
