@@ -13,14 +13,13 @@ import (
 
 func login(q *Context) {
 
-	mail := first(q.r, "mail")
 	pw := first(q.r, "pw")
 
 	if pw == "" {
 		pw = "none" // anders kan iemand na een eerdere inlog zonder password inloggen
 	}
 
-	rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_users` WHERE `mail` = %q AND `pw` = %q", Cfg.Prefix, mail, pw))
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `mail` FROM `%s_users` WHERE `pw` = %q", Cfg.Prefix, pw))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -28,7 +27,14 @@ func login(q *Context) {
 	}
 
 	if rows.Next() {
+		var mail string
+		err := rows.Scan(&mail)
 		rows.Close()
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
 		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = '' WHERE `mail` = %q", Cfg.Prefix, mail))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
@@ -87,8 +93,8 @@ func login1(q *Context) {
 		mail,
 		"Log in",
 		fmt.Sprintf(
-			"Visit this URL to log in: %s?mail=%s&pw=%s",
-			urlJoin(Cfg.Url, "login"), urlencode(mail), urlencode(auth)))
+			"Ga naar deze URL om in te loggen: %s?pw=%s",
+			urlJoin(Cfg.Url, "login"), urlencode(auth)))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
