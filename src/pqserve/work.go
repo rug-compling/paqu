@@ -157,7 +157,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		case "line":
 			tok = "tokenize_no_breaks.sh"
 		default:
-			err = errors.New("Not implemented: " + params)
+			err = errors.New("Niet geïmplementeerd: " + params)
 			return
 		}
 		cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", prepare, data, tok, stderr)
@@ -202,7 +202,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				return
 			}
 		} else {
-			err = fmt.Errorf("MySQL: Can't find quotum")
+			err = fmt.Errorf("MySQL: Kan quotum niet vinden")
 			quotumLock.Unlock()
 			return
 		}
@@ -294,11 +294,16 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		return
 	}
 	if len(errlines) == 0 {
-		fmt.Fprintf(fp, "Alle %d regels zijn succesvol geparst\n", nlines)
+		fmt.Fprintf(fp, "Alle %d regels zijn met succes geparst.\n", nlines)
 	} else {
 		fmt.Fprintf(
 			fp,
-			"%d van de %d regels zijn succesvol geparst\n\nEr waren problemen met de volgende %d regels:\n\n",
+			`"%d van de %d regels zijn met succes geparst.
+
+Er waren problemen met de %d regels hieronder. Waarschijnlijk was er bij
+die regels een time-out waardoor geen volledige parse gedaan kon worden.
+
+`,
 			nlines-len(errlines),
 			nlines,
 			len(errlines))
@@ -439,11 +444,11 @@ func work(task *Process) {
 
 	if err == nil {
 		logf("FINISHED: " + task.id)
-		sendmail(user, "Corpus Ready", fmt.Sprintf("Your corpus \"%s\" is ready at %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
+		sendmail(user, "Corpus klaar", fmt.Sprintf("Je corpus \"%s\" staat klaar op %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
 		if !task.killed {
-			sendmail(user, "Corpus error", fmt.Sprintf("There was an error with your corpus \"%s\": %v", title, err))
+			sendmail(user, "Corpus fout", fmt.Sprintf("Er ging iets fout met je corpus \"%s\": %v", title, err))
 		}
 		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
 	}

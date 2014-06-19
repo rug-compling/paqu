@@ -29,9 +29,9 @@ func doErr(q *Context, err error) bool {
 	var s1 string
 	_, filename, lineno, ok := runtime.Caller(1)
 	if ok {
-		s1 = fmt.Sprintf("ERROR: %v:%v: %v", path.Base(filename), lineno, s)
+		s1 = fmt.Sprintf("FOUT: %v:%v: %v", path.Base(filename), lineno, s)
 	} else {
-		s1 = "ERROR: " + s
+		s1 = "FOUT: " + s
 	}
 	chLog <- s1
 

@@ -207,7 +207,7 @@ func handleFunc(url string, handler func(*Context)) {
 					}
 				}
 			default:
-				http.Error(w, "Method "+r.Method+" is not allowd", http.StatusMethodNotAllowed)
+				http.Error(w, "Methode "+r.Method+" is niet toegestaan", http.StatusMethodNotAllowed)
 				return
 			}
 

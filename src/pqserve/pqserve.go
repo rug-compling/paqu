@@ -104,7 +104,7 @@ func main() {
 	if minversion(5, 7, 4) {
 		hasMaxStatementTime = true
 	}
-	logf("MySQL server version: %v (%s)", version, versionstring)
+	logf("MySQL server-versie: %v (%s)", version, versionstring)
 
 	for i := 0; i < Cfg.Maxjob; i++ {
 		wg.Add(1)
@@ -168,7 +168,11 @@ func main() {
 
 	handleStatic("up", up)
 
-	logf("Serving on %s", Cfg.Url)
+	var s string
+	if Cfg.Https {
+		s = "s"
+	}
+	logf("Server beschikbaar op http%s://127.0.0.1:%v", s, Cfg.Port)
 
 	addr := fmt.Sprint(":", Cfg.Port)
 	if Cfg.Https {
@@ -208,7 +212,7 @@ func Log(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-chGlobalExit:
-			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			http.Error(w, "Service niet beschikbaar", http.StatusServiceUnavailable)
 		default:
 			wg.Add(1)
 			defer wg.Done()
@@ -216,8 +220,8 @@ func Log(handler http.Handler) http.Handler {
 				logf("[%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
 				handler.ServeHTTP(w, r)
 			} else {
-				logf("ACCESS DENIED: [%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
-				http.Error(w, "Access denied", http.StatusForbidden)
+				logf("GEEN TOEGANG: [%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
+				http.Error(w, "Geen toegang", http.StatusForbidden)
 			}
 		}
 	})

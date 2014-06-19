@@ -194,7 +194,7 @@ Opties:
 
 	db = connect()
 	defer func() {
-		fmt.Println("Closing database connection...")
+		fmt.Println("Verbinding met database wordt gesloten...")
 		util.CheckErr(db.Close())
 	}()
 
@@ -203,7 +203,7 @@ Opties:
 	if err == nil && rows.Next() {
 		rows.Close()
 		if !(db_append || db_overwrite) {
-			util.CheckErr(fmt.Errorf("Database exists and no -a or -w specified"))
+			util.CheckErr(fmt.Errorf("De database bestaat al, en er is geen optie -a of -w"))
 		}
 		db_exists = true
 
@@ -347,7 +347,7 @@ Opties:
 			}
 			showmemstats()
 		} else {
-			util.CheckErr(fmt.Errorf("Invalid suffix for file '%s'", filename))
+			util.CheckErr(fmt.Errorf("Ongeldige extensie voor bestand '%s'", filename))
 		}
 	}
 	util.CheckErr(scanner.Err())

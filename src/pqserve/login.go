@@ -16,7 +16,7 @@ func login(q *Context) {
 	pw := first(q.r, "pw")
 
 	if pw == "" {
-		pw = "none" // anders kan iemand na een eerdere inlog zonder password inloggen
+		pw = "none" // anders kan iemand zonder password inloggen
 	}
 
 	rows, err := q.db.Query(fmt.Sprintf("SELECT `mail` FROM `%s_users` WHERE `pw` = %q", Cfg.Prefix, pw))
@@ -56,7 +56,7 @@ func login1(q *Context) {
 
 	if !accessLogin(mail) {
 		logf("LOGIN DENIED: %s %s %s", q.r.RemoteAddr, q.r.Method, q.r.URL)
-		http.Error(q.w, "Access denied", http.StatusForbidden)
+		http.Error(q.w, "Verboden toegang", http.StatusForbidden)
 		return
 	}
 

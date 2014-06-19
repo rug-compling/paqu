@@ -178,7 +178,7 @@ var (
 		"Ddet/crd", "Ddet/mod", "Dmod/-", "Dmod/app", "Dmod/cnj", "Dmod/crd", "Dmod/det", "Dmod/mod", "Dmod/rhd",
 		"Dmod/whd", "Dmwp/-", "Dobj1/-", "Dsat/dlink", "Dsu/-", "Dtag/dlink", "Dwhd/-"}
 
-	ConnectionClosed = errors.New("Connection Closed")
+	ConnectionClosed = errors.New("Verbinding gesloten")
 
 	versionstring string
 	version       [3]int

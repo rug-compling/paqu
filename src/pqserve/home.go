@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -124,8 +123,9 @@ func home(q *Context) {
 			zin.words = strings.Fields(s)
 			rows.Close()
 		} else {
-			fmt.Printf("Missing sentence for file id %d\n", zin.file)
-			os.Exit(1)
+			doErr(q, fmt.Errorf("Zin ontbreekt voor bestand met id %v\n", zin.file))
+			busyClear(q)
+			return
 		}
 
 		// Matchende dependency relations bij xml-bestand opvragen

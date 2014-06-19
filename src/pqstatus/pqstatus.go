@@ -103,7 +103,7 @@ func main() {
 		return
 	}
 	sort.Strings(dirnames)
-	fmt.Print("\nVERWEESDE DIRECTORIES\n\n")
+	fmt.Print("\nVERWEESDE DIRECTORY'S\n\n")
 	for _, d := range dirnames {
 		fmt.Println(d)
 	}
@@ -114,17 +114,3 @@ func main() {
 func dbopen() (*sql.DB, error) {
 	return sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
