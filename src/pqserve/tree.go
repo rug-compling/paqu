@@ -3,8 +3,7 @@ package main
 //. C-code voor omzetten van dot naar svg
 
 /*
-#cgo LDFLAGS: -Wl,-rpath=/net/aps/64/opt/graphviz-2.30.1/lib -L/net/aps/64/opt/graphviz-2.30.1/lib -lgvc
-#cgo CFLAGS: -I/net/aps/64/opt/graphviz-2.30.1/include -I/net/aps/64/opt/graphviz-2.30.1/include/graphviz
+#cgo LDFLAGS: -lgvc
 #include <graphviz/gvc.h>
 #include <graphviz/cgraph.h>
 #include <stdlib.h>

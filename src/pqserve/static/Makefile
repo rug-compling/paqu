@@ -18,4 +18,4 @@ DEPS = \
 	./mkstatic $(DEPS) > $@
 
 mkstatic: mkstatic.go
-	$(VARS) go build $(OPTS) $^
+	go build $(OPTS) $^

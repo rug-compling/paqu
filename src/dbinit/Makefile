@@ -2,4 +2,4 @@
 include ../Makefile.cfg
 
 ../../bin/dbinit: *.go
-	$(VARS) go build -o $@ $(OPTS) .
+	go build -o $@ $(OPTS) .

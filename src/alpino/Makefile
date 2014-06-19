@@ -6,7 +6,7 @@ include ../Makefile.cfg
 all: ../../bin/alpino ../../bin/prepare testdoc-ascii.txt testdoc-latin.txt testdoc-utf16.txt testdoc-windows.txt
 
 ../../bin/alpino: *.go
-	$(VARS) go build -o $@ $(OPTS) .
+	go build -o $@ $(OPTS) .
 
 ../../bin/prepare: prepare.l
 	flex prepare.l

@@ -1,4 +1,11 @@
 
+info:
+	@echo
+	@echo Kopieer Makefile.cfg.example naar Makefile.cfg
+	@echo Pas Makefile.cfg aan aan de lokale situatie
+	@echo Run daarna: make all
+	@echo
+
 all:
 	mkdir -p ../bin
 	make -C alpino

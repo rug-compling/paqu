@@ -2,5 +2,5 @@
 include ../Makefile.cfg
 
 ../../bin/rmuser: *.go
-	$(VARS) go build -o $@ $(OPTS) .
+	go build -o $@ $(OPTS) .
 

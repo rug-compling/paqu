@@ -1,10 +1,24 @@
 
-# Pas dit bestand aan en bewaar als 'Makefile.cfg'
+# Pas dit bestand aan en bewaar het als 'Makefile.cfg'
 
-# variabelen die gezet moet worden voor de aanroep van 'go'
-#VARS = GOPATH=$(HOME)/go
-VARS =
+#### Variabelen voor Make zelf
 
-# extra opties voor 'go'
+# Als je geen DbXML hebt, gebruik dan -tags nodbxml
+#TAGS = -tags nodbxml
+TAGS =
+
+# Extra opties voor 'go'
 OPTS = -v
+
+#### Environment-variabelen
+
+# Als de Go-pakketten die nodig zijn niet aanwezig zijn kun je de
+# versies die bij PaQu zijn meegeleverd gebruiken. Zet dan GOPATH
+# naar de directory '_vendor'
+# export GOPATH=/path/naar/paqu/_vendor
+
+# Zonodig extra paden naar C-headers en C-libraries
+# Bijvoorbeeld als DbXML op een niet-stadaard lokatie staat
+export CPATH=
+export LIBRARY_PATH=
 
