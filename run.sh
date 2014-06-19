@@ -10,5 +10,5 @@ then
     sleep 2
     echo Restarting pqserve
     cat pqserve.out
-    pqserve/pqserve &> pqserve.out &
+    bin/pqserve &> pqserve.out &
 fi

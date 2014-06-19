@@ -7,5 +7,5 @@ else
  TAGS = -tags nodbxml
 endif
 
-pqbuild: *.go
-	$(VARS) go build $(TAGS) $(OPTS) .
+../../bin/pqbuild: *.go
+	$(VARS) go build -o $@ $(TAGS) $(OPTS) .

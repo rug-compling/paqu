@@ -7,6 +7,6 @@ else
  TAGS = -tags nodbxml
 endif
 
-pqserve: *.go static/*.*
+../../bin/pqserve: *.go static/*.* static/Makefile
 	make -C static
-	$(VARS) go build $(TAGS) $(OPTS) .
+	$(VARS) go build -o $@ $(TAGS) $(OPTS) .

@@ -1,5 +1,6 @@
 
 all:
+	mkdir -p ../bin
 	make -C alpino
 	make -C dbinit
 	make -C pqbuild

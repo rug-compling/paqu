@@ -77,7 +77,7 @@ sh = "/bin/sh"
 
 # Het path naar alle hulpprogramma's die gebruikt worden door de server,
 # met uitzondering van programma's onder ALPINO_PATH.
-path = "/local/opt/paqu/pqbuild:/local/opt/paqu/alpino:/bin:/usr/bin"
+path = "/local/opt/paqu/bin:/bin:/usr/bin"
 
 # De root-directory van Alpino (ALPINO_PATH). Ook als er een
 # Alpino-server wordt gebruikt, is dit nodig, omdat de tokenizer van

@@ -119,6 +119,7 @@ alles:
   - foutafhandeling als gebruiker een leeg bestand uploadt
   - fout van shell: niet de errorcode, maar de laatste regel(s) van
     stderr gebruiken als melding aan de gebruiker
+  - https zonder http? de combinatie maakt het erg ingewikkeld
 
 ----------------------------------------------------------------
 
