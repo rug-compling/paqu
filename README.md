@@ -74,7 +74,7 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
     - Introtekst op hoofdpagina
     - Tekst achter Meer info...
   - Interface
-    - Algemene opmaak
+    - ✔ Algemene opmaak
     - Beheer van corpora
       - uploaden:
         - meerdere tekstdocumenten in een zipbestand
@@ -95,22 +95,16 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
   - Code
     - Organisatie + documentatie
     - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
-  - Dependencies
-    - externe go-pakketten opnemen onder directory `_vendor`
+  - ✔ Dependencies
+    - ✔ externe go-pakketten opnemen onder directory `_vendor`
   - Voor later
     - Misschien: subboompjes met statistiek en zoeklink, vergt meer info in database
-  - Licentie
-  - Queue
-    - Wat als permanent sneller corpora worden geüpload dan er verwerkt
-      kunnen worden. Moet er een maximum op de grootte van de queue? En
-      wat moet er dan gebeuren als de queue vol is?
-
+  - ✔ Licentie
 
 ### Diversen ###
 
 alles:
 
-  - alle tekst in het Nederlands
   - zie TODO in diverse bestanden
 
 `pqserve`:
@@ -133,8 +127,6 @@ Een Linux-machine, veel geheugen, veel processoren...
 
 pakketten:
 
- - `mercurial`
- - `git`
  - `graphviz-dev` of `libgraphviz-dev`
 
 overige software:

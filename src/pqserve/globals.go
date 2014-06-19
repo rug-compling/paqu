@@ -42,6 +42,7 @@ type Config struct {
 	Timeout int
 
 	Https     bool
+	Httpdual  bool
 	Remote    bool
 	Forwarded bool
 

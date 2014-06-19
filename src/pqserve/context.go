@@ -199,7 +199,7 @@ func handleFunc(url string, handler func(*Context)) {
 						logerr(err)
 						return
 					}
-					q.form, err = reader.ReadForm(Cfg.Maxmem / 10)
+					q.form, err = reader.ReadForm(Cfg.Maxmem * 1024 * 1024)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						logerr(err)

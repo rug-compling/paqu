@@ -298,7 +298,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	} else {
 		fmt.Fprintf(
 			fp,
-			`"%d van de %d regels zijn met succes geparst.
+			`%d van de %d regels zijn met succes geparst.
 
 Er waren problemen met de %d regels hieronder. Waarschijnlijk was er bij
 die regels een time-out waardoor geen volledige parse gedaan kon worden.

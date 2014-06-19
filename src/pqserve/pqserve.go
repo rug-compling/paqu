@@ -169,16 +169,26 @@ func main() {
 	handleStatic("up", up)
 
 	var s string
-	if Cfg.Https {
+	if Cfg.Https || Cfg.Httpdual {
 		s = "s"
 	}
 	logf("Server beschikbaar op http%s://127.0.0.1:%v", s, Cfg.Port)
 
 	addr := fmt.Sprint(":", Cfg.Port)
-	if Cfg.Https {
-		// Dit is ingewikkeld omdat ik zowel http als https wil afhandelen.
-		// Anders zou ik gewoon ListenAndServeTLS kunnen gebruiken.
+	if Cfg.Https || Cfg.Httpdual {
+
+		if !Cfg.Httpdual {
+
+			// De simpele oplossing: accepteer alleen https.
+
+			logerr(http.ListenAndServeTLS(addr, path.Join(paqudir, "cert.pem"), path.Join(paqudir, "key.pem"), Log(http.DefaultServeMux)))
+			return
+
+		}
+
+		// De ingewikkelde oplossing: acepteer zowel http als https.
 		// Http wordt omgezet in redirect naar https.
+
 		if tlsConfig.NextProtos == nil {
 			tlsConfig.NextProtos = []string{"http/1.1"}
 		}
@@ -266,6 +276,10 @@ func (l *SplitListener) Accept() (net.Conn, error) {
 	c, err := l.Listener.Accept()
 	if err != nil {
 		return nil, err
+	}
+	if tc, ok := c.(*net.TCPConn); ok {
+		tc.SetKeepAlive(true)
+		tc.SetKeepAlivePeriod(3 * time.Minute)
 	}
 	b := make([]byte, 1)
 	_, err = c.Read(b)

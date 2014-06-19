@@ -69,8 +69,8 @@ maxwrd = 1000000
 # Maximum geheugen dat door het programma gebruikt mag worden bij het
 # inlezen van een door de gebruiker geüpload bestand. Als het bestand
 # groter is wordt het tijdelijk op schijf bewaard.
-# In bytes.
-maxmem = 54098268160
+# In Megabytes.
+maxmem = 500
 
 # De shell binary, inclusief path
 sh = "/bin/sh"
@@ -100,6 +100,11 @@ secret = "Verander dit in een andere willekeurige tekst"
 # $PAQU. Laat het certificaat ondertekenen door een Certificaatautoriteit,
 # zie: http://nl.wikipedia.org/wiki/Certificaatautoriteit
 https = false
+
+# Accepteer zowel https als http? Http wordt dan omgezet in een
+# redirect naar https. Dit is enigszins experimenteel. Als dit
+# problemen veroorzaakt, gebruik dan alleen de optie https.
+httpdual = true
 
 # Als extra veiligheidsmaatregel kan het remote ip-adres gebruikt worden
 # als deel van de identificatie van de gebruiker. Een log-in is dan
