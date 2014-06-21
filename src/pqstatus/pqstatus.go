@@ -59,14 +59,14 @@ func main() {
 			Cfg.Prefix))
 	util.CheckErr(err)
 
-	fmt.Print("\nCORPORA\n\nlaatst gebruikt\t\t\tid\t\t\ttokens\t\tstatus\t\teigenaar\n")
+	fmt.Print("\nCORPORA\n\nlaatst gebruikt\tid\t\t\ttokens\t\tstatus\t\teigenaar\n")
 	for rows.Next() {
 		var id, owner, status string
 		var nword int
 		var active time.Time
 		util.CheckErr(rows.Scan(&id, &owner, &status, &nword, &active))
 		fmt.Printf("%v\t%-23s\t%-15s\t%-10s\t%v\n",
-			active,
+			date(active),
 			id,
 			fmt.Sprint(nword),
 			status,
@@ -79,14 +79,14 @@ func main() {
 			"SELECT `mail`, `active`, `quotum` FROM `%s_users` ORDER BY `active` DESC",
 			Cfg.Prefix))
 	util.CheckErr(err)
-	fmt.Print("\n\nGEBRUIKERS\n\nlaatst actief\t\t\tquotum\t\tmail\n")
+	fmt.Print("\n\nGEBRUIKERS\n\nlaatst actief\tquotum\t\tmail\n")
 	for rows.Next() {
 		var mail string
 		var quotum int
 		var active time.Time
 		util.CheckErr(rows.Scan(&mail, &active, &quotum))
 		fmt.Printf("%v\t%-15s\t%v\n",
-			active,
+			date(active),
 			fmt.Sprint(quotum),
 			mail)
 	}
@@ -109,6 +109,10 @@ func main() {
 	}
 	fmt.Println()
 
+}
+
+func date(t time.Time) string {
+	return fmt.Sprintf("%02d-%02d-%d", t.Day(), t.Month(), t.Year())
 }
 
 func dbopen() (*sql.DB, error) {
