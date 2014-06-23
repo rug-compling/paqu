@@ -66,6 +66,8 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		select {
 		case <-chGlobalExit:
 			return
+		case <-task.chKill:
+			return
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
@@ -79,6 +81,8 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		for _, file := range files {
 			select {
 			case <-chGlobalExit:
+				return
+			case <-task.chKill:
 				return
 			default:
 			}
@@ -462,6 +466,10 @@ func kill(id string) {
 		done := false
 
 		task.lock.Lock()
+		if task.killed {
+			task.lock.Unlock()
+			return
+		}
 		task.killed = true
 		if task.queued {
 			done = true

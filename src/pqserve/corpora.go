@@ -223,7 +223,7 @@ function formtest() {
 				p := 0
 				files, err := ioutil.ReadDir(path.Join(paqudir, "data", corpus.id, "xml"))
 				if err == nil {
-					p = 1 + int(float64(len(files)) / float64(corpus.nline) * 98 + .5)
+					p = 1 + int(float64(len(files))/float64(corpus.nline)*98+.5)
 				}
 				st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 			}
@@ -231,12 +231,12 @@ function formtest() {
 			fmt.Fprintf(q.w, "<td class=\"even\">%s\n", html.EscapeString(corpus.description))
 
 			if corpus.status == "gereed" {
-				fmt.Fprintf(q.w, "<td class=\"odd right\">%d\n", corpus.nline)
+				fmt.Fprintf(q.w, "<td class=\"odd right\">%s\n", iformat(corpus.nline))
 				fmt.Fprintf(q.w, "<td class=\"even\">%s\n", corpus.shared)
 			} else {
 				n := ""
 				if corpus.nline > 0 {
-					n = fmt.Sprint(corpus.nline)
+					n = iformat(corpus.nline)
 				}
 				fmt.Fprintf(q.w, "<td class=\"odd right\">%s\n<td class=\"even\">\n", n)
 			}
