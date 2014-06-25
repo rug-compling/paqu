@@ -96,6 +96,7 @@ Syntax: %s [-w]
 
 	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_users (
 		mail   varchar(64) NOT NULL,
+		sec    char(16)    NOT NULL,
 		pw     char(16)    NOT NULL,
 		active datetime    NOT NULL,
 		quotum int         NOT NULL DEFAULT 0,

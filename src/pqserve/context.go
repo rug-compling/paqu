@@ -18,6 +18,7 @@ type Context struct {
 	r          *http.Request
 	user       string
 	auth       bool
+	sec        string
 	quotum     int
 	db         *sql.DB
 	opt_db     []string
@@ -82,11 +83,15 @@ func handleFunc(url string, handler func(*Context)) {
 
 			// Is de gebruiker ingelogd?
 			if auth, err := r.Cookie("paqu-auth"); err == nil {
-				q.user = authcookie.Login(auth.Value, []byte(getRemote(q)+Cfg.Secret))
+				s := strings.SplitN(authcookie.Login(auth.Value, []byte(getRemote(q)+Cfg.Secret)), "|", 2)
+				if len(s) == 2 {
+					q.user = s[1]
+					q.sec = s[0]
+				}
 			}
 			if q.user != "" {
 				rows, err := q.db.Query(fmt.Sprintf(
-					"SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, q.user))
+					"SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q AND `sec` = %q", Cfg.Prefix, q.user, q.sec))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
