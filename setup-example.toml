@@ -154,7 +154,7 @@ directories = [
 
 [[view]]
 allow = true
-addr  = [ "127.0.0.1/8", "123.123.123.123" ]
+addr  = [ "127.0.0.1/8", "::1", "123.123.123.123" ]
 
 [[view]]
 allow = false

@@ -47,9 +47,9 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
         corpora van een enkele gerbuiker in de wachtrij staan de
         verwerking afwisselen met verwerking corpora van andere
         gebruikers.
-  - Toegang
+  - ✔ Toegang
     - ✔ leesrechten: deny/allow op basis van ip-adressen
-      - IPv6?
+      - ✔ IPv6
     - ✔ inlogrechten: deny/allow op basis van regexp mail-adressen
     - ✔ downloadrechten, alleen wie is ingelogd, alleen eigen corpora
   - Alpino-server

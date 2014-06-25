@@ -62,6 +62,13 @@ func accessView(addr string) bool {
 		ad = addr[:i]
 	}
 
+	// haken weghalen bij IPv6
+	if l := len(ad); l > 1 {
+		if ad[0] == '[' && ad[l-1] == ']' {
+			ad = ad[1 : l-1]
+		}
+	}
+
 	// ip parsen
 	ip := net.ParseIP(ad)
 	if ip == nil {
