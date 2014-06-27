@@ -18,7 +18,7 @@ OPTS = -v
 # export GOPATH=/path/naar/paqu/_vendor
 
 # Zonodig extra paden naar C-headers en C-libraries
-# Bijvoorbeeld als DbXML op een niet-stadaard lokatie staat
+# Bijvoorbeeld als DbXML niet op een standaardlokatie staat
 export CPATH=
 export LIBRARY_PATH=
 
