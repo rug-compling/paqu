@@ -58,6 +58,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	dirname := path.Join(paqudir, "data", task.id)
 	data := path.Join(dirname, "data")
 	xml := path.Join(dirname, "xml")
+	dact := path.Join(dirname, "data.dact")
 	stdout := path.Join(dirname, "stdout.txt")
 	stderr := path.Join(dirname, "stderr.txt")
 	summary := path.Join(dirname, "summary.txt")
@@ -71,7 +72,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
-		for _, f := range []string{data, data + ".lines", stdout, stderr, summary} {
+		for _, f := range []string{data, data + ".lines", dact, stdout, stderr, summary} {
 			logerr(gz(f))
 		}
 		files, e := ioutil.ReadDir(xml)
@@ -329,6 +330,10 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 	err = run(cmd, task.chKill, nil)
 	if err != nil {
 		return
+	}
+
+	if Cfg.Dact {
+		err = makeDact(dact, xml, task.chKill)
 	}
 
 	return

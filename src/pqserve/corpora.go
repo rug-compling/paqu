@@ -184,7 +184,10 @@ function formtest() {
 <li><a href="download?dl=summary&id=%s">overzicht</a>
 <li><a href="download?dl=zinnen&id=%s">download zinnen</a>
 <li><a href="download?dl=xml&id=%s">download xml</a>
-`, id, id, id, id, id)
+`, id, id, id, id, id, id)
+					if has_dbxml && Cfg.Dact {
+						fmt.Fprintf(q.w, `<li><a href="download?dl=dact&id=%s">download dact</a>`, id)
+					}
 				}
 				fmt.Fprintf(q.w, `
 <li><a href="download?dl=stdout&id=%s">download stdout</a>

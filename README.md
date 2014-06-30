@@ -80,10 +80,10 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
         - meerdere tekstdocumenten in een zipbestand
         - dact
         - regels die al een label hebben
-      - downloaden:
+      - ✔ downloaden:
         - ✔ xml in zip
-        - dact
-		  - setup-optie: wel/niet aanbieden van dact download. Als wel:
+        - ✔ dact
+		  - ✔ setup-optie: wel/niet aanbieden van dact download. Als wel:
             direct bij verwerking dact aanmaken
       - ✔ browse: zinnen, stdout, stderr
       - ✔ modernere interface: verwijderen, opties

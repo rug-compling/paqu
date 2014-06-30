@@ -66,6 +66,14 @@ maxjob = 10
 # programma `setquota`.
 maxwrd = 1000000
 
+# Laat gebruikers corpora downloaden in dact-formaat?
+# Als dit aan staat gebruiken corpora meer dan twee keer zoveel schijfruimte.
+# Als dit uit staat kunnen gebruikers nog wel corpora in dact-formaat uploaden,
+# maar die corpora worden uitgepakt, en het dact-bestand wordt verwijderd.
+# Het veranderen van deze optie van false naar true heeft alleen effect voor
+# nieuwe corpora.
+dact = true
+
 # De shell binary, inclusief path
 sh = "/bin/sh"
 
