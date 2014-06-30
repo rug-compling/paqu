@@ -77,8 +77,8 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
     - ✔ Algemene opmaak
     - Beheer van corpora
       - uploaden:
-        - meerdere tekstdocumenten in een zipbestand
-        - dact
+        - meerdere tekstdocumenten in een zipbestand (?)
+        - ✔ dact
         - regels die al een label hebben
       - ✔ downloaden:
         - ✔ xml in zip
@@ -121,7 +121,7 @@ alles:
 
 ### Systeemeisen ###
 
-Een Linux-machine, veel geheugen, veel processoren...
+Een 64-bit Linux-machine (amd64), veel geheugen, veel processoren...
 
 ### Wat je nodig hebt, op Debian ###
 

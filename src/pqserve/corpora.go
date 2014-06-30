@@ -18,6 +18,7 @@ type Corpus struct {
 	nline       int
 	msg         string
 	shared      string
+	params      string
 }
 
 var (
@@ -42,7 +43,7 @@ func corpora(q *Context) {
 
 	rows, err := q.db.Query(
 		fmt.Sprintf(
-			"SELECT `id`, `description`, `status`, `nline`, `nword`, `msg`, `shared` FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
+			"SELECT `id`, `description`, `status`, `nline`, `nword`, `msg`, `shared`, `params`FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
 			Cfg.Prefix,
 			q.user))
 	if err != nil {
@@ -53,10 +54,10 @@ func corpora(q *Context) {
 
 	corpora := make([]Corpus, 0)
 	gebruikt := 0
-	var id, desc, status, msg, shared string
+	var id, desc, status, msg, shared, params string
 	var zinnen, woorden int
 	for rows.Next() {
-		err := rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared)
+		err := rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared, &params)
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -68,8 +69,9 @@ func corpora(q *Context) {
 			description: desc,
 			status:      tr[status],
 			nline:       zinnen,
-			shared:      tr[shared],
 			msg:         msg,
+			shared:      tr[shared],
+			params:      params,
 		})
 	}
 
@@ -223,12 +225,14 @@ function formtest() {
 				processLock.RUnlock()
 				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
 			} else if st == "bezig" {
-				p := 0
-				files, err := ioutil.ReadDir(path.Join(paqudir, "data", corpus.id, "xml"))
-				if err == nil {
-					p = 1 + int(float64(len(files))/float64(corpus.nline)*98+.5)
+				if corpus.params != "dact" {
+					p := 0
+					files, err := ioutil.ReadDir(path.Join(paqudir, "data", corpus.id, "xml"))
+					if err == nil {
+						p = 1 + int(float64(len(files))/float64(corpus.nline)*98+.5)
+					}
+					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 				}
-				st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 			}
 			fmt.Fprintf(q.w, "<td class=\"%s first\">%s\n", cl, st)
 			fmt.Fprintf(q.w, "<td class=\"even\">%s\n", html.EscapeString(corpus.description))
@@ -268,13 +272,18 @@ function formtest() {
 	<select name="how">
 	  <option value="run">Doorlopende tekst</option>
 	  <option value="line">Een zin per regel</option>
+`, MAXTITLELEN+MAXTITLELEN/4, MAXTITLELEN)
+	if has_dbxml {
+		fmt.Fprintln(q.w, "<option value=\"dact\">Dact-bestand</option>")
+	}
+	fmt.Fprint(q.w, `
 	</select>
       <p>
 	<input type="submit">
     </form>
 </body>
 </html>
-`, MAXTITLELEN+MAXTITLELEN/4, MAXTITLELEN)
+`)
 
 }
 
@@ -326,7 +335,11 @@ func submitCorpus(q *Context) {
 	}
 
 	if len(q.form.File["data"]) > 0 {
-		fpout, err := os.Create(path.Join(fulldirname, "data"))
+		fname := "data"
+		if how == "dact" {
+			fname = "data.dact"
+		}
+		fpout, err := os.Create(path.Join(fulldirname, fname))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)

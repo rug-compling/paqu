@@ -5,14 +5,22 @@ package main
 import (
 	"github.com/pebbe/dbxml"
 
+	"encoding/xml"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 )
 
 const (
 	has_dbxml = true
+)
+
+var (
+	reFilechars = regexp.MustCompile("[^-._a-zA-Z0-9]+")
 )
 
 func get_dact(archive, filename string) ([]byte, error) {
@@ -62,4 +70,117 @@ func makeDact(dact, xml string, chKill chan bool) error {
 		}
 	}
 	return nil
+}
+
+func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nline int, err error) {
+
+	os.Mkdir(xmldir, 0777)
+
+	dc, err := dbxml.Open(dact)
+	if err != nil {
+		return 0, 0, fmt.Errorf("Openen dact-bestand: %s", err)
+	}
+	defer func() {
+		dc.Close()
+		if !Cfg.Dact {
+			os.Remove(dact)
+		}
+	}()
+
+	docs, err := dc.All()
+	if err != nil {
+		return 0, 0, fmt.Errorf("Lezen dact-bestand: %s", err)
+	}
+	defer docs.Close()
+
+	fperr, err := os.Create(stderr)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer fperr.Close()
+
+	fplines, err := os.Create(data + ".lines")
+	if err != nil {
+		return 0, 0, err
+	}
+	defer fplines.Close()
+
+	tokens = 0
+	nline = 0
+	for docs.Next() {
+
+		select {
+		case <-chGlobalExit:
+			return 0, 0, errors.New("Global Exit")
+		case <-chKill:
+			return 0, 0, errors.New("Killed")
+		default:
+		}
+
+		nline++
+
+		name := docs.Name()
+		data := []byte(docs.Content())
+
+		if strings.HasSuffix(name, ".xml") {
+			name = name[:len(name)-4]
+		}
+		name = encode_filename(name)
+
+		fp, err := os.Create(path.Join(xmldir, name+".xml"))
+		if err != nil {
+			return 0, 0, err
+		}
+		_, err = fp.Write(data)
+		fp.Close()
+		if err != nil {
+			return 0, 0, err
+		}
+
+		alpino := Alpino_ds_no_node{}
+		err = xml.Unmarshal(data, &alpino)
+		if err != nil {
+			return 0, 0, fmt.Errorf("Parsen van %q uit dact-bestand: %s", docs.Name(), err)
+		}
+		tokens += len(strings.Fields(alpino.Sentence))
+		fmt.Fprintf(fplines, "%s|%s\n", name, strings.TrimSpace(alpino.Sentence))
+		for _, c := range alpino.Comments {
+			if strings.HasPrefix(c.Comment, "Q#") {
+				a := strings.SplitN(c.Comment, "|", 2)
+				if len(a) == 2 {
+					fmt.Fprintf(fperr, "Q#%s|%s\n", name, strings.TrimSpace(a[1]))
+					break
+				}
+			}
+		}
+	}
+
+	return tokens, nline, nil
+}
+
+func repl_filechar(s string) string {
+	a := make([]string, 0, 5)
+	for _, b := range []byte(s) {
+		a = append(a, fmt.Sprintf("_%2X", b))
+	}
+	return strings.Join(a, "")
+}
+
+func encode_filename(s string) string {
+
+	if s == "" {
+		return "_"
+	}
+
+	s = strings.Replace(s, "_", "__", -1)
+
+	s = reFilechars.ReplaceAllStringFunc(s, repl_filechar)
+
+	if s[0] == '.' {
+		s = "_2E" + s[1:]
+	}
+	if s[0] == '-' {
+		s = "_2D" + s[1:]
+	}
+	return s
 }

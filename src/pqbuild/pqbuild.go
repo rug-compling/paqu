@@ -104,10 +104,11 @@ var (
 	buffer       [5]bytes.Buffer
 	buf_has_data [5]bool
 
-	db_append    bool
-	db_overwrite bool
-	db_exists    bool
-	db_makeindex bool
+	db_append       bool
+	db_overwrite    bool
+	db_exists       bool
+	db_makeindex    bool
+	db_updatestatus bool
 
 	memstats runtime.MemStats
 
@@ -136,6 +137,8 @@ func main() {
 			db_overwrite = true
 		} else if os.Args[1] == "-i" {
 			db_makeindex = false
+		} else if os.Args[1] == "-s" {
+			db_updatestatus = false
 		} else {
 			break
 		}
@@ -144,13 +147,14 @@ func main() {
 
 	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] [-s] id description owner public < bestandnamen
 
 Opties:
 
  -a : toevoegen aan bestaande database
  -w : bestaande database overschrijven
  -i : geen tabel van woord naar lemmas aanmaken
+ -s : status niet bijwerken als klaar
 
   id:
   description:
@@ -515,8 +519,13 @@ Opties:
 		util.CheckErr(rows.Scan(&lines))
 		rows.Close()
 	}
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW() WHERE `id` = %q",
-		Cfg.Prefix, lines, prefix))
+	if db_updatestatus {
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW() WHERE `id` = %q",
+			Cfg.Prefix, lines, prefix))
+	} else {
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW() WHERE `id` = %q",
+			Cfg.Prefix, lines, prefix))
+	}
 	util.CheckErr(err)
 
 	user := owner

@@ -101,171 +101,146 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	default:
 	}
 
-	reuse := false
-	reuse_more := false
-	if files, e := ioutil.ReadDir(xml); e == nil && len(files) > 0 {
-		reuse = true
-		done := make(map[string]bool)
-		for _, f := range files {
-			b, e := ioutil.ReadFile(path.Join(xml, f.Name()))
+	if params == "dact" {
+		var tokens, nlines int
+		tokens, nlines, err = unpackDact(data, xml, dact, stderr, task.chKill)
+		if err != nil {
+			return
+		}
+		err = do_quotum(db, task.id, user, tokens, nlines)
+		if err != nil {
+			os.Remove(data)
+			os.Remove(data + ".lines")
+			os.Remove(dact)
+			os.Remove(stderr)
+			os.RemoveAll(xml)
+			return
+		}
+	} else { // if !dact
+		reuse := false
+		reuse_more := false
+		if files, e := ioutil.ReadDir(xml); e == nil && len(files) > 0 {
+			reuse = true
+			done := make(map[string]bool)
+			for _, f := range files {
+				b, e := ioutil.ReadFile(path.Join(xml, f.Name()))
+				if e != nil {
+					err = e
+					return
+				}
+				if strings.Index(string(b), "</alpino_ds>") > 0 {
+					done[f.Name()] = true
+				}
+			}
+			fpin, e := os.Open(data + ".lines")
 			if e != nil {
 				err = e
 				return
 			}
-			if strings.Index(string(b), "</alpino_ds>") > 0 {
-				done[f.Name()] = true
-			}
-		}
-		fpin, e := os.Open(data + ".lines")
-		if e != nil {
-			err = e
-			return
-		}
-		fpout, e := os.Create(data + ".lines.tmp")
-		if e != nil {
-			fpin.Close()
-			err = e
-			return
-		}
-		nword := 0
-		r := util.NewReader(fpin)
-		for {
-			line, e := r.ReadLineString()
+			fpout, e := os.Create(data + ".lines.tmp")
 			if e != nil {
-				fpout.Close()
 				fpin.Close()
-				if e != io.EOF {
-					err = e
-					return
-				}
-				break
-			}
-			nword += len(strings.Fields(line))
-			key := line[:strings.Index(line, "|")]
-			if !done[key+".xml"] {
-				fmt.Fprintln(fpout, line)
-				reuse_more = true
-			}
-		}
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
-			Cfg.Prefix, nword, task.id))
-		if err != nil {
-			return
-		}
-
-	} else { // if !reuse
-		var prepare, tok string
-		switch params {
-		case "run":
-			tok = "tokenize.sh"
-			prepare = "-r"
-		case "line":
-			tok = "tokenize_no_breaks.sh"
-		default:
-			err = errors.New("Niet geïmplementeerd: " + params)
-			return
-		}
-		cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", prepare, data, tok, stderr)
-		chPipe := make(chan string)
-		chTokens := make(chan int, 2)
-		var fp *os.File
-		fp, err = os.Create(data + ".lines")
-		if err != nil {
-			return
-		}
-		go func() {
-			var tokens, lineno int
-			for line := range chPipe {
-				tokens += len(strings.Fields(line))
-				lineno++
-				fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
-			}
-			fp.Close()
-			chTokens <- tokens
-			chTokens <- lineno
-		}()
-		err = run(cmd, task.chKill, chPipe)
-		if err != nil {
-			return
-		}
-		tokens := <-chTokens
-		nlines := <-chTokens
-
-		quotumLock.Lock()
-		quotum := 0
-		gebruikt := 0
-		rows, err = db.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
-		if err != nil {
-			quotumLock.Unlock()
-			return
-		}
-		if rows.Next() {
-			err = rows.Scan(&quotum)
-			rows.Close()
-			if err != nil {
-				quotumLock.Unlock()
+				err = e
 				return
 			}
-		} else {
-			err = fmt.Errorf("MySQL: Kan quotum niet vinden")
-			quotumLock.Unlock()
-			return
-		}
-		if quotum > 0 {
-			rows, err = db.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
+			nword := 0
+			r := util.NewReader(fpin)
+			for {
+				line, e := r.ReadLineString()
+				if e != nil {
+					fpout.Close()
+					fpin.Close()
+					if e != io.EOF {
+						err = e
+						return
+					}
+					break
+				}
+				nword += len(strings.Fields(line))
+				key := line[:strings.Index(line, "|")]
+				if !done[key+".xml"] {
+					fmt.Fprintln(fpout, line)
+					reuse_more = true
+				}
+			}
+
+			_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
+				Cfg.Prefix, nword, task.id))
 			if err != nil {
-				quotumLock.Unlock()
 				return
 			}
-			for rows.Next() {
-				var n int
-				err = rows.Scan(&n)
-				if err != nil {
-					quotumLock.Unlock()
-					return
+
+		} else { // if !reuse
+			var prepare, tok string
+			switch params {
+			case "run":
+				tok = "tokenize.sh"
+				prepare = "-r"
+			case "line":
+				tok = "tokenize_no_breaks.sh"
+			default:
+				err = errors.New("Niet geïmplementeerd: " + params)
+				return
+			}
+			cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", prepare, data, tok, stderr)
+			chPipe := make(chan string)
+			chTokens := make(chan int, 2)
+			var fp *os.File
+			fp, err = os.Create(data + ".lines")
+			if err != nil {
+				return
+			}
+			go func() {
+				var tokens, lineno int
+				for line := range chPipe {
+					tokens += len(strings.Fields(line))
+					lineno++
+					fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
 				}
-				gebruikt += n
+				fp.Close()
+				chTokens <- tokens
+				chTokens <- lineno
+			}()
+			err = run(cmd, task.chKill, chPipe)
+			if err != nil {
+				return
+			}
+			tokens := <-chTokens
+			nlines := <-chTokens
+
+			err = do_quotum(db, task.id, user, tokens, nlines)
+			if err != nil {
+				os.Remove(data)
+				os.Remove(data + ".lines")
+				return
+			}
+
+			if err != nil {
+				return
+			}
+
+		} // end if !reuse
+
+		if !reuse || reuse_more {
+
+			var ext string
+			if reuse {
+				ext = ".tmp"
+			}
+
+			var timeout string
+			if Cfg.Timeout > 0 {
+				timeout = fmt.Sprint("-t ", Cfg.Timeout)
+			}
+			cmd := shell(
+				`alpino -a %s -d %s %s %s.lines%s >> %s 2>> %s`,
+				Cfg.Alpino, xml, timeout, data, ext, stdout, stderr)
+			err = run(cmd, task.chKill, nil)
+			if err != nil {
+				return
 			}
 		}
-
-		if quotum > 0 && quotum-gebruikt < tokens {
-			err = fmt.Errorf("Ruimte voor %d tokens. Nieuw corpus bevat %d tokens.", quotum-gebruikt, tokens)
-			os.Remove(data)
-			os.Remove(data + ".lines")
-			quotumLock.Unlock()
-			return
-		}
-
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d, `nline` = %d WHERE `id` = %q",
-			Cfg.Prefix, tokens, nlines, task.id))
-		quotumLock.Unlock()
-
-		if err != nil {
-			return
-		}
-
-	} // end if !reuse
-
-	if !reuse || reuse_more {
-
-		var ext string
-		if reuse {
-			ext = ".tmp"
-		}
-
-		var timeout string
-		if Cfg.Timeout > 0 {
-			timeout = fmt.Sprint("-t ", Cfg.Timeout)
-		}
-		cmd := shell(
-			`alpino -a %s -d %s %s %s.lines%s >> %s 2>> %s`,
-			Cfg.Alpino, xml, timeout, data, ext, stdout, stderr)
-		err = run(cmd, task.chKill, nil)
-		if err != nil {
-			return
-		}
-
-	}
+	} // end if !dact
 
 	// TODO: inlezen uit xml-bestanden als er een Alpino-server wordt gebruikt
 	nlines := 0
@@ -294,37 +269,52 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 		}
 	}
+
 	fp, err = os.Create(summary)
 	if err != nil {
 		return
 	}
-	if len(errlines) == 0 {
-		fmt.Fprintf(fp, "Alle %d regels zijn met succes geparst.\n", nlines)
-	} else {
-		fmt.Fprintf(
-			fp,
-			`%d van de %d regels zijn met succes geparst.
 
-Er waren problemen met de %d regels hieronder. Waarschijnlijk was er bij
+	s := params
+	switch params {
+	case "run":
+		s = "doorlopende tekst"
+	case "line":
+		s = "een zin per regel"
+	case "dact":
+		s = "dact-bestand"
+	}
+	fmt.Fprintf(fp, "Bron: %s\n\n", s)
+
+	if nlines > 0 {
+		if len(errlines) == 0 {
+			fmt.Fprintf(fp, "Alle %d regels zijn met succes geparst.\n", nlines)
+		} else {
+			fmt.Fprintf(
+				fp,
+				`%d van de %d regels zijn met succes geparst.
+
+Er waren problemen met de %d regels hieronder. Misschien was er bij
 die regels een time-out waardoor geen volledige parse gedaan kon worden.
 
 `,
-			nlines-len(errlines),
-			nlines,
-			len(errlines))
-		for _, line := range errlines {
-			a := strings.Split(line, "|")
-			if len(a) > 5 {
-				a[1] = strings.Join(a[1:len(a)-3], "|")
+				nlines-len(errlines),
+				nlines,
+				len(errlines))
+			for _, line := range errlines {
+				a := strings.Split(line, "|")
+				if len(a) > 5 {
+					a[1] = strings.Join(a[1:len(a)-3], "|")
+				}
+				fmt.Fprintf(fp, "%s\t%s\n", a[0][2:], a[1])
 			}
-			fmt.Fprintf(fp, "%s\t%s\n", a[0][2:], a[1])
 		}
 	}
 	fp.Close()
 
 	cmd := shell(
 		// optie -w i.v.m. recover()
-		`find %s -name '*.xml' | pqbuild -w %s %s %s 0 >> %s 2>> %s`,
+		`find %s -name '*.xml' | pqbuild -w -s %s %s %s 0 >> %s 2>> %s`,
 		dirname,
 		path.Base(dirname), quote(title), quote(user), stdout, stderr)
 	err = run(cmd, task.chKill, nil)
@@ -332,8 +322,11 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 		return
 	}
 
-	if Cfg.Dact {
+	if Cfg.Dact && params != "dact" {
 		err = makeDact(dact, xml, task.chKill)
+		if err != nil {
+			return
+		}
 	}
 
 	return
@@ -454,6 +447,7 @@ func work(task *Process) {
 	if err == nil {
 		logf("FINISHED: " + task.id)
 		sendmail(user, "Corpus klaar", fmt.Sprintf("Je corpus \"%s\" staat klaar op %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
+		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\" WHERE `id` = %q", Cfg.Prefix, task.id))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
 		if !task.killed {
@@ -537,4 +531,47 @@ func recover() {
 		processLock.Unlock()
 		chWork <- p
 	}
+}
+
+func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
+	quotumLock.Lock()
+	defer quotumLock.Unlock()
+
+	quotum := 0
+	gebruikt := 0
+	rows, err := db.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
+	if err != nil {
+		return err
+	}
+	if rows.Next() {
+		err = rows.Scan(&quotum)
+		rows.Close()
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("MySQL: Kan quotum niet vinden")
+	}
+	if quotum > 0 {
+		rows, err = db.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
+		if err != nil {
+			return err
+		}
+		for rows.Next() {
+			var n int
+			err = rows.Scan(&n)
+			if err != nil {
+				return err
+			}
+			gebruikt += n
+		}
+	}
+
+	if quotum > 0 && quotum-gebruikt < tokens {
+		return fmt.Errorf("Ruimte voor %d tokens. Nieuw corpus bevat %d tokens.", quotum-gebruikt, tokens)
+	}
+
+	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d, `nline` = %d WHERE `id` = %q",
+		Cfg.Prefix, tokens, nlines, id))
+	return err
 }
