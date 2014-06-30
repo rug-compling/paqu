@@ -32,7 +32,6 @@ type Config struct {
 
 	Maxjob int
 	Maxwrd int
-	Maxmem int64 // voor het parsen post data, in bytes
 
 	Secret string
 

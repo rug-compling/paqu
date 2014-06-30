@@ -66,12 +66,6 @@ maxjob = 10
 # programma `setquota`.
 maxwrd = 1000000
 
-# Maximum geheugen dat door het programma gebruikt mag worden bij het
-# inlezen van een door de gebruiker geüpload bestand. Als het bestand
-# groter is wordt het tijdelijk op schijf bewaard.
-# In Megabytes.
-maxmem = 500
-
 # De shell binary, inclusief path
 sh = "/bin/sh"
 
