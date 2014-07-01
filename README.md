@@ -91,7 +91,7 @@ De default is `$HOME/.paqu`, maar je kunt dit veranderen door de
 environment-variabele `PAQU` te zetten. Voor de onderstaande
 beschrijving gaan we er vanuit dat je de default gebruikt.
 
-Verder gaan we ervan uit dat je PaQu in `$HOME/paqu` hebt geïnstalleerd
+Verder gaan we ervan uit dat je PaQu in `$HOME/paqu` hebt geplaatst
 (zonder punt ervoor).
 
 ### Compileren ###
@@ -106,15 +106,25 @@ je PATH, of voeg de directory toe aan PATH.
 
 ### Configuratie ###
 
-Voordat je de programma's kunt draaien moet je een configuratiebestand maken.
-Kopieer het bestand `~/paqu/setup-example.toml` naar
+Voordat je de programma's kunt draaien moet je een configuratiebestand
+maken. Kopieer het bestand `~/paqu/setup-example.toml` naar
 `~/.paqu/setup.toml` en pas het aan door de instructies in het bestand
-op te volgen.
+op te volgen. Geef het bestand de rechten 600 zodat andere gebruikers op
+je computer de wachtwoorden niet kunnen lezen:
+
+    chmod 600 ~/.paqu/setup.toml
+
+Je kunt de configuratie controleren met het commando `config`. Als je
+een typefout maakt in een label in het configuratiebestand, dan wordt
+dat item genegeerd. Door het commando `config` te draaien kun je zien of
+alles de juiste waarde heeft. Omdat dit programma ook de wachtwoorden
+laat zien heeft het de rechten 700, zodat andere gebruikers op je
+computer het programma niet kunnen gebruiken.
 
 ### HTTPS ###
 
 Wil je https gebruiken, dan dien je een certificaat aan te maken en die te
-laten ondertekenen door een instantie die algemeen geaccepteerd wordt.
+laten ondertekenen door een instantie die algemeen erkend wordt.
 Doe je dat laatste niet, dan krijgt de gebruiker in z'n webbrowser een
 waarschuwing dat de site niet te vertrouwen is, en dat ie de site beter
 niet kan bezoeken.
@@ -127,7 +137,7 @@ Stel dat je server voor gebruikers toegankelijk is via
     cd ~/.paqu
     go run `go env GOROOT`/src/pkg/crypto/tls/generate_cert.go -host=paqu.myserver.nl
 
-Er staan nu twee bestanden in `~/.paqu`: `cert.pem` en `key.pem`
+Er staan nu twee nieuwe bestanden in `~/.paqu`: `cert.pem` en `key.pem`
 
 #### HTTPS: Ondertekenen van certificaat ####
 
@@ -151,7 +161,7 @@ eerst in te hoeven loggen en hun eigen corpus aan te hoeven maken.
 
 Het is raadzaam om het corpus
 [Lassy Klein](http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66)
-te installeren, omdat al voorbeelden die de gebruiker in de informatie ziet werken op dat corpus.
+te installeren, omdat alle voorbeelden die de gebruiker in de informatie ziet werken op dat corpus.
 
 Als je dit corpus hebt geïnstalleerd in `~/corpora/LassySmall` kun je
 het zo opnemen in PaQu:
@@ -203,7 +213,7 @@ op de server:
 
 Met het programma `rmuser` kun je een gebruiker verwijderen, inclusief
 alle data die door die gebruiker is opgeslagen, zowel van schijf als uit
-de MySQL-database,
+de MySQL-database.
 
 Met het programma `setquota` kun je het quotum voor een of meer
 gebruikers aanpassen.

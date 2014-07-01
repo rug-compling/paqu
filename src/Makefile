@@ -9,6 +9,7 @@ info:
 all:
 	mkdir -p ../bin
 	make -C alpino
+	make -C config
 	make -C dbinit
 	make -C pqbuild
 	make -C pqserve
