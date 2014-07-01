@@ -97,6 +97,8 @@ timeout = 900
 # inloggen.
 secret = "Verander dit in een andere willekeurige tekst"
 
+# TODO: uitleg over https met/zonder poortnummer
+
 # Https gebruiken? In dat geval moet je zorgen voor de bestanden
 # `cert.pem` en `key.pem` in de directory die aangegeven wordt door
 # $PAQU. Laat het certificaat ondertekenen door een Certificaatautoriteit,
