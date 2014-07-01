@@ -89,7 +89,7 @@ gebruikt heb je zelf van Alpino alleen de tokenizer nodig.
 PaQu maakt gebruik van een directory voor het opslaan van gegevens.
 De default is `$HOME/.paqu`, maar je kunt dit veranderen door de
 environment-variabele `PAQU` te zetten. Voor de onderstaande
-beschrijving gaan we er vanuit dat je de default gebruikt.
+beschrijving gaan we ervan uit dat je de default gebruikt.
 
 Verder gaan we ervan uit dat je PaQu in `$HOME/paqu` hebt geplaatst
 (zonder punt ervoor).
