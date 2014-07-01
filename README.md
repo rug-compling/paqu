@@ -6,7 +6,7 @@ Parse & Query
 
 ## Status ##
 
-In ontwikkeling, maar al bruikbaar via http://zardoz.service.rug.nl:8067/
+Grotendeels voltooid. Zie TODO.md voor wat er nog moet gebeuren.
 
 ----------------------------------------------------------------
 
@@ -25,115 +25,191 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
 
 ----------------------------------------------------------------
 
-## Te doen ##
+## Systeemeisen ##
 
-### Hoofdtaken ###
+Een 64-bit Linux-machine (amd64), ruim voldoende geheugen, het liefst veel processoren...
 
-  - Quota
-    - ✔ Corpora
-      - ✔ default voor elke gebruiker in setup, door admin aan te passen
-        per gebruiker
-      - ✔ max aantal tokens (woorden)
-      - ✔ maximale verwerktijd van een zin (alleen bij gebruik lokale
-        parser): in setup
-    - ✔ Geheugen
-      - ✔ globaal instellen dmv `ulimit -v`
-    - Processortijd
-      - ✔  Max aantal corpora dat tegelijk verwerkt wordt, met de aanname
-        dat hierbij een processor voor 100% gebruikt wordt.
-      - Wanneer corpus geparst wordt door een alpino-server: verdere
-        verwerking in parallel met verwerking door de alpinoserver
-      - Pas als blijkt dat dit nodig is: Scheduler: als er meerdere
-        corpora van een enkele gerbuiker in de wachtrij staan de
-        verwerking afwisselen met verwerking corpora van andere
-        gebruikers.
-  - ✔ Toegang
-    - ✔ leesrechten: deny/allow op basis van ip-adressen
-      - ✔ IPv6
-    - ✔ inlogrechten: deny/allow op basis van regexp mail-adressen
-    - ✔ downloadrechten, alleen wie is ingelogd, alleen eigen corpora
-  - Alpino-server
-    - Aanpassen aan API van de server (huidige server is te oud)
-	  - zie ook TODOs in work.go
-  - ✔ Beveiliging
-    - ✔ opties in setup:
-	  - ✔ https gebruiken
-	  - ✔ remote ip-adres gebruiken als deel van identificatie van gebruiker
-	  - ✔ x-forwarded-for gebruiken als deel van identificatie van gebruiker
-  - Middelen voor beheerder
-    - ✔ Statistiek
-      - ✔ pqstatus
-      - ✔ handler voor interne status (NumGoroutine, MemStat)
-    - ✔ Gebruiker verwijderen
-    - ✔ Quotum voor specifieke gebruiker veranderen
-    - E-mail aan beheerder bij problemen
-  - Adminhandleiding
-    - installatie
-    - (account-)beheer
-  - Gebruikershandleiding
-    - Introtekst op hoofdpagina
-    - Tekst achter Meer info...
-  - Interface
-    - ✔ Algemene opmaak
-    - Beheer van corpora
-      - uploaden:
-        - meerdere tekstdocumenten in een zipbestand (?)
-        - ✔ dact
-        - regels die al een label hebben
-      - ✔ downloaden:
-        - ✔ xml in zip
-        - ✔ dact
-		  - ✔ setup-optie: wel/niet aanbieden van dact download. Als wel:
-            direct bij verwerking dact aanmaken
-      - ✔ browse: zinnen, stdout, stderr
-      - ✔ modernere interface: verwijderen, opties
-      - Voordat er iets gedownload wordt controleren of er nog
-        onge'gzip'te bestanden zijn
-    - ✔ Keuze van corpus
-      - ✔ Lijst van beschikbare (gedeelde) corpora die
-        toegevoegd/verwijderd kunnen worden in menu
-  - Code
-    - Organisatie + documentatie
-    - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
-  - ✔ Dependencies
-    - ✔ externe go-pakketten opnemen onder directory `_vendor`
-  - Voor later
-    - Misschien: subboompjes met statistiek en zoeklink, vergt meer info in database
-  - ✔ Licentie
+Je hebt een account op een MySQL-server nodig.
 
-### Diversen ###
+----------------------------------------------------------------
 
-alles:
+## Benodigde software ##
 
-  - zie TODO in diverse bestanden
+### Graphviz: Graph Visualization Software ###
 
-`pqserve`:
+Van Graphviz heb je de library's en de headers nodig. Op Debian worden
+die geleverd door het pakket `graphviz-dev` of `libgraphviz-dev`.
+Misschien is die versie te oud (TODO: welke versie is nodig?). Dan kun
+je het downloaden van http://www.graphviz.org/
 
-  - logo + balk wijzigen
-  - foutafhandeling als gebruiker een leeg bestand uploadt
-  - fout van shell: niet de errorcode, maar de laatste regel(s) van
-    stderr gebruiken als melding aan de gebruiker
-  - https zonder http? de combinatie maakt het erg ingewikkeld
+### DbXML: Oracle Berkeley DB XML ###
+
+Dit is optioneel, maar wel sterk aanbevolen. Zonder DbXML kun je geen
+Dact-bestanden verwerken. Dact-bestanden zijn corpora in het formaat
+gebruikt door [Dact](http://rug-compling.github.io/dact/), waarmee
+corpora bekeken en geanalyseerd kunnen worden.
+
+Hier kun je DbXML downloaden:
+http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads
+
+Let op dat je de software met XML in de naam downloadt.
+
+### Go ###
+
+De meeste programma's zijn geschreven in de programmeertaal Go. Je hebt
+dus de Go-compiler nodig. Op Debian is Go beschikbaar in het pakket
+`golang`, maar die versie is bij schrijven (juli 2014) te oud.
+
+Je hebt minimaal versie 1.2 nodig. Geef het commando `go version` om dit
+te controleren.
+
+Je kunt Go downloaden van http://golang.org/
+
+### Flex: A fast lexical analyzer generator ###
+
+Voor het compileren van één programma heb je het programma flex nodig.
+Op Debian is dat beschikbaar in het pakket `flex`.
+
+Dit is dus iets anders dan Adobe Flex of Apache Flex
+
+### Alpino: A dependency parser for Dutch ###
+
+Om PaQu te draaien heb je van
+[Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/) de tokenizer en de
+parser nodig.
+
+In de nabije toekomst is het mogelijk gebruik te maken van een
+Alpino-server, die ergens op een andere website draait. Als je dat
+gebruikt heb je zelf van Alpino alleen de tokenizer nodig.
 
 ----------------------------------------------------------------
 
 ## Installatie ##
 
-### Systeemeisen ###
+PaQu maakt gebruik van een directory voor het opslaan van gegevens.
+De default is `$HOME/.paqu`, maar je kunt dit veranderen door de
+environment-variabele `PAQU` te zetten. Voor de onderstaande
+beschrijving gaan we er vanuit dat je de default gebruikt.
 
-Een 64-bit Linux-machine (amd64), veel geheugen, veel processoren...
+Verder gaan we ervan uit dat je PaQu in `$HOME/paqu` hebt geïnstalleerd
+(zonder punt ervoor).
 
-### Wat je nodig hebt, op Debian ###
+### Compileren ###
 
-pakketten:
+Ga naar de directory `~/paqu/src`, kopieer het bestand
+`Makefile.cfg.example` naar `Makefile.cfg` en pas het aan. Volg daarvoor
+de aanwijzingen in het bestand.
 
- - `graphviz-dev` of `libgraphviz-dev`
+Als je klaar bent, run `make all`. Als alles goed gaat vind je alle
+programma's in `~/paqu/bin`. Verplaats de programma's naar een plek in
+je PATH, of voeg de directory toe aan PATH.
 
-overige software:
+### Configuratie ###
 
- - (optioneel, nodig voor verwerking van dact-bestanden)
-   [Oracle Berkeley DB XML](http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads):
-   libs en headers geïnstalleerd op een standaardlokatie.
- - [Go](http://golang.org/): als met DB XML, dan versie 1.2 of hoger, anders versie 1.0 of hoger
- - [Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/): tokenizer
- - Alpinoparser of toegang tot een alpinoserver
+Voordat je de programma's kunt draaien moet je een configuratiebestand maken.
+Kopieer het bestand `~/paqu/setup-example.toml` naar
+`~/.paqu/setup.toml` en pas het aan door de instructies in het bestand
+op te volgen.
+
+### HTTPS ###
+
+Wil je https gebruiken, dan dien je een certificaat aan te maken en die te
+laten ondertekenen door een instantie die algemeen geaccepteerd wordt.
+Doe je dat laatste niet, dan krijgt de gebruiker in z'n webbrowser een
+waarschuwing dat de site niet te vertrouwen is, en dat ie de site beter
+niet kan bezoeken.
+
+#### HTTPS: Aanmaken certificaat ####
+
+Stel dat je server voor gebruikers toegankelijk is via
+`paqu.myserver.nl`, geef dan de volgende commando's:
+
+    cd ~/.paqu
+    go run `go env GOROOT`/src/pkg/crypto/tls/generate_cert.go -host=paqu.myserver.nl
+
+Er staan nu twee bestanden in `~/.paqu`: `cert.pem` en `key.pem`
+
+#### HTTPS: Ondertekenen van certificaat ####
+
+Voor meer info over het laten ondertekenen van een certificaat, zie
+http://nl.wikipedia.org/wiki/Certificaatautoriteit
+
+Als je het certificaat hebt laten ondertekenen dien je die ondertekening
+onderaan `cert.pem` toe te voegen.
+
+### Initialiseer de database ###
+
+Om de database te initialiseren, run:
+
+    dbinit
+
+### Lassy Klein ###
+
+Het is zeer aan te bevelen om alvast een corpus te installeren voordat
+mensen PaQu gaan gebruiken, omdat ze er dan mee kunnen werken zonder
+eerst in te hoeven loggen en hun eigen corpus aan te hoeven maken.
+
+Het is raadzaam om het corpus
+[Lassy Klein](http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66)
+te installeren, omdat al voorbeelden die de gebruiker in de informatie ziet werken op dat corpus.
+
+Als je dit corpus hebt geïnstalleerd in `~/corpora/LassySmall` kun je
+het zo opnemen in PaQu:
+
+    find ~/corpora/LassySmall/Treebank -name '*.xml' | pqbuild -w lassysmall 'Lassy Klein' none 1
+
+Dit duurt wel even, dus wellicht wil je bovenstaande regel in een script
+zetten en dat aanroepen met `nohup`.
+
+Nadat het corpus in PaQu is opgenomen moet je de xml-bestanden van Lassy Klein
+laten staan waar ze staan. Die xml-bestanden worden zelf niet in PaQu
+opgenomen, alleen de analyse van die bestanden. De bestanden zelf zijn
+ook nog nodig voor het werken met PaQu.
+
+----------------------------------------------------------------
+
+## Werken met PaQu ##
+
+### De server starten ###
+
+Je kunt PaQu nu heel simpel starten met `pqserve`. Maar dat is wellicht
+niet de beste methode. Beter is het om het script `~/paqu/run.sh` aan te
+passen aan je wensen, en regelmatig (bijvoorbeeld elk kwartier) aan te
+roepen vanuit `cron`. Dit script test of de server nog reageert
+(daarvoor gebruikt het de link `/up` op de server), en start het opnieuw
+mocht dit niet zo zijn. Het print dan ook eventuele foutmeldingen van de
+vorige run van pqserve, en als je `MAILTO` goed hebt gezet in
+`crontab -e`, dan worden die foutmeldingen naar je toegestuurd.
+
+### Log-bestanden ###
+
+Het programma `pqserve` maakt logbestanden aan in directory `~/.paqu`.
+Deze bestanden worden automatisch geroteerd als ze te groot worden, dus
+je hoeft geen `logrotate` te gebruiken.
+
+### Status ###
+
+Het programma `pqstatus` geeft je een overzicht van gebruikers en
+corpora. Wellicht is dit handig om eenmaal per dag aan te roepen vanuit
+`cron`, dat dan de resultaten naar je toestuurt.
+
+Info over de interne staat van de server kun je opvragen via deze paden
+op de server:
+
+    /debug/vars
+    /debug/env
+
+### Beheer ###
+
+Met het programma `rmuser` kun je een gebruiker verwijderen, inclusief
+alle data die door die gebruiker is opgeslagen, zowel van schijf als uit
+de MySQL-database,
+
+Met het programma `setquota` kun je het quotum voor een of meer
+gebruikers aanpassen.
+
+### Overigen ###
+
+De programma's `alpino` en `prepare` zijn alleen voor gebruik door andere
+programma's.
+

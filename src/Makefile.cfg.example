@@ -12,13 +12,13 @@ OPTS = -v
 
 #### Environment-variabelen
 
-# Als de Go-pakketten die nodig zijn niet aanwezig zijn kun je de
+# Als de Go-pakketten die nodig zijn niet al aanwezig zijn kun je de
 # versies die bij PaQu zijn meegeleverd gebruiken. Zet dan GOPATH
 # naar de directory '_vendor'
-# export GOPATH=/path/naar/paqu/_vendor
+export GOPATH=$(HOME)/paqu/_vendor
 
 # Zonodig extra paden naar C-headers en C-libraries
-# Bijvoorbeeld als DbXML niet op een standaardlokatie staat
-export CPATH=
-export LIBRARY_PATH=
+# Bijvoorbeeld als DbXML of Graphviz niet op een standaardlokatie staat
+export CPATH=$(HOME)/include:$(HOME)/include/graphviz
+export LIBRARY_PATH=$(HOME)/lib
 
