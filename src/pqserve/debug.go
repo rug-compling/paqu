@@ -7,6 +7,7 @@ import (
 )
 
 type Info struct {
+	HasDbXML     bool
 	QueueLen     int
 	QueueCap     int
 	NumCPU       int
@@ -20,6 +21,7 @@ type Info struct {
 func GetInfo() interface{} {
 	d := time.Now().Sub(started)
 	return Info{
+		HasDbXML:     has_dbxml,
 		QueueLen:     len(chWork),
 		QueueCap:     cap(chWork),
 		NumCPU:       runtime.NumCPU(),

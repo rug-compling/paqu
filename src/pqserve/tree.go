@@ -351,7 +351,7 @@ func tree(q *Context) {
 				break
 			}
 		}
-		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(filename))
+		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(decode_filename(filename)))
 	}
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")

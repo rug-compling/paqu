@@ -101,7 +101,7 @@ func download(q *Context) {
 			logerr(err)
 			return
 		}
-		fh.Name = path.Join("xml", name)
+		fh.Name = path.Join(id, decode_filename(name))
 		f, err := w.CreateHeader(fh)
 		if err != nil {
 			logerr(err)

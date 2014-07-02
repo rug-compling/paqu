@@ -11,16 +11,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 )
 
 const (
 	has_dbxml = true
-)
-
-var (
-	reFilechars = regexp.MustCompile("[^-._a-zA-Z0-9]+")
 )
 
 func get_dact(archive, filename string) ([]byte, error) {
@@ -156,31 +151,4 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 	}
 
 	return tokens, nline, nil
-}
-
-func repl_filechar(s string) string {
-	a := make([]string, 0, 5)
-	for _, b := range []byte(s) {
-		a = append(a, fmt.Sprintf("_%2X", b))
-	}
-	return strings.Join(a, "")
-}
-
-func encode_filename(s string) string {
-
-	if s == "" {
-		return "_"
-	}
-
-	s = strings.Replace(s, "_", "__", -1)
-
-	s = reFilechars.ReplaceAllStringFunc(s, repl_filechar)
-
-	if s[0] == '.' {
-		s = "_2E" + s[1:]
-	}
-	if s[0] == '-' {
-		s = "_2D" + s[1:]
-	}
-	return s
 }

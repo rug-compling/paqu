@@ -14,9 +14,16 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"unicode/utf8"
+)
+
+var (
+	reFilechars = regexp.MustCompile("[^-._a-zA-Z0-9]+")
+	reFilecodes = regexp.MustCompile("_[0-9A-F][0-9A-F]|__")
 )
 
 func doErr(q *Context, err error) bool {
@@ -213,4 +220,48 @@ func gz(filename string) error {
 	}
 	os.Remove(filename)
 	return nil
+}
+
+func repl_filechar(s string) string {
+	a := make([]string, 0, 5)
+	for _, b := range []byte(s) {
+		a = append(a, fmt.Sprintf("_%2X", b))
+	}
+	return strings.Join(a, "")
+}
+
+func encode_filename(s string) string {
+
+	if s == "" {
+		return "_"
+	}
+
+	s = strings.Replace(s, "_", "__", -1)
+
+	s = reFilechars.ReplaceAllStringFunc(s, repl_filechar)
+
+	if s[0] == '.' {
+		s = "_2E" + s[1:]
+	}
+	if s[0] == '-' {
+		s = "_2D" + s[1:]
+	}
+	return s
+}
+
+func repl_filecode(s string) string {
+	if s == "__" {
+		return "_"
+	}
+	i, _ := strconv.ParseInt(s[1:], 16, 0)
+	b := []byte{byte(i)}
+	return string(b)
+}
+
+func decode_filename(s string) string {
+	if s == "_" {
+		return ""
+	}
+
+	return reFilecodes.ReplaceAllStringFunc(s, repl_filecode)
 }

@@ -27,7 +27,8 @@ Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
 
 ## Systeemeisen ##
 
-Een 64-bit Linux-machine (amd64), ruim voldoende geheugen, het liefst veel processoren...
+Een 64-bit Linux-machine (amd64), ruim voldoende geheugen en
+schijfruimte, het liefst veel processoren...
 
 Je hebt een account op een MySQL-server nodig.
 
