@@ -3,7 +3,9 @@ package main
 import (
 	"github.com/pebbe/util"
 
+	"archive/zip"
 	"database/sql"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -66,14 +68,16 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	defer func() {
 		select {
 		case <-chGlobalExit:
+			err = errGlobalExit
 			return
 		case <-task.chKill:
+			err = errKilled
 			return
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
 		for _, f := range []string{data, data + ".lines", dact, stdout, stderr, summary} {
-			if f == data && params == "dact" {
+			if f == data && (params == "dact" || params == "xmlzip") {
 				continue
 			}
 			if f == dact && !Cfg.Dact {
@@ -81,31 +85,36 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			logerr(gz(f))
 		}
-		files, e := ioutil.ReadDir(xml)
+		fnames, e := filenames2(xml)
 		if logerr(e) {
 			return
 		}
-		for _, file := range files {
+		for _, fname := range fnames {
 			select {
 			case <-chGlobalExit:
+				err = errGlobalExit
 				return
 			case <-task.chKill:
+				err = errKilled
 				return
 			default:
 			}
-			logerr(gz(path.Join(xml, file.Name())))
+			logerr(gz(path.Join(xml, fname)))
 		}
 		if params == "dact" && !Cfg.Dact {
-			os.Remove(path.Join(dact))
+			os.Remove(dact)
+		}
+		if params == "xmlzip" {
+			os.Remove(data)
 		}
 	}()
 
 	select {
 	case <-chGlobalExit:
-		err = fmt.Errorf("Global Exit")
+		err = errGlobalExit
 		return
 	case <-task.chKill:
-		err = fmt.Errorf("Killed")
+		err = errKilled
 		return
 	default:
 	}
@@ -118,27 +127,39 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		err = do_quotum(db, task.id, user, tokens, nlines)
 		if err != nil {
-			os.Remove(data)
-			os.Remove(data + ".lines")
 			os.Remove(dact)
+			os.Remove(data + ".lines")
 			os.Remove(stderr)
 			os.RemoveAll(xml)
 			return
 		}
-	} else { // if !dact
+	} else if params == "xmlzip" {
+		var tokens, nlines int
+		tokens, nlines, err = unpackXml(data, xml, stderr, task.chKill)
+		if err != nil {
+			return
+		}
+		err = do_quotum(db, task.id, user, tokens, nlines)
+		if err != nil {
+			os.Remove(data + ".lines")
+			os.Remove(stderr)
+			os.RemoveAll(xml)
+			return
+		}
+	} else { // if params != (dact || xmlzip)
 		reuse := false
 		reuse_more := false
-		if files, e := ioutil.ReadDir(xml); e == nil && len(files) > 0 {
+		if files, e := filenames2(xml); e == nil && len(files) > 0 {
 			reuse = true
 			done := make(map[string]bool)
 			for _, f := range files {
-				b, e := ioutil.ReadFile(path.Join(xml, f.Name()))
+				b, e := ioutil.ReadFile(path.Join(xml, f))
 				if e != nil {
 					err = e
 					return
 				}
 				if strings.Index(string(b), "</alpino_ds>") > 0 {
-					done[f.Name()] = true
+					done[f] = true
 				}
 			}
 			fpin, e := os.Open(data + ".lines")
@@ -203,8 +224,11 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				var tokens, lineno int
 				for line := range chPipe {
 					tokens += len(strings.Fields(line))
+					fmt.Fprintf(fp, "%04d/%04d|%s\n", lineno/10000, lineno%10000, line)
+					if lineno%10000 == 0 {
+						os.MkdirAll(path.Join(xml, fmt.Sprintf("%04d", lineno/10000)), 0777)
+					}
 					lineno++
-					fmt.Fprintf(fp, "%08d|%s\n", lineno, line)
 				}
 				fp.Close()
 				chTokens <- tokens
@@ -249,7 +273,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				return
 			}
 		}
-	} // end if !dact
+	} // end if params != (dact || xmlzip)
 
 	// TODO: inlezen uit xml-bestanden als er een Alpino-server wordt gebruikt
 	nlines := 0
@@ -291,7 +315,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	case "line":
 		s = "een zin per regel"
 	case "dact":
-		s = "dact-bestand"
+		s = "Dact-bestand"
+	case "xmlzip":
+		s = "Alpino XML-bestanden in zipbestand"
 	}
 	fmt.Fprintf(fp, "Bron: %s\n\n", s)
 
@@ -315,7 +341,7 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 				if len(a) > 5 {
 					a[1] = strings.Join(a[1:len(a)-3], "|")
 				}
-				fmt.Fprintf(fp, "%s\t%s\n", a[0][2:], a[1])
+				fmt.Fprintf(fp, "%s\t%s\n", decode_filename(a[0][2:]), a[1])
 			}
 		}
 	}
@@ -332,7 +358,7 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 	}
 
 	if Cfg.Dact && params != "dact" {
-		err = makeDact(dact, xml, task.chKill)
+		err = makeDact(dact, xml, params == "xmlzip", task.chKill)
 		if err != nil {
 			return
 		}
@@ -583,4 +609,96 @@ func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
 	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d, `nline` = %d WHERE `id` = %q",
 		Cfg.Prefix, tokens, nlines, id))
 	return err
+}
+
+func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int, err error) {
+
+	os.Mkdir(xmldir, 0777)
+
+	fperr, err := os.Create(stderr)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer fperr.Close()
+
+	fplines, err := os.Create(data + ".lines")
+	if err != nil {
+		return 0, 0, err
+	}
+	defer fplines.Close()
+
+	z, err := zip.OpenReader(data)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer z.Close()
+
+	tokens = 0
+	nline = 0
+	nd := -1
+	sdir := ""
+
+	for _, f := range z.File {
+
+		select {
+		case <-chGlobalExit:
+			return 0, 0, errGlobalExit
+		case <-chKill:
+			return 0, 0, errKilled
+		default:
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return 0, 0, err
+		}
+		bindata, err := ioutil.ReadAll(rc)
+		rc.Close()
+		if len(bindata) == 0 {
+			continue
+		}
+
+		nline++
+
+		if nline%10000 == 1 {
+			nd++
+			sdir = fmt.Sprintf("%04d", nd)
+			os.Mkdir(path.Join(xmldir, sdir), 0777)
+		}
+
+		name := f.Name
+		if strings.HasSuffix(strings.ToLower(name), ".xml") {
+			name = name[:len(name)-4]
+		}
+		encname := encode_filename(name)
+
+		fp, err := os.Create(path.Join(xmldir, sdir, encname+".xml"))
+		if err != nil {
+			return 0, 0, err
+		}
+		_, err = fp.Write(bindata)
+		fp.Close()
+		if err != nil {
+			return 0, 0, err
+		}
+
+		alpino := Alpino_ds_no_node{}
+		err = xml.Unmarshal(bindata, &alpino)
+		if err != nil {
+			return 0, 0, fmt.Errorf("Parsen van %q uit zip-bestand: %s", f.Name, err)
+		}
+		tokens += len(strings.Fields(alpino.Sentence))
+		fmt.Fprintf(fplines, "%s|%s\n", name, strings.TrimSpace(alpino.Sentence))
+		for _, c := range alpino.Comments {
+			if strings.HasPrefix(c.Comment, "Q#") {
+				a := strings.SplitN(c.Comment, "|", 2)
+				if len(a) == 2 {
+					fmt.Fprintf(fperr, "Q#%s|%s\n", name, strings.TrimSpace(a[1]))
+					break
+				}
+			}
+		}
+	}
+
+	return tokens, nline, nil
 }

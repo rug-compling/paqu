@@ -31,7 +31,7 @@ func makeQuery(q *Context, prefix string, chClose <-chan bool) (string, error) {
 				var s string
 				select {
 				case <-chClose:
-					return "", ConnectionClosed
+					return "", errConnectionClosed
 				default:
 				}
 				rows, err := q.db.Query(fmt.Sprintf("SELECT `lemma` FROM `%s_c_%s_word` WHERE `word` = %q",

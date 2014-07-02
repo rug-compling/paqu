@@ -6,7 +6,6 @@ import (
 	"github.com/pebbe/dbxml"
 
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,8 +30,8 @@ func get_dact(archive, filename string) ([]byte, error) {
 	return []byte(d), nil
 }
 
-func makeDact(dact, xml string, chKill chan bool) error {
-	files, err := ioutil.ReadDir(xml)
+func makeDact(dact, xml string, strip1dir bool, chKill chan bool) error {
+	files, err := filenames2(xml)
 	if err != nil {
 		return err
 	}
@@ -44,20 +43,24 @@ func makeDact(dact, xml string, chKill chan bool) error {
 	}
 	defer db.Close()
 
-	for _, file := range files {
+	for _, name := range files {
 
 		select {
 		case <-chGlobalExit:
-			return errors.New("Global Exit")
+			return errGlobalExit
 		case <-chKill:
-			return errors.New("Killed")
+			return errKilled
 		default:
 		}
 
-		name := file.Name()
 		data, err := ioutil.ReadFile(path.Join(xml, name))
 		if err != nil {
 			return err
+		}
+
+		name = decode_filename(name)
+		if strip1dir {
+			name = strings.SplitN(name, "/", 2)[1]
 		}
 		err = db.PutXml(name, string(data), false)
 		if err != nil {
@@ -97,27 +100,35 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 
 	tokens = 0
 	nline = 0
+	nd := -1
+	sdir := ""
 	for docs.Next() {
 
 		select {
 		case <-chGlobalExit:
-			return 0, 0, errors.New("Global Exit")
+			return 0, 0, errGlobalExit
 		case <-chKill:
-			return 0, 0, errors.New("Killed")
+			return 0, 0, errKilled
 		default:
 		}
 
 		nline++
 
-		name := docs.Name()
-		data := []byte(docs.Content())
+		if nline % 10000 == 1 {
+			nd++
+			sdir = fmt.Sprintf("%04d", nd)
+			os.Mkdir(path.Join(xmldir, sdir), 0777)
+		}
 
-		if strings.HasSuffix(name, ".xml") {
+		name := docs.Name()
+		if strings.HasSuffix(strings.ToLower(name), ".xml") {
 			name = name[:len(name)-4]
 		}
-		name = encode_filename(name)
+		encname := encode_filename(name)
 
-		fp, err := os.Create(path.Join(xmldir, name+".xml"))
+		data := []byte(docs.Content())
+
+		fp, err := os.Create(path.Join(xmldir, sdir, encname+".xml"))
 		if err != nil {
 			return 0, 0, err
 		}

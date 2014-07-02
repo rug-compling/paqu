@@ -5,20 +5,21 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 func download(q *Context) {
 	id := first(q.r, "id")
 	dl := first(q.r, "dl")
 
+	params := q.params[id]
 	if !q.prefixes[id] {
 		// misschien een corpus dat mislukt is
 		rows, err := q.db.Query(
-			fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
+			fmt.Sprintf("SELECT `params` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
 				Cfg.Prefix,
 				id,
 				q.user))
@@ -28,7 +29,13 @@ func download(q *Context) {
 			return
 		}
 		if rows.Next() {
+			err := rows.Scan(&params)
 			rows.Close()
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
 		} else {
 			http.Error(q.w, "Dat is niet je corpus", http.StatusUnauthorized)
 			return
@@ -82,7 +89,7 @@ func download(q *Context) {
 
 	// xml
 	datadir = path.Join(datadir, "xml")
-	files, err := ioutil.ReadDir(datadir)
+	files, err := filenames2(datadir)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -93,15 +100,23 @@ func download(q *Context) {
 	q.w.Header().Set("Content-Disposition", "attachment; filename="+id+".zip")
 
 	w := zip.NewWriter(q.w)
-	for _, file := range files {
-		gzname := file.Name()
-		name := gzname[:len(gzname)-3]
+	for _, gzname := range files {
+		fullgzname := path.Join(datadir, gzname)
+		file, err := os.Stat(fullgzname)
+		name := decode_filename(gzname[:len(gzname)-3])
+		if params == "dact" || params == "xmlzip" {
+			name = strings.SplitN(name, "/", 2)[1]
+		}
+		if err != nil {
+			logerr(err)
+			return
+		}
 		fh, err := zip.FileInfoHeader(file)
 		if err != nil {
 			logerr(err)
 			return
 		}
-		fh.Name = path.Join(id, decode_filename(name))
+		fh.Name = path.Join(id, name)
 		f, err := w.CreateHeader(fh)
 		if err != nil {
 			logerr(err)

@@ -72,7 +72,7 @@ func home(q *Context) {
 	// Maximaal ZINMAX matchende xml-bestanden opvragen
 	select {
 	case <-chClose:
-		logerr(ConnectionClosed)
+		logerr(errConnectionClosed)
 		return
 	default:
 	}
@@ -104,7 +104,7 @@ func home(q *Context) {
 		var s string
 		select {
 		case <-chClose:
-			logerr(ConnectionClosed)
+			logerr(errConnectionClosed)
 			return
 		default:
 		}
@@ -131,7 +131,7 @@ func home(q *Context) {
 		// Matchende dependency relations bij xml-bestand opvragen
 		select {
 		case <-chClose:
-			logerr(ConnectionClosed)
+			logerr(errConnectionClosed)
 			return
 		default:
 		}

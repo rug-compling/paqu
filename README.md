@@ -145,6 +145,8 @@ Er staan nu twee nieuwe bestanden in `~/.paqu`: `cert.pem` en `key.pem`
 Voor meer info over het laten ondertekenen van een certificaat, zie
 http://nl.wikipedia.org/wiki/Certificaatautoriteit
 
+Voor leveranciers, zie https://www.google.nl/search?q=SSL+certificaten
+
 Als je het certificaat hebt laten ondertekenen dien je die ondertekening
 onderaan `cert.pem` toe te voegen.
 
@@ -222,9 +224,3 @@ de MySQL-database.
 
 Met het programma `setquota` kun je het quotum voor een of meer
 gebruikers aanpassen.
-
-### Overigen ###
-
-De programma's `alpino` en `prepare` zijn alleen voor gebruik door andere
-programma's.
-

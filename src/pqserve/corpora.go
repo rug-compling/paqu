@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -225,9 +224,9 @@ function formtest() {
 				processLock.RUnlock()
 				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
 			} else if st == "bezig" {
-				if corpus.params != "dact" {
+				if corpus.params != "dact" && corpus.params != "xmlzip" {
 					p := 0
-					files, err := ioutil.ReadDir(path.Join(paqudir, "data", corpus.id, "xml"))
+					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"))
 					if err == nil {
 						p = 1 + int(float64(len(files))/float64(corpus.nline)*98+.5)
 					}
@@ -272,6 +271,7 @@ function formtest() {
 	<select name="how">
 	  <option value="run">Doorlopende tekst</option>
 	  <option value="line">Een zin per regel</option>
+	  <option value="xmlzip">Alpino XML-bestanden in zipfile</option>
 `, MAXTITLELEN+MAXTITLELEN/4, MAXTITLELEN)
 	if has_dbxml {
 		fmt.Fprintln(q.w, "<option value=\"dact\">Dact-bestand</option>")

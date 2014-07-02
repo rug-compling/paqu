@@ -351,7 +351,11 @@ func tree(q *Context) {
 				break
 			}
 		}
-		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(decode_filename(filename)))
+		f := decode_filename(filename)
+		if p := q.params[prefix]; p == "dact" || p == "xmlzip" {
+			f = strings.SplitN(f, "/", 2)[1]
+		}
+		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(f))
 	}
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")

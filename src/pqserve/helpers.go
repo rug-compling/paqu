@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -264,4 +265,24 @@ func decode_filename(s string) string {
 	}
 
 	return reFilecodes.ReplaceAllStringFunc(s, repl_filecode)
+}
+
+// alle bestandsnamen van all subdirectories van de gegeven directory)
+func filenames2(dirname string) ([]string, error) {
+	fnames := make([]string, 0)
+	dirs, err := ioutil.ReadDir(dirname)
+	if err != nil {
+		return fnames, err
+	}
+	for _, dir := range dirs {
+		dname := dir.Name()
+		files, err := ioutil.ReadDir(path.Join(dirname, dname))
+		if err != nil {
+			return fnames, err
+		}
+		for _, file := range files {
+			fnames = append(fnames, path.Join(dname, file.Name()))
+		}
+	}
+	return fnames, nil
 }

@@ -68,7 +68,7 @@ func stats(q *Context) {
 	// Aantal zinnen die matchen met de query
 	select {
 	case <-chClose:
-		logerr(ConnectionClosed)
+		logerr(errConnectionClosed)
 		return
 	default:
 	}
@@ -113,7 +113,7 @@ func stats(q *Context) {
 		}
 		select {
 		case <-chClose:
-			logerr(ConnectionClosed)
+			logerr(errConnectionClosed)
 			return
 		default:
 		}
@@ -240,7 +240,7 @@ func statsrel(q *Context) {
 
 	select {
 	case <-chClose:
-		logerr(ConnectionClosed)
+		logerr(errConnectionClosed)
 		return
 	default:
 	}

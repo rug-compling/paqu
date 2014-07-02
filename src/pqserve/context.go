@@ -28,6 +28,7 @@ type Context struct {
 	desc       map[string]string
 	lines      map[string]int
 	shared     map[string]string
+	params     map[string]string
 	form       *multipart.Form
 }
 
@@ -69,6 +70,7 @@ func handleFunc(url string, handler func(*Context)) {
 				desc:       make(map[string]string),
 				lines:      make(map[string]int),
 				shared:     make(map[string]string),
+				params:     make(map[string]string),
 			}
 
 			// Maak verbinding met database
@@ -148,7 +150,7 @@ func handleFunc(url string, handler func(*Context)) {
 				o = "6, 2"
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`,  "+s+
+				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -161,10 +163,10 @@ func handleFunc(url string, handler func(*Context)) {
 				logerr(err)
 				return
 			}
-			var id, desc, owner, shared, group string
+			var id, desc, owner, shared, params, group string
 			var zinnen int
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &group)
+				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &params, &group)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -182,6 +184,7 @@ func handleFunc(url string, handler func(*Context)) {
 				q.desc[id] = desc
 				q.lines[id] = zinnen
 				q.shared[id] = shared
+				q.params[id] = params
 				if q.auth && owner == q.user {
 					q.myprefixes[id] = true
 				}
