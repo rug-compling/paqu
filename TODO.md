@@ -17,9 +17,13 @@ Zie ook: TODO in diverse bestanden
     - Beheer van corpora
       - uploaden:
         - meerdere tekstdocumenten in een zipbestand (?)
+		- xml-bestanden in zipbestand
         - regels die al een label hebben
       - Voordat er iets gedownload wordt controleren of er nog
         onge'gzip'te bestanden zijn
   - Code
     - Organisatie + documentatie
     - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
+
+  - pqbuild
+    - invoer: *.xml.gz

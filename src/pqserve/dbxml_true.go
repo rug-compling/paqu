@@ -75,12 +75,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 	if err != nil {
 		return 0, 0, fmt.Errorf("Openen dact-bestand: %s", err)
 	}
-	defer func() {
-		dc.Close()
-		if !Cfg.Dact {
-			os.Remove(dact)
-		}
-	}()
+	defer dc.Close()
 
 	docs, err := dc.All()
 	if err != nil {

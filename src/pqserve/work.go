@@ -73,6 +73,12 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		os.Remove(data + ".lines.tmp")
 		for _, f := range []string{data, data + ".lines", dact, stdout, stderr, summary} {
+			if f == data && params == "dact" {
+				continue
+			}
+			if f == dact && !Cfg.Dact {
+				continue
+			}
 			logerr(gz(f))
 		}
 		files, e := ioutil.ReadDir(xml)
@@ -88,6 +94,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			default:
 			}
 			logerr(gz(path.Join(xml, file.Name())))
+		}
+		if params == "dact" && !Cfg.Dact {
+			os.Remove(path.Join(dact))
 		}
 	}()
 

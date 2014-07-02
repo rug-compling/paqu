@@ -177,6 +177,10 @@ laten staan waar ze staan. Die xml-bestanden worden zelf niet in PaQu
 opgenomen, alleen de analyse van die bestanden. De bestanden zelf zijn
 ook nog nodig voor het werken met PaQu.
 
+Wel kun je de xml-bestanden na verwerking comprimeren met `gzip`:
+
+    find ~/corpora/LassySmall/Treebank -name '*.xml' | xargs gzip
+
 ----------------------------------------------------------------
 
 ## Werken met PaQu ##
