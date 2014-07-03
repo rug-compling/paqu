@@ -71,7 +71,9 @@ func (c *Corpus) Get(name string) (xml []byte, err error) {
 	return
 }
 
-// Open a compact corpus for reading
+// Open a compact corpus for reading in simple mode.
+// Use this version if you want to retrieve most or all items from the corpus.
+// See also: RaOpen()
 func Open(name string) (corpus *Corpus, err error) {
 	corpus = &Corpus{
 		names: make([]string, 0),
@@ -134,7 +136,7 @@ func Open(name string) (corpus *Corpus, err error) {
 			err = fmt.Errorf("%v in file '%s.index', line %d", curfile, lineno)
 			return
 		}
-		if offset+size >= uint64(len(data)) {
+		if offset+size > uint64(len(data)) {
 			err = fmt.Errorf("Data in file '%s.data.dz' is too short", name)
 			return
 		}

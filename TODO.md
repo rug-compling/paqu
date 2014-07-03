@@ -22,6 +22,7 @@ Zie ook: TODO in diverse bestanden
           - DbXML: zie onder
           - tijdens verwerking, in veld "Opmerkingen" soort vermelden
         - xml-bestanden in zipbestand
+		  - data.lines: sorteren op naam
         - regels
           - met/zonder label
           - wel/niet getokeniseerd

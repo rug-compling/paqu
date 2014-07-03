@@ -134,13 +134,14 @@ func tree(q *Context) {
 				return
 			}
 		} else {
-			reader, err := compactcorpus.Open(archive)
+			reader, err := compactcorpus.RaOpen(archive)
 			if err != nil {
 				http.Error(q.w, err.Error(), http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
 			data, err = reader.Get(filename)
+			reader.Close()
 			if err != nil {
 				http.Error(q.w, err.Error(), http.StatusInternalServerError)
 				logerr(err)
