@@ -1,4 +1,4 @@
-The Go package compactcorpus is a reader for corpora in the compact Alpino format.
+The Go package compactcorpus provides a reader and writer for corpora in the compact Alpino format.
 
 See: http://github.com/rug-compling/alpinocorpus
 
