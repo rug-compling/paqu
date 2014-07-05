@@ -401,7 +401,13 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 	}
 
 	if Cfg.Dact && params != "dact" {
-		err = makeDact(dact, xml, params == "xmlzip", task.chKill)
+		p := ""
+		if strings.Contains(params, "-lbl") {
+			p = "-"
+		} else if params == "xmlzip" {
+			p = "/"
+		}
+		err = makeDact(dact, xml, p, task.chKill)
 		if err != nil {
 			return
 		}

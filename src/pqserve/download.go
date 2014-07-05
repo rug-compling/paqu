@@ -143,6 +143,8 @@ func download(q *Context) {
 		name := decode_filename(gzname[:len(gzname)-3])
 		if params == "dact" || params == "xmlzip" {
 			name = name[1+strings.Index(name, "/"):]
+		} else if strings.Contains(params, "-lbl") {
+			name = name[1+strings.Index(name, "-"):]
 		}
 		if err != nil {
 			logerr(err)

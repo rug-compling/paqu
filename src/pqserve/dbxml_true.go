@@ -30,7 +30,7 @@ func get_dact(archive, filename string) ([]byte, error) {
 	return []byte(d), nil
 }
 
-func makeDact(dact, xml string, strip1dir bool, chKill chan bool) error {
+func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 	files, err := filenames2(xml)
 	if err != nil {
 		return err
@@ -59,8 +59,8 @@ func makeDact(dact, xml string, strip1dir bool, chKill chan bool) error {
 		}
 
 		name = decode_filename(name)
-		if strip1dir {
-			name = strings.SplitN(name, "/", 2)[1]
+		if stripchar != "" {
+			name = name[1+strings.Index(name, stripchar):]
 		}
 		err = db.PutXml(name, string(data), false)
 		if err != nil {
