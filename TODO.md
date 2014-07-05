@@ -10,10 +10,10 @@ Zie ook: TODO in diverse bestanden
   - Gebruikershandleiding
     - Introtekst op hoofdpagina
     - Tekst achter *Meer info...*
+	- Helptekst voor pagina *Mijn corpora*
   - Interface
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - Logo + balk wijzigen
-    - Pop-up help, waar nodig
   - Code
     - Organisatie + documentatie
     - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`

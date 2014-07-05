@@ -173,7 +173,7 @@ function formtest() {
 			fmt.Fprint(q.w, "<td class=\"more\">")
 			if corpus.status == "gereed" || corpus.status == "fout" {
 				id := urlencode(corpus.id)
-				fmt.Fprintf(q.w, `<a href="javascript:void(0)" onclick="javascript:menu(%d)" class="opties a%d" title="opties">&#10020;</a>
+				fmt.Fprintf(q.w, `<a href="javascript:void(0)" onclick="javascript:menu(%d)" class="opties a%d" title=" opties ">&#10020;</a>
 <div class="submenu a%d" style="display: none;">
 <ul class="optielijst">
 `, i, i, i)
@@ -281,7 +281,7 @@ function formtest() {
 		fmt.Fprintln(q.w, "<option value=\"dact\">Dact-bestand</option>")
 	}
 	fmt.Fprint(q.w, `
-	</select>
+	</select> <b><a href="corpushelp" title=" help ">?</a></b>
       <p>
 	<input type="submit">
     </form>

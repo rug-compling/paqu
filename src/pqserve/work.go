@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"sort"
 	"syscall"
 	"time"
 )
@@ -660,6 +661,20 @@ func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
 	return err
 }
 
+type XmlFiles []*zip.File
+
+func (x XmlFiles) Less(i, j int) bool {
+	return x[i].Name < x[j].Name
+}
+
+func (x XmlFiles) Swap(i, j int) {
+	x[i], x[j] = x[j], x[i]
+}
+
+func (x XmlFiles) Len() int {
+	return len(x)
+}
+
 func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int, err error) {
 
 	os.Mkdir(xmldir, 0777)
@@ -686,6 +701,8 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 	nline = 0
 	nd := -1
 	sdir := ""
+
+	sort.Sort(XmlFiles(z.Reader.File))
 
 	for _, f := range z.File {
 
