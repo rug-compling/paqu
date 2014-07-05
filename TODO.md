@@ -18,5 +18,6 @@ Zie ook: TODO in diverse bestanden
     - Organisatie + documentatie
     - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
 
-  - pqbuild
-    - invoer: *.xml.gz
+  - pqrmcorpus
+    - nieuw programma
+	- ook beschrijven in README.md

@@ -10,6 +10,7 @@ import (
 
 	"bufio"
 	"bytes"
+	"compress/gzip"
 	"database/sql"
 	"encoding/xml"
 	"fmt"
@@ -128,6 +129,7 @@ func main() {
 	buffer[ARCH].Grow(50000)
 
 	db_makeindex = true
+	db_updatestatus = true
 	for len(os.Args) > 1 {
 		if os.Args[1] == "-a" {
 			db_append = true
@@ -337,6 +339,16 @@ Opties:
 			data, err := ioutil.ReadFile(filename)
 			util.CheckErr(err)
 			do_data("", filename, data)
+		} else if strings.HasSuffix(filename, ".xml.gz") {
+			fp, err := os.Open(filename)
+			util.CheckErr(err)
+			r, err := gzip.NewReader(fp)
+			util.CheckErr(err)
+			data, err := ioutil.ReadAll(r)
+			r.Close()
+			fp.Close()
+			util.CheckErr(err)
+			do_data("", filename[:len(filename)-3], data)
 		} else if has_dbxml && strings.HasSuffix(filename, ".dact") {
 			do_dact(filename)
 		} else if strings.HasSuffix(filename, ".data.dz") {
