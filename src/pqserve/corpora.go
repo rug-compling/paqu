@@ -224,7 +224,7 @@ function formtest() {
 				processLock.RUnlock()
 				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
 			} else if st == "bezig" {
-				if corpus.params != "dact" && corpus.params != "xmlzip" {
+				if corpus.params == "run" || strings.HasPrefix(corpus.params, "line") {
 					p := 0
 					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"))
 					if err == nil {
@@ -267,10 +267,14 @@ function formtest() {
 	Upload document:<br>
 	<input type="file" name="data">
         <p>
-        Structuur van document:<br>
+        Soort document:<br>
 	<select name="how">
+	  <option value="auto">Automatisch bepaald</option>
 	  <option value="run">Doorlopende tekst</option>
 	  <option value="line">Een zin per regel</option>
+	  <option value="line-lbl">Een zin per regel, met labels</option>
+	  <option value="line-tok">Een zin per regel, getokeniseerd</option>
+	  <option value="line-lbl-tok">Een zin per regel, met labels, getokeniseerd</option>
 	  <option value="xmlzip">Alpino XML-bestanden in zipfile</option>
 `, MAXTITLELEN+MAXTITLELEN/4, MAXTITLELEN)
 	if has_dbxml {
@@ -361,9 +365,9 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	_, err = q.db.Exec(fmt.Sprintf("INSERT %s_info (id, description, owner, status, params) VALUES (%q, %q, %q, \"QUEUED\", %q);",
+	_, err = q.db.Exec(fmt.Sprintf("INSERT %s_info (id, description, owner, status, params, msg) VALUES (%q, %q, %q, \"QUEUED\", %q, %q);",
 		Cfg.Prefix,
-		dirname, title, q.user, how))
+		dirname, title, q.user, how, "Bron: " + invoertabel[how]))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)

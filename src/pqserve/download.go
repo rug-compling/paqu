@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/pebbe/util"
+
 	"archive/zip"
 	"compress/gzip"
 	"fmt"
@@ -52,7 +54,9 @@ func download(q *Context) {
 	case "stderr":
 		filename = "stderr.txt"
 	case "zinnen":
-		filename = "data.lines"
+		if !strings.Contains(params, "-lbl") {
+			filename = "data.lines"
+		}
 	case "dact":
 		filename = "data.dact"
 	case "xml":
@@ -87,6 +91,39 @@ func download(q *Context) {
 		return
 	}
 
+	// data.lines met verkeerde labels
+	if dl == "zinnen" {
+		fp, err := os.Open(path.Join(datadir, "data.lines.gz"))
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
+		r, err := gzip.NewReader(fp)
+		if err != nil {
+			fp.Close()
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
+
+		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		rd := util.NewReader(r)
+		for {
+			line, err := rd.ReadLineString()
+			if err != nil {
+				break
+			}
+			a := strings.SplitN(line, "|", 2)
+			lbl := decode_filename(a[0][1+strings.Index(a[0], "-"):])
+			fmt.Fprintf(q.w, "%s|%s\n", lbl, a[1])
+		}
+		r.Close()
+		fp.Close()
+
+		return
+	}
+
 	// xml
 	datadir = path.Join(datadir, "xml")
 	files, err := filenames2(datadir)
@@ -105,7 +142,7 @@ func download(q *Context) {
 		file, err := os.Stat(fullgzname)
 		name := decode_filename(gzname[:len(gzname)-3])
 		if params == "dact" || params == "xmlzip" {
-			name = strings.SplitN(name, "/", 2)[1]
+			name = name[1+strings.Index(name, "/"):]
 		}
 		if err != nil {
 			logerr(err)

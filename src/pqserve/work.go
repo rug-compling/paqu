@@ -6,7 +6,6 @@ import (
 	"archive/zip"
 	"database/sql"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -64,6 +63,16 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	stdout := path.Join(dirname, "stdout.txt")
 	stderr := path.Join(dirname, "stderr.txt")
 	summary := path.Join(dirname, "summary.txt")
+
+	if params == "auto" {
+		params, err = invoersoort(db, data, task.id)
+		if err != nil {
+			return
+		}
+		if params == "dact" {
+			os.Rename(data, dact)
+		}
+	}
 
 	defer func() {
 		select {
@@ -201,18 +210,50 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 		} else { // if !reuse
+			var has_tok, has_lbl bool
+			if strings.Contains(params, "-lbl") {
+				has_lbl = true
+			}
+			if strings.Contains(params, "-tok") {
+				has_tok = true
+			}
+
+			labels := make([]string, 0)
+			if has_lbl {
+				fp, _ := os.Open(data)
+				fptmp, _ := os.Create(data + ".tmp")
+
+				rd := util.NewReader(fp)
+				for {
+					line, err := rd.ReadLineString()
+					if err != nil {
+						break
+					}
+					a := strings.SplitN(line, "|", 2)
+					if len(a) == 2 {
+						labels = append(labels, strings.TrimSpace(a[0]))
+						fmt.Fprintln(fptmp, strings.TrimSpace(a[1]))
+					}
+				}
+				fptmp.Close()
+				fp.Close()
+				os.Rename(data+".tmp", data)
+			}
+
 			var pqtexter, tok string
-			switch params {
-			case "run":
+			if params == "run" {
 				tok = "tokenize.sh"
 				pqtexter = "-r"
-			case "line":
+			} else {
 				tok = "tokenize_no_breaks.sh"
-			default:
-				err = errors.New("Niet geïmplementeerd: " + params)
-				return
 			}
-			cmd := shell("pqtexter %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", pqtexter, data, tok, stderr)
+
+			var cmd *exec.Cmd
+			if has_tok {
+				cmd = shell("pqtexter %s 2>> %s", data, stderr)
+			} else {
+				cmd = shell("pqtexter %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", pqtexter, data, tok, stderr)
+			}
 			chPipe := make(chan string)
 			chTokens := make(chan int, 2)
 			var fp *os.File
@@ -222,9 +263,15 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			go func() {
 				var tokens, lineno int
+				i := 0
 				for line := range chPipe {
 					tokens += len(strings.Fields(line))
-					fmt.Fprintf(fp, "%04d/%04d|%s\n", lineno/10000, lineno%10000, line)
+					if has_lbl {
+						fmt.Fprintf(fp, "%04d/%04d-%s|%s\n", lineno/10000, lineno%10000, encode_filename(labels[i]), line)
+						i++
+					} else {
+						fmt.Fprintf(fp, "%04d/%04d|%s\n", lineno/10000, lineno%10000, strings.TrimSpace(line))
+					}
 					if lineno%10000 == 0 {
 						os.MkdirAll(path.Join(xml, fmt.Sprintf("%04d", lineno/10000)), 0777)
 					}
@@ -308,18 +355,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		return
 	}
 
-	s := params
-	switch params {
-	case "run":
-		s = "doorlopende tekst"
-	case "line":
-		s = "een zin per regel"
-	case "dact":
-		s = "Dact-bestand"
-	case "xmlzip":
-		s = "Alpino XML-bestanden in zipbestand"
-	}
-	fmt.Fprintf(fp, "Bron: %s\n\n", s)
+	fmt.Fprintf(fp, "Bron: %s\n\n", invoertabel[params])
 
 	if nlines > 0 {
 		if len(errlines) == 0 {
@@ -341,7 +377,14 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 				if len(a) > 5 {
 					a[1] = strings.Join(a[1:len(a)-3], "|")
 				}
-				fmt.Fprintf(fp, "%s\t%s\n", decode_filename(a[0][2:]), a[1])
+				fname := a[0][2:]
+				if params == "run" || strings.HasPrefix(params, "line") {
+					fname = decode_filename(a[0][2:])
+				}
+				if strings.Contains(params, "-lbl") {
+					fname = fname[1+strings.Index(fname, "-"):]
+				}
+				fmt.Fprintf(fp, "%s\t%s\n", fname, a[1])
 			}
 		}
 	}
@@ -482,7 +525,7 @@ func work(task *Process) {
 	if err == nil {
 		logf("FINISHED: " + task.id)
 		sendmail(user, "Corpus klaar", fmt.Sprintf("Je corpus \"%s\" staat klaar op %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
-		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\" WHERE `id` = %q", Cfg.Prefix, task.id))
+		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `msg` = \"\" WHERE `id` = %q", Cfg.Prefix, task.id))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
 		if !task.killed {

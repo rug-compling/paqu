@@ -355,6 +355,8 @@ func tree(q *Context) {
 		f := decode_filename(filename)
 		if p := q.params[prefix]; p == "dact" || p == "xmlzip" {
 			f = strings.SplitN(f, "/", 2)[1]
+		} else if strings.Contains(p, "-lbl") {
+			f = strings.SplitN(f, "-", 2)[1]
 		}
 		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(f))
 	}
