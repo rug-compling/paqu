@@ -1,6 +1,6 @@
 
 include ../Makefile.cfg
 
-../../bin/setquota: *.go
+../../bin/pqconfig: *.go
 	go build -o $@ $(OPTS) .
-
+	chmod 700 $@

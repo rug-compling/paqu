@@ -1,6 +1,6 @@
 
 include ../Makefile.cfg
 
-../../bin/rmuser: *.go
+../../bin/pqrmuser: *.go
 	go build -o $@ $(OPTS) .
 

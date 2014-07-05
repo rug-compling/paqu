@@ -115,9 +115,9 @@ je computer de wachtwoorden niet kunnen lezen:
 
     chmod 600 ~/.paqu/setup.toml
 
-Je kunt de configuratie controleren met het commando `config`. Als je
+Je kunt de configuratie controleren met het commando `pqconfig`. Als je
 een typefout maakt in een label in het configuratiebestand, dan wordt
-dat item genegeerd. Door het commando `config` te draaien kun je zien of
+dat item genegeerd. Door het commando `pqconfig` te draaien kun je zien of
 alles de juiste waarde heeft. Omdat dit programma ook de wachtwoorden
 laat zien heeft het de rechten 700, zodat andere gebruikers op je
 computer het programma niet kunnen gebruiken.
@@ -154,7 +154,7 @@ onderaan `cert.pem` toe te voegen.
 
 Om de database te initialiseren, run:
 
-    dbinit
+    pqinit
 
 ### Lassy Klein ###
 
@@ -218,9 +218,9 @@ op de server:
 
 ### Beheer ###
 
-Met het programma `rmuser` kun je een gebruiker verwijderen, inclusief
+Met het programma `pqrmuser` kun je een gebruiker verwijderen, inclusief
 alle data die door die gebruiker is opgeslagen, zowel van schijf als uit
 de MySQL-database.
 
-Met het programma `setquota` kun je het quotum voor een of meer
+Met het programma `pqsetquota` kun je het quotum voor een of meer
 gebruikers aanpassen.

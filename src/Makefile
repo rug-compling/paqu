@@ -8,11 +8,12 @@ info:
 
 all:
 	mkdir -p ../bin
-	make -C alpino
-	make -C config
-	make -C dbinit
+	make -C pqalpino
 	make -C pqbuild
+	make -C pqconfig
+	make -C pqinit
+	make -C pqrmuser
 	make -C pqserve
+	make -C pqsetquota
 	make -C pqstatus
-	make -C rmuser
-	make -C setquota
+	make -C pqtexter

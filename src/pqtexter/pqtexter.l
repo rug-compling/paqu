@@ -1,14 +1,14 @@
 /*
- * File: prepare.l
+ * File: texter.l
  *
  * (c) Peter Kleiweg
  *     Wed May  7 09:58:58 2014
  *
  * Compile:
  *
- *    flex prepare.l
- *    gcc -s -Wall -o prepare prepare.c -lfl
- *    rm prepare.c
+ *    flex pqtexter.l
+ *    gcc -s -Wall -o pqtexter pqtexter.c -lfl
+ *    rm pqtexter.c
  *
  */
 
@@ -62,7 +62,7 @@ int
 
 %option 8bit batch
 %option noyywrap nounput noinput
-%option outfile="prepare.c"
+%option outfile="pqtexter.c"
 
 SPC	([ \t\n\r\f]+)
 

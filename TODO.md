@@ -36,10 +36,6 @@ Zie ook: TODO in diverse bestanden
   - pqbuild
     - invoer: *.xml.gz
 
-  - alle programma's zonder pq hernoemen
-
-  - niet meer dan 10.000 bestanden in een directory
-
 ```
 # Berkeley DB
 #

@@ -1,5 +1,6 @@
 
 include ../Makefile.cfg
 
-../../bin/dbinit: *.go
+../../bin/pqsetquota: *.go
 	go build -o $@ $(OPTS) .
+

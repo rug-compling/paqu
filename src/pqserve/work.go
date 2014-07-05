@@ -201,18 +201,18 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 		} else { // if !reuse
-			var prepare, tok string
+			var pqtexter, tok string
 			switch params {
 			case "run":
 				tok = "tokenize.sh"
-				prepare = "-r"
+				pqtexter = "-r"
 			case "line":
 				tok = "tokenize_no_breaks.sh"
 			default:
 				err = errors.New("Niet geïmplementeerd: " + params)
 				return
 			}
-			cmd := shell("prepare %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", prepare, data, tok, stderr)
+			cmd := shell("pqtexter %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", pqtexter, data, tok, stderr)
 			chPipe := make(chan string)
 			chTokens := make(chan int, 2)
 			var fp *os.File
@@ -266,7 +266,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				timeout = fmt.Sprint("-t ", Cfg.Timeout)
 			}
 			cmd := shell(
-				`alpino -a %s -d %s %s %s.lines%s >> %s 2>> %s`,
+				`pqalpino -a %s -d %s %s %s.lines%s >> %s 2>> %s`,
 				Cfg.Alpino, xml, timeout, data, ext, stdout, stderr)
 			err = run(cmd, task.chKill, nil)
 			if err != nil {
