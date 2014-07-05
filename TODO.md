@@ -17,7 +17,3 @@ Zie ook: TODO in diverse bestanden
   - Code
     - Organisatie + documentatie
     - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`
-
-  - pqrmcorpus
-    - nieuw programma
-	- ook beschrijven in README.md

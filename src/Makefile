@@ -12,6 +12,7 @@ all:
 	make -C pqbuild
 	make -C pqconfig
 	make -C pqinit
+	make -C pqrmcorpus
 	make -C pqrmuser
 	make -C pqserve
 	make -C pqsetquota
