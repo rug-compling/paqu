@@ -182,17 +182,17 @@ function formtest() {
 <li><a href=".?db=%s">doorzoeken</a>
 <li><a href="rename?id=%s">hernoemen</a>
 <li><a href="share?id=%s">delen</a>
-<li><a href="download?dl=summary&id=%s">overzicht</a>
-<li><a href="download?dl=zinnen&id=%s">download zinnen</a>
-<li><a href="download?dl=xml&id=%s">download xml</a>
+<li><a href="download?dl=summary&amp;id=%s">overzicht</a>
+<li><a href="download?dl=zinnen&amp;id=%s">download zinnen</a>
+<li><a href="download?dl=xml&amp;id=%s">download xml</a>
 `, id, id, id, id, id, id)
 					if has_dbxml && Cfg.Dact {
-						fmt.Fprintf(q.w, `<li><a href="download?dl=dact&id=%s">download dact</a>`, id)
+						fmt.Fprintf(q.w, `<li><a href="download?dl=dact&amp;id=%s">download dact</a>`, id)
 					}
 				}
 				fmt.Fprintf(q.w, `
-<li><a href="download?dl=stdout&id=%s">download stdout</a>
-<li><a href="download?dl=stderr&id=%s">download stderr</a>
+<li><a href="download?dl=stdout&amp;id=%s">download stdout</a>
+<li><a href="download?dl=stderr&amp;id=%s">download stderr</a>
 </ul>
 </div>
 `, id, id)
@@ -252,7 +252,37 @@ function formtest() {
 		fmt.Fprintln(q.w, "</table>")
 	}
 
-	fmt.Fprintln(q.w, "<h2>Nieuw corpus maken</h2>")
+	fmt.Fprintln(q.w, `
+<div class="submenu a9999">
+<div class="corpushelp">
+Soort document
+<p>
+<dl>
+<dt>Automatisch bepaald
+<dd>TODO
+<dt>Doorlopende tekst
+<dd>TODO
+<dt>Een zin per regel
+<dd>TODO
+<dt>Een zin per regel, met labels
+<dd>TODO
+<dt>Een zin per regel, getokeniseerd
+<dd>TODO
+<dt>Een zin per regel, met labels, getokeniseerd
+<dd>TODO
+`)
+	if has_dbxml {
+		fmt.Fprintln(q.w, `
+<dt>Alpino XML-bestanden in zipfile
+<dd>TODO
+`)
+	}
+	fmt.Fprintln(q.w, `
+</dl>
+</div>
+</div>
+<h2>Nieuw corpus maken</h2>
+`)
 	if q.quotum > 0 {
 		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n<p>\n", q.quotum-gebruikt)
 	}
@@ -281,7 +311,7 @@ function formtest() {
 		fmt.Fprintln(q.w, "<option value=\"dact\">Dact-bestand</option>")
 	}
 	fmt.Fprint(q.w, `
-	</select> <b><a href="corpushelp" title=" help ">?</a></b>
+	</select> <b><a href="javascript:void(0)" title=" help " onclick="javascript:menu(9999)">?</a></b>
       <p>
 	<input type="submit">
     </form>
@@ -367,7 +397,7 @@ func submitCorpus(q *Context) {
 
 	_, err = q.db.Exec(fmt.Sprintf("INSERT %s_info (id, description, owner, status, params, msg) VALUES (%q, %q, %q, \"QUEUED\", %q, %q);",
 		Cfg.Prefix,
-		dirname, title, q.user, how, "Bron: " + invoertabel[how]))
+		dirname, title, q.user, how, "Bron: "+invoertabel[how]))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)

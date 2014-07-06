@@ -16,4 +16,3 @@ Zie ook: TODO in diverse bestanden
     - Logo + balk wijzigen
   - Code
     - Organisatie + documentatie
-    - Ontwikkeling: `make`, `go fmt`, `go vet`, `golint`

@@ -247,3 +247,14 @@ div.submenu {
   font-size: 11px;
   padding: 0px;
 }
+
+/*** overrides for div.submenu *****/
+
+div.a9999 {
+  width: 50%;
+}
+
+div.corpushelp {
+    margin: 1em 2em;
+}
+1
