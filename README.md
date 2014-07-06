@@ -115,12 +115,13 @@ je computer de wachtwoorden niet kunnen lezen:
 
     chmod 600 ~/.paqu/setup.toml
 
+Dit voorkomt ook dat anderen de programma's kunnen draaien en daarmee
+zomaar corpora van willekeurig wie kunnen verwijderen, bijvoorbeeld.
+
 Je kunt de configuratie controleren met het commando `pqconfig`. Als je
 een typefout maakt in een label in het configuratiebestand, dan wordt
 dat item genegeerd. Door het commando `pqconfig` te draaien kun je zien of
-alles de juiste waarde heeft. Omdat dit programma ook de wachtwoorden
-laat zien heeft het de rechten 700, zodat andere gebruikers op je
-computer het programma niet kunnen gebruiken.
+alles de juiste waarde heeft.
 
 ### HTTPS ###
 
