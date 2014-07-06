@@ -1,3 +1,7 @@
+/*
+TODO: Geen curl gebruiken, maar Go-functies
+*/
+
 package main
 
 import (
@@ -66,7 +70,7 @@ func main() {
 			"-c",
 			fmt.Sprintf(
 				"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
-				*opt_d, *opt_t * 1000, filename))
+				*opt_d, *opt_t*1000, filename))
 		cmd.Env = []string{
 			"ALPINO_HOME=" + *opt_a,
 			"PATH=" + os.Getenv("PATH"),
