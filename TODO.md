@@ -16,4 +16,6 @@ Zie ook: TODO in diverse bestanden
     - Logo + balk wijzigen
   - Code
     - pqserve: gebruik/codering van labels is een rommeltje, dat moet beter
+      - benaming: label/bestand
+      - uitleg op tab browse: `%` en `_` in label
     - Organisatie + documentatie

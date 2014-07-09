@@ -350,11 +350,12 @@ Opties:
 		filename, err = filepath.Abs(filename)
 		util.CheckErr(err)
 		filename = filepath.Clean(filename)
-		if strings.HasSuffix(filename, ".xml") {
+		lowername := strings.ToLower(filename)
+		if strings.HasSuffix(lowername, ".xml") {
 			data, err := ioutil.ReadFile(filename)
 			util.CheckErr(err)
 			do_data("", filename, data)
-		} else if strings.HasSuffix(filename, ".xml.gz") {
+		} else if strings.HasSuffix(lowername, ".xml.gz") {
 			fp, err := os.Open(filename)
 			util.CheckErr(err)
 			r, err := gzip.NewReader(fp)
@@ -364,9 +365,9 @@ Opties:
 			fp.Close()
 			util.CheckErr(err)
 			do_data("", filename[:len(filename)-3], data)
-		} else if has_dbxml && strings.HasSuffix(filename, ".dact") {
+		} else if has_dbxml && strings.HasSuffix(lowername, ".dact") {
 			do_dact(filename)
-		} else if strings.HasSuffix(filename, ".data.dz") {
+		} else if strings.HasSuffix(lowername, ".data.dz") {
 			reader, err := compactcorpus.Open(filename)
 			util.CheckErr(err)
 			fmt.Println(">>>", filename)
@@ -953,9 +954,9 @@ func repl_filecode(s string) string {
 // Als de buffer vol raakt, stuur alles naar de database.
 func sent_buf_put(arch, file int, sentence, archname, filename string) {
 
-	lbl := filename
+	lbl := noext(filename, ".xml")
 	if archname != "" {
-		lbl = archname + "::" + filename
+		lbl = noext(archname, ".dact", "data.dz") + "::" + lbl
 	}
 	if db_strippath {
 		lbl = rePath.ReplaceAllLiteralString(lbl, "")
@@ -1319,4 +1320,14 @@ func iformat(i int) string {
 		s1 = s1[0 : n-3]
 	}
 	return s1 + s2
+}
+
+func noext(name string, ext ...string) string {
+	s := strings.ToLower(name)
+	for _, e := range ext {
+		if strings.HasSuffix(s, e) {
+			return name[:len(s)-len(e)]
+		}
+	}
+	return name
 }
