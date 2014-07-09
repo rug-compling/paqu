@@ -75,12 +75,8 @@ func corpora(q *Context) {
 	}
 
 	writeHead(q, "Corpora", 2)
-	fmt.Fprintln(q.w, "<h1>Mijn corpora</h1>")
-
-	if len(corpora) == 0 {
-		fmt.Fprintln(q.w, "Je hebt nog geen corpora")
-	} else {
-		fmt.Fprint(q.w, `<script type="text/javascript" src="jquery.js"></script>
+	fmt.Fprintln(q.w, `
+<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
 var visible = -1;
 function menu(idx) {
@@ -109,6 +105,30 @@ $(document).mouseup(
         }
     });
 
+function trim(stringToTrim) {
+  return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+
+function formtest() {
+  var f = document.newcorpus;
+  if (trim(f.title.value) == '') {
+    alert('Titel ontbreekt');
+    return false;
+  }
+  if (trim(f.data.value) == '') {
+    alert('Geen document gekozen');
+    return false;
+  }
+  return true;
+}
+//--></script>
+
+<h1>Mijn corpora</h1>
+`)
+	if len(corpora) == 0 {
+		fmt.Fprintln(q.w, "Je hebt nog geen corpora")
+	} else {
+		fmt.Fprint(q.w, `<script type="text/javascript"><!--
 corpora = [`)
 		p := ""
 		for _, corpus := range corpora {
@@ -129,23 +149,6 @@ function rm(idx) {
         return false;
     }
     return false;
-}
-
-function trim(stringToTrim) {
-  return stringToTrim.replace(/^\s+|\s+$/g,"");
-}
-
-function formtest() {
-  var f = document.newcorpus;
-  if (trim(f.title.value) == '') {
-    alert('Titel ontbreekt');
-    return false;
-  }
-  if (trim(f.data.value) == '') {
-    alert('Geen document gekozen');
-    return false;
-  }
-  return true;
 }
 //--></script>
 <table class="corpora">
