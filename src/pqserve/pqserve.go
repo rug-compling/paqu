@@ -143,6 +143,8 @@ func main() {
 	handleFunc("corpuslijst", corpuslijst)
 	handleFunc("corsave", corsave)
 
+	handleFunc("browse", browse)
+
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)
 	handleFunc("share", share)

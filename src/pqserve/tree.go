@@ -45,7 +45,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -87,6 +86,23 @@ func tree(q *Context) {
 		return
 	}
 
+	label := ""
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
+		return
+	}
+	if rows.Next() {
+		err := rows.Scan(&label)
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
+		rows.Close()
+	}
+
 	archive := ""
 	if arch >= 0 {
 		rows, err := q.db.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
@@ -107,7 +123,7 @@ func tree(q *Context) {
 	}
 
 	filename := ""
-	rows, err := q.db.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
+	rows, err = q.db.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -328,38 +344,7 @@ func tree(q *Context) {
 
 	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"/tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
 
-	dirnames := make([]string, len(Cfg.Directories)+1)
-	copy(dirnames, Cfg.Directories)
-	dirnames[len(Cfg.Directories)] = path.Join(paqudir, "data", prefix, "xml")
-	for i, d := range dirnames {
-		if !strings.HasSuffix(d, "/") {
-			dirnames[i] = d + "/"
-		}
-	}
-
-	if archive != "" {
-		for _, p := range dirnames {
-			if strings.HasPrefix(archive, p) {
-				archive = archive[len(p):]
-				break
-			}
-		}
-		fmt.Fprintf(q.w, "archief: %s<br>bestand: %s\n", html.EscapeString(archive), html.EscapeString(filename))
-	} else {
-		for _, p := range dirnames {
-			if strings.HasPrefix(filename, p) {
-				filename = filename[len(p):]
-				break
-			}
-		}
-		f := decode_filename(filename)
-		if p := q.params[prefix]; p == "dact" || p == "xmlzip" {
-			f = strings.SplitN(f, "/", 2)[1]
-		} else if strings.Contains(p, "-lbl") {
-			f = strings.SplitN(f, "-", 2)[1]
-		}
-		fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(f))
-	}
+	fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(label))
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")
 

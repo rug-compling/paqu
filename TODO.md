@@ -15,4 +15,5 @@ Zie ook: TODO in diverse bestanden
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - Logo + balk wijzigen
   - Code
+    - pqserve: gebruik/codering van labels is een rommeltje, dat moet beter
     - Organisatie + documentatie

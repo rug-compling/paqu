@@ -135,16 +135,6 @@ forwarded = false
 # ook onderbroken.
 querytimeout = 120
 
-# Prefixen van globale corpora.
-# Een globaal corpus is een corpus dat apart is geïnstalleerd door de
-# beheerder, niet door een gebruiker via de website.
-# De prefixen worden gestript van bestandnamen die worden getoond aan de
-# gebruiker op de pagina met de boomweergave van een zin.
-directories = [
-  "/net/corpora/LassySmall/Treebank",
-  "/net/corpora/LassyLarge/NLWIKI20110804/DACT"
-]
-
 # Wie mag de site bekijken?
 # Selectie op basis van ip-adres.
 # Als dit ontbreekt heeft iedereen toegang.

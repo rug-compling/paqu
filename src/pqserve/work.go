@@ -12,8 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strings"
+	"regexp"
 	"sort"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -391,10 +392,21 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 	}
 	fp.Close()
 
+	p := regexp.QuoteMeta(xml + "/")
+	d := ""
+	if strings.Contains(params, "-lbl") {
+		p += "[0-9]+/[0-9]+-"
+		d = "-d"
+	} else if params == "dact" || params == "xmlzip" {
+		p += "[0-9]+/"
+		d = "-d"
+	}
+
 	cmd := shell(
 		// optie -w i.v.m. recover()
-		`find %s -name '*.xml' | pqbuild -w -s %s %s %s 0 >> %s 2>> %s`,
+		`find %s -name '*.xml' | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
 		dirname,
+		quote(p), d,
 		path.Base(dirname), quote(title), quote(user), stdout, stderr)
 	err = run(cmd, task.chKill, nil)
 	if err != nil {

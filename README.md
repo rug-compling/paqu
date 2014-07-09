@@ -170,7 +170,12 @@ te installeren, omdat alle voorbeelden die de gebruiker in de informatie ziet we
 Als je dit corpus hebt geïnstalleerd in `~/corpora/LassySmall` kun je
 het zo opnemen in PaQu:
 
-    find ~/corpora/LassySmall/Treebank -name '*.xml' | pqbuild -w lassysmall 'Lassy Klein' none 1
+    find ~/corpora/LassySmall/Treebank -name '*.xml' | sort | \
+	    pqbuild -w -p '.*/corpora/LassySmall/Treebank/' lassysmall 'Lassy Klein' none 1
+
+De string achter -p is een reguliere expressie die het deel van elke
+bestandsnaam matcht dat wordt verwijderd om van de bestandsnaam een label
+te maken.
 
 Dit duurt wel even, dus wellicht wil je bovenstaande regel in een script
 zetten en dat aanroepen met `nohup`.

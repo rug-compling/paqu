@@ -21,6 +21,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -110,6 +111,11 @@ var (
 	db_exists       bool
 	db_makeindex    bool
 	db_updatestatus bool
+	db_strippath    bool
+	db_decode       bool
+
+	rePath      *regexp.Regexp
+	reFilecodes = regexp.MustCompile("_[0-9A-F][0-9A-F]|__")
 
 	memstats runtime.MemStats
 
@@ -141,6 +147,12 @@ func main() {
 			db_makeindex = false
 		} else if os.Args[1] == "-s" {
 			db_updatestatus = false
+		} else if os.Args[1] == "-p" && len(os.Args) > 2 {
+			db_strippath = true
+			os.Args = append(os.Args[:1], os.Args[2:]...)
+			rePath = regexp.MustCompile(os.Args[1])
+		} else if os.Args[1] == "-d" {
+			db_decode = true
 		} else {
 			break
 		}
@@ -149,7 +161,7 @@ func main() {
 
 	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] [-s] id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] id description owner public < bestandnamen
 
 Opties:
 
@@ -157,6 +169,8 @@ Opties:
  -w : bestaande database overschrijven
  -i : geen tabel van woord naar lemmas aanmaken
  -s : status niet bijwerken als klaar
+ -p : prefix die van bestandnaam wordt gestript voor label
+ -d : bestandnaam decoderen voor labal
 
   id:
   description:
@@ -304,9 +318,10 @@ Opties:
 
 		util.CheckErr(err)
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent (
-			arch int  NOT NULL,
-			file int  NOT NULL,
-			sent text NOT NULL)
+			arch int          NOT NULL,
+			file int          NOT NULL,
+			sent text         NOT NULL,
+			lbl  varchar(260) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
@@ -400,7 +415,8 @@ Opties:
 	fmt.Println("Aanmaken indexen op " + Cfg.Prefix + "_c_" + prefix + "_sent ...")
 	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent
 		ADD INDEX (file),
-		ADD INDEX (arch);`)
+		ADD INDEX (arch),
+		ADD INDEX (lbl);`)
 	util.CheckErr(err)
 
 	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_file ...")
@@ -586,7 +602,7 @@ func do_data(archname, filename string, data []byte) {
 	util.CheckErr(err)
 
 	// zin opslaan in <prefix>_sent
-	sent_buf_put(arch, file, alpino.Sentence)
+	sent_buf_put(arch, file, alpino.Sentence, archname, filename)
 
 	// multi-word units "ineenvouwen"
 	mwu(alpino.Node0)
@@ -924,16 +940,37 @@ func lassy_deprel(word, lemma, root, postag, rel, hword, hlemma, hroot, hpostag,
 
 //. Buffering
 
+func repl_filecode(s string) string {
+	if s == "__" {
+		return "_"
+	}
+	i, _ := strconv.ParseInt(s[1:], 16, 0)
+	b := []byte{byte(i)}
+	return string(b)
+}
+
 // Zet een zin in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
-func sent_buf_put(arch, file int, sentence string) {
+func sent_buf_put(arch, file int, sentence, archname, filename string) {
+
+	lbl := filename
+	if archname != "" {
+		lbl = archname + "::" + filename
+	}
+	if db_strippath {
+		lbl = rePath.ReplaceAllLiteralString(lbl, "")
+	}
+	if db_decode {
+		lbl = reFilecodes.ReplaceAllStringFunc(lbl, repl_filecode)
+	}
+
 	komma := ","
 	if !buf_has_data[SENT] {
 		komma = ""
 		buf_has_data[SENT] = true
-		fmt.Fprintf(&buffer[SENT], "INSERT `%s_c_%s_sent` (`arch`,`file`,`sent`) VALUES", Cfg.Prefix, prefix)
+		fmt.Fprintf(&buffer[SENT], "INSERT `%s_c_%s_sent` (`arch`,`file`,`sent`,`lbl`) VALUES", Cfg.Prefix, prefix)
 	}
-	fmt.Fprintf(&buffer[SENT], "%s\n(%d,%d,%q)", komma, arch, file, sentence)
+	fmt.Fprintf(&buffer[SENT], "%s\n(%d,%d,%q,%q)", komma, arch, file, sentence, lbl)
 	if buffer[SENT].Len() > 49500 {
 		buf_flush(SENT)
 	}
