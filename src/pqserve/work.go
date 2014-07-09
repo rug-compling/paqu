@@ -404,7 +404,7 @@ die regels een time-out waardoor geen volledige parse gedaan kon worden.
 
 	cmd := shell(
 		// optie -w i.v.m. recover()
-		`find %s -name '*.xml' | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
+		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
 		dirname,
 		quote(p), d,
 		path.Base(dirname), quote(title), quote(user), stdout, stderr)
