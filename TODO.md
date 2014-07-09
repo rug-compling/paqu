@@ -18,4 +18,5 @@ Zie ook: TODO in diverse bestanden
     - pqserve: gebruik/codering van labels is een rommeltje, dat moet beter
       - benaming: label/bestand
       - uitleg op tab browse: `%` en `_` in label
+    - pqserve: alle javascript onderbrengen in één apart bestand
     - Organisatie + documentatie
