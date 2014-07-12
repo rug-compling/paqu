@@ -72,8 +72,10 @@ func (c *Corpus) Get(name string) (xml []byte, err error) {
 }
 
 // Open a compact corpus for reading in simple mode.
-// Use this version if you want to retrieve most or all items from the corpus.
-// See also: RaOpen()
+//
+// Use this version if you want to retrieve most or all items from the corpus,
+// and if you have enough memory to unpack the complete corpus into memory.
+// Otherwise, use: RaOpen()
 func Open(name string) (corpus *Corpus, err error) {
 	corpus = &Corpus{
 		names: make([]string, 0),
@@ -145,4 +147,3 @@ func Open(name string) (corpus *Corpus, err error) {
 
 	return
 }
-

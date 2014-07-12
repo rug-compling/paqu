@@ -77,9 +77,14 @@ func (c *RaCorpus) Close() {
 	}
 }
 
-// Open a compact corpus for reading in random access mode. You need to call Close() when you are done.
-// Use this version if you want to retrieve only a few items from the corpus.
-// See also: Open()
+// Open a compact corpus for reading in random access mode.
+//
+// You need to call Close() when you are done.
+//
+// Use this version if you want to retrieve only a few items from the
+// corpus, or if you don't have enough memory to unpack the complete corpus
+// into memory.
+// Otherwise, use: Open()
 func RaOpen(name string) (corpus *RaCorpus, err error) {
 	corpus = &RaCorpus{
 		names:  make([]string, 0),
