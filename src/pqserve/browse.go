@@ -47,7 +47,7 @@ func browse(q *Context) {
 	fmt.Fprintf(q.w, "<ol start=\"%d\">\n", offset+1)
 	rows, err := q.db.Query(
 		fmt.Sprintf(
-			"SELECT `arch`,`file`,`sent`,`lbl` FROM `%s_c_%s_sent` %s ORDER BY `lbl` LIMIT %d,%d",
+			"SELECT `arch`,`file`,`sent`,`lbl` FROM `%s_c_%s_sent` %s LIMIT %d,%d",
 			Cfg.Prefix,
 			prefix,
 			query,
