@@ -273,10 +273,12 @@ Soort document
 <dd>TODO
 <dt>Een zin per regel, met labels, getokeniseerd
 <dd>TODO
+<dt>Alpino XML-bestanden in zipfile
+<dd>TODO
 `)
 	if has_dbxml {
 		fmt.Fprintln(q.w, `
-<dt>Alpino XML-bestanden in zipfile
+<dt>Dact-bestand
 <dd>TODO
 `)
 	}
