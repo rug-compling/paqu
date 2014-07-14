@@ -260,7 +260,8 @@ Opties:
 			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_sent ...")
 			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent
 				DROP INDEX file,
-				DROP INDEX arch;`)
+				DROP INDEX arch,
+				DROP INDEX lbl;`)
 			fmt.Println("Verwijderen index uit " + Cfg.Prefix + "_c_" + prefix + "_file ...")
 			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_file
 				DROP INDEX id`)
