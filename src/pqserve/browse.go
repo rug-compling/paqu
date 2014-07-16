@@ -104,7 +104,7 @@ Er waren problemen met %d van de %d zinnen:
 	// HTML-uitvoer van het formulier
 	fmt.Fprintf(q.w, `
 <form action="browse" method="get" accept-charset="utf-8">
-<input type="hidden" name="id", value="%s">
+<input type="hidden" name="id" value="%s">
 Label: <input type="text" name="lbl" size="20" value="%s">
 <input type="submit" value="Zoeken">
 <input type="button" value="Wissen" onClick="javascript:formclear(form)">
