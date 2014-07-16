@@ -14,6 +14,7 @@ import (
 	"path"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -346,49 +347,33 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		if strings.HasPrefix(line, "Q#") {
 			nlines++
-			if strings.Index(line, "|1|1|") < 0 {
-				errlines = append(errlines, line)
+			a := strings.Split(line, "|")
+			ln := len(a)
+			n, err := strconv.Atoi(a[ln-3])
+			if err == nil && n > 0 {
+				continue
 			}
+
+			if ln > 5 {
+				a[1] = strings.Join(a[1:ln-3], "|")
+			}
+			fname := a[0][2:]
+			if params == "run" || strings.HasPrefix(params, "line") {
+				fname = decode_filename(a[0][2:])
+			}
+			if strings.Contains(params, "-lbl") {
+				fname = fname[1+strings.Index(fname, "-"):]
+			}
+			errlines = append(errlines, fname+"\t"+a[ln-3]+"\t"+a[ln-2]+"\t"+a[1]+"\n")
 		}
 	}
-
 	fp, err = os.Create(summary)
 	if err != nil {
 		return
 	}
-
-	fmt.Fprintf(fp, "Bron: %s\n\n", invoertabel[params])
-
-	if nlines > 0 {
-		if len(errlines) == 0 {
-			fmt.Fprintf(fp, "Alle %d regels zijn met succes geparst.\n", nlines)
-		} else {
-			fmt.Fprintf(
-				fp,
-				`%d van de %d regels zijn met succes geparst.
-
-Er waren problemen met de %d regels hieronder. Misschien was er bij
-die regels een time-out waardoor geen volledige parse gedaan kon worden.
-
-`,
-				nlines-len(errlines),
-				nlines,
-				len(errlines))
-			for _, line := range errlines {
-				a := strings.Split(line, "|")
-				if len(a) > 5 {
-					a[1] = strings.Join(a[1:len(a)-3], "|")
-				}
-				fname := a[0][2:]
-				if params == "run" || strings.HasPrefix(params, "line") {
-					fname = decode_filename(a[0][2:])
-				}
-				if strings.Contains(params, "-lbl") {
-					fname = fname[1+strings.Index(fname, "-"):]
-				}
-				fmt.Fprintf(fp, "%s\t%s\n", fname, a[1])
-			}
-		}
+	fmt.Fprintf(fp, "%d\t%d\t%s\n", nlines, len(errlines), invoertabel[params])
+	for _, line := range errlines {
+		fmt.Fprint(fp, line)
 	}
 	fp.Close()
 

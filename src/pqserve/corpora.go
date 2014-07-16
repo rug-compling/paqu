@@ -74,7 +74,7 @@ func corpora(q *Context) {
 		})
 	}
 
-	writeHead(q, "Corpora", 3)
+	writeHead(q, "Corpora", 2)
 	fmt.Fprintln(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
@@ -185,7 +185,7 @@ function rm(idx) {
 <li><a href=".?db=%s">doorzoeken</a>
 <li><a href="rename?id=%s">hernoemen</a>
 <li><a href="share?id=%s">delen</a>
-<li><a href="download?dl=summary&amp;id=%s">overzicht</a>
+<li><a href="browse?id=%s">overzicht</a>
 <li><a href="download?dl=zinnen&amp;id=%s">download zinnen</a>
 <li><a href="download?dl=xml&amp;id=%s">download xml</a>
 `, id, id, id, id, id, id)
