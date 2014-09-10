@@ -141,7 +141,7 @@ func (db *Db) Merge(filename string, replace bool) error {
 	if replace {
 		repl = 1
 	}
-	r:= C.c_dbxml_merge(db.db, cs, repl)
+	r := C.c_dbxml_merge(db.db, cs, repl)
 	defer C.c_dbxml_result_free(r)
 	if C.c_dbxml_result_error(r) != 0 {
 		return errors.New(C.GoString(C.c_dbxml_result_string(r)))
@@ -276,24 +276,34 @@ func (docs *Docs) Next() bool {
 
 // Get name of current xml document after call to docs.Next().
 func (docs *Docs) Name() string {
-	return docs.getNameContent(true)
+	return docs.getNameContent(1)
 }
 
 // Get content of current xml document after call to docs.Next().
 func (docs *Docs) Content() string {
-	return docs.getNameContent(false)
+	return docs.getNameContent(2)
 }
 
-func (docs *Docs) getNameContent(getname bool) string {
+// Get matched subtree from current xml document after call to docs.Next().
+func (docs *Docs) Match() string {
+	return docs.getNameContent(3)
+}
+
+func (docs *Docs) getNameContent(what int) string {
 	docs.lock.Lock()
 	defer docs.lock.Unlock()
 	if !(docs.opened && docs.started) {
 		return ""
 	}
-	if getname {
+	switch what {
+	case 1:
 		return C.GoString(C.c_dbxml_docs_name(docs.docs))
+	case 2:
+		return C.GoString(C.c_dbxml_docs_content(docs.docs))
+	case 3:
+		return C.GoString(C.c_dbxml_docs_match(docs.docs))
 	}
-	return C.GoString(C.c_dbxml_docs_content(docs.docs))
+	return ""
 }
 
 // Close iterator over xml documents in the database, that was returned by db.All() or db.Query(query).

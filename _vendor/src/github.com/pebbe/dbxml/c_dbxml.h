@@ -53,6 +53,7 @@ extern "C" {
     int c_dbxml_docs_next(c_dbxml_docs docs);
     char const * c_dbxml_docs_name(c_dbxml_docs docs);
     char const * c_dbxml_docs_content(c_dbxml_docs docs);
+    char const * c_dbxml_docs_match(c_dbxml_docs docs);
     void c_dbxml_docs_free(c_dbxml_docs docs);
 
 #ifdef __cplusplus
