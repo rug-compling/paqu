@@ -122,7 +122,6 @@ func xpath(q *Context) {
 	xmlparts := make([]string, 0)
 	query := first(q.r, "xpath")
 	for _, dactfile := range dactfiles {
-		curdac = dactfile
 		select {
 		case <-chClose:
 			logerr(errConnectionClosed)
@@ -150,10 +149,11 @@ func xpath(q *Context) {
 			name := docs.Name()
 			if name != filename {
 				if curno > offset && curno <= offset+ZINMAX*2 {
-					xpath_result(q, curno, dactfile, filename, xmlall, xmlparts, prefix, global)
+					xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 					xmlparts = xmlparts[0:0]
 				}
 				curno++
+				curdac = dactfile
 				filename = name
 			}
 			if curno > offset+ZINMAX*2 {
