@@ -58,7 +58,6 @@ func download(q *Context) {
 			filename = "data.lines"
 		}
 	case "dact":
-		filename = "data.dact"
 	case "xml":
 	default:
 		http.Error(q.w, "Ongeldige selectie: "+dl, http.StatusUnauthorized)
@@ -79,14 +78,24 @@ func download(q *Context) {
 			logerr(err)
 			return
 		}
-		if filename == "data.dact" {
-			q.w.Header().Set("Content-Type", "application/octet-stream")
-			q.w.Header().Set("Content-Disposition", "attachment; filename="+id+".dact")
-		} else {
-			q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		}
+		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		io.Copy(q.w, r)
 		r.Close()
+		fp.Close()
+		return
+	}
+
+	// dact
+	if dl == "dact" {
+		fp, err := os.Open(path.Join(datadir, "data.dact"))
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
+		q.w.Header().Set("Content-Type", "application/octet-stream")
+		q.w.Header().Set("Content-Disposition", "attachment; filename="+id+".dact")
+		io.Copy(q.w, fp)
 		fp.Close()
 		return
 	}

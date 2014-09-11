@@ -75,13 +75,16 @@ func writeHead(q *Context, title string, tab int) {
 		fmt.Fprintln(q.w, "<form action=\"login1\">E-mail: <input type=\"text\" name=\"mail\"> <input type=\"submit\" value=\"Log in\"></form>")
 	}
 
-	var t [4]string
+	var t [5]string
 	t[tab] = " class=\"selected\""
 	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\""+t[1]+">Zoeken</a>")
-	if q.auth {
-		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[2]+">Corpora</a>")
+	if has_dbxml {
+		fmt.Fprintln(q.w, "<a href=\"xpath\""+t[2]+">XPath</a>")
 	}
-	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[3]+">Info</a>\n</div>\n")
+	if q.auth {
+		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[3]+">Corpora</a>")
+	}
+	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[4]+">Info</a>\n</div>\n")
 }
 
 func writeHtml(q *Context, title, msg string) {
@@ -113,7 +116,7 @@ func urlencode(s string) string {
 	for _, b := range []byte(s) {
 		if b >= 'a' && b <= 'z' ||
 			b >= 'A' && b <= 'Z' ||
-			b >= '0' && b <= '0' {
+			b >= '0' && b <= '9' {
 			buf.WriteByte(b)
 		} else {
 			buf.WriteString(fmt.Sprintf("%%%02x", b))

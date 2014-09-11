@@ -33,7 +33,7 @@ func static_favicon_ico(q *Context) {
 }
 
 func static_info_html(q *Context) {
-	writeHead(q, "Info", 3)
+	writeHead(q, "Info", 4)
 	i := strings.Index(file__info__html, "<body>")
 	s := file__info__html[i+6:]
 	data, err := ioutil.ReadFile(path.Join(paqudir, "contact.html"))

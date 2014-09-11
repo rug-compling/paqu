@@ -50,6 +50,9 @@ func home(q *Context) {
 	if err == nil {
 		offset = o
 	}
+	if offset < 0 {
+		offset = 0
+	}
 
 	fmt.Fprintln(q.w, "<hr>")
 

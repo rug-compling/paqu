@@ -126,6 +126,7 @@ type TreeContext struct {
 	green  map[int]bool
 	marks  map[string]bool
 	refs   map[string]bool
+	mnodes map[string]bool
 	graph  bytes.Buffer // definitie dot-bestand
 	start  int
 	words  []string

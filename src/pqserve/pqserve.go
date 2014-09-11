@@ -145,6 +145,8 @@ func main() {
 
 	handleFunc("browse", browse)
 
+	handleFunc("xpath", xpath)
+
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)
 	handleFunc("share", share)

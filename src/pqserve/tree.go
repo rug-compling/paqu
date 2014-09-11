@@ -45,6 +45,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -59,6 +60,7 @@ func tree(q *Context) {
 		green:  make(map[int]bool),
 		marks:  make(map[string]bool),
 		refs:   make(map[string]bool),
+		mnodes: make(map[string]bool),
 		words:  make([]string, 0),
 	}
 
@@ -75,44 +77,48 @@ func tree(q *Context) {
 		return
 	}
 
-	file, err := strconv.Atoi(first(q.r, "file"))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
-		return
+	has_names := false
+	if first(q.r, "names") == "true" {
+		has_names = true
 	}
-	arch, err := strconv.Atoi(first(q.r, "arch"))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
-		return
+
+	if n := first(q.r, "marknodes"); n != "" {
+		for _, m := range strings.Split(n, ",") {
+			ctx.mnodes[m] = true
+		}
+	}
+
+	file := 0
+	arch := 0
+	if !has_names {
+		var err error
+		file, err = strconv.Atoi(first(q.r, "file"))
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
+			return
+		}
+		arch, err = strconv.Atoi(first(q.r, "arch"))
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
+			return
+		}
 	}
 
 	label := ""
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
-		return
-	}
-	if rows.Next() {
-		err := rows.Scan(&label)
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			return
+	if has_names {
+		label = first(q.r, "file")
+		if first(q.r, "global") == "true" {
+			label = path.Base(first(q.r, "arch")) + "::" + label
 		}
-		rows.Close()
-	}
-
-	archive := ""
-	if arch >= 0 {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
+	} else {
+		rows, err := q.db.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
 		if rows.Next() {
-			err := rows.Scan(&archive)
+			err := rows.Scan(&label)
 			if err != nil {
 				http.Error(q.w, err.Error(), http.StatusInternalServerError)
 				logerr(err)
@@ -122,21 +128,48 @@ func tree(q *Context) {
 		}
 	}
 
-	filename := ""
-	rows, err = q.db.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
-		return
+	archive := ""
+	if has_names {
+		archive = first(q.r, "arch")
+	} else {
+		if arch >= 0 {
+			rows, err := q.db.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			if rows.Next() {
+				err := rows.Scan(&archive)
+				if err != nil {
+					http.Error(q.w, err.Error(), http.StatusInternalServerError)
+					logerr(err)
+					return
+				}
+				rows.Close()
+			}
+		}
 	}
-	if rows.Next() {
-		err := rows.Scan(&filename)
+
+	filename := ""
+	if has_names {
+		filename = first(q.r, "file")
+	} else {
+		rows, err := q.db.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
-		rows.Close()
+		if rows.Next() {
+			err := rows.Scan(&filename)
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			rows.Close()
+		}
 	}
 
 	// xml-bestand inlezen
@@ -165,6 +198,7 @@ func tree(q *Context) {
 			}
 		}
 	} else {
+		var err error
 		data, err = ioutil.ReadFile(filename)
 		if err != nil {
 			fp, err := os.Open(filename + ".gz")
@@ -208,7 +242,7 @@ func tree(q *Context) {
 	}
 
 	alpino := Alpino_ds{}
-	err = xml.Unmarshal(data, &alpino)
+	err := xml.Unmarshal(data, &alpino)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -220,7 +254,9 @@ func tree(q *Context) {
 
 	// Multi-word units "ineenvouwen".
 	// Past ook 'words' aan, bijv: "Koninkrijk" "der" "Nederlanden" -> "Koninkrijk der Nederlanden" "" ""
-	mwu(ctx, alpino.Node0)
+	if first(q.r, "mwu") != "false" {
+		mwu(ctx, alpino.Node0)
+	}
 
 	// Uitvoer content-type.
 	// Als niet 'dot', dan ook de kop van het HTML-bestand, inclusief zin met gekleurde woorden.
@@ -422,6 +458,10 @@ func set_refs(ctx *TreeContext, node *Node) {
 func print_nodes(ctx *TreeContext, node *Node) {
 	idx := ""
 	style := ""
+
+	if ctx.mnodes[node.Id] {
+		style += ", color=\"#7FCDBB\", style=filled"
+	}
 
 	// Als dit een node met inhoud EN index is, dan in vierkant zetten.
 	// Als de node gemarkeerd is, dan in zwart, anders in lichtgrijs.

@@ -88,7 +88,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
-		for _, f := range []string{data, data + ".lines", dact, stdout, stderr, summary} {
+		for _, f := range []string{data, data + ".lines", stdout, stderr, summary} {
 			if f == data && (params == "dact" || params == "xmlzip") {
 				continue
 			}
