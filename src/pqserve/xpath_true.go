@@ -196,7 +196,34 @@ func xpath(q *Context) {
 		}
 	}
 
-	fmt.Fprintln(q.w, "<hr><small>tijd:", time.Now().Sub(now), "</small>")
+	fmt.Fprintln(q.w, "<hr><small>tijd:", time.Now().Sub(now), "</small><hr>")
+
+	// Links naar statistieken
+	fmt.Fprintf(q.w, `<p>
+		<div id="xstats">
+		<form action="javascript:$.fn.xstats()" name="xstatsform" onsubmit="javascript:return xstatftest()">
+		<input type="hidden" name="xpath" value="%s">
+		<input type="hidden" name="db" value="%s">
+		Selecteer &eacute;&eacute;n tot drie attributen:<br>
+`, html.EscapeString(query), html.EscapeString(prefix))
+
+	for i := 1; i <= 3; i++ {
+		fmt.Fprintf(q.w, "<select name=\"attr%d\">\n<option value=\"\">--</option>\n", i)
+		for _, s := range NodeTags {
+			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
+		}
+		fmt.Fprintln(q.w, "</select>")
+	}
+
+	fmt.Fprintf(q.w, `
+		<p>
+		<input type="submit" value="statistiek">
+		</form>
+		<p>
+		<div id="xstatresults">
+		</div>
+		</div>
+`)
 
 	html_footer(q)
 
@@ -206,7 +233,28 @@ func xpath(q *Context) {
 
 func html_xpath_header(q *Context) {
 	fmt.Fprint(q.w, `
+<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
+  $.fn.xstats = function() {
+    $("#xstatresults").html('<img src="busy.gif">');
+    $.get("xpathstats?" + $(document.xstatsform).serialize(), function(data) {
+      $("#xstatresults").html(data);
+    }).fail(function(e) {
+      $("#xstatresults").html(e.responseText);
+    });
+  }
+  function xstatftest() {
+    var f = document.xstatsform;
+    var n = 0;
+    if (f.attr1.value != "") { n++; }
+    if (f.attr2.value != "") { n++; }
+    if (f.attr3.value != "") { n++; }
+    if (n < 1) {
+      alert("Geen attribuut geselecteerd");
+      return false;
+    }
+    return true;
+  }
   function formclear(f) {
     f.xpath.value = "";
   }
@@ -297,7 +345,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		fmt.Fprint(q.w, " ")
 	}
 
-	fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;names=true&mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\">&nbsp;&#9741;&nbsp;</a>\n",
+	fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\">&nbsp;&#9741;&nbsp;</a>\n",
 		prefix,
 		html.EscapeString(dactfile),
 		html.EscapeString(filename),
