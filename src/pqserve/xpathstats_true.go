@@ -303,7 +303,6 @@ func xpathstats(q *Context) {
 		fmt.Fprintln(q.w, "Geen attribuut gekozen")
 		return
 	}
-	fmt.Println(attr)
 
 	query := first(q.r, "xpath")
 
@@ -369,7 +368,7 @@ func xpathstats(q *Context) {
 	now := time.Now()
 
 	sums := make(map[string]int)
-
+	count := 0
 	for _, dactfile := range dactfiles {
 		select {
 		case <-chClose:
@@ -408,6 +407,7 @@ func xpathstats(q *Context) {
 				return
 			}
 			sums[getAttr(attr[0], alp.Node0)+"\t"+getAttr(attr[1], alp.Node0)+"\t"+getAttr(attr[2], alp.Node0)]++
+			count++
 		}
 		db.Close()
 	}
@@ -419,9 +419,13 @@ func xpathstats(q *Context) {
 	sort.Sort(AttrItems(attrList))
 
 	if download {
-		fmt.Fprintf(q.w, "# %d combinaties\t\n", len(attrList))
+		fmt.Fprintf(q.w, "# %d matches in %d combinaties\t\n", count, len(attrList))
 	} else {
-		fmt.Fprintln(q.w, "Aantal gevonden combinaties:", iformat(len(attrList)))
+		fmt.Fprintf(q.w, `<table>
+<tr><td>Matches:<td class="right">%s
+<tr><td>Combinaties:<td class="right">%s
+</table>
+`, iformat(count), iformat(len(attrList)))
 	}
 
 	nAttr := 0
@@ -434,7 +438,7 @@ func xpathstats(q *Context) {
 	if download {
 		fmt.Fprint(q.w, "aantal")
 	} else {
-		fmt.Fprint(q.w, "<table>\n<tr><th>")
+		fmt.Fprint(q.w, "<table class=\"breed\">\n<tr><th><th>")
 	}
 	for i := 0; i < nAttr; i++ {
 		if download {
@@ -447,16 +451,16 @@ func xpathstats(q *Context) {
 
 	for n, a := range attrList {
 		if !download && n == WRDMAX {
-			fmt.Fprintln(q.w, "<tr><td class=\"right\">...")
+			fmt.Fprintln(q.w, "<tr><td class=\"right\">...<td class=\"right\">...")
 			for i := 0; i < nAttr; i++ {
 				fmt.Fprintln(q.w, "<td class=\"nil\">...")
 			}
 			break
 		}
 		if download {
-			fmt.Fprint(q.w, a.n)
+			fmt.Fprint(q.w, "%d\t%.2f%%", a.n, float64(a.n)/float64(count)*100)
 		} else {
-			fmt.Fprintf(q.w, "<tr><td class=\"right\">%d\n", a.n)
+			fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.2f%%\n", a.n, float64(a.n)/float64(count)*100)
 		}
 		v := strings.Split(a.a, "\t")
 		for i := 0; i < nAttr; i++ {

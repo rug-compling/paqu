@@ -180,6 +180,11 @@ a.opties:hover
     color: ##0000c0;
 }
 
+table.breed td {
+    padding: 0px 1em;
+}
+
+
 table.corpora {
     background-color: #f3f3f3;
     padding: .5em;

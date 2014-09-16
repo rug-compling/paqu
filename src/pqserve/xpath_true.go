@@ -268,6 +268,8 @@ func html_xpath_uitleg(q *Context) {
 <hr>
 <p>
 Uitleg over XPATH
+<p>
+<a href="http://rug-compling.github.io/dact/cookbook/">voorbeelden</a>
 `)
 }
 
@@ -351,6 +353,10 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		html.EscapeString(filename),
 		global,
 		strings.Join(ids, ","))
+
+	if ff, ok := q.w.(http.Flusher); ok {
+		ff.Flush()
+	}
 }
 
 // zet de teller voor alle woorden onder node 1 hoger

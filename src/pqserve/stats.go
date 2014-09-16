@@ -247,7 +247,7 @@ func statsrel(q *Context) {
 
 	limit := ""
 	if !download {
-		limit = fmt.Sprintf(" LIMIT %d", WRDMAX + 1)
+		limit = fmt.Sprintf(" LIMIT %d", WRDMAX+1)
 	}
 
 	rows, err := timeoutQuery(q, chClose, "SELECT count(*),"+st+" FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+
