@@ -385,14 +385,15 @@ func xpathstats(q *Context) {
 		docs, err := db.Query(query)
 		if err != nil {
 			interneFoutRegel(q, err, !download)
+			db.Close()
 			return
 		}
 		for docs.Next() {
 			select {
 			case <-chClose:
+				logerr(errConnectionClosed)
 				docs.Close()
 				db.Close()
-				logerr(errConnectionClosed)
 				return
 			default:
 			}
@@ -404,6 +405,8 @@ func xpathstats(q *Context) {
 			if err != nil {
 				interneFoutRegel(q, err, !download)
 				logerr(err)
+				docs.Close()
+				db.Close()
 				return
 			}
 			sums[getAttr(attr[0], alp.Node0)+"\t"+getAttr(attr[1], alp.Node0)+"\t"+getAttr(attr[2], alp.Node0)]++
@@ -458,9 +461,9 @@ func xpathstats(q *Context) {
 			break
 		}
 		if download {
-			fmt.Fprint(q.w, "%d\t%.2f%%", a.n, float64(a.n)/float64(count)*100)
+			fmt.Fprint(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
 		} else {
-			fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.2f%%\n", a.n, float64(a.n)/float64(count)*100)
+			fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.1f%%\n", a.n, float64(a.n)/float64(count)*100)
 		}
 		v := strings.Split(a.a, "\t")
 		for i := 0; i < nAttr; i++ {

@@ -135,14 +135,15 @@ func xpath(q *Context) {
 		docs, err := db.Query(query)
 		if err != nil {
 			fmt.Fprintln(q.w, "</ol>\n"+html.EscapeString(err.Error()))
+			db.Close()
 			return
 		}
 		for docs.Next() {
 			select {
 			case <-chClose:
+				logerr(errConnectionClosed)
 				docs.Close()
 				db.Close()
-				logerr(errConnectionClosed)
 				return
 			default:
 			}
