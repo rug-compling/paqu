@@ -244,6 +244,25 @@ func html_xpath_header(q *Context) {
       $("#xstatresults").html(e.responseText);
     });
   }
+  function formclear(f) {
+    f.xpath.value = "";
+  }
+  function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+  }
+  function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "";
+  }
   function xstatftest() {
     var f = document.xstatsform;
     var n = 0;
@@ -254,11 +273,20 @@ func html_xpath_header(q *Context) {
       alert("Geen attribuut geselecteerd");
       return false;
     }
+    setCookie("xpattr1", f.attr1.value, 14);
+    setCookie("xpattr2", f.attr2.value, 14);
+    setCookie("xpattr3", f.attr3.value, 14);
     return true;
   }
-  function formclear(f) {
-    f.xpath.value = "";
+  function setForm() {
+    var f = document.xstatsform;
+    if (f) {
+      f.attr1.value = getCookie("xpattr1");
+      f.attr2.value = getCookie("xpattr2");
+      f.attr3.value = getCookie("xpattr3");
+    }
   }
+  $(document).ready(setForm);
   //--></script>
 `)
 }
