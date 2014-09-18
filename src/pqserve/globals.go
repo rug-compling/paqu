@@ -107,16 +107,7 @@ type CommentType struct {
 }
 
 type Node struct {
-	Id       string  `xml:"id,attr"`
-	Index    string  `xml:"index,attr"`
-	Cat      string  `xml:"cat,attr"`
-	Pt       string  `xml:"pt,attr"`
-	Word     string  `xml:"word,attr"`
-	Lemma    string  `xml:"lemma,attr"`
-	Postag   string  `xml:"postag,attr"`
-	Rel      string  `xml:"rel,attr"`
-	Begin    int     `xml:"begin,attr"`
-	End      int     `xml:"end,attr"`
+	FullNode
 	NodeList []*Node `xml:"node"`
 	skip     bool
 }

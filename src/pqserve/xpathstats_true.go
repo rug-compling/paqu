@@ -88,7 +88,7 @@ type Alpino_ds_full_node struct {
 
 type FullNode struct {
 	Aform       string `xml:"aform,attr"`
-	Begin       string `xml:"begin,attr"`
+	Begin       int    `xml:"begin,attr"`
 	Buiging     string `xml:"buiging,attr"`
 	Case        string `xml:"case,attr"`
 	Cat         string `xml:"cat,attr"`
@@ -96,7 +96,7 @@ type FullNode struct {
 	Conjtype    string `xml:"conjtype,attr"`
 	Def         string `xml:"def,attr"`
 	Dial        string `xml:"dial,attr"`
-	End         string `xml:"end,attr"`
+	End         int    `xml:"end,attr"`
 	Frame       string `xml:"frame,attr"`
 	Gen         string `xml:"gen,attr"`
 	Genus       string `xml:"genus,attr"`
@@ -150,7 +150,7 @@ func getAttr(attr string, n *FullNode) string {
 	case "aform":
 		return n.Aform
 	case "begin":
-		return n.Begin
+		return fmt.Sprint(n.Begin)
 	case "buiging":
 		return n.Buiging
 	case "case":
@@ -166,7 +166,7 @@ func getAttr(attr string, n *FullNode) string {
 	case "dial":
 		return n.Dial
 	case "end":
-		return n.End
+		return fmt.Sprint(n.End)
 	case "frame":
 		return n.Frame
 	case "gen":

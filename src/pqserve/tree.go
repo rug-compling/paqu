@@ -38,6 +38,7 @@ import "C"
 import (
 	"github.com/pebbe/compactcorpus"
 
+	"bytes"
 	"compress/gzip"
 	"encoding/xml"
 	"fmt"
@@ -225,6 +226,12 @@ func tree(q *Context) {
 		}
 	}
 
+	if first(q.r, "xml") != "" {
+		q.w.Header().Set("Content-type", "application/xml")
+		fmt.Fprint(q.w, string(data))
+		return
+	}
+
 	// markeringen voor gewone woorden
 	ctx.yellow = indexes(first(q.r, "yl"))
 
@@ -380,7 +387,7 @@ func tree(q *Context) {
 
 	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"/tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
 
-	fmt.Fprintf(q.w, "bestand: %s\n", html.EscapeString(label))
+	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", q.r.URL.RawQuery, html.EscapeString(label))
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")
 
@@ -474,6 +481,16 @@ func print_nodes(ctx *TreeContext, node *Node) {
 		}
 	}
 
+	// attributen
+	var tooltip bytes.Buffer
+	tooltip.WriteString("<table class=\"attr\">")
+	for _, attr := range NodeTags {
+		if value := getAttr(attr, &node.FullNode); value != "" {
+			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", attr, html.EscapeString(value)))
+		}
+	}
+	tooltip.WriteString("</table>")
+
 	lbl := dotquote(node.Rel)
 	if node.Cat != "" && node.Cat != node.Rel {
 		lbl += "\\n" + dotquote(node.Cat)
@@ -481,7 +498,7 @@ func print_nodes(ctx *TreeContext, node *Node) {
 		lbl += "\\n" + dotquote(node.Pt)
 	}
 
-	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v%v\"%s];\n", node.Id, idx, lbl, style))
+	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v%v\"%s, tooltip=\"%s\"];\n", node.Id, idx, lbl, style, dotquote2(tooltip.String())))
 	for _, d := range node.NodeList {
 		print_nodes(ctx, d)
 	}
