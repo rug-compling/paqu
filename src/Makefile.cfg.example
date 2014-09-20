@@ -4,6 +4,7 @@
 #### Variabelen voor Make zelf
 
 # Als je geen DbXML hebt, gebruik dan -tags nodbxml
+# Zonder DbXML kunnen gebruikers geen XPATH-query's uitvoeren
 #TAGS = -tags nodbxml
 TAGS =
 

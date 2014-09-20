@@ -46,9 +46,10 @@ je het downloaden van http://www.graphviz.org/
 ### DbXML: Oracle Berkeley DB XML ###
 
 Dit is optioneel, maar wel sterk aanbevolen. Zonder DbXML kun je geen
-Dact-bestanden verwerken. Dact-bestanden zijn corpora in het formaat
-gebruikt door [Dact](http://rug-compling.github.io/dact/), waarmee
-corpora bekeken en geanalyseerd kunnen worden.
+Dact-bestanden verwerken, en kun je geen XPATH-query's uitvoeren.
+Dact-bestanden zijn corpora in het formaat gebruikt door
+[Dact](http://rug-compling.github.io/dact/), waarmee corpora bekeken en
+geanalyseerd kunnen worden.
 
 Hier kun je DbXML downloaden:
 http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads
@@ -169,6 +170,11 @@ te installeren, omdat alle voorbeelden die de gebruiker in de informatie ziet we
 
 Als je dit corpus hebt geïnstalleerd in `~/corpora/LassySmall` kun je
 het zo opnemen in PaQu:
+
+	echo ~/corpora/LassySmall/lassy.dact | \
+	    pqbuild -w -p '.*/corpora/LassySmall/' lassysmall 'Lassy Klein' none 1
+
+Als je geen DbXml beschikbaar hebt kun je het zo opnemen in PaQu:
 
     find ~/corpora/LassySmall/Treebank -name '*.xml' | sort | \
 	    pqbuild -w -p '.*/corpora/LassySmall/Treebank/' lassysmall 'Lassy Klein' none 1
