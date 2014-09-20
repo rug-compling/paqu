@@ -34,6 +34,13 @@ extern "C" {
 	std::string errstring;
     };
 
+    struct c_dbxml_query_t {
+	DbXml::XmlQueryContext context;
+	DbXml::XmlQueryExpression expression;
+	bool error;
+	std::string errstring;
+    };
+
     c_dbxml c_dbxml_open(char const *filename)
     {
 	c_dbxml db;
@@ -241,6 +248,42 @@ extern "C" {
 	return docs;
     }
 
+    c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query)
+    {
+	c_dbxml_query q;
+	q = new c_dbxml_query_t;
+	try {
+	    q->context = db->manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
+	    q->context.setDefaultCollection(ALIAS);
+	    q->expression = db->manager.prepare(std::string("collection('" ALIAS "')") + query, q->context);
+	    q->error = false;
+	} catch (DbXml::XmlException const &xe) {
+	    q->error = true;
+	    q->errstring = xe.what();
+	}
+	return q;
+    }
+
+    c_dbxml_docs c_dbxml_run_query(c_dbxml_query query)
+    {
+	c_dbxml_docs docs;
+	docs = new c_dbxml_docs_t;
+	docs->more = true;
+	docs->context = query->context;
+	try {
+	    docs->it = query->expression.execute(docs->context,
+						 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY | DbXml::DBXML_DOCUMENT_PROJECTION
+						 );
+	    docs->error = false;
+	} catch (DbXml::XmlException const &xe) {
+	    docs->more = false;
+	    docs->error = true;
+	    docs->errstring = xe.what();
+	}
+
+	return docs;
+    }
+
     int c_dbxml_get_query_error(c_dbxml_docs docs)
     {
 	return docs->error ? 1 : 0;
@@ -251,11 +294,27 @@ extern "C" {
 	return docs->errstring.c_str();
     }
 
+    int c_dbxml_get_prepared_error(c_dbxml_query query)
+    {
+	return query->error ? 1 : 0;
+    }
+
+    char const *c_dbxml_get_prepared_errstring(c_dbxml_query query)
+    {
+	return query->errstring.c_str();
+    }
+
     int c_dbxml_docs_next(c_dbxml_docs docs)
     {
 	if (docs->more) {
-	    docs->it.peek(docs->value);
-	    docs->more = docs->it.next(docs->doc);
+	    try {
+		docs->it.peek(docs->value);
+		docs->more = docs->it.next(docs->doc);
+	    } catch (DbXml::XmlException &xe) {
+		docs->errstring = xe.what();
+		docs->error = true;
+		docs->more = false;
+	    }
 	    docs->name.clear();
 	    docs->content.clear();
 	    docs->match.clear();
@@ -291,6 +350,16 @@ extern "C" {
     void c_dbxml_docs_free(c_dbxml_docs docs)
     {
 	delete docs;
+    }
+
+    void c_dbxml_query_free(c_dbxml_query query)
+    {
+	delete query;
+    }
+
+    void c_dbxml_cancel_query(c_dbxml_query query)
+    {
+	query->context.interruptQuery();
     }
 
 }

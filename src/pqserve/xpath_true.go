@@ -128,25 +128,39 @@ func xpath(q *Context) {
 			return
 		default:
 		}
+
 		db, err := dbxml.Open(dactfile)
 		if doErr(q, err) {
 			return
 		}
-		docs, err := db.Query(query)
+
+		qu, err := db.Prepare(query)
 		if err != nil {
 			fmt.Fprintln(q.w, "</ol>\n"+html.EscapeString(err.Error()))
 			db.Close()
 			return
 		}
-		for docs.Next() {
+		done := make(chan bool, 1)
+		interrupted := make(chan bool, 1)
+		go func() {
 			select {
 			case <-chClose:
+				interrupted <- true
 				logerr(errConnectionClosed)
-				docs.Close()
-				db.Close()
-				return
-			default:
+				qu.Cancel()
+			case <-done:
 			}
+		}()
+
+		docs, err := qu.Run()
+		if err != nil {
+			fmt.Fprintln(q.w, "</ol>\n"+html.EscapeString(err.Error()))
+			qu.Close()
+			db.Close()
+			done <- true
+			return
+		}
+		for docs.Next() {
 			name := docs.Name()
 			if name != filename {
 				if curno > offset && curno <= offset+ZINMAX*2 {
@@ -166,7 +180,16 @@ func xpath(q *Context) {
 				}
 			}
 		}
+		if err := docs.Error(); err != nil {
+			logerr(err)
+		}
 		db.Close()
+		done <- true
+		select {
+		case <-interrupted:
+			return
+		default:
+		}
 		if curno > offset+ZINMAX*2 {
 			break
 		}

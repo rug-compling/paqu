@@ -36,12 +36,21 @@ type Docs struct {
 	opened  bool
 	docs    C.c_dbxml_docs
 	lock    sync.Mutex
+	err     error
+}
+
+// A prepared query that can be run multiple times and interrupted while running.
+type Query struct {
+	opened bool
+	query  C.c_dbxml_query
+	lock   sync.Mutex
 }
 
 //. Variables
 
 var (
-	errclosed = errors.New("Database is closed")
+	errclosed      = errors.New("Database is closed")
+	errqueryclosed = errors.New("Query is closed")
 )
 
 //. Open & Close
@@ -67,6 +76,9 @@ func Open(filename string) (*Db, error) {
 // Close the database.
 //
 // This flushes all write operations to the database.
+//
+// This is called automaticly on garbage collection.
+// Note that teminating the program does not call the garbage collector.
 func (db *Db) Close() {
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -213,6 +225,9 @@ func (db *Db) Size() (uint64, error) {
 //          for docs.Next() {
 //              fmt.Println(docs.Name(), docs.Content())
 //          }
+//          if err := docs.Error(); err != nil {
+//              fmt.Println(err)
+//          }
 //      }
 func (db *Db) All() (*Docs, error) {
 	docs := &Docs{}
@@ -239,6 +254,9 @@ func (db *Db) All() (*Docs, error) {
 //          for docs.Next() {
 //              fmt.Println(docs.Name(), docs.Content())
 //          }
+//          if err := docs.Error(); err != nil {
+//              fmt.Println(err)
+//          }
 //      }
 func (db *Db) Query(query string) (*Docs, error) {
 	docs := &Docs{}
@@ -252,6 +270,7 @@ func (db *Db) Query(query string) (*Docs, error) {
 	defer C.free(unsafe.Pointer(cs))
 	docs.docs = C.c_dbxml_get_query(db.db, cs)
 	if C.c_dbxml_get_query_error(docs.docs) != 0 {
+		C.c_dbxml_docs_free(docs.docs)
 		return docs, errors.New(C.GoString(C.c_dbxml_get_query_errstring(docs.docs)))
 	}
 	runtime.SetFinalizer(docs, (*Docs).Close)
@@ -259,15 +278,71 @@ func (db *Db) Query(query string) (*Docs, error) {
 	return docs, nil
 }
 
-// Iterate to the next xml document in the list, that was returned by db.All() or db.Query(query).
+// Prepare an XPATH query.
+//
+// The query can be run multiple times, and a running query can be cancelled by query.Cancel()
+func (db *Db) Prepare(query string) (*Query, error) {
+	q := &Query{}
+	db.lock.Lock()
+	defer db.lock.Unlock()
+
+	if !db.opened {
+		return q, errclosed
+	}
+	cs := C.CString(query)
+	defer C.free(unsafe.Pointer(cs))
+	q.query = C.c_dbxml_prepare_query(db.db, cs)
+	if C.c_dbxml_get_prepared_error(q.query) != 0 {
+		C.c_dbxml_query_free(q.query)
+		return q, errors.New(C.GoString(C.c_dbxml_get_prepared_errstring(q.query)))
+	}
+	runtime.SetFinalizer(q, (*Query).Close)
+	q.opened = true
+	return q, nil
+}
+
+// Run a prepared query.
+func (query *Query) Run() (*Docs, error) {
+	docs := &Docs{}
+	query.lock.Lock()
+	defer query.lock.Unlock()
+
+	if !query.opened {
+		return docs, errqueryclosed
+	}
+	docs.docs = C.c_dbxml_run_query(query.query)
+	if C.c_dbxml_get_query_error(docs.docs) != 0 {
+		C.c_dbxml_docs_free(docs.docs)
+		return docs, errors.New(C.GoString(C.c_dbxml_get_query_errstring(docs.docs)))
+	}
+	runtime.SetFinalizer(docs, (*Docs).Close)
+	docs.opened = true
+	return docs, nil
+}
+
+// Cancel a running query.
+func (query *Query) Cancel() {
+	query.lock.Lock()
+	defer query.lock.Unlock()
+	if query.opened {
+		C.c_dbxml_cancel_query(query.query)
+	}
+}
+
+// Iterate to the next xml document in the list, that was returned by db.All(), db.Query(query), or query.Run().
 func (docs *Docs) Next() bool {
 	docs.lock.Lock()
 	defer docs.lock.Unlock()
 	if !docs.opened {
 		return false
 	}
+	docs.err = nil
 	if C.c_dbxml_docs_next(docs.docs) == 0 {
+		if C.c_dbxml_get_query_error(docs.docs) != 0 {
+			docs.err = errors.New(C.GoString(C.c_dbxml_get_query_errstring(docs.docs)))
+		}
 		docs.close()
+		docs.started = false
 		return false
 	}
 	docs.started = true
@@ -306,7 +381,7 @@ func (docs *Docs) getNameContent(what int) string {
 	return ""
 }
 
-// Close iterator over xml documents in the database, that was returned by db.All() or db.Query(query).
+// Close iterator over xml documents in the database, that was returned by db.All(), db.Query(query), or query.Run().
 //
 // This is called automaticly if docs.Next() reaches false, but you can also call it inside a loop to exit it prematurely:
 //
@@ -327,5 +402,24 @@ func (docs *Docs) close() {
 	if docs.opened {
 		C.c_dbxml_docs_free(docs.docs)
 		docs.opened = false
+	}
+}
+
+// Get the error, if any, after docs.Next() returned false.
+func (docs *Docs) Error() error {
+	docs.lock.Lock()
+	defer docs.lock.Unlock()
+	return docs.err
+}
+
+// Close a query that was created with Prepare()
+//
+// This is called automaticly by the garbage collector.
+func (query *Query) Close() {
+	query.lock.Lock()
+	defer query.lock.Unlock()
+	if query.opened {
+		C.c_dbxml_query_free(query.query)
+		query.opened = false
 	}
 }

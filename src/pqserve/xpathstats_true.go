@@ -382,21 +382,32 @@ func xpathstats(q *Context) {
 			logerr(err)
 			return
 		}
-		docs, err := db.Query(query)
+
+		qu, err := db.Prepare(query)
+		if err != nil {
+			interneFoutRegel(q, err, !download)
+			db.Close()
+			return
+		}
+		done := make(chan bool, 1)
+		interrupted := make(chan bool, 1)
+		go func() {
+			select {
+			case <-chClose:
+				interrupted <- true
+				logerr(errConnectionClosed)
+				qu.Cancel()
+			case <-done:
+			}
+		}()
+
+		docs, err := qu.Run()
 		if err != nil {
 			interneFoutRegel(q, err, !download)
 			db.Close()
 			return
 		}
 		for docs.Next() {
-			select {
-			case <-chClose:
-				logerr(errConnectionClosed)
-				docs.Close()
-				db.Close()
-				return
-			default:
-			}
 			alp := Alpino_ds_full_node{}
 			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
@@ -412,7 +423,16 @@ func xpathstats(q *Context) {
 			sums[getAttr(attr[0], alp.Node0)+"\t"+getAttr(attr[1], alp.Node0)+"\t"+getAttr(attr[2], alp.Node0)]++
 			count++
 		}
+		if err := docs.Error(); err != nil {
+			logerr(err)
+		}
 		db.Close()
+		done <- true
+		select {
+		case <-interrupted:
+			return
+		default:
+		}
 	}
 
 	attrList := make([]*AttrItem, 0, len(sums))

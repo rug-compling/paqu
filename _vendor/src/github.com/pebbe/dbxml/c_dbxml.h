@@ -11,6 +11,8 @@ extern "C" {
 
     typedef struct c_dbxml_docs_t *c_dbxml_docs;
 
+    typedef struct c_dbxml_query_t *c_dbxml_query;
+
     c_dbxml c_dbxml_open(char const *filename);
     void c_dbxml_free(c_dbxml db);
 
@@ -55,6 +57,12 @@ extern "C" {
     char const * c_dbxml_docs_content(c_dbxml_docs docs);
     char const * c_dbxml_docs_match(c_dbxml_docs docs);
     void c_dbxml_docs_free(c_dbxml_docs docs);
+    c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query);
+    c_dbxml_docs c_dbxml_run_query(c_dbxml_query query);
+    void c_dbxml_cancel_query(c_dbxml_query query);
+    void c_dbxml_query_free(c_dbxml_query query);
+    int c_dbxml_get_prepared_error(c_dbxml_query query);
+    char const *c_dbxml_get_prepared_errstring(c_dbxml_query query);
 
 #ifdef __cplusplus
 }
