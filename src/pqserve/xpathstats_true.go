@@ -81,6 +81,14 @@ type AttrItem struct {
 
 type AttrItems []*AttrItem
 
+type ValueItem struct {
+	begin int
+	end   int
+	value string
+}
+
+type ValueItems []*ValueItem
+
 type Alpino_ds_full_node struct {
 	XMLName xml.Name  `xml:"alpino_ds"`
 	Node0   *FullNode `xml:"node"`
@@ -263,6 +271,42 @@ func getAttr(attr string, n *FullNode) string {
 	return ""
 }
 
+func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
+	if s := getAttr(attr, &n.FullNode); s != "" {
+		*values = append(*values, &ValueItem{n.Begin, n.End, s})
+		return
+	}
+	for _, n2 := range n.NodeList {
+		getDeepAttr(attr, n2, values)
+	}
+}
+
+func getFullAttr(attr string, n *Node) string {
+
+	if s := getAttr(attr, &n.FullNode); s != "" {
+		return s
+	}
+	values := make([]*ValueItem, 0)
+	getDeepAttr(attr, n, &values)
+
+	if len(values) == 0 {
+		return ""
+	}
+
+	fmt.Printf("%q\n", values)
+	sort.Sort(ValueItems(values))
+
+	s := make([]string, 0, len(values))
+	p := -1
+	for _, v := range values {
+		if v.begin > p {
+			p = v.begin
+			s = append(s, v.value)
+		}
+	}
+	return "  " + strings.Join(s, " ")
+}
+
 func xpathstats(q *Context) {
 
 	download := false
@@ -369,7 +413,11 @@ func xpathstats(q *Context) {
 
 	sums := make(map[string]int)
 	count := 0
+	tooMany := false
 	for _, dactfile := range dactfiles {
+		if tooMany {
+			break
+		}
 		select {
 		case <-chClose:
 			logerr(errConnectionClosed)
@@ -408,7 +456,7 @@ func xpathstats(q *Context) {
 			return
 		}
 		for docs.Next() {
-			alp := Alpino_ds_full_node{}
+			alp := Alpino_ds{}
 			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+docs.Match()+`
@@ -420,8 +468,12 @@ func xpathstats(q *Context) {
 				db.Close()
 				return
 			}
-			sums[getAttr(attr[0], alp.Node0)+"\t"+getAttr(attr[1], alp.Node0)+"\t"+getAttr(attr[2], alp.Node0)]++
+			sums[getFullAttr(attr[0], alp.Node0)+"\t"+getFullAttr(attr[1], alp.Node0)+"\t"+getFullAttr(attr[2], alp.Node0)]++
 			count++
+			if len(sums) >= 10000 {
+				tooMany = true
+				docs.Close()
+			}
 		}
 		if err := docs.Error(); err != nil {
 			logerr(err)
@@ -442,8 +494,14 @@ func xpathstats(q *Context) {
 	sort.Sort(AttrItems(attrList))
 
 	if download {
-		fmt.Fprintf(q.w, "# %d matches in %d combinaties\t\n", count, len(attrList))
+		if tooMany {
+			fmt.Fprintln(q.w, "# ONDERBROKEN VANWEGE TE VEEL COMBINATIES")
+		}
+		fmt.Fprintf(q.w, "# %d matches in %d combinaties\n", count, len(attrList))
 	} else {
+		if tooMany {
+			fmt.Fprintln(q.w, "<div class=\"warning\">Onderbroken vanwege te veel combinaties</div>")
+		}
 		fmt.Fprintf(q.w, `<table>
 <tr><td>Matches:<td class="right">%s
 <tr><td>Combinaties:<td class="right">%s
@@ -481,7 +539,7 @@ func xpathstats(q *Context) {
 			break
 		}
 		if download {
-			fmt.Fprint(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
+			fmt.Fprintf(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
 		} else {
 			fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.1f%%\n", a.n, float64(a.n)/float64(count)*100)
 		}
@@ -491,13 +549,17 @@ func xpathstats(q *Context) {
 				if download {
 					fmt.Fprintf(q.w, "\tNIL")
 				} else {
-					fmt.Fprintln(q.w, "<td><span class=\"nil\">&mdash;</span>")
+					fmt.Fprintln(q.w, "<td class=\"nil\">(leeg)")
 				}
 			} else {
 				if download {
-					fmt.Fprintf(q.w, "\t%s", v[i])
+					fmt.Fprintf(q.w, "\t%s", strings.TrimSpace(v[i]))
 				} else {
-					fmt.Fprintf(q.w, "<td>%s\n", html.EscapeString(v[i]))
+					if strings.HasPrefix(v[i], "  ") {
+						fmt.Fprintf(q.w, "<td class=\"multi\">%s\n", html.EscapeString(strings.TrimSpace(v[i])))
+					} else {
+						fmt.Fprintf(q.w, "<td>%s\n", html.EscapeString(v[i]))
+					}
 				}
 			}
 		}
@@ -526,5 +588,20 @@ func (x AttrItems) Swap(i, j int) {
 }
 
 func (x AttrItems) Len() int {
+	return len(x)
+}
+
+func (x ValueItems) Less(i, j int) bool {
+	if x[i].begin < x[j].begin {
+		return true
+	}
+	return x[i].end < x[j].end
+}
+
+func (x ValueItems) Swap(i, j int) {
+	x[i], x[j] = x[j], x[i]
+}
+
+func (x ValueItems) Len() int {
 	return len(x)
 }

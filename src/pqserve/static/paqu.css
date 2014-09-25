@@ -217,8 +217,12 @@ div.warning {
     background-color: #ffe0e0;
 }
 
-span.nil {
+td.nil {
     color: #909090;
+}
+
+td.multi {
+    color: #60a060;
 }
 
 /****************************************************************/
