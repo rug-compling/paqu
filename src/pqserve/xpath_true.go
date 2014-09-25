@@ -259,13 +259,25 @@ func html_xpath_header(q *Context) {
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
+  var lastcall = null;
   $.fn.xstats = function() {
+    if (lastcall) {
+      try {
+        lastcall.abort();
+      }
+      catch(err) {}
+    }
     $("#xstatresults").html('<img src="busy.gif">');
-    $.get("xpathstats?" + $(document.xstatsform).serialize(), function(data) {
-      $("#xstatresults").html(data);
-    }).fail(function(e) {
-      $("#xstatresults").html(e.responseText);
-    });
+    lastcall = $.ajax("xpathstats?" + $(document.xstatsform).serialize())
+      .done(function(data) {
+        $("#xstatresults").html(data);
+      })
+      .fail(function(e) {
+        $("#xstatresults").html(e.responseText);
+      })
+      .always(function() {
+        lastcall = null;
+      });
   }
   function formclear(f) {
     f.xpath.value = "";

@@ -24,7 +24,5 @@ Zie ook: TODO in diverse bestanden
     - macro's
     - tijdens intypen van query laten zien of de query geldig is
     - tijdens intypen van query matchende haken laten zien
-    - statistiek: als opnieuw op de knop wordt geklikt moet de lopende
-      query onderbroken worden
   - statistiek bij XPath en gewoon zoeken
     - tussenresultaten laten zien bij langdurende operaties

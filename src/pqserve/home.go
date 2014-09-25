@@ -370,19 +370,32 @@ func html_header(q *Context) {
 <script type="text/javascript"><!--
   $.fn.stats = function(url) {
     $("#stats").html('<img src="busy.gif" alt="aan het werk...">');
-    $.get(url, function(data) {
-      $("#stats").html(data);
-    }).fail(function(e) {
-      $("#stats").html(e.responseText);
-    });
+    $.ajax(url)
+      .done(function(data) {
+        $("#stats").html(data);
+      })
+      .fail(function(e) {
+        $("#stats").html(e.responseText);
+      });
   }
+  var lastcall = null;
   $.fn.statsrel = function() {
+    if (lastcall) {
+      try {
+        lastcall.abort();
+      }
+      catch(err) {}
+    }
     $("#statresults").html('<img src="busy.gif">');
-    $.get("statsrel?" + $(document.statsrelform).serialize(), function(data) {
-      $("#statresults").html(data);
-    }).fail(function(e) {
-      $("#statresults").html(e.responseText);
-    });
+    lastcall = $.ajax("statsrel?" + $(document.statsrelform).serialize())
+      .done(function(data) {
+        $("#statresults").html(data);
+      }).fail(function(e) {
+        $("#statresults").html(e.responseText);
+      })
+      .always(function() {
+        lastcall = null;
+      });
   }
   function formclear(f) {
     f.word.value = "";
