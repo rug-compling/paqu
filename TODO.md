@@ -21,7 +21,6 @@ Zie ook: TODO in diverse bestanden
     - pqserve: alle javascript onderbrengen in één apart bestand
     - Organisatie + documentatie
   - XPath (pqserve)
-    - mogelijk geheugenprobleem bij statistiek
     - macro's
     - tijdens intypen van query laten zien of de query geldig is
     - tijdens intypen van query matchende haken laten zien

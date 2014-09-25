@@ -192,7 +192,8 @@ table.corpora {
     border: 1px solid lightgrey;
 }
 
-table.corpora td {
+table.corpora td,
+table.breed td {
     vertical-align: top;
 }
 

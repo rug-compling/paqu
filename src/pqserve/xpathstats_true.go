@@ -272,6 +272,10 @@ func getAttr(attr string, n *FullNode) string {
 }
 
 func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
+	if n.Index != "" && len(n.NodeList) == 0 && n.Word == "" {
+		*values = append(*values, &ValueItem{-1, -1, n.Index})
+		return
+	}
 	if s := getAttr(attr, &n.FullNode); s != "" {
 		*values = append(*values, &ValueItem{n.Begin, n.End, s})
 		return
@@ -281,7 +285,20 @@ func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
 	}
 }
 
-func getFullAttr(attr string, n *Node) string {
+func getIndexValue(idx, attr string, n *Node, values *[]*ValueItem) bool {
+	if n.Index == idx && (len(n.NodeList) > 0 || n.Word != "") {
+		getDeepAttr(attr, n, values)
+		return true
+	}
+	for _, n2 := range n.NodeList {
+		if getIndexValue(idx, attr, n2, values) {
+			return true
+		}
+	}
+	return false
+}
+
+func getFullAttr(attr string, n, top *Node) string {
 
 	if s := getAttr(attr, &n.FullNode); s != "" {
 		return s
@@ -293,14 +310,24 @@ func getFullAttr(attr string, n *Node) string {
 		return ""
 	}
 
-	fmt.Printf("%q\n", values)
+	for _, v := range values {
+		if v.begin < 0 {
+			getIndexValue(v.value, attr, top, &values)
+		}
+	}
+
 	sort.Sort(ValueItems(values))
 
 	s := make([]string, 0, len(values))
 	p := -1
+	q := 0
 	for _, v := range values {
 		if v.begin > p {
 			p = v.begin
+			if v.begin > q && len(s) > 0 {
+				s = append(s, "...")
+			}
+			q = v.end
 			s = append(s, v.value)
 		}
 	}
@@ -456,8 +483,17 @@ func xpathstats(q *Context) {
 			return
 		}
 		for docs.Next() {
+			alpino := Alpino_ds{}
 			alp := Alpino_ds{}
-			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			err := xml.Unmarshal([]byte(docs.Content()), &alpino)
+			if err != nil {
+				interneFoutRegel(q, err, !download)
+				logerr(err)
+				docs.Close()
+				db.Close()
+				return
+			}
+			err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+docs.Match()+`
 </alpino_ds>`), &alp)
@@ -468,9 +504,11 @@ func xpathstats(q *Context) {
 				db.Close()
 				return
 			}
-			sums[getFullAttr(attr[0], alp.Node0)+"\t"+getFullAttr(attr[1], alp.Node0)+"\t"+getFullAttr(attr[2], alp.Node0)]++
+			sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
+				getFullAttr(attr[1], alp.Node0, alpino.Node0)+"\t"+
+				getFullAttr(attr[2], alp.Node0, alpino.Node0)]++
 			count++
-			if len(sums) >= 10000 {
+			if len(sums) >= 100000 {
 				tooMany = true
 				docs.Close()
 			}
@@ -545,7 +583,7 @@ func xpathstats(q *Context) {
 		}
 		v := strings.Split(a.a, "\t")
 		for i := 0; i < nAttr; i++ {
-			if v[i] == "" {
+			if strings.TrimSpace(v[i]) == "" {
 				if download {
 					fmt.Fprintf(q.w, "\tNIL")
 				} else {
