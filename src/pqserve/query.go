@@ -76,6 +76,9 @@ func makeQuery(q *Context, prefix string, chClose <-chan bool) (string, error) {
 		parts = append(parts, fmt.Sprintf("`rel` = %q", s))
 	}
 	if s := first(q.r, "hpostag"); s != "" {
+		if s == "--LEEG--" {
+			s = ""
+		}
 		parts = append(parts, fmt.Sprintf("`hpostag` = %q", s))
 	}
 

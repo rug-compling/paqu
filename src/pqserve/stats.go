@@ -313,6 +313,9 @@ func statsrel(q *Context) {
 							qhword = urlencode("+" + s)
 						case "hpostag":
 							qhpostag = urlencode(s)
+							if qhpostag == "" {
+								qhpostag = "--LEEG--"
+							}
 						}
 					}
 					a1 = fmt.Sprintf("<a href=\".?db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s\">",
