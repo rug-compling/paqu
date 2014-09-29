@@ -72,7 +72,7 @@ func writeHead(q *Context, title string, tab int) {
 	if q.auth {
 		fmt.Fprintf(q.w, "<form action=\"logout\">%s &nbsp; <input type=\"submit\" value=\"Log uit\"></form>\n", html.EscapeString(q.user))
 	} else {
-		fmt.Fprintln(q.w, "<form action=\"login1\">E-mail: <input type=\"text\" name=\"mail\"> <input type=\"submit\" value=\"Log in\"></form>")
+		fmt.Fprintln(q.w, "<form action=\"login1\"><input type=\"text\" name=\"mail\" placeholder=\"E-mail\"> <input type=\"submit\" value=\"Log in\"></form>")
 	}
 
 	var t [5]string
