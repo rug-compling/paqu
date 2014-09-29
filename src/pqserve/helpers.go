@@ -65,6 +65,9 @@ func writeHead(q *Context, title string, tab int) {
 <title>%s</title>
 <link rel="stylesheet" type="text/css" href="paqu.css">
 <meta name="robots" content="noindex,nofollow">
+<![if gte IE 10]>
+<style type="text/css">span.ie { display:none; }</style>
+<![endif]>
 </head>
 <body>
 <div id="login">
@@ -72,7 +75,7 @@ func writeHead(q *Context, title string, tab int) {
 	if q.auth {
 		fmt.Fprintf(q.w, "<form action=\"logout\">%s &nbsp; <input type=\"submit\" value=\"Log uit\"></form>\n", html.EscapeString(q.user))
 	} else {
-		fmt.Fprintln(q.w, "<form action=\"login1\"><input type=\"text\" name=\"mail\" placeholder=\"E-mail\"> <input type=\"submit\" value=\"Log in\"></form>")
+		fmt.Fprintln(q.w, "<form action=\"login1\"><span class=\"ie\">E-mail: </span><input type=\"text\" name=\"mail\" placeholder=\"E-mail\"> <input type=\"submit\" value=\"Log in\"></form>")
 	}
 
 	var t [5]string

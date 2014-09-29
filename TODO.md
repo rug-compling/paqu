@@ -26,3 +26,6 @@ Zie ook: TODO in diverse bestanden
     - tijdens intypen van query matchende haken laten zien
   - statistiek bij XPath en gewoon zoeken
     - tussenresultaten laten zien bij langdurende operaties
+  - tooltip (pqserve)
+    - jQuery gebruiken om het in alle browsers te laten werken (huidige
+      versie werkt in IE niet op breedte van het scherm)
