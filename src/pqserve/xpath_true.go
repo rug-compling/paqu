@@ -225,7 +225,7 @@ func xpath(q *Context) {
 	// Links naar statistieken
 	fmt.Fprintf(q.w, `<p>
 		<div id="xstats">
-		<form action="xpathstats" target="xframe" id="xstatsform" onsubmit="javascript:return xstatftest()">
+		<form action="xpathstats" target="xframe" name="xstatsform" onsubmit="javascript:return xstatftest()">
 		<input type="hidden" name="xpath" value="%s">
 		<input type="hidden" name="db" value="%s">
 		Selecteer &eacute;&eacute;n tot drie attributen:<br>
@@ -257,7 +257,7 @@ func xpath(q *Context) {
 func html_xpath_header(q *Context) {
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="jquery.browser.js"></script>
+<script type="text/javascript" src="jquery-migrate.js"></script>
 <script type="text/javascript" src="jquery.iframe-auto-height.js"></script>
 <script type="text/javascript"><!--
   var result;
@@ -281,34 +281,36 @@ func html_xpath_header(q *Context) {
     return "";
   }
   function xstatftest() {
-    var f = $('#xstatsform');
+    var f = document.forms["xstatsform"];
     var n = 0;
-    if (f.attr1.value != "") { n++; }
-    if (f.attr2.value != "") { n++; }
-    if (f.attr3.value != "") { n++; }
+    if (f["attr1"].selectedIndex > 0) { n++; }
+    if (f["attr2"].selectedIndex > 0) { n++; }
+    if (f["attr3"].selectedIndex > 0) { n++; }
     if (n < 1) {
       alert("Geen attribuut geselecteerd");
       result.addClass('hide');
       return false;
     }
-    setCookie("xpattr1", f.attr1.value, 14);
-    setCookie("xpattr2", f.attr2.value, 14);
-    setCookie("xpattr3", f.attr3.value, 14);
+    setCookie("xpattr1", f["attr1"].selectedIndex, 14);
+    setCookie("xpattr2", f["attr2"].selectedIndex, 14);
+    setCookie("xpattr3", f["attr3"].selectedIndex, 14);
     result.removeClass('hide');
     return true;
   }
   function setForm() {
-    var f = document.xstatsform;
+    var f = document.forms["xstatsform"];
     if (f) {
-      f.attr1.value = getCookie("xpattr1");
-      f.attr2.value = getCookie("xpattr2");
-      f.attr3.value = getCookie("xpattr3");
+      try {
+        f["attr1"].selectedIndex = getCookie("xpattr1");
+        f["attr2"].selectedIndex = getCookie("xpattr2");
+        f["attr3"].selectedIndex = getCookie("xpattr3");
+      } catch (e) { }
     }
   }
   $(document).ready(function() {
     result = $('#result');
     result.addClass('hide');
-    result.iframeAutoHeight();
+    result.iframeAutoHeight({minHeight: 160});
     setForm();
   });
   //--></script>

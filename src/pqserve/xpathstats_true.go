@@ -342,12 +342,45 @@ func xpathstats(q *Context) {
 	}
 
 	if download {
-		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		contentType(q, "text/plain; charset=utf-8")
+		cache(q)
 	} else {
-		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		contentType(q, "text/html; charset=utf-8")
+		cache(q)
+		fmt.Fprint(q.w, `<!DOCTYPE html>
+<html>
+<head>
+<title>PaQu - XPath - statistiek</title>
+<style type="text/css">
+<!--
+body {
+  background:#e0e0e0;
+  padding: 1em;
+  border: 0px;
+  margin: 0px;
+  font-size: small;
+}
+table {
+  padding: 0px;
+  margin: 0px;
+  border: 0px;
+}
+th {
+  text-align: left;
+}
+th, td {
+  padding: 0px 1em 0px 0px;
+}
+td.right {
+  text-align: right;
+}
+-->
+</style>
+<meta name="robots" content="noindex,nofollow">
+</head>
+<body>
+`)
 	}
-	q.w.Header().Set("Cache-Control", "no-cache")
-	q.w.Header().Add("Pragma", "no-cache")
 
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
@@ -544,6 +577,7 @@ func xpathstats(q *Context) {
 <tr><td>Matches:<td class="right">%s
 <tr><td>Combinaties:<td class="right">%s
 </table>
+<p>
 `, iformat(count), iformat(len(attrList)))
 	}
 
@@ -608,7 +642,7 @@ func xpathstats(q *Context) {
 
 	if !download {
 		fmt.Fprintf(q.w,
-			"</table>\n<hr>tijd: %s\n<p>\n<a href=\"xpathstats?%s&amp;d=1\" target=\"_blank\">download</a>\n",
+			"</table>\n<hr>tijd: %s\n<p>\n<a href=\"xpathstats?%s&amp;d=1\" target=\"_blank\">download</a>\n</body>\n</html>\n",
 			time.Now().Sub(now),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 	}

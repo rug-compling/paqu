@@ -49,10 +49,10 @@ func static_jquery_js(q *Context) {
 	fmt.Fprint(q.w, file__jquery__js)
 }
 
-func static_jquery_browser_js(q *Context) {
+func static_jquery_migrate_js(q *Context) {
 	contentType(q, "application/javascript")
 	cache(q)
-	fmt.Fprint(q.w, file__jquery__browser__js)
+	fmt.Fprint(q.w, file__jquery__migrate__js)
 }
 
 func static_jquery_iframe_auto_height_js(q *Context) {

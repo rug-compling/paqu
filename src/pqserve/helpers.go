@@ -65,9 +65,9 @@ func writeHead(q *Context, title string, tab int) {
 <title>%s</title>
 <link rel="stylesheet" type="text/css" href="paqu.css">
 <meta name="robots" content="noindex,nofollow">
-<!--[if gte IE 10]-->
+<!--[if gte IE 10]> -->
 <style type="text/css">span.ie { display:none; }</style>
-<!--[endif]-->
+<!-- <![endif]-->
 </head>
 <body>
 <div id="login">

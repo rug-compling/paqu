@@ -165,7 +165,7 @@ func main() {
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)
 	handleStatic("jquery.js", static_jquery_js)
-	handleStatic("jquery.browser.js", static_jquery_browser_js)
+	handleStatic("jquery-migrate.js", static_jquery_migrate_js)
 	handleStatic("jquery.iframe-auto-height.js", static_jquery_iframe_auto_height_js)
 	handleStatic("leeg.html", static_leeg_html)
 	handleStatic("paqu.css", static_paqu_css)

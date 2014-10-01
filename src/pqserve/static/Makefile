@@ -7,7 +7,7 @@ DEPS = \
 	favicon.ico \
 	info.html \
 	jquery.js \
-	jquery.browser.js \
+	jquery-migrate.js \
 	jquery.iframe-auto-height.js \
 	paqu.css \
 	paqu.png \
