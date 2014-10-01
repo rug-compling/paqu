@@ -49,10 +49,28 @@ func static_jquery_js(q *Context) {
 	fmt.Fprint(q.w, file__jquery__js)
 }
 
+func static_jquery_browser_js(q *Context) {
+	contentType(q, "application/javascript")
+	cache(q)
+	fmt.Fprint(q.w, file__jquery__browser__js)
+}
+
+func static_jquery_iframe_auto_height_js(q *Context) {
+	contentType(q, "application/javascript")
+	cache(q)
+	fmt.Fprint(q.w, file__jquery__iframe__auto__height__js)
+}
+
 func static_paqu_css(q *Context) {
 	contentType(q, "text/css")
 	cache(q)
 	fmt.Fprint(q.w, file__paqu__css)
+}
+
+func static_leeg_html(q *Context) {
+	contentType(q, "text/html")
+	cache(q)
+	fmt.Fprintln(q.w, "<!DOCTYPE html>\n<html><head><title></title></head><body></body></html>")
 }
 
 func static_paqu_png(q *Context) {

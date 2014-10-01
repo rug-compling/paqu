@@ -49,5 +49,5 @@ import (
 }
 
 func varname(s string) string {
-	return "file__" + strings.Replace(s, ".", "__", -1)
+	return "file__" + strings.Replace(strings.Replace(s, ".", "__", -1), "-", "__", -1)
 }

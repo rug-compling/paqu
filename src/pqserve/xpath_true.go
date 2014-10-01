@@ -225,7 +225,7 @@ func xpath(q *Context) {
 	// Links naar statistieken
 	fmt.Fprintf(q.w, `<p>
 		<div id="xstats">
-		<form action="javascript:$.fn.xstats()" name="xstatsform" onsubmit="javascript:return xstatftest()">
+		<form action="xpathstats" target="xframe" id="xstatsform" onsubmit="javascript:return xstatftest()">
 		<input type="hidden" name="xpath" value="%s">
 		<input type="hidden" name="db" value="%s">
 		Selecteer &eacute;&eacute;n tot drie attributen:<br>
@@ -239,13 +239,12 @@ func xpath(q *Context) {
 		fmt.Fprintln(q.w, "</select>")
 	}
 
-	fmt.Fprintf(q.w, `
+	fmt.Fprint(q.w, `
 		<p>
 		<input type="submit" value="statistiek">
 		</form>
 		<p>
-		<div id="xstatresults">
-		</div>
+        <iframe src="leeg.html" id="result" name="xframe"></iframe>
 		</div>
 `)
 
@@ -258,27 +257,10 @@ func xpath(q *Context) {
 func html_xpath_header(q *Context) {
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jquery.browser.js"></script>
+<script type="text/javascript" src="jquery.iframe-auto-height.js"></script>
 <script type="text/javascript"><!--
-  var lastcall = null;
-  $.fn.xstats = function() {
-    if (lastcall) {
-      try {
-        lastcall.abort();
-      }
-      catch(err) {}
-    }
-    $("#xstatresults").html('<img src="busy.gif">');
-    lastcall = $.ajax("xpathstats?" + $(document.xstatsform).serialize())
-      .done(function(data) {
-        $("#xstatresults").html(data);
-      })
-      .fail(function(e) {
-        $("#xstatresults").html(e.responseText);
-      })
-      .always(function() {
-        lastcall = null;
-      });
-  }
+  var result;
   function formclear(f) {
     f.xpath.value = "";
   }
@@ -299,18 +281,20 @@ func html_xpath_header(q *Context) {
     return "";
   }
   function xstatftest() {
-    var f = document.xstatsform;
+    var f = $('#xstatsform');
     var n = 0;
     if (f.attr1.value != "") { n++; }
     if (f.attr2.value != "") { n++; }
     if (f.attr3.value != "") { n++; }
     if (n < 1) {
       alert("Geen attribuut geselecteerd");
+      result.addClass('hide');
       return false;
     }
     setCookie("xpattr1", f.attr1.value, 14);
     setCookie("xpattr2", f.attr2.value, 14);
     setCookie("xpattr3", f.attr3.value, 14);
+    result.removeClass('hide');
     return true;
   }
   function setForm() {
@@ -321,7 +305,12 @@ func html_xpath_header(q *Context) {
       f.attr3.value = getCookie("xpattr3");
     }
   }
-  $(document).ready(setForm);
+  $(document).ready(function() {
+    result = $('#result');
+    result.addClass('hide');
+    result.iframeAutoHeight();
+    setForm();
+  });
   //--></script>
 `)
 }

@@ -281,3 +281,9 @@ ol.xpath li {
 .c3 { background-color: #1D91C0; color: #ffffff; }
 .c4 { background-color: #225EA8; color: #ffffff; }
 .c5 { background-color: #0C2C84; color: #ffffff; }
+
+/****************************************************************/
+
+iframe {
+    width: 100%;
+}
