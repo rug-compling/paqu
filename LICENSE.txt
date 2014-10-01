@@ -3,8 +3,6 @@ For parts written by others, see:
 
 src/pqserve/static/jquery.LICENSE.txt
 
-src/pqserve/static/jquery.iframe-auto-height.LICENSE.txt
-
 _vendor/src/github.com/BurntSushi/toml/COPYING
 Source: https://github.com/BurntSushi/toml
 Commit: bd2bdf7f18f849530ef7a1c29a4290217cab32a1

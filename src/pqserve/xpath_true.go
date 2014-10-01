@@ -257,13 +257,12 @@ func xpath(q *Context) {
 func html_xpath_header(q *Context) {
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="jquery-migrate.js"></script>
-<script type="text/javascript" src="jquery.iframe-auto-height.js"></script>
 <script type="text/javascript"><!--
-  var result;
+
   function formclear(f) {
     f.xpath.value = "";
   }
+
   function setCookie(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -280,38 +279,45 @@ func html_xpath_header(q *Context) {
     }
     return "";
   }
+
+  var result;
+  var at1, at2, at3;
+  window._fn = {
+    resize: function(h) {
+      result.height(h + 32);
+    }
+  }
   function xstatftest() {
-    var f = document.forms["xstatsform"];
     var n = 0;
-    if (f["attr1"].selectedIndex > 0) { n++; }
-    if (f["attr2"].selectedIndex > 0) { n++; }
-    if (f["attr3"].selectedIndex > 0) { n++; }
+    if (at1.selectedIndex > 0) { n++; }
+    if (at2.selectedIndex > 0) { n++; }
+    if (at3.selectedIndex > 0) { n++; }
     if (n < 1) {
       alert("Geen attribuut geselecteerd");
       result.addClass('hide');
       return false;
     }
-    setCookie("xpattr1", f["attr1"].selectedIndex, 14);
-    setCookie("xpattr2", f["attr2"].selectedIndex, 14);
-    setCookie("xpattr3", f["attr3"].selectedIndex, 14);
+    setCookie("xpattr1", at1.selectedIndex, 14);
+    setCookie("xpattr2", at2.selectedIndex, 14);
+    setCookie("xpattr3", at3.selectedIndex, 14);
     result.removeClass('hide');
     return true;
   }
   function setForm() {
-    var f = document.forms["xstatsform"];
-    if (f) {
-      try {
-        f["attr1"].selectedIndex = getCookie("xpattr1");
-        f["attr2"].selectedIndex = getCookie("xpattr2");
-        f["attr3"].selectedIndex = getCookie("xpattr3");
-      } catch (e) { }
-    }
+    try {
+      at1.selectedIndex = getCookie("xpattr1");
+      at2.selectedIndex = getCookie("xpattr2");
+      at3.selectedIndex = getCookie("xpattr3");
+    } catch (e) { }
   }
   $(document).ready(function() {
+    var f = document.forms["xstatsform"];
+    at1 = f["attr1"];
+    at2 = f["attr2"];
+    at3 = f["attr3"];
+    setForm();
     result = $('#result');
     result.addClass('hide');
-    result.iframeAutoHeight({minHeight: 160});
-    setForm();
   });
   //--></script>
 `)

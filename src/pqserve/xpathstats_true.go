@@ -351,6 +351,14 @@ func xpathstats(q *Context) {
 <html>
 <head>
 <title>PaQu - XPath - statistiek</title>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript"><!--
+function resize() {
+  var b = $('body');
+  var h = Math.max(parseInt(b.height()), parseInt(b.outerHeight()), parseInt(b.innerHeight()));
+  window.parent._fn.resize(h);
+}
+//--></script>
 <style type="text/css">
 <!--
 body {
@@ -369,16 +377,20 @@ th {
   text-align: left;
 }
 th, td {
-  padding: 0px 1em 0px 0px;
+  padding: 0px .5em;
+  vertical-align: top;
 }
 td.right {
   text-align: right;
+}
+tr.odd {
+  background: #d0d0d0;
 }
 -->
 </style>
 <meta name="robots" content="noindex,nofollow">
 </head>
-<body>
+<body onload="resize()">
 `)
 	}
 
@@ -591,7 +603,7 @@ td.right {
 	if download {
 		fmt.Fprint(q.w, "aantal")
 	} else {
-		fmt.Fprint(q.w, "<table class=\"breed\">\n<tr><th><th>")
+		fmt.Fprint(q.w, "<table class=\"breed\">\n<tr class=\"odd\"><th><th>")
 	}
 	for i := 0; i < nAttr; i++ {
 		if download {
@@ -603,8 +615,12 @@ td.right {
 	fmt.Fprintln(q.w)
 
 	for n, a := range attrList {
+		o := ""
+		if n%2 == 1 {
+			o = " class=\"odd\""
+		}
 		if !download && n == WRDMAX {
-			fmt.Fprintln(q.w, "<tr><td class=\"right\">...<td class=\"right\">...")
+			fmt.Fprintf(q.w, "<tr%s><td class=\"right\">...<td class=\"right\">...\n", o)
 			for i := 0; i < nAttr; i++ {
 				fmt.Fprintln(q.w, "<td class=\"nil\">...")
 			}
@@ -613,7 +629,7 @@ td.right {
 		if download {
 			fmt.Fprintf(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
 		} else {
-			fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.1f%%\n", a.n, float64(a.n)/float64(count)*100)
+			fmt.Fprintf(q.w, "<tr%s><td class=\"right\">%d<td class=\"right\">%.1f%%\n", o, a.n, float64(a.n)/float64(count)*100)
 		}
 		v := strings.Split(a.a, "\t")
 		for i := 0; i < nAttr; i++ {
