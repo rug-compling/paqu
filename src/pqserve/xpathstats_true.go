@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/pebbe/dbxml"
 
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -334,6 +335,25 @@ func getFullAttr(attr string, n, top *Node) string {
 	return "  " + strings.Join(s, " ")
 }
 
+func updateText(q *Context, s string) {
+	fmt.Fprintf(q.w, `<script type="text/javascript"><!--
+window.parent._fn.update(%q);
+//--></script>
+`, s)
+	if ff, ok := q.w.(http.Flusher); ok {
+		ff.Flush()
+	}
+}
+
+func updateError(q *Context, err error, is_html bool) {
+	s := err.Error()
+	if is_html {
+		updateText(q, "Interne fout: "+html.EscapeString(s))
+	} else {
+		fmt.Fprintln(q.w, "Interne fout:", s)
+	}
+}
+
 func xpathstats(q *Context) {
 
 	download := false
@@ -350,53 +370,21 @@ func xpathstats(q *Context) {
 		fmt.Fprint(q.w, `<!DOCTYPE html>
 <html>
 <head>
-<title>PaQu - XPath - statistiek</title>
-<script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript"><!--
-function resize() {
-  var b = $('body');
-  var h = Math.max(parseInt(b.height()), parseInt(b.outerHeight()), parseInt(b.innerHeight()));
-  window.parent._fn.resize(h);
-}
-//--></script>
-<style type="text/css">
-<!--
-body {
-  background:#e0e0e0;
-  padding: 1em;
-  border: 0px;
-  margin: 0px;
-  font-size: small;
-}
-table {
-  padding: 0px;
-  margin: 0px;
-  border: 0px;
-}
-th {
-  text-align: left;
-}
-th, td {
-  padding: 0px .5em;
-  vertical-align: top;
-}
-td.right {
-  text-align: right;
-}
-tr.odd {
-  background: #d0d0d0;
-}
--->
-</style>
-<meta name="robots" content="noindex,nofollow">
+<title></title>
 </head>
-<body onload="resize()">
+<body">
 `)
+		updateText(q, `<img src="busy.gif" alt="aan het werk...">`)
 	}
 
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
-		fmt.Fprintf(q.w, "Invalid corpus: "+html.EscapeString(prefix))
+		if download {
+			fmt.Fprintf(q.w, "Invalid corpus: "+prefix)
+		} else {
+			updateText(q, "Invalid corpus: "+html.EscapeString(prefix))
+			fmt.Fprintln(q.w, "</body>\n</html>")
+		}
 		return
 	}
 
@@ -416,21 +404,31 @@ tr.odd {
 		attr[0], attr[1], attr[2] = attr[1], attr[2], ""
 	}
 	if attr[0] == "" {
-		fmt.Fprintln(q.w, "Geen attribuut gekozen")
+		if download {
+			fmt.Fprintln(q.w, "Geen attribuut gekozen")
+		} else {
+			updateText(q, "Geen attribuut gekozen")
+			fmt.Fprintln(q.w, "</body>\n</html>")
+		}
 		return
 	}
 
 	query := first(q.r, "xpath")
 
 	if query == "" {
-		fmt.Fprintln(q.w, "Query ontbreekt")
+		if download {
+			fmt.Fprintln(q.w, "Query ontbreekt")
+		} else {
+			updateText(q, "Query ontbreekt")
+			fmt.Fprintln(q.w, "</body>\n</html>")
+		}
 		return
 	}
 
 	var owner string
 	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if err != nil {
-		interneFoutRegel(q, err, !download)
+		updateError(q, err, !download)
 		logerr(err)
 		return
 	}
@@ -441,7 +439,7 @@ tr.odd {
 		}
 	}
 	if err := rows.Err(); err != nil {
-		interneFoutRegel(q, err, !download)
+		updateError(q, err, !download)
 		logerr(err)
 		return
 	}
@@ -452,7 +450,7 @@ tr.odd {
 	} else {
 		rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			logerr(err)
 			return
 		}
@@ -460,7 +458,7 @@ tr.odd {
 			var s string
 			err := rows.Scan(&s)
 			if err != nil {
-				interneFoutRegel(q, err, !download)
+				updateError(q, err, !download)
 				logerr(err)
 				rows.Close()
 				return
@@ -470,7 +468,7 @@ tr.odd {
 			}
 		}
 		if err := rows.Err(); err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			logerr(err)
 			return
 		}
@@ -482,11 +480,16 @@ tr.odd {
 	}
 
 	now := time.Now()
+	now2 := time.Now()
 
 	sums := make(map[string]int)
 	count := 0
 	tooMany := false
 	for _, dactfile := range dactfiles {
+		if !download && time.Now().Sub(now2) > 2*time.Second {
+			xpathout(q, sums, attr, count, tooMany, now, download, false)
+			now2 = time.Now()
+		}
 		if tooMany {
 			break
 		}
@@ -498,14 +501,14 @@ tr.odd {
 		}
 		db, err := dbxml.Open(dactfile)
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			logerr(err)
 			return
 		}
 
 		qu, err := db.Prepare(query)
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			db.Close()
 			return
 		}
@@ -523,16 +526,20 @@ tr.odd {
 
 		docs, err := qu.Run()
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			db.Close()
 			return
 		}
 		for docs.Next() {
+			if !download && time.Now().Sub(now2) > 2*time.Second {
+				xpathout(q, sums, attr, count, tooMany, now, download, false)
+				now2 = time.Now()
+			}
 			alpino := Alpino_ds{}
 			alp := Alpino_ds{}
 			err := xml.Unmarshal([]byte(docs.Content()), &alpino)
 			if err != nil {
-				interneFoutRegel(q, err, !download)
+				updateError(q, err, !download)
 				logerr(err)
 				docs.Close()
 				db.Close()
@@ -543,7 +550,7 @@ tr.odd {
 `+docs.Match()+`
 </alpino_ds>`), &alp)
 			if err != nil {
-				interneFoutRegel(q, err, !download)
+				updateError(q, err, !download)
 				logerr(err)
 				docs.Close()
 				db.Close()
@@ -570,11 +577,23 @@ tr.odd {
 		}
 	}
 
+	xpathout(q, sums, attr, count, tooMany, now, download, true)
+
+	if !download {
+		fmt.Fprintln(q.w, "</body>\n</html>")
+	}
+
+}
+
+func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany bool, now time.Time, download bool, final bool) {
+
 	attrList := make([]*AttrItem, 0, len(sums))
 	for key, value := range sums {
 		attrList = append(attrList, &AttrItem{value, key})
 	}
 	sort.Sort(AttrItems(attrList))
+
+	var buf bytes.Buffer
 
 	if download {
 		if tooMany {
@@ -583,14 +602,20 @@ tr.odd {
 		fmt.Fprintf(q.w, "# %d matches in %d combinaties\n", count, len(attrList))
 	} else {
 		if tooMany {
-			fmt.Fprintln(q.w, "<div class=\"warning\">Onderbroken vanwege te veel combinaties</div>")
+			fmt.Fprintln(&buf, "<div class=\"warning\">Onderbroken vanwege te veel combinaties</div>")
 		}
-		fmt.Fprintf(q.w, `<table>
-<tr><td>Matches:<td class="right">%s
+		f := ""
+		if !final {
+			f = `<img src="busy.gif" alt="aan het werk...">`
+		}
+		fmt.Fprintf(&buf, `<table>
+<tr><td>Matches:<td class="right">%s<td rowspan="2" width="50">%s
 <tr><td>Combinaties:<td class="right">%s
+<tr><td>Tijd:<td colspan="2">%s
 </table>
 <p>
-`, iformat(count), iformat(len(attrList)))
+`, iformat(count), f, iformat(len(attrList)), time.Now().Sub(now),
+		)
 	}
 
 	nAttr := 0
@@ -603,13 +628,13 @@ tr.odd {
 	if download {
 		fmt.Fprint(q.w, "aantal")
 	} else {
-		fmt.Fprint(q.w, "<table class=\"breed\">\n<tr class=\"odd\"><th><th>")
+		fmt.Fprint(&buf, "<table class=\"breed\">\n<tr class=\"odd\"><th><th>")
 	}
 	for i := 0; i < nAttr; i++ {
 		if download {
 			fmt.Fprintf(q.w, "\t%s", attr[i])
 		} else {
-			fmt.Fprintf(q.w, "<th>%s", html.EscapeString(attr[i]))
+			fmt.Fprintf(&buf, "<th>%s", html.EscapeString(attr[i]))
 		}
 	}
 	fmt.Fprintln(q.w)
@@ -620,16 +645,16 @@ tr.odd {
 			o = " class=\"odd\""
 		}
 		if !download && n == WRDMAX {
-			fmt.Fprintf(q.w, "<tr%s><td class=\"right\">...<td class=\"right\">...\n", o)
+			fmt.Fprintf(&buf, "<tr%s><td class=\"right\">...<td class=\"right\">...\n", o)
 			for i := 0; i < nAttr; i++ {
-				fmt.Fprintln(q.w, "<td class=\"nil\">...")
+				fmt.Fprintln(&buf, "<td class=\"nil\">...")
 			}
 			break
 		}
 		if download {
 			fmt.Fprintf(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
 		} else {
-			fmt.Fprintf(q.w, "<tr%s><td class=\"right\">%d<td class=\"right\">%.1f%%\n", o, a.n, float64(a.n)/float64(count)*100)
+			fmt.Fprintf(&buf, "<tr%s><td class=\"right\">%d<td class=\"right\">%.1f%%\n", o, a.n, float64(a.n)/float64(count)*100)
 		}
 		v := strings.Split(a.a, "\t")
 		for i := 0; i < nAttr; i++ {
@@ -637,16 +662,16 @@ tr.odd {
 				if download {
 					fmt.Fprintf(q.w, "\tNIL")
 				} else {
-					fmt.Fprintln(q.w, "<td class=\"nil\">(leeg)")
+					fmt.Fprintln(&buf, "<td class=\"nil\">(leeg)")
 				}
 			} else {
 				if download {
 					fmt.Fprintf(q.w, "\t%s", strings.TrimSpace(v[i]))
 				} else {
 					if strings.HasPrefix(v[i], "  ") {
-						fmt.Fprintf(q.w, "<td class=\"multi\">%s\n", html.EscapeString(strings.TrimSpace(v[i])))
+						fmt.Fprintf(&buf, "<td class=\"multi\">%s\n", html.EscapeString(strings.TrimSpace(v[i])))
 					} else {
-						fmt.Fprintf(q.w, "<td>%s\n", html.EscapeString(v[i]))
+						fmt.Fprintf(&buf, "<td>%s\n", html.EscapeString(v[i]))
 					}
 				}
 			}
@@ -657,10 +682,10 @@ tr.odd {
 	}
 
 	if !download {
-		fmt.Fprintf(q.w,
-			"</table>\n<hr>tijd: %s\n<p>\n<a href=\"xpathstats?%s&amp;d=1\" target=\"_blank\">download</a>\n</body>\n</html>\n",
-			time.Now().Sub(now),
+		fmt.Fprintf(&buf,
+			"</table>\n<hr><a href=\"xpathstats?%s&amp;d=1\" target=\"_blank\">download</a>\n",
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
+		updateText(q, buf.String())
 	}
 }
 

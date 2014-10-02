@@ -244,7 +244,8 @@ func xpath(q *Context) {
 		<input type="submit" value="statistiek">
 		</form>
 		<p>
-        <iframe src="leeg.html" id="result" name="xframe"></iframe>
+        <iframe src="leeg.html" name="xframe" class="hide"></iframe>
+        <div id="result"></div>
 		</div>
 `)
 
@@ -283,8 +284,8 @@ func html_xpath_header(q *Context) {
   var result;
   var at1, at2, at3;
   window._fn = {
-    resize: function(h) {
-      result.height(h + 32);
+    update: function(data) {
+      result.html(data);
     }
   }
   function xstatftest() {

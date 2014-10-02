@@ -180,10 +180,19 @@ a.opties:hover
     color: ##0000c0;
 }
 
-table.breed td {
-    padding: 0px 1em;
+table.breed th {
+  text-align: left;
 }
-
+table.breed th, td {
+  padding: 0px .5em;
+  vertical-align: top;
+}
+table.breed td.right {
+  text-align: right;
+}
+table.breed tr.odd {
+  background: #d0d0d0;
+}
 
 table.corpora {
     background-color: #f3f3f3;
@@ -283,7 +292,3 @@ ol.xpath li {
 .c5 { background-color: #0C2C84; color: #ffffff; }
 
 /****************************************************************/
-
-iframe {
-    width: 100%;
-}
