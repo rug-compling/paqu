@@ -336,9 +336,9 @@ func getFullAttr(attr string, n, top *Node) string {
 }
 
 func updateText(q *Context, s string) {
-	fmt.Fprintf(q.w, `<script type="text/javascript"><!--
+	fmt.Fprintf(q.w, `<script type="text/javascript">
 window.parent._fn.update(%q);
-//--></script>
+</script>
 `, s)
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()

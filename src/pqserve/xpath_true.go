@@ -295,13 +295,11 @@ func html_xpath_header(q *Context) {
     if (at3.selectedIndex > 0) { n++; }
     if (n < 1) {
       alert("Geen attribuut geselecteerd");
-      result.addClass('hide');
       return false;
     }
     setCookie("xpattr1", at1.selectedIndex, 14);
     setCookie("xpattr2", at2.selectedIndex, 14);
     setCookie("xpattr3", at3.selectedIndex, 14);
-    result.removeClass('hide');
     return true;
   }
   function setForm() {
@@ -312,13 +310,12 @@ func html_xpath_header(q *Context) {
     } catch (e) { }
   }
   $(document).ready(function() {
+    result = $('#result');
     var f = document.forms["xstatsform"];
     at1 = f["attr1"];
     at2 = f["attr2"];
     at3 = f["attr3"];
     setForm();
-    result = $('#result');
-    result.addClass('hide');
   });
   //--></script>
 `)
