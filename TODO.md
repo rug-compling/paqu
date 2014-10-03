@@ -21,11 +21,13 @@ Zie ook: TODO in diverse bestanden
       - uitleg op tab browse: `%` en `_` in label
     - pqserve: alle javascript onderbrengen in één apart bestand
     - Organisatie + documentatie
-  - link naar boom als svg-plaatje (huidig teken wordt niet in alle
-    browsers weergegeven)
-  - XPath (pqserve)
-    - macro's
-    - tijdens intypen van query matchende haken laten zien
-  - tooltip (pqserve)
-    - jQuery gebruiken om het in alle browsers te laten werken (huidige
-      versie werkt in IE niet op breedte van het scherm)
+  - pqserve:
+    - link naar boom als svg-plaatje (huidig teken wordt niet in alle
+      browsers weergegeven)
+    - XPath
+      - macro's
+      - tijdens intypen van query matchende haken laten zien
+    - tooltip
+      - jQuery gebruiken om het in alle browsers te laten werken (huidige
+        versie werkt in IE niet op breedte van het scherm)
+    - weergave op mobiel of tablet
