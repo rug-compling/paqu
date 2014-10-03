@@ -151,7 +151,7 @@ type FullNode struct {
 	Wh          string `xml:"wh,attr"`
 	Wk          string `xml:"wk,attr"`
 	Word        string `xml:"word,attr"`
-	Wvorm       string `xml:"wvorm"`
+	Wvorm       string `xml:"wvorm,attr"`
 }
 
 func getAttr(attr string, n *FullNode) string {
@@ -419,6 +419,13 @@ func xpathstats(q *Context) {
 		return
 	}
 
+	nAttr := 0
+	for i := 0; i < 3; i++ {
+		if attr[i] != "" {
+			nAttr = i + 1
+		}
+	}
+
 	query := first(q.r, "xpath")
 
 	if query == "" {
@@ -564,9 +571,17 @@ func xpathstats(q *Context) {
 				db.Close()
 				return
 			}
-			sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
-				getFullAttr(attr[1], alp.Node0, alpino.Node0)+"\t"+
-				getFullAttr(attr[2], alp.Node0, alpino.Node0)]++
+			switch nAttr {
+			case 1:
+				sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)]++
+			case 2:
+				sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
+					getFullAttr(attr[1], alp.Node0, alpino.Node0)]++
+			case 3:
+				sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
+					getFullAttr(attr[1], alp.Node0, alpino.Node0)+"\t"+
+					getFullAttr(attr[2], alp.Node0, alpino.Node0)]++
+			}
 			count++
 			if len(sums) >= 100000 {
 				tooMany = true

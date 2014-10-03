@@ -278,6 +278,11 @@ func xpath(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr><small>tijd:", time.Now().Sub(now), "</small><hr>")
 
+	if curno == 0 {
+		html_footer(q)
+		return
+	}
+
 	// Links naar statistieken
 	fmt.Fprintf(q.w, `<p>
 		<div id="xstats">
