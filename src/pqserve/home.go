@@ -64,7 +64,7 @@ func home(q *Context) {
 	// DEBUG: HTML-uitvoer van de query
 	fmt.Fprint(q.w, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
 
-	fmt.Fprint(q.w, "<div id=\"busy\"><img src=\"busy.gif\" alt=\"aan het werk...\"></div>\n")
+	fmt.Fprint(q.w, "<div id=\"busy1\"><img src=\"busy.gif\" alt=\"aan het werk...\"></div>\n")
 
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
@@ -174,6 +174,7 @@ func home(q *Context) {
 	}
 
 	busyClear(q)
+
 	// Verwerking en HTML-uitvoer van zinnen en dependency relations
 	fmt.Fprintln(q.w, "<ol>")
 	for i, zin := range zinnen {
@@ -283,8 +284,20 @@ func home(q *Context) {
 	// Links naar statistieken
 	fmt.Fprintf(q.w, `<p>
 		<div id="stats">
-		<button onclick="javascript:$.fn.stats('stats?word=%s&amp;postag=%s&amp;rel=%s&amp;hpostag=%s&amp;hword=%s&amp;db=%s')">statistiek &mdash; algemeen</button>
+		<div id="inner">
+		<form action="stats" target="sframe">
+		<input type="hidden" name="word" value="%s">
+		<input type="hidden" name="postag" value="%s">
+		<input type="hidden" name="rel" value="%s">
+		<input type="hidden" name="hpostag" value="%s">
+		<input type="hidden" name="hword" value="%s">
+		<input type="hidden" name="db" value="%s">
+		<input type="submit" value="statistiek &mdash; algemeen">
+		</form>
 		</div>
+        <img src="busy.gif" id="busy" class="hide" alt="aan het werk...">
+		</div>
+		<iframe src="leeg.html" name="sframe" class="hide"></iframe>
 `,
 		urlencode(first(q.r, "word")),
 		urlencode(first(q.r, "postag")),
@@ -368,16 +381,31 @@ func html_header(q *Context) {
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
-  $.fn.stats = function(url) {
-    $("#stats").html('<img src="busy.gif" alt="aan het werk...">');
-    $.ajax(url)
-      .done(function(data) {
-        $("#stats").html(data);
-      })
-      .fail(function(e) {
-        $("#stats").html(e.responseText);
-      });
+
+  function formclear(f) {
+    f.word.value = "";
+    f.postag.value = "";
+    f.rel.value = "";
+    f.hpostag.value = "";
+    f.hword.value = "";
   }
+
+  var result;
+  var busy;
+
+  window._fn = {
+    update: function(data) {
+      result.append(data);
+    },
+    started: function() {
+      result.html('');
+      busy.removeClass('hide');
+    },
+    completed: function() {
+      busy.addClass('hide');
+    }
+  }
+
   var lastcall = null;
   $.fn.statsrel = function() {
     if (lastcall) {
@@ -397,15 +425,9 @@ func html_header(q *Context) {
         lastcall = null;
       });
   }
-  function formclear(f) {
-    f.word.value = "";
-    f.postag.value = "";
-    f.rel.value = "";
-    f.hpostag.value = "";
-    f.hword.value = "";
-  }
+
   function statftest() {
-    var f = document.statsrelform;
+    var f = document.forms["statsrelform"];
     var n = 0;
     if (f.cword.checked   ) { n++; }
     if (f.clemma.checked  ) { n++; }
@@ -420,6 +442,12 @@ func html_header(q *Context) {
     }
     return true;
   }
+
+  $(document).ready(function() {
+    result = $('#inner');
+    busy = $('#busy');
+  });
+
   //--></script>
 `)
 }
@@ -603,7 +631,7 @@ func getprefix(q *Context) string {
 
 func busyClear(q *Context) {
 	fmt.Fprint(q.w, `<script type="text/javascript"><!--
-document.getElementById('busy').className = 'hide';
+$('#busy1').addClass('hide');
 //--></script>
 `)
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 )
 
 func stats(q *Context) {
+
+	var buf bytes.Buffer
 
 	var chClose <-chan bool
 	if f, ok := q.w.(http.CloseNotifier); ok {
@@ -54,15 +57,27 @@ func stats(q *Context) {
 
 	if download {
 		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		cache(q)
 	} else {
 		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		cache(q)
+		fmt.Fprint(q.w, `<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body">
+<script type="text/javascript">
+window.parent._fn.started();
+</script>
+`)
 	}
-	q.w.Header().Set("Cache-Control", "no-cache")
-	q.w.Header().Add("Pragma", "no-cache")
 
 	// DEBUG: HTML-uitvoer van de query
 	if !download {
-		fmt.Fprint(q.w, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
+		fmt.Fprint(&buf, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
+		updateText(q, buf.String())
+		buf.Reset()
 	}
 
 	// Aantal zinnen die matchen met de query
@@ -75,7 +90,7 @@ func stats(q *Context) {
 	rows, err := timeoutQuery(q, chClose, "SELECT 1 FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+
 		query+" GROUP BY `arch`,`file`")
 	if err != nil {
-		interneFoutRegel(q, err, !download)
+		updateError(q, err, !download)
 		logerr(err)
 		return
 	}
@@ -84,7 +99,7 @@ func stats(q *Context) {
 		counter++
 	}
 	if err != nil {
-		interneFoutRegel(q, err, !download)
+		updateError(q, err, !download)
 		logerr(err)
 		return
 	}
@@ -92,7 +107,9 @@ func stats(q *Context) {
 	if download {
 		fmt.Fprintf(q.w, "# %d zinnen\t\n", counter)
 	} else {
-		fmt.Fprintln(q.w, "Aantal gevonden zinnen:", iformat(counter))
+		fmt.Fprintln(&buf, "Aantal gevonden zinnen:", iformat(counter))
+		updateText(q, buf.String())
+		buf.Reset()
 	}
 
 	// Tellingen van onderdelen
@@ -103,11 +120,11 @@ func stats(q *Context) {
 			fmt.Fprintln(q.w, "# "+ww+"\t")
 		} else {
 			if i == 0 {
-				fmt.Fprintln(q.w, "<p>"+YELLOW+"<b>word</b></span>: ")
+				fmt.Fprintln(&buf, "<p>"+YELLOW+"<b>word</b></span>: ")
 			} else if i == 4 {
-				fmt.Fprintln(q.w, "<p>"+GREEN+"<b>hword</b></span>: ")
+				fmt.Fprintln(&buf, "<p>"+GREEN+"<b>hword</b></span>: ")
 			} else {
-				fmt.Fprintln(q.w, "<p><b>"+ww+"</b>: ")
+				fmt.Fprintln(&buf, "<p><b>"+ww+"</b>: ")
 			}
 			limit = " LIMIT " + fmt.Sprint(WRDMAX)
 		}
@@ -120,14 +137,14 @@ func stats(q *Context) {
 		rows, err := timeoutQuery(q, chClose, "SELECT count(*), `"+ww+"` FROM `"+Cfg.Prefix+"_c_"+prefix+
 			"_deprel` WHERE "+query+" GROUP BY `"+ww+"` COLLATE 'utf8_bin' ORDER BY 1 DESC, 2"+limit)
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			logerr(err)
 			return
 		}
 		for rows.Next() {
 			err := rows.Scan(&j, &s)
 			if err != nil {
-				interneFoutRegel(q, err, !download)
+				updateError(q, err, !download)
 				logerr(err)
 				return
 			}
@@ -137,30 +154,37 @@ func stats(q *Context) {
 			if download {
 				fmt.Fprintf(q.w, "%d\t%s\n", j, s)
 			} else {
-				fmt.Fprint(q.w, p, j, "&times;&nbsp;", html.EscapeString(s))
+				fmt.Fprint(&buf, p, j, "&times;&nbsp;", html.EscapeString(s))
 				p = ", "
 				count++
 			}
 		}
 		err = rows.Err()
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			updateError(q, err, !download)
 			logerr(err)
 			return
 		}
-		if count == WRDMAX {
-			fmt.Fprint(q.w, ", ...")
-		}
 		if !download {
-			fmt.Fprint(q.w, "\n<BR>\n")
+			if count == WRDMAX {
+				fmt.Fprint(&buf, ", ...")
+			}
+			fmt.Fprint(&buf, "\n<BR>\n")
+			updateText(q, buf.String())
+			buf.Reset()
 		}
 	}
 
 	if !download {
-		fmt.Fprintf(q.w,
+		fmt.Fprintf(&buf,
 			"<hr>tijd: %s\n<p>\n<a href=\"stats?%s&amp;d=1\" target=\"_blank\">download</a>\n",
 			time.Now().Sub(now),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
+		updateText(q, buf.String())
+		fmt.Fprintf(q.w, `<script type="text/javascript">
+window.parent._fn.completed();
+</script>
+`)
 	}
 }
 
@@ -230,8 +254,7 @@ func statsrel(q *Context) {
 	} else {
 		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	}
-	q.w.Header().Set("Cache-Control", "no-cache")
-	q.w.Header().Add("Pragma", "no-cache")
+	cache(q)
 
 	// DEBUG: HTML-uitvoer van de query
 	if !download {
@@ -259,7 +282,7 @@ func statsrel(q *Context) {
 	}
 
 	if !download {
-		fmt.Fprintln(q.w, "<table><tr>")
+		fmt.Fprintln(q.w, "<table class=\"breed\"><tr class=\"odd\">")
 		for _, c := range cols {
 			fmt.Fprintln(q.w, "<th>"+c)
 		}
@@ -286,7 +309,11 @@ func statsrel(q *Context) {
 			return
 		}
 		if !download {
-			fmt.Fprintln(q.w, "<tr>")
+			if n%2 == 0 {
+				fmt.Fprintln(q.w, "<tr class=\"odd\">")
+			} else {
+				fmt.Fprintln(q.w, "<tr>")
+			}
 		}
 		for i, e := range fields {
 			value := *(e.(*string))

@@ -435,7 +435,9 @@ func xpathstats(q *Context) {
 		return
 	}
 	for rows.Next() {
-		if doErr(q, rows.Scan(&owner)) {
+		if err := rows.Scan(&owner); err != nil {
+			updateError(q, err, !download)
+			logerr(err)
 			rows.Close()
 			return
 		}
