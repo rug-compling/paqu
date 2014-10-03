@@ -282,6 +282,7 @@ func html_xpath_header(q *Context) {
 
   function formclear(f) {
     f.xpath.value = "";
+    xquery.css('background-color', '#ffffff');
   }
 
   function setCookie(cname, cvalue, exdays) {
@@ -414,7 +415,7 @@ corpus: <select name="db">
 	fmt.Fprint(q.w, `<p>
 		   <input type="submit" value="Zoeken">
 		   <input type="button" value="Wissen" onClick="javascript:formclear(form)">
-		   <input type="reset" value="Reset">
+		   <input type="reset" value="Reset" onClick="javascript:qcheck()">
 	   </form>
 	   `)
 
