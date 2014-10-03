@@ -466,19 +466,23 @@ func print_nodes(ctx *TreeContext, node *Node) {
 	idx := ""
 	style := ""
 
-	if ctx.mnodes[node.Id] {
-		style += ", color=\"#7FCDBB\", style=filled"
-	}
-
 	// Als dit een node met inhoud EN index is, dan in vierkant zetten.
 	// Als de node gemarkeerd is, dan in zwart, anders in lichtgrijs.
 	// Index als nummer in label zetten.
 	if (len(node.NodeList) > 0 || node.Word != "") && node.Index != "" {
 		idx = fmt.Sprintf("%s\\n", node.Index)
-		style = ", shape=box"
 		if !ctx.refs[node.Index] {
 			style += ", color=\"#d3d3d3\""
+		} else {
+			style += ", color=\"#000000\""
 		}
+		if ctx.mnodes[node.Id] {
+			style += ", style=filled, fillcolor=\"#7FCDBB\""
+		} else {
+			style += ", shape=box"
+		}
+	} else if ctx.mnodes[node.Id] {
+		style += ", color=\"#7FCDBB\", style=filled"
 	}
 
 	// attributen

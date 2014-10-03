@@ -311,7 +311,9 @@ func getFullAttr(attr string, n, top *Node) string {
 		return ""
 	}
 
-	for _, v := range values {
+	// er kunnen nog index-waardes aan 'values' worden toegevoegd, dus geen range gebruiken
+	for i := 0; i < len(values); i++ {
+		v := values[i]
 		if v.begin < 0 {
 			getIndexValue(v.value, attr, top, &values)
 		}
