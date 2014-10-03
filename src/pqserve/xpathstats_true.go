@@ -301,6 +301,10 @@ func getIndexValue(idx, attr string, n *Node, values *[]*ValueItem) bool {
 
 func getFullAttr(attr string, n, top *Node) string {
 
+	if n == nil || top == nil {
+		return ""
+	}
+
 	if s := getAttr(attr, &n.FullNode); s != "" {
 		return s
 	}

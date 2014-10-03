@@ -10,10 +10,22 @@ import (
 	"html"
 	"net/http"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var (
+	reXpath = regexp.MustCompile(`'[^']*'|"[^"]*"|@[a-z][-_a-z]*|[a-zA-Z][-_:a-zA-Z]*(\s*\()?`)
+	keyTags = make(map[string]bool)
+)
+
+func init() {
+	for _, tag := range NodeTags {
+		keyTags[tag] = true
+	}
+}
 
 func xpathcheck(q *Context) {
 	contentType(q, "text/plain")
@@ -25,13 +37,37 @@ func xpathcheck(q *Context) {
 		return
 	}
 
+	// syntactisch fout -> 2
 	if query == "." || query == "/" || dbxml.Check(query) != nil {
 		fmt.Fprintln(q.w, "2")
 		return
 	}
 
-	// als query geen resultaat gaat geven, println 1
+	// geen resultaat -> 1
+	for i, s := range reXpath.FindAllString(query, -1) {
+		if i == 0 && s == "alpino_ds" {
+			continue
+		}
+		if s[0] == '\'' || s[0] == '"' {
+			continue
+		}
+		if s[0] == '@' {
+			if keyTags[s[1:]] {
+				continue
+			}
+			fmt.Fprintln(q.w, "1")
+			return
+		}
+		if strings.HasSuffix(s, "(") {
+			continue
+		}
+		if s != "node" && s != "div" && s != "or" && s != "and" && s != "mod" {
+			fmt.Fprintln(q.w, "1")
+			return
+		}
+	}
 
+	// ok -> 0
 	fmt.Fprintln(q.w, "0")
 }
 
@@ -444,11 +480,13 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			fmt.Fprintf(q.w, "<li>FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
 			return
 		}
-		ids[i] = alp.Node0.Id
-		lvl1 := make([]int, len(woorden)+1)
-		alpscan(alp.Node0, alpino.Node0, lvl1)
-		for j, n := range lvl1 {
-			lvl[j] += n
+		if alp.Node0 != nil {
+			ids[i] = alp.Node0.Id
+			lvl1 := make([]int, len(woorden)+1)
+			alpscan(alp.Node0, alpino.Node0, lvl1)
+			for j, n := range lvl1 {
+				lvl[j] += n
+			}
 		}
 	}
 
