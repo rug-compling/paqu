@@ -362,4 +362,21 @@ extern "C" {
 	query->context.interruptQuery();
     }
 
+    c_dbxml_result c_dbxml_check(char const *query)
+    {
+	c_dbxml_result r;
+	r = new c_dbxml_result_t;
+	try {
+	    DbXml::XmlManager manager;
+	    DbXml::XmlQueryContext context;
+	    context = manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
+	    manager.prepare(std::string(query), context);
+	    r->error = false;
+	} catch (DbXml::XmlException const &xe) {
+	    r->result = xe.what();
+	    r->error = true;
+	}
+	return r;
+    }
+
 }

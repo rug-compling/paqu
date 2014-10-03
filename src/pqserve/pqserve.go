@@ -146,6 +146,7 @@ func main() {
 	handleFunc("browse", browse)
 
 	handleFunc("xpath", xpath)
+	handleFunc("xpathcheck", xpathcheck)
 	handleFunc("xpathstats", xpathstats)
 
 	handleFunc("corpora", corpora)
@@ -233,7 +234,9 @@ func Log(handler http.Handler) http.Handler {
 			wg.Add(1)
 			defer wg.Done()
 			if accessView(r.RemoteAddr) {
-				logf("[%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
+				if !strings.HasPrefix(r.URL.Path, "/xpathcheck") {
+					logf("[%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)
+				}
 				handler.ServeHTTP(w, r)
 			} else {
 				logf("GEEN TOEGANG: [%s] %s %s %s", r.Header.Get("X-Forwarded-For"), r.RemoteAddr, r.Method, r.URL)

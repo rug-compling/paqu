@@ -64,6 +64,10 @@ extern "C" {
     int c_dbxml_get_prepared_error(c_dbxml_query query);
     char const *c_dbxml_get_prepared_errstring(c_dbxml_query query);
 
+    /**** CHECK ****/
+
+    c_dbxml_result c_dbxml_check(char const *query);
+
 #ifdef __cplusplus
 }
 #endif

@@ -423,3 +423,17 @@ func (query *Query) Close() {
 		query.opened = false
 	}
 }
+
+//. Check
+
+// Check if query is valid without opening a database.
+func Check(query string) error {
+	cs := C.CString(query)
+	defer C.free(unsafe.Pointer(cs))
+	r := C.c_dbxml_check(cs)
+	defer C.c_dbxml_result_free(r)
+	if C.c_dbxml_result_error(r) != 0 {
+		return errors.New(C.GoString(C.c_dbxml_result_string(r)))
+	}
+	return nil
+}

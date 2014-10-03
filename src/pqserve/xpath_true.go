@@ -15,6 +15,26 @@ import (
 	"time"
 )
 
+func xpathcheck(q *Context) {
+	contentType(q, "text/plain")
+	cache(q)
+
+	query := first(q.r, "xpath")
+	if query == "" {
+		fmt.Fprintln(q.w, "0")
+		return
+	}
+
+	if query == "." || query == "/" || dbxml.Check(query) != nil {
+		fmt.Fprintln(q.w, "2")
+		return
+	}
+
+	// als query geen resultaat gaat geven, println 1
+
+	fmt.Fprintln(q.w, "0")
+}
+
 // TAB: xpath
 func xpath(q *Context) {
 
@@ -283,6 +303,7 @@ func html_xpath_header(q *Context) {
 
   var result;
   var at1, at2, at3;
+  var xquery;
   window._fn = {
     update: function(data) {
       result.html(data);
@@ -309,13 +330,52 @@ func html_xpath_header(q *Context) {
       at3.selectedIndex = getCookie("xpattr3");
     } catch (e) { }
   }
+
+  var lastcall;
+  var timer;
+  function qcheck() {
+    try {
+      window.clearTimeout(timer);
+    } catch (e) { }
+    timer = window.setTimeout(function(){qcheckdo()}, 200);
+  }
+  function qcheckdo() {
+    if (lastcall) {
+      try {
+        lastcall.abort();
+      }
+      catch(err) {}
+    }
+    lastcall = $.ajax("xpathcheck?" + xquery.serialize())
+      .done(function(data) {
+        r = parseInt(data);
+        if (r == 0) {
+          xquery.css('background-color', '#ffffff');
+        } else if (r == 1) {
+          xquery.css('background-color', '#ffff80');
+        } else if (r == 2) {
+          xquery.css('background-color', '#ffa0a0');
+        }
+      }).fail(function(e) {
+          xquery.setStyle('background-color', '#d0d0d0');
+      })
+      .always(function() {
+        lastcall = null;
+      });
+  }
+
   $(document).ready(function() {
     result = $('#result');
-    var f = document.forms["xstatsform"];
-    at1 = f["attr1"];
-    at2 = f["attr2"];
-    at3 = f["attr3"];
-    setForm();
+    try {
+      var f = document.forms["xstatsform"];
+      at1 = f["attr1"];
+      at2 = f["attr2"];
+      at3 = f["attr3"];
+      setForm();
+    } catch (e) {}
+    xquery = $('#xquery');
+    xquery.on('keyup', qcheck);
+    qcheckdo();
   });
   //--></script>
 `)
@@ -349,7 +409,7 @@ corpus: <select name="db">
 	}
 	fmt.Fprintf(q.w, `<p>
 		XPATH query:<br>
-		<textarea name="xpath" rows="6" cols="80">%s</textarea>
+		<textarea name="xpath" rows="6" cols="80" id="xquery">%s</textarea>
 		`, html.EscapeString(first(q.r, "xpath")))
 	fmt.Fprint(q.w, `<p>
 		   <input type="submit" value="Zoeken">
