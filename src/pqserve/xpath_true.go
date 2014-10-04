@@ -510,7 +510,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		fmt.Fprint(q.w, " ")
 	}
 
-	fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\">&nbsp;&#9741;&nbsp;</a>\n",
+	fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",
 		prefix,
 		html.EscapeString(dactfile),
 		html.EscapeString(filename),

@@ -44,6 +44,12 @@ a {
 a:hover {
     text-decoration: underline;
 }
+a.ico {
+    padding: 0px .5em;
+}
+a.ico:hover {
+    text-decoration: none;
+}
 #stats, #statsrel, #xstats {
    background:#e0e0e0;
    padding: 10px;

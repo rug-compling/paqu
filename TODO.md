@@ -22,8 +22,6 @@ Zie ook: TODO in diverse bestanden
     - pqserve: alle javascript onderbrengen in één apart bestand
     - Organisatie + documentatie
   - pqserve:
-    - link naar boom als svg-plaatje (huidig teken wordt niet in alle
-      browsers weergegeven)
     - XPath
       - macro's
       - tijdens intypen van query matchende haken laten zien
