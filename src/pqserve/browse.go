@@ -151,8 +151,8 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 		zinnen = append(zinnen, ZinArchFile{zin: sent, arch: arch, file: file})
 	}
 
-	fmt.Fprintln(q.w, "<p>\n<table class=\"corpora\">\n<tr><th>Label<th>Zin</tr>")
-	for i, zin := range zinnen {
+	fmt.Fprintln(q.w, "<p>\n<dl>")
+	for _, zin := range zinnen {
 		rows, err := q.db.Query(
 			fmt.Sprintf(
 				"SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, id, zin.file, zin.arch))
@@ -161,24 +161,14 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 			rows.Scan(&lbl)
 			rows.Close()
 
-			eo := "even"
-			if i%2 == 0 {
-				eo = "odd"
-			}
-			if i == 0 {
-				eo += " first"
-			}
-			if i == len(zinnen)-1 {
-				eo += " last"
-			}
-			fmt.Fprintf(q.w, "<tr class=\"%s\"><td class=\"first odd\"><a href=\"tree?db=%s&amp;arch=%d&amp;file=%d\">%s</a><td class=\"even\">%s\n",
-				eo, id, zin.arch, zin.file,
+			fmt.Fprintf(q.w, "<dt><a href=\"tree?db=%s&amp;arch=%d&amp;file=%d\">%s</a>\n<dd>%s\n",
+				id, zin.arch, zin.file,
 				html.EscapeString(lbl), html.EscapeString(zin.zin))
 		} else {
 			doErr(q, fmt.Errorf("Database error"))
 		}
 	}
-	fmt.Fprint(q.w, "</table>\n<p>\n")
+	fmt.Fprint(q.w, "</dl>\n<p>\n")
 
 	// Links naar volgende en vorige pagina's met resultaten
 	qs := fmt.Sprintf("id=%s&amp;lbl=%s", urlencode(id), urlencode(lbl))
