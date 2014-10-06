@@ -419,6 +419,7 @@ func html_xpath_header(q *Context) {
     xquery.on('keyup', qcheck);
     qcheckdo();
   });
+
   //--></script>
 `)
 }
@@ -458,7 +459,100 @@ corpus: <select name="db">
 		   <input type="button" value="Wissen" onClick="javascript:formclear(form)">
 		   <input type="reset" value="Reset" onClick="javascript:qcheck()">
 	   </form>
-	   `)
+<script type="text/javascript" src="jquery.textcomplete.js"></script>
+<script type="text/javascript"><!--
+var begin = ['//node', '/alpino_ds/node'];
+var other = ['/node',
+        "@aform",
+        "@begin",
+        "@buiging",
+        "@case",
+        "@cat",
+        "@comparative",
+        "@conjtype",
+        "@def",
+        "@dial",
+        "@end",
+        "@frame",
+        "@gen",
+        "@genus",
+        "@getal",
+        "@getal-n",
+        "@graad",
+        "@id",
+        "@index",
+        "@infl",
+        "@lcat",
+        "@lemma",
+        "@lwtype",
+        "@mwu_root",
+        "@mwu_sense",
+        "@naamval",
+        "@neclass",
+        "@npagr",
+        "@ntype",
+        "@num",
+        "@numtype",
+        "@pb",
+        "@pdtype",
+        "@per",
+        "@persoon",
+        "@pos",
+        "@positie",
+        "@postag",
+        "@pt",
+        "@pvagr",
+        "@pvtijd",
+        "@refl",
+        "@rel",
+        "@root",
+        "@sc",
+        "@sense",
+        "@special",
+        "@spectype",
+        "@status",
+        "@tense",
+        "@vform",
+        "@vwtype",
+        "@vztype",
+        "@wh",
+        "@wk",
+        "@word",
+        "@wvorm"];
+
+    $('#xquery').textcomplete([
+	{
+            match: /^(\/\/?[_a-z]*)$/,
+            search: function (term, callback) {
+                callback($.map(begin, function (e) {
+                    return e.indexOf(term) === 0 ? e : null;
+                }));
+            },
+            replace: function (value) {
+                return value + ' ';
+            },
+	    index: 1
+        },
+	{
+	    match: /([\/@][-_a-z]*)$/,
+            search: function (term, callback) {
+                callback($.map(other, function (e) {
+                    return e.indexOf(term) === 0 ? e : null;
+                }));
+            },
+            replace: function (value) {
+                return value + ' ';
+            },
+	    index: 1
+        }
+    ],
+    {
+        maxCount: 100,
+        debounce: 100,
+    });
+
+//--></script>
+`)
 
 	return
 }

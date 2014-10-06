@@ -49,6 +49,12 @@ func static_jquery_js(q *Context) {
 	fmt.Fprint(q.w, file__jquery__js)
 }
 
+func static_jquery_textcomplete_js(q *Context) {
+	contentType(q, "application/javascript")
+	cache(q)
+	fmt.Fprint(q.w, file__jquery__textcomplete__js)
+}
+
 func static_paqu_css(q *Context) {
 	contentType(q, "text/css")
 	cache(q)

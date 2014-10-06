@@ -7,6 +7,7 @@ DEPS = \
 	favicon.ico \
 	info.html \
 	jquery.js \
+	jquery.textcomplete.js \
 	paqu.css \
 	paqu.png \
 	robots.txt \

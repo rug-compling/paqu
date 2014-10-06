@@ -166,6 +166,7 @@ func main() {
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)
 	handleStatic("jquery.js", static_jquery_js)
+	handleStatic("jquery.textcomplete.js", static_jquery_textcomplete_js)
 	handleStatic("leeg.html", static_leeg_html)
 	handleStatic("paqu.css", static_paqu_css)
 	handleStatic("paqu.png", static_paqu_png)
