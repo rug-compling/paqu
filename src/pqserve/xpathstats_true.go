@@ -649,7 +649,7 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 	}
 
 	if download {
-		fmt.Fprint(q.w, "aantal")
+		fmt.Fprint(q.w, "aantal\tperc.")
 	} else {
 		fmt.Fprint(&buf, "<table class=\"breed\">\n<tr class=\"odd\"><th><th>")
 	}

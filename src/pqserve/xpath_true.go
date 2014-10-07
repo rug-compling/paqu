@@ -543,7 +543,30 @@ var other = ['/node',
             replace: function (value) {
                 return value + ' ';
             },
-	    index: 1
+	    index: 1,
+        context: function(text) {
+                var state = 0;
+                var i, j;
+                for (i = 0, j = text.length; i < j; i++) {
+                    var c = text.charAt(i);
+                    if (state == 0) {
+                       if (c == "'") {
+                           state = 1;
+                       } else if (c == '"') {
+                           state = 2;
+                       }
+                    } else if (state == 1) {
+                       if (c == "'") {
+                           state = 0;
+                       }
+                    } else {
+                       if (c == '"') {
+                           state = 0;
+                       }
+                    }
+                }
+                return state == 0;
+            }
         }
     ],
     {
