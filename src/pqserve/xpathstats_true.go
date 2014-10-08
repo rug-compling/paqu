@@ -343,7 +343,7 @@ func getFullAttr(attr string, n, top *Node) string {
 
 func updateText(q *Context, s string) {
 	fmt.Fprintf(q.w, `<script type="text/javascript">
-window.parent._fn.update(%q);
+f(%q);
 </script>
 `, s)
 	if ff, ok := q.w.(http.Flusher); ok {
@@ -377,6 +377,11 @@ func xpathstats(q *Context) {
 <html>
 <head>
 <title></title>
+<script type="text/javascript"><!--
+function f(s) {
+    window.parent._fn.update(s);
+}
+//--></script>
 </head>
 <body">
 `)

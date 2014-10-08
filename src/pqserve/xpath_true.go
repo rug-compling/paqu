@@ -121,12 +121,13 @@ func xpath(q *Context) {
 	now := time.Now()
 
 	var owner string
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	var nlines uint64
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if doErr(q, err) {
 		return
 	}
 	for rows.Next() {
-		if doErr(q, rows.Scan(&owner)) {
+		if doErr(q, rows.Scan(&owner, &nlines)) {
 			rows.Close()
 			return
 		}
@@ -165,7 +166,7 @@ func xpath(q *Context) {
 		return
 	}
 
-	fmt.Fprintln(q.w, "<img src=\"busy.gif\" id=\"loading\">")
+	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\"><p><span></span></div>")
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
@@ -178,12 +179,23 @@ func xpath(q *Context) {
 	xmlall := ""
 	xmlparts := make([]string, 0)
 	query := first(q.r, "xpath")
+	var seen uint64
 	for _, dactfile := range dactfiles {
 		select {
 		case <-chClose:
 			logerr(errConnectionClosed)
 			return
 		default:
+		}
+
+		if seen > 0 {
+			fmt.Fprintf(q.w, `<script type="text/javascript"><!--
+$('#loading span').html('%d%%');
+//--></script>
+`, seen*100/nlines)
+			if ff, ok := q.w.(http.Flusher); ok {
+				ff.Flush()
+			}
 		}
 
 		db, err := dbxml.Open(dactfile)
@@ -241,6 +253,9 @@ func xpath(q *Context) {
 		}
 		if err := docs.Error(); err != nil {
 			logerr(err)
+		}
+		if n, err := db.Size(); err == nil {
+			seen += n
 		}
 		db.Close()
 		done <- true

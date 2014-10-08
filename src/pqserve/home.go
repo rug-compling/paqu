@@ -79,9 +79,11 @@ func home(q *Context) {
 		return
 	default:
 	}
+
+	// Om resultaten te krijgen die gegarandeerd correct zijn zou je "ORDER BY 1,2" moeten toevoegen, maar
+	// dat maakt het veel trager (vooral als er heel veel hits zijn), en zo lijkt het ook goed te werken.
 	rows, err := timeoutQuery(q, chClose,
-		// "SELECT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" GROUP BY `arch`,`file` LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
-		"SELECT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
+		"SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
 	if doErr(q, err) {
 		busyClear(q)
 		return

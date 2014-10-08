@@ -87,8 +87,8 @@ window.parent._fn.started();
 		return
 	default:
 	}
-	rows, err := timeoutQuery(q, chClose, "SELECT 1 FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+
-		query+" GROUP BY `arch`,`file`")
+	rows, err := timeoutQuery(q, chClose, "SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+
+		query)
 	if err != nil {
 		updateError(q, err, !download)
 		logerr(err)
