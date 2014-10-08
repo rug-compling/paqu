@@ -120,6 +120,8 @@ var (
 	memstats runtime.MemStats
 
 	Cfg Config
+
+	utfRE = regexp.MustCompile("[^\001-\uFFFF]")
 )
 
 //. Main
@@ -579,6 +581,9 @@ Opties:
 
 // Verwerk een enkel xml-bestand
 func do_data(archname, filename string, data []byte) {
+
+	// MySQL tot versie 5.5.3 kan niet met tekens boven U+FFFF overweg
+	data = utfRE.ReplaceAllLiteral(data, []byte("?"))
 
 	arch := -1
 	if archname != "" {
