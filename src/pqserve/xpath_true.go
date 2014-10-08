@@ -455,10 +455,10 @@ corpus: <select name="db">
 		<textarea name="xpath" rows="6" cols="80" id="xquery">%s</textarea>
 		`, html.EscapeString(first(q.r, "xpath")))
 	fmt.Fprint(q.w, `<p>
-		   <input type="submit" value="Zoeken">
-		   <input type="button" value="Wissen" onClick="javascript:formclear(form)">
-		   <input type="reset" value="Reset" onClick="javascript:qcheck()">
-	   </form>
+           <input type="submit" value="Zoeken">
+           <input type="button" value="Wissen" onClick="javascript:formclear(form)">
+           <input type="reset" value="Reset" onClick="javascript:qcheck()">
+       </form>
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node'];
@@ -520,59 +520,115 @@ var other = ['/node',
         "@word",
         "@wvorm"];
 
-    $('#xquery').textcomplete([
-	{
-            match: /^(\/\/?[_a-z]*)$/,
-            search: function (term, callback) {
-                callback($.map(begin, function (e) {
-                    return e.indexOf(term) === 0 ? e : null;
-                }));
-            },
-            replace: function (value) {
-                return value + ' ';
-            },
-	    index: 1
-        },
-	{
-	    match: /([\/@][-_a-z]*)$/,
-            search: function (term, callback) {
-                callback($.map(other, function (e) {
-                    return e.indexOf(term) === 0 ? e : null;
-                }));
-            },
-            replace: function (value) {
-                return value + ' ';
-            },
-	    index: 1,
-        context: function(text) {
-                var state = 0;
-                var i, j;
-                for (i = 0, j = text.length; i < j; i++) {
-                    var c = text.charAt(i);
-                    if (state == 0) {
-                       if (c == "'") {
-                           state = 1;
-                       } else if (c == '"') {
-                           state = 2;
-                       }
-                    } else if (state == 1) {
-                       if (c == "'") {
-                           state = 0;
-                       }
-                    } else {
-                       if (c == '"') {
-                           state = 0;
-                       }
-                    }
-                }
-                return state == 0;
+function outText(text) {
+    var state = 0;
+    var i, j;
+    for (i = 0, j = text.length; i < j; i++) {
+        var c = text.charAt(i);
+        if (state == 0) {
+           if (c == "'") {
+               state = 1;
+           } else if (c == '"') {
+               state = 2;
+           }
+        } else if (state == 1) {
+           if (c == "'") {
+               state = 0;
+           }
+        } else {
+           if (c == '"') {
+               state = 0;
+           }
+        }
+    }
+    return state == 0;
+}
+
+$('#xquery').textcomplete([
+{
+    match: /^(\/\/?[_a-z]*)$/,
+    search: function (term, callback) {
+        callback($.map(begin, function (e) {
+            return e.indexOf(term) === 0 ? e : null;
+        }));
+    },
+    replace: function (value) {
+        return value + ' ';
+    },
+    index: 1
+},
+{
+    match: /([\/@][-_a-z]*)$/,
+    search: function (term, callback) {
+        callback($.map(other, function (e) {
+            return e.indexOf(term) === 0 ? e : null;
+        }));
+    },
+    replace: function (value) {
+        return value + ' ';
+    },
+    index: 1,
+    context: outText
+},
+{
+    match: /^((.|\n)*[ \n'")\]])$/,
+    search: function (term, callback) {
+        var chars = [];
+        var i, j;
+        var state = 0;
+
+        for (i = 0, j = term.length; i < j; i++) {
+            var c = term.charAt(i);
+            if (state == 0) {
+               if (c == "'") {
+                   state = 1;
+               } else if (c == '"') {
+                   state = 2;
+               } else if (c == '[') {
+                   chars.unshift(']');
+               } else if (c == ']') {
+                   if (chars.length == 0 || chars[0] != ']') {
+                       callback([]);
+                       return;
+                   }
+                   chars.shift();
+               } else if (c == '(') {
+                   chars.unshift(')');
+               } else if (c == ')') {
+                   if (chars.length == 0 || chars[0] != ')') {
+                       callback([]);
+                       return;
+                   }
+                   chars.shift();
+               }
+            } else if (state == 1) {
+               if (c == "'") {
+                   state = 0;
+               }
+            } else {
+               if (c == '"') {
+                   state = 0;
+               }
             }
         }
-    ],
-    {
-        maxCount: 100,
-        debounce: 100,
-    });
+        var result = [];
+        var s = "";
+        while (chars.length > 0) {
+            s += chars.shift();
+            result.push(s);
+        }
+        callback(result);
+    },
+    index: 1,
+    replace: function (value) {
+        return "$1" + value;
+    },
+    context: outText
+}],
+{
+    maxCount: 100,
+    debounce: 100,
+});
 
 //--></script>
 `)
