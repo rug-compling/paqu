@@ -331,3 +331,8 @@ ol.xpath li {
 .dropdown-menu a:hover {
     cursor: pointer;
 }
+
+#loading {
+    position: absolute;
+    margin-left: -60px;
+}

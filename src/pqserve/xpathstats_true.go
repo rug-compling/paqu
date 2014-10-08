@@ -439,14 +439,15 @@ func xpathstats(q *Context) {
 	}
 
 	var owner string
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	var nlines uint64
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if err != nil {
 		updateError(q, err, !download)
 		logerr(err)
 		return
 	}
 	for rows.Next() {
-		if err := rows.Scan(&owner); err != nil {
+		if err := rows.Scan(&owner, &nlines); err != nil {
 			updateError(q, err, !download)
 			logerr(err)
 			rows.Close()
@@ -500,9 +501,10 @@ func xpathstats(q *Context) {
 	sums := make(map[string]int)
 	count := 0
 	tooMany := false
+	var seen uint64
 	for _, dactfile := range dactfiles {
 		if !download && time.Now().Sub(now2) > 2*time.Second {
-			xpathout(q, sums, attr, count, tooMany, now, download, false)
+			xpathout(q, sums, attr, count, tooMany, now, download, seen, nlines, false)
 			now2 = time.Now()
 		}
 		if tooMany {
@@ -547,7 +549,7 @@ func xpathstats(q *Context) {
 		}
 		for docs.Next() {
 			if !download && time.Now().Sub(now2) > 2*time.Second {
-				xpathout(q, sums, attr, count, tooMany, now, download, false)
+				xpathout(q, sums, attr, count, tooMany, now, download, seen, nlines, false)
 				now2 = time.Now()
 			}
 			alpino := Alpino_ds{}
@@ -591,6 +593,9 @@ func xpathstats(q *Context) {
 		if err := docs.Error(); err != nil {
 			logerr(err)
 		}
+		if n, err := db.Size(); err == nil {
+			seen += n
+		}
 		db.Close()
 		done <- true
 		select {
@@ -600,7 +605,7 @@ func xpathstats(q *Context) {
 		}
 	}
 
-	xpathout(q, sums, attr, count, tooMany, now, download, true)
+	xpathout(q, sums, attr, count, tooMany, now, download, 0, 0, true)
 
 	if !download {
 		fmt.Fprintln(q.w, "</body>\n</html>")
@@ -608,7 +613,7 @@ func xpathstats(q *Context) {
 
 }
 
-func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany bool, now time.Time, download bool, final bool) {
+func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
 
 	attrList := make([]*AttrItem, 0, len(sums))
 	for key, value := range sums {
@@ -630,14 +635,17 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 		f := ""
 		if !final {
 			f = `<img src="busy.gif" alt="aan het werk...">`
+			if seen > 0 {
+				f = fmt.Sprintf("%s %d%%", f, seen*100/total)
+			}
 		}
 		fmt.Fprintf(&buf, `<table>
-<tr><td>Matches:<td class="right">%s<td rowspan="2" width="50">%s
+<tr><td>Matches:<td class="right">%s<td rowspan="2" width="100">%s
 <tr><td>Combinaties:<td class="right">%s
 <tr><td>Tijd:<td colspan="2">%s
 </table>
 <p>
-`, iformat(count), f, iformat(len(attrList)), time.Now().Sub(now),
+`, iformat(count), f, iformat(len(attrList)), tijd(time.Now().Sub(now)),
 		)
 	}
 

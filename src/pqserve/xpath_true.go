@@ -118,10 +118,6 @@ func xpath(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr>")
 
-	if ff, ok := q.w.(http.Flusher); ok {
-		ff.Flush()
-	}
-
 	now := time.Now()
 
 	var owner string
@@ -169,6 +165,11 @@ func xpath(q *Context) {
 		return
 	}
 
+	fmt.Fprintln(q.w, "<img src=\"busy.gif\" id=\"loading\">")
+	if ff, ok := q.w.(http.Flusher); ok {
+		ff.Flush()
+	}
+
 	fmt.Fprintf(q.w, "<ol start=\"%d\" class=\"xpath\">\n", offset+1)
 
 	curno := 0
@@ -194,6 +195,7 @@ func xpath(q *Context) {
 		if err != nil {
 			fmt.Fprintln(q.w, "</ol>\n"+html.EscapeString(err.Error()))
 			db.Close()
+			clearLoading(q.w)
 			return
 		}
 		done := make(chan bool, 1)
@@ -214,6 +216,7 @@ func xpath(q *Context) {
 			qu.Close()
 			db.Close()
 			done <- true
+			clearLoading(q.w)
 			return
 		}
 		for docs.Next() {
@@ -255,6 +258,7 @@ func xpath(q *Context) {
 	}
 
 	fmt.Fprintln(q.w, "</ol>")
+	clearLoading(q.w)
 
 	if curno == 0 {
 		fmt.Fprintf(q.w, "geen match gevonden")
@@ -276,7 +280,7 @@ func xpath(q *Context) {
 		}
 	}
 
-	fmt.Fprintln(q.w, "<hr><small>tijd:", time.Now().Sub(now), "</small><hr>")
+	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small><hr>")
 
 	if curno == 0 {
 		html_footer(q)
@@ -722,4 +726,12 @@ func alpindex(idx int, node *Node) *Node {
 		}
 	}
 	return nil
+}
+
+func clearLoading(w http.ResponseWriter) {
+	fmt.Fprint(w, `
+<script type="text/javascript"><!--
+$('#loading').addClass('hide');
+//--></script>
+`)
 }

@@ -19,6 +19,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -291,4 +292,10 @@ func filenames2(dirname string) ([]string, error) {
 		}
 	}
 	return fnames, nil
+}
+
+var reTijd = regexp.MustCompile(`\.[0-9]+([a-z]+)$`)
+
+func tijd(t time.Duration) string {
+	return reTijd.ReplaceAllString(t.String(), "$1")
 }

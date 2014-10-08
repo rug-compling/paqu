@@ -80,7 +80,8 @@ func home(q *Context) {
 	default:
 	}
 	rows, err := timeoutQuery(q, chClose,
-		"SELECT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" GROUP BY `arch`,`file` LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
+		// "SELECT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" GROUP BY `arch`,`file` LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
+		"SELECT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
 	if doErr(q, err) {
 		busyClear(q)
 		return
@@ -279,9 +280,10 @@ func home(q *Context) {
 		}
 	}
 
-	fmt.Fprintln(q.w, "<hr><small>tijd:", time.Now().Sub(now), "</small><hr>")
+	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small><hr>")
 
 	// Links naar statistieken
+
 	fmt.Fprintf(q.w, `<p>
 		<div id="stats">
 		<div id="inner">
@@ -299,12 +301,12 @@ func home(q *Context) {
 		</div>
 		<iframe src="leeg.html" name="sframe" class="hide"></iframe>
 `,
-		urlencode(first(q.r, "word")),
-		urlencode(first(q.r, "postag")),
-		urlencode(first(q.r, "rel")),
-		urlencode(first(q.r, "hpostag")),
-		urlencode(first(q.r, "hword")),
-		urlencode(prefix))
+		html.EscapeString(first(q.r, "word")),
+		html.EscapeString(first(q.r, "postag")),
+		html.EscapeString(first(q.r, "rel")),
+		html.EscapeString(first(q.r, "hpostag")),
+		html.EscapeString(first(q.r, "hword")),
+		html.EscapeString(prefix))
 
 	fmt.Fprintf(q.w, `<p>
 		<div id="statsrel">

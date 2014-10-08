@@ -178,7 +178,7 @@ window.parent._fn.started();
 	if !download {
 		fmt.Fprintf(&buf,
 			"<hr>tijd: %s\n<p>\n<a href=\"stats?%s&amp;d=1\" target=\"_blank\">download</a>\n",
-			time.Now().Sub(now),
+			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 		updateText(q, buf.String())
 		fmt.Fprintf(q.w, `<script type="text/javascript">
@@ -373,7 +373,7 @@ func statsrel(q *Context) {
 	if !download {
 		fmt.Fprintf(q.w,
 			"<hr>tijd: %s\n<p>\n<a href=\"statsrel?%s&amp;d=1\" target=\"_blank\">download</a>\n",
-			time.Now().Sub(now),
+			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 	}
 }
