@@ -641,13 +641,13 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 		if !final {
 			f = `<img src="busy.gif" alt="aan het werk...">`
 			if seen > 0 {
-				f = fmt.Sprintf("%s %d%%", f, seen*100/total)
+				f = fmt.Sprintf("%s %.1f%%", f, float64(seen)*100/float64(total))
 			}
 		}
 		fmt.Fprintf(&buf, `<table>
-<tr><td>Matches:<td class="right">%s<td rowspan="2" width="100">%s
+<tr><td>Matches:<td class="right">%s<td rowspan="3">%s
 <tr><td>Combinaties:<td class="right">%s
-<tr><td>Tijd:<td colspan="2">%s
+<tr><td>Tijd:<td class="right">%s
 </table>
 <p>
 `, iformat(count), f, iformat(len(attrList)), tijd(time.Now().Sub(now)),

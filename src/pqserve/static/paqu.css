@@ -332,7 +332,3 @@ ol.xpath li {
     cursor: pointer;
 }
 
-#loading {
-    position: absolute;
-    margin-left: -60px;
-}

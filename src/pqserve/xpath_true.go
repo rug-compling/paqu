@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/pebbe/dbxml"
 
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -166,12 +167,12 @@ func xpath(q *Context) {
 		return
 	}
 
-	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\"><p><span></span></div>")
+	fmt.Fprintf(q.w, "<ol start=\"%d\" id=\"ol\" class=\"xpath\">\n</ol>\n", offset+1)
+
+	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\"> <span></span></div>")
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
-
-	fmt.Fprintf(q.w, "<ol start=\"%d\" class=\"xpath\">\n", offset+1)
 
 	curno := 0
 	filename := ""
@@ -190,9 +191,9 @@ func xpath(q *Context) {
 
 		if seen > 0 {
 			fmt.Fprintf(q.w, `<script type="text/javascript"><!--
-$('#loading span').html('%d%%');
+$('#loading span').html('%.1f%%');
 //--></script>
-`, seen*100/nlines)
+`, float64(seen)*100/float64(nlines))
 			if ff, ok := q.w.(http.Flusher); ok {
 				ff.Flush()
 			}
@@ -205,7 +206,7 @@ $('#loading span').html('%d%%');
 
 		qu, err := db.Prepare(query)
 		if err != nil {
-			fmt.Fprintln(q.w, "</ol>\n"+html.EscapeString(err.Error()))
+			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
 			db.Close()
 			clearLoading(q.w)
 			return
@@ -224,7 +225,7 @@ $('#loading span').html('%d%%');
 
 		docs, err := qu.Run()
 		if err != nil {
-			fmt.Fprintln(q.w, "</ol>\n"+html.EscapeString(err.Error()))
+			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
 			qu.Close()
 			db.Close()
 			done <- true
@@ -272,7 +273,6 @@ $('#loading span').html('%d%%');
 		xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 	}
 
-	fmt.Fprintln(q.w, "</ol>")
 	clearLoading(q.w)
 
 	if curno == 0 {
@@ -659,7 +659,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 	alpino := Alpino_ds{}
 	err := xml.Unmarshal([]byte(xmlall), &alpino)
 	if err != nil {
-		fmt.Fprintf(q.w, "<li>FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+		fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
 		return
 	}
 	woorden := strings.Fields(alpino.Sentence)
@@ -674,7 +674,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 `+part+`
 </alpino_ds>`), &alp)
 		if err != nil {
-			fmt.Fprintf(q.w, "<li>FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+			fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
 			return
 		}
 		if alp.Node0 != nil {
@@ -687,27 +687,34 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		}
 	}
 
-	fmt.Fprint(q.w, "<li>")
+	var buf bytes.Buffer
+
+	fmt.Fprint(&buf, "<li>")
 	l := 0
 	for i, woord := range woorden {
 		for l < lvl[i] {
 			l++
-			fmt.Fprintf(q.w, "<span class=\"c%d\">", l)
+			fmt.Fprintf(&buf, "<span class=\"c%d\">", l)
 		}
-		fmt.Fprintf(q.w, html.EscapeString(woord))
+		fmt.Fprintf(&buf, html.EscapeString(woord))
 		for l > lvl[i+1] {
 			l--
-			fmt.Fprint(q.w, "</span>")
+			fmt.Fprint(&buf, "</span>")
 		}
-		fmt.Fprint(q.w, " ")
+		fmt.Fprint(&buf, " ")
 	}
 
-	fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",
+	fmt.Fprintf(&buf, "\n<a href=\"/tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",
 		prefix,
 		html.EscapeString(dactfile),
 		html.EscapeString(filename),
 		global,
 		strings.Join(ids, ","))
+
+	fmt.Fprintf(q.w, `<script type="text/javascript"><!--
+$('ol').append(%q);
+//--></script>
+`, buf.String())
 
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
