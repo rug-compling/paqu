@@ -24,8 +24,4 @@ Zie ook: TODO in diverse bestanden
   - pqserve:
     - XPath
       - macro's
-      - tijdens intypen van query matchende haken laten zien
-    - tooltip
-      - jQuery gebruiken om het in alle browsers te laten werken (huidige
-        versie werkt in IE niet op breedte van het scherm)
     - weergave op mobiel of tablet

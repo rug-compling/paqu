@@ -53,8 +53,8 @@ var tooltip=function(){
 	pos:function(e){
 	    var u = ie ? event.clientY + document.documentElement.scrollTop : e.pageY;
 	    var l = ie ? event.clientX + document.documentElement.scrollLeft : e.pageX;
-	    var w = window.innerWidth;
-	    var o = window.pageXOffset;
+	    var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+	    var o = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 	    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 	    var top = u - h;
 	    if (top < scroll + 10) {
