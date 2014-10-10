@@ -174,6 +174,7 @@ func xpath(q *Context) {
 		ff.Flush()
 	}
 
+	found := false
 	curno := 0
 	filename := ""
 	curdac := ""
@@ -234,7 +235,7 @@ $('#loading span').html('%.1f%%');
 		for docs.Next() {
 			name := docs.Name()
 			if name != filename {
-				if curno > offset && curno <= offset+ZINMAX*2 {
+				if found && curno > offset && curno <= offset+ZINMAX*2 {
 					xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 					xmlparts = xmlparts[0:0]
 				}
@@ -242,6 +243,7 @@ $('#loading span').html('%.1f%%');
 				curdac = dactfile
 				filename = name
 			}
+			found = true
 			if curno > offset+ZINMAX*2 {
 				docs.Close()
 			} else {
@@ -264,12 +266,15 @@ $('#loading span').html('%.1f%%');
 			return
 		default:
 		}
+
+		if found && curno > offset && curno <= offset+ZINMAX*2 {
+			found = false
+			xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
+			xmlparts = xmlparts[0:0]
+		}
 		if curno > offset+ZINMAX*2 {
 			break
 		}
-	}
-	if curno > offset && curno <= offset+ZINMAX*2 {
-		xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 	}
 
 	clearLoading(q.w)
