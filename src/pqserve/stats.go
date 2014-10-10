@@ -65,6 +65,11 @@ func stats(q *Context) {
 <html>
 <head>
 <title></title>
+<script type="text/javascript"><!--
+function f(s) {
+    window.parent._fn.update(s);
+}
+//--></script>
 </head>
 <body">
 <script type="text/javascript">
@@ -91,6 +96,7 @@ window.parent._fn.started();
 		query)
 	if err != nil {
 		updateError(q, err, !download)
+		completed(q, download)
 		logerr(err)
 		return
 	}
@@ -100,6 +106,7 @@ window.parent._fn.started();
 	}
 	if err != nil {
 		updateError(q, err, !download)
+		completed(q, download)
 		logerr(err)
 		return
 	}
@@ -138,6 +145,7 @@ window.parent._fn.started();
 			"_deprel` WHERE "+query+" GROUP BY `"+ww+"` COLLATE 'utf8_bin' ORDER BY 1 DESC, 2"+limit)
 		if err != nil {
 			updateError(q, err, !download)
+			completed(q, download)
 			logerr(err)
 			return
 		}
@@ -145,6 +153,7 @@ window.parent._fn.started();
 			err := rows.Scan(&j, &s)
 			if err != nil {
 				updateError(q, err, !download)
+				completed(q, download)
 				logerr(err)
 				return
 			}
@@ -162,6 +171,7 @@ window.parent._fn.started();
 		err = rows.Err()
 		if err != nil {
 			updateError(q, err, !download)
+			completed(q, download)
 			logerr(err)
 			return
 		}
@@ -181,11 +191,18 @@ window.parent._fn.started();
 			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 		updateText(q, buf.String())
-		fmt.Fprintf(q.w, `<script type="text/javascript">
+		completed(q, download)
+	}
+}
+
+func completed(q *Context, download bool) {
+	if download {
+		return
+	}
+	fmt.Fprintf(q.w, `<script type="text/javascript">
 window.parent._fn.completed();
 </script>
 `)
-	}
 }
 
 func statsrel(q *Context) {

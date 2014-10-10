@@ -226,7 +226,6 @@ $('#loading span').html('%.1f%%');
 		docs, err := qu.Run()
 		if err != nil {
 			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
-			qu.Close()
 			db.Close()
 			done <- true
 			clearLoading(q.w)
