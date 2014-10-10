@@ -25,9 +25,11 @@ import (
 
 // A database connection.
 type Db struct {
-	opened bool
-	db     C.c_dbxml
-	lock   sync.Mutex
+	opened  bool
+	db      C.c_dbxml
+	lock    sync.Mutex
+	queries map[uint64]*Query
+	counter uint64
 }
 
 // An iterator over xml documents in the database.
@@ -41,6 +43,8 @@ type Docs struct {
 
 // A prepared query that can be run multiple times and interrupted while running.
 type Query struct {
+	db     *Db
+	id     uint64
 	opened bool
 	query  C.c_dbxml_query
 	lock   sync.Mutex
@@ -59,7 +63,9 @@ var (
 //
 // Call db.Close() to ensure all write operations to the database are finished, before terminating the program.
 func Open(filename string) (*Db, error) {
-	db := &Db{}
+	db := &Db{
+		queries: make(map[uint64]*Query),
+	}
 	cs := C.CString(filename)
 	defer C.free(unsafe.Pointer(cs))
 	db.db = C.c_dbxml_open(cs)
@@ -83,6 +89,14 @@ func (db *Db) Close() {
 	db.lock.Lock()
 	defer db.lock.Unlock()
 	if db.opened {
+		// Collect all the keys before starting to close, because closing will change the hash
+		keys := make([]uint64, 0, len(db.queries))
+		for key := range db.queries {
+			keys = append(keys, key)
+		}
+		for _, key := range keys {
+			db.queries[key].Close()
+		}
 		C.c_dbxml_free(db.db)
 		db.opened = false
 	}
@@ -296,8 +310,12 @@ func (db *Db) Prepare(query string) (*Query, error) {
 		C.c_dbxml_query_free(q.query)
 		return q, errors.New(C.GoString(C.c_dbxml_get_prepared_errstring(q.query)))
 	}
-	runtime.SetFinalizer(q, (*Query).Close)
+	// No finalizer: query will be closed when database gets closed
 	q.opened = true
+	q.db = db
+	q.id = db.counter
+	db.counter++
+	db.queries[q.id] = q
 	return q, nil
 }
 
@@ -414,12 +432,14 @@ func (docs *Docs) Error() error {
 
 // Close a query that was created with Prepare()
 //
-// This is called automaticly by the garbage collector.
+// This is called automaticly when the database is closed.
 func (query *Query) Close() {
 	query.lock.Lock()
 	defer query.lock.Unlock()
 	if query.opened {
 		C.c_dbxml_query_free(query.query)
+		delete(query.db.queries, query.id)
+		query.db = nil
 		query.opened = false
 	}
 }
