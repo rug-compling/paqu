@@ -172,7 +172,7 @@ Opties:
  -i : geen tabel van woord naar lemmas aanmaken
  -s : status niet bijwerken als klaar
  -p : prefix die van bestandnaam wordt gestript voor label
- -d : bestandnaam decoderen voor labal
+ -d : bestandnaam decoderen voor label
 
   id:
   description:
