@@ -582,7 +582,7 @@ Opties:
 
 func utfFunc(b []byte) []byte {
 	u, _ := utf8.DecodeRune(b)
-	return []byte(fmt.Sprintf("&lt;U+%X&gt;", u))
+	return []byte(fmt.Sprintf("&amp;#%d;", u))
 }
 
 // Verwerk een enkel xml-bestand

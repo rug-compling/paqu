@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // TAB: begin
@@ -223,7 +225,7 @@ func home(q *Context) {
 			} else if idx[j]&2 != 0 {
 				fmt.Fprint(q.w, GREEN)
 			}
-			fmt.Fprint(q.w, html.EscapeString(word))
+			fmt.Fprint(q.w, html.EscapeString(unHigh(word)))
 			if idx[j]&4 != 0 {
 				fmt.Fprint(q.w, "</span>")
 			}
@@ -246,13 +248,16 @@ func home(q *Context) {
 		// HTML-uitvoer van alle matchende dependency relations voor huidige zin
 		seen := make(map[string]bool)
 		for _, item := range zin.items {
-			s := fmt.Sprintf("%s:%s — %s — %s:%s", item.word, item.postag, item.rel, item.hword, item.hpostag)
+			s := fmt.Sprintf("%s:%s — %s — %s:%s",
+				html.EscapeString(unHigh(item.word)), item.postag,
+				item.rel,
+				html.EscapeString(unHigh(item.hword)), item.hpostag)
 			if seen[s] {
 				continue
 			}
 			seen[s] = true
 			qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, prefix)
-			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"/?%s\">%s</a>\n", qq, html.EscapeString(s))
+			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"/?%s\">%s</a>\n", qq, html.EscapeString(unHigh(s)))
 		}
 
 		// Einde zin + dependency relations
@@ -371,11 +376,11 @@ func get_path(zin *Sentence, idx int, mark map[string]bool) {
 func make_query_string(word, postag, rel, hpostag, hword, db string) string {
 	return fmt.Sprintf(
 		"word=%s&amp;postag=%s&amp;rel=%s&amp;hpostag=%s&amp;hword=%s&amp;db=%s",
-		urlencode(word),
+		urlencode(unHigh(word)),
 		urlencode(postag),
 		urlencode(rel),
 		urlencode(hpostag),
-		urlencode(hword),
+		urlencode(unHigh(hword)),
 		urlencode(db))
 }
 
@@ -638,4 +643,27 @@ func busyClear(q *Context) {
 $('#busy1').addClass('hide');
 //--></script>
 `)
+}
+
+var (
+	reUnHigh  = regexp.MustCompile("&#[0-9]+;")
+	reSetHigh = regexp.MustCompile("[^\001-\uFFFF]")
+)
+
+func unHighFunc(s string) string {
+	c, _ := strconv.Atoi(s[2 : len(s)-1])
+	return fmt.Sprintf("%c", c)
+}
+
+func setHighFunc(s string) string {
+	u, _ := utf8.DecodeRuneInString(s)
+	return fmt.Sprintf("&#%d;", u)
+}
+
+func unHigh(s string) string {
+	return reUnHigh.ReplaceAllStringFunc(s, unHighFunc)
+}
+
+func setHigh(s string) string {
+	return reSetHigh.ReplaceAllStringFunc(s, setHighFunc)
 }

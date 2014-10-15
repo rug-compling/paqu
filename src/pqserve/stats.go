@@ -160,6 +160,7 @@ window.parent._fn.started();
 			if s == "" {
 				s = "\"\""
 			}
+			s = unHigh(s)
 			if download {
 				fmt.Fprintf(q.w, "%d\t%s\n", j, s)
 			} else {
@@ -333,7 +334,7 @@ func statsrel(q *Context) {
 			}
 		}
 		for i, e := range fields {
-			value := *(e.(*string))
+			value := unHigh(*(e.(*string)))
 			if !download && n > WRDMAX {
 				value = "..."
 			}

@@ -16,7 +16,7 @@ func makeQuery(q *Context, prefix string, chClose <-chan bool) (string, error) {
 	parts := make([]string, 0, 6)
 	for _, p := range []string{"", "h"} {
 		if first(q.r, p+"word") != "" {
-			wrd := first(q.r, p+"word")
+			wrd := setHigh(first(q.r, p+"word"))
 			if wrd[0] == '+' {
 				parts = append(parts, fmt.Sprintf("`"+p+"lemma` = %q", wrd[1:]))
 			} else if wrd[0] == '@' {
