@@ -223,7 +223,7 @@ func home(q *Context) {
 			} else if idx[j]&2 != 0 {
 				fmt.Fprint(q.w, GREEN)
 			}
-			fmt.Fprint(q.w, word)
+			fmt.Fprint(q.w, html.EscapeString(word))
 			if idx[j]&4 != 0 {
 				fmt.Fprint(q.w, "</span>")
 			}

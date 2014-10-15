@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 //. Types
@@ -579,11 +580,16 @@ Opties:
 
 //. Verwerking
 
+func utfFunc(b []byte) []byte {
+	u, _ := utf8.DecodeRune(b)
+	return []byte(fmt.Sprintf("&lt;U+%X&gt;", u))
+}
+
 // Verwerk een enkel xml-bestand
 func do_data(archname, filename string, data []byte) {
 
 	// MySQL tot versie 5.5.3 kan niet met tekens boven U+FFFF overweg
-	data = utfRE.ReplaceAllLiteral(data, []byte("?"))
+	data = utfRE.ReplaceAllFunc(data, utfFunc)
 
 	arch := -1
 	if archname != "" {
