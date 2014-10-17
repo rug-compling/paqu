@@ -345,17 +345,17 @@ func statsrel(q *Context) {
 						s := *fields[j].(*string)
 						switch cols[j] {
 						case "word":
-							qword = urlencode("=" + s)
+							qword = urlencode("=" + unHigh(s))
 						case "lemma":
-							qword = urlencode("+" + s)
+							qword = urlencode("+" + unHigh(s))
 						case "postag":
 							qpostag = urlencode(s)
 						case "rel":
 							qrel = urlencode(s)
 						case "hword":
-							qhword = urlencode("=" + s)
+							qhword = urlencode("=" + unHigh(s))
 						case "hlemma":
-							qhword = urlencode("+" + s)
+							qhword = urlencode("+" + unHigh(s))
 						case "hpostag":
 							qhpostag = urlencode(s)
 							if qhpostag == "" {
