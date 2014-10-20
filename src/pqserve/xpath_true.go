@@ -543,6 +543,9 @@ var other = ['/node',
         "@word",
         "@wvorm"];
 
+// TODO: fill this list with actual data
+var macros = ["qwerty", "abc", "xyz", "test"];
+
 function outText(text) {
     var state = 0;
     var i, j;
@@ -565,6 +568,17 @@ function outText(text) {
         }
     }
     return state == 0;
+}
+
+function inMacro(text) {
+    var state = false;
+    var i, j;
+    for (i = 0, j = text.length; i < j; i++) {
+        if (text.charAt(i) == "%") {
+            state = !state;
+        }
+    }
+    return state;
 }
 
 $('#xquery').textcomplete([
@@ -592,6 +606,19 @@ $('#xquery').textcomplete([
     },
     index: 1,
     context: outText
+},
+{
+    match: /%(|[a-zA-Z][_a-zA-Z0-9]*)$/,
+    search: function (term, callback) {
+        callback($.map(macros, function (e) {
+            return e.indexOf(term) === 0 ? e : null;
+        }));
+    },
+    replace: function (value) {
+        return '%' + value + '% ';
+    },
+    index: 1,
+    context: inMacro
 },
 {
     match: /^((.|\n)*[ \n'")\]])$/,
