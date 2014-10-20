@@ -26,7 +26,10 @@ Zie ook: TODO in diverse bestanden
     - XPath
       - macro's
     - weergave op mobiel of tablet
-
+  - programma tags.go toevoegen
+    - kopiëren uit /net/aistaff/alfa/lassy
+    - aanpassen
+	- documentatie
 
 ## Gebruik/codering van labels ##
 
