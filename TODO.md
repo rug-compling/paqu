@@ -11,7 +11,6 @@ Zie ook: TODO in diverse bestanden
     - Introtekst op hoofdpagina
     - Tekst achter *Meer info...*
     - Helptekst voor pagina *XPath*
-    - Helptekst voor pagina *Mijn corpora*
   - Interface
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - Logo + balk wijzigen

@@ -258,28 +258,52 @@ function rm(idx) {
 	fmt.Fprintln(q.w, `
 <div class="submenu a9999">
 <div class="corpushelp">
-Soort document
+Keuzes voor het soort document
 <p>
 <dl>
 <dt>Automatisch bepaald
-<dd>TODO
+<dd>Een van onderstaande formaten wordt gedetecteerd. Dit gaat niet altijd goed. Kies in dat geval zelf het formaat.
 <dt>Doorlopende tekst
-<dd>TODO
+<dd>Een bestand met platte tekst, met zinnen die doorlopen over regeleindes. Voorbeeld:
+<pre>
+  Dit is de eerste zin. Dit is
+  de tweede zin. Dit is zin nummer drie.
+</pre>
 <dt>Een zin per regel
-<dd>TODO
+<dd>Een bestand met platte tekst, met één zinper regel. Voorbeeld:
+<pre>
+  Dit is de eerste zin.
+  Dit is de tweede zin.
+</pre>
 <dt>Een zin per regel, met labels
-<dd>TODO
+<dd>Als boven, met labels toegevoegd. Label wordt van zin gescheiden door verticale streep, zonder spaties aan weerszijde. Voorbeeld:
+<pre>
+  zin 1|Dit is de eerste zin.
+  zin 2|Dit is de tweede zin.
+</pre>
 <dt>Een zin per regel, getokeniseerd
-<dd>TODO
+<dd>Tekst die al getokeniseerd is, één zin per regel. Voorbeeld:
+<pre>
+  Dit is de eerste zin .
+  Dit is de tweede zin .
+</pre>
+Als tekst al getokeniseerd is worden sommige tekens speciaal behandeld. Zie:
+<a href="http://www.let.rug.nl/vannoord/alp/Alpino/AlpinoUserGuide.html#_special_symbols_in_the_input" target="_blank" class="normal">Special
+symbols in the input</a>.
 <dt>Een zin per regel, met labels, getokeniseerd
-<dd>TODO
+<dd>Tekst die al getokeniseerd is, en waar labels aan de zinnen is toegevoegd. Voorbeeld:
+<pre>
+  zin 1|Dit is de eerste zin .
+  zin 2|Dit is de tweede zin .
+</pre>
 <dt>Alpino XML-bestanden in zipfile
-<dd>TODO
+<dd>XML-bestanden met één door Alpino geparste zin per bestand, samengevoegd in een zip-bestand.
 `)
 	if has_dbxml {
 		fmt.Fprintln(q.w, `
 <dt>Dact-bestand
-<dd>TODO
+<dd>Een bestand in het DbXML-formaat, waarin Alpino XML-bestanden zijn opgeslagen. Dit formaat wordt onder andere gebruikt door het programma
+<a href="http://rug-compling.github.io/dact/" target="_blank" class="normal">dact</a>.
 `)
 	}
 	fmt.Fprintln(q.w, `
@@ -302,7 +326,7 @@ Soort document
 	Upload document:<br>
 	<input type="file" name="data">
         <p>
-        Soort document:<br>
+        Soort document (<a href="javascript:void(0)" onclick="javascript:menu(9999)">uitleg</a>):<br>
 	<select name="how">
 	  <option value="auto">Automatisch bepaald</option>
 	  <option value="run">Doorlopende tekst</option>
@@ -316,7 +340,7 @@ Soort document
 		fmt.Fprintln(q.w, "<option value=\"dact\">Dact-bestand</option>")
 	}
 	fmt.Fprint(q.w, `
-	</select> <b><a href="javascript:void(0)" title=" help " onclick="javascript:menu(9999)">?</a></b>
+	</select>
       <p>
 	<input type="submit">
     </form>
