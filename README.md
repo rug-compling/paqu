@@ -40,8 +40,14 @@ Je hebt een account op een MySQL-server nodig.
 
 Van Graphviz heb je de library's en de headers nodig. Op Debian worden
 die geleverd door het pakket `graphviz-dev` of `libgraphviz-dev`.
-Misschien is die versie te oud (TODO: welke versie is nodig?). Dan kun
-je het downloaden van http://www.graphviz.org/
+Misschien is die versie te oud. Als je een compileerfout krijgt moet je
+een nieuwere versie hebben. Die kun je downloaden van
+http://www.graphviz.org/
+
+Voor de juiste weergave in de labels van bomen, van letters met een code
+boven de U+FFFF (zeldzaam, maar komt voor in Lassy Large, bijv: 𐎠𐎼𐎫𐎧𐏁𐏂𐎠)
+heb je minimaal versie 2.36.0 nodig. Vind je dit niet belangrijk, dan
+kun je een oudere versie gebruiken.
 
 ### DbXML: Oracle Berkeley DB XML ###
 
