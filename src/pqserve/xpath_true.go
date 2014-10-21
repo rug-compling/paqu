@@ -463,31 +463,18 @@ func html_xpath_header(q *Context) {
       $('#macrosave').attr("disabled", "disabled");
   }
 
-  function opslaan() {
-    var data = "--iuhwe874fhiuehwifu38er7hidvh89tr\nContent-Disposition: form-data; name=\"macrotext\"\n\n" +
-        $('#macrotext').val() + "\n--iuhwe874fhiuehwifu38er7hidvh89tr\n";
-    $.ajax({
-      url: "savemacros",
-      type: "post",
-      contentType: "multipart/form-data; boundary=iuhwe874fhiuehwifu38er7hidvh89tr",
-      data: data,
-      dataType: "json",
-      success: function(data) {
-        if (data.err == "") {
-            $('#macromsg').addClass('hide');
-            $('#macrotext').val(data.macros);
-            $('#macrotext').text(data.macros);
-            macros = data.keys;
-        } else {
-            $('#macromsg').removeClass('hide').text("Fout: " + data.err);
-        }
-        disableSave();
-      },
-      error: function(jqxhr, textStatus, errorThrown) {
-        $('#macromsg').removeClass('hide').text("Fout: " + errorThrown);
-        disableSave();
+  window._fn = {
+    update: function(data) {
+      if (data.err == "") {
+          $('#macromsg').addClass('hide');
+          $('#macrotext').val(data.macros);
+          $('#macrotext').text(data.macros);
+          macros = data.keys;
+      } else {
+          $('#macromsg').removeClass('hide').text("Fout: " + data.err);
       }
-    });
+      disableSave();
+    }
   }
 
   $(document).ready(function() {
@@ -506,6 +493,13 @@ func html_xpath_header(q *Context) {
     $('#sluitmacro').on('click', sluitMacro);
     $('#macroreset').on('click', disableSave);
     $('#macrotext').on('keyup', enableSave);
+    $('#macrofilename').on('change', function() {
+        if ($('#macrofilename').val() == "") {
+          $('#macrofilesave').attr('disabled', 'disabled');
+        } else {
+          $('#macrofilesave').removeAttr('disabled');
+        }
+    });
   });
 
   //--></script>
@@ -545,15 +539,20 @@ func html_xpath_form(q *Context) (has_query bool) {
 <div class="hide warning" id="macromsg">
 </div>
 <p>
-<form action="javascript:void(0)" onsubmit="javascript:opslaan()" id="macroform" name="macroform">
-<textarea rows="6" cols="80" id="macrotext">%s</textarea>
+<form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">
+<input type="submit" value="Macro's uploaden &rarr;" id="macrofilesave" disabled="disabled">
+<input type="file" id="macrofilename" value="Bestand" name="macrotext" id="macrofilename">
+</form>
 <p>
+<form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">
+<textarea rows="6" cols="80" id="macrotext" name="macrotext">%s</textarea><br>
 <input type="submit" value="Macro's opslaan" id="macrosave" disabled="disabled">
 <input type="reset" value="Reset" id="macroreset">
 </form>
 <p>
 <hr>
 </div>
+<iframe src="leeg.html" name="hiddenframe" class="hide"></iframe>
 <p>
 `, html.EscapeString(macros))
 	}

@@ -109,6 +109,19 @@ func first(r *http.Request, opt string) string {
 }
 
 func firstf(form *multipart.Form, opt string) string {
+	if len(form.File[opt]) > 0 {
+		file, err := form.File[opt][0].Open()
+		if logerr(err) {
+			return ""
+		}
+		data, err := ioutil.ReadAll(file)
+		file.Close()
+		if logerr(err) {
+			return ""
+		}
+		return string(data)
+	}
+
 	if len(form.Value[opt]) > 0 {
 		return strings.TrimSpace(form.Value[opt][0])
 	}

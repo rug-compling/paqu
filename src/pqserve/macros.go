@@ -37,8 +37,6 @@ func savemacros(q *Context) {
 		return
 	}
 
-	contentType(q, "application/json")
-
 	macros := firstf(q.form, "macrotext")
 
 	result := MacroResult{Keys: make([]string, 0)}
@@ -110,7 +108,20 @@ MACROLOOP:
 
 	b, _ := json.Marshal(result)
 
+	fmt.Fprint(q.w, `<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<script type="text/javascript"><!--
+window.parent._fn.update(`)
 	fmt.Fprintln(q.w, string(b))
+	fmt.Fprint(q.w, `);
+//--></script>
+</head>
+<body></body>
+</html>
+`)
+
 }
 
 func clearMacros() {
