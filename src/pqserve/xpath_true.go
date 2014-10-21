@@ -643,12 +643,12 @@ var macros = [`)
 	p := ","
 	for i, key := range keys {
 		if i == len(keys)-1 {
-			p = "];"
+			p = ""
 		}
 		fmt.Fprintf(q.w, "%q%s\n", key, p)
 	}
 
-	fmt.Fprint(q.w, `
+	fmt.Fprint(q.w, `];
 
 function outText(text) {
     var state = 0;
