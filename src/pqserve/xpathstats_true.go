@@ -443,6 +443,13 @@ function f(s) {
 		return
 	}
 
+	if strings.Contains(query, "%") {
+		rules := getMacrosRules(q)
+		query = macroKY.ReplaceAllStringFunc(query, func(s string) string {
+			return rules[s[1:len(s)-1]]
+		})
+	}
+
 	var owner string
 	var nlines uint64
 	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))

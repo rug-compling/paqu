@@ -38,6 +38,13 @@ func xpathcheck(q *Context) {
 		return
 	}
 
+	if strings.Contains(query, "%") {
+		rules := getMacrosRules(q)
+		query = macroKY.ReplaceAllStringFunc(query, func(s string) string {
+			return rules[s[1:len(s)-1]]
+		})
+	}
+
 	// syntactisch fout -> 2
 	if query == "." || query == "/" || dbxml.Check(query) != nil {
 		fmt.Fprintln(q.w, "2")
@@ -181,6 +188,14 @@ func xpath(q *Context) {
 	xmlall := ""
 	xmlparts := make([]string, 0)
 	query := first(q.r, "xpath")
+	fullquery := query
+	if strings.Contains(query, "%") {
+		rules := getMacrosRules(q)
+		fullquery = macroKY.ReplaceAllStringFunc(query, func(s string) string {
+			return rules[s[1:len(s)-1]]
+		})
+	}
+
 	var seen uint64
 	for _, dactfile := range dactfiles {
 		select {
@@ -205,7 +220,7 @@ $('#loading span').html('%.1f%%');
 			return
 		}
 
-		qu, err := db.Prepare(query)
+		qu, err := db.Prepare(fullquery)
 		if err != nil {
 			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
 			db.Close()
@@ -429,6 +444,52 @@ func html_xpath_header(q *Context) {
       });
   }
 
+  function openMacro() {
+      $('#openmacro').addClass('hide');
+      $('#macros').removeClass('hide');
+  }
+
+  function sluitMacro() {
+      $('#openmacro').removeClass('hide');
+      $('#macros').addClass('hide');
+      $('#macromsg').addClass('hide');
+  }
+
+  function enableSave() {
+      $('#macrosave').removeAttr('disabled');
+  }
+
+  function disableSave() {
+      $('#macrosave').attr("disabled", "disabled");
+  }
+
+  function opslaan() {
+    var data = "--iuhwe874fhiuehwifu38er7hidvh89tr\nContent-Disposition: form-data; name=\"macrotext\"\n\n" +
+        $('#macrotext').val() + "\n--iuhwe874fhiuehwifu38er7hidvh89tr\n";
+    $.ajax({
+      url: "savemacros",
+      type: "post",
+      contentType: "multipart/form-data; boundary=iuhwe874fhiuehwifu38er7hidvh89tr",
+      data: data,
+      dataType: "json",
+      success: function(data) {
+        if (data.err == "") {
+            $('#macromsg').addClass('hide');
+            $('#macrotext').val(data.macros);
+            $('#macrotext').text(data.macros);
+            macros = data.keys;
+        } else {
+            $('#macromsg').removeClass('hide').text("Fout: " + data.err);
+        }
+        disableSave();
+      },
+      error: function(jqxhr, textStatus, errorThrown) {
+        $('#macromsg').removeClass('hide').text("Fout: " + errorThrown);
+        disableSave();
+      }
+    });
+  }
+
   $(document).ready(function() {
     result = $('#result');
     try {
@@ -441,6 +502,10 @@ func html_xpath_header(q *Context) {
     xquery = $('#xquery');
     xquery.on('keyup', qcheck);
     qcheckdo();
+    $('#openmacro').on('click', openMacro);
+    $('#sluitmacro').on('click', sluitMacro);
+    $('#macroreset').on('click', disableSave);
+    $('#macrotext').on('keyup', enableSave);
   });
 
   //--></script>
@@ -462,6 +527,35 @@ func html_xpath_form(q *Context) (has_query bool) {
 	has_query = true
 	if first(q.r, "xpath") == "" {
 		has_query = false
+	}
+
+	if q.auth {
+		macros := ""
+		rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+		if err == nil {
+			if rows.Next() {
+				rows.Scan(&macros)
+				rows.Close()
+			}
+		}
+		fmt.Fprintf(q.w, `
+<button id="openmacro">Macro's</button>
+<div id="macros" class="hide">
+<button id="sluitmacro">Macro's sluiten</button>
+<div class="hide warning" id="macromsg">
+</div>
+<p>
+<form action="javascript:void(0)" onsubmit="javascript:opslaan()" id="macroform" name="macroform">
+<textarea rows="6" cols="80" id="macrotext">%s</textarea>
+<p>
+<input type="submit" value="Macro's opslaan" id="macrosave" disabled="disabled">
+<input type="reset" value="Reset" id="macroreset">
+</form>
+<p>
+<hr>
+</div>
+<p>
+`, html.EscapeString(macros))
 	}
 
 	fmt.Fprint(q.w, `
@@ -543,8 +637,18 @@ var other = ['/node',
         "@word",
         "@wvorm"];
 
-// TODO: fill this list with actual data
-var macros = ["qwerty", "abc", "xyz", "test"];
+var macros = [`)
+
+	keys := getMacrosKeys(q)
+	p := ","
+	for i, key := range keys {
+		if i == len(keys)-1 {
+			p = "];"
+		}
+		fmt.Fprintf(q.w, "%q%s\n", key, p)
+	}
+
+	fmt.Fprint(q.w, `
 
 function outText(text) {
     var state = 0;

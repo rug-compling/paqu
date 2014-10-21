@@ -51,15 +51,15 @@ Syntax: %s [-w]
 	defer db.Close()
 
 	if db_overwrite {
-		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_corpora`, `%s_info`, `%s_ignore`, `%s_users`; ",
-			Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix))
+		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_corpora`, `%s_info`, `%s_ignore`, `%s_users`, `%s_macros`; ",
+			Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix))
 		util.CheckErr(err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_corpora (
-		user    varchar(64) NOT NULL,
-		prefix  varchar(64) NOT NULL,
-		enabled tinyint     NOT NULL DEFAULT 1,
+		user    varchar(128) NOT NULL,
+		prefix  varchar(128) NOT NULL,
+		enabled tinyint      NOT NULL DEFAULT 1,
 		INDEX (user),
 		INDEX (prefix),
 		INDEX (enabled))
@@ -88,20 +88,27 @@ Syntax: %s [-w]
 	util.CheckErr(err)
 
 	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_ignore (
-		user    varchar(64) NOT NULL,
-		prefix  varchar(64) NOT NULL,
+		user    varchar(128) NOT NULL,
+		prefix  varchar(128) NOT NULL,
 		INDEX (user),
 		INDEX (prefix));`)
 	util.CheckErr(err)
 
 	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_users (
-		mail   varchar(64) NOT NULL,
-		sec    char(16)    NOT NULL,
-		pw     char(16)    NOT NULL,
-		active datetime    NOT NULL,
-		quotum int         NOT NULL DEFAULT 0,
+		mail   varchar(128) NOT NULL,
+		sec    char(16)     NOT NULL,
+		pw     char(16)     NOT NULL,
+		active datetime     NOT NULL,
+		quotum int          NOT NULL DEFAULT 0,
 		UNIQUE INDEX (mail),
 		INDEX (active))
+		DEFAULT CHARACTER SET utf8;`)
+	util.CheckErr(err)
+
+	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_macros (
+		user   varchar(128) NOT NULL,
+		macros text         NOT NULL,
+		UNIQUE INDEX (user))
 		DEFAULT CHARACTER SET utf8;`)
 	util.CheckErr(err)
 }

@@ -131,6 +131,8 @@ func main() {
 	}
 	go recover()
 
+	go clearMacros()
+
 	handleFunc("", home)
 	handleFunc("tree", tree)
 	handleFunc("stats", stats)
@@ -148,6 +150,7 @@ func main() {
 	handleFunc("xpath", xpath)
 	handleFunc("xpathcheck", xpathcheck)
 	handleFunc("xpathstats", xpathstats)
+	handleFunc("savemacros", savemacros)
 
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)
