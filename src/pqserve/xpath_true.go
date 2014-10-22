@@ -18,8 +18,29 @@ import (
 )
 
 var (
-	reXpath = regexp.MustCompile(`'[^']*'|"[^"]*"|@[a-z][-_a-z]*|[a-zA-Z][-_:a-zA-Z]*(\s*\()?`)
-	keyTags = make(map[string]bool)
+	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[a-z][-_a-z]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
+	keyTags    = make(map[string]bool)
+	xpathNames = map[string]bool{
+		"node":                 true,
+		"div":                  true,
+		"or":                   true,
+		"and":                  true,
+		"mod":                  true,
+		"fn:":                  true,
+		"ancestor::":           true,
+		"ancestor-or-self::":   true,
+		"attribute::":          true,
+		"child::":              true,
+		"descendant::":         true,
+		"descendant-or-self::": true,
+		"following::":          true,
+		"following-sibling::":  true,
+		"namespace::":          true,
+		"parent::":             true,
+		"preceding::":          true,
+		"preceding-sibling::":  true,
+		"self::":               true,
+	}
 )
 
 func init() {
@@ -69,7 +90,7 @@ func xpathcheck(q *Context) {
 		if strings.HasSuffix(s, "(") {
 			continue
 		}
-		if s != "node" && s != "div" && s != "or" && s != "and" && s != "mod" {
+		if !xpathNames[s] {
 			fmt.Fprintln(q.w, "1")
 			return
 		}
@@ -636,6 +657,27 @@ var other = ['/node',
         "@word",
         "@wvorm"];
 
+var axis = [
+		"node",
+		"and",
+		"div",
+		"mod",
+		"or",
+		"fn:",
+		"ancestor::",
+		"ancestor-or-self::",
+		"attribute::",
+		"child::",
+		"descendant::",
+		"descendant-or-self::",
+		"following::",
+		"following-sibling::",
+		"namespace::",
+		"parent::",
+		"preceding::",
+		"preceding-sibling::",
+		"self::"];
+
 var macros = [`)
 
 	keys := getMacrosKeys(q)
@@ -722,6 +764,36 @@ $('#xquery').textcomplete([
     },
     index: 1,
     context: inMacro
+},
+{
+    match: /\b([a-z][-a-z]*)$/,
+    search: function (term, callback) {
+        callback($.map(axis, function (e) {
+            return e.indexOf(term) === 0 ? e : null;
+        }));
+    },
+    replace: function (value) {
+        if (value.indexOf(":") > 0) {
+            return value;
+        } else {
+            return value + ' ';
+        }
+    },
+    index: 1,
+    context: outText
+},
+{
+    match: /::([a-z]*)$/,
+    search: function (term, callback) {
+        callback($.map(['node'], function (e) {
+            return e.indexOf(term) === 0 ? e : null;
+        }));
+    },
+    replace: function (value) {
+        return '::' + value + ' ';
+    },
+    index: 1,
+    context: outText
 },
 {
     match: /^((.|\n)*[ \n'")\]])$/,
