@@ -23,7 +23,10 @@ Zie ook: TODO in diverse bestanden
     - Organisatie + documentatie
   - pqserve:
     - XPath
-      - macro's
+      - zoeken: POST i.p.v. GET?
+	    - anders url misschien te lang
+		- maar dan werken links naar volgende pagina niet meer
+		- pagina updaten i.p.v. opnieuw laden bij uitvoeren van zoeken?
     - weergave op mobiel of tablet
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
