@@ -10,8 +10,14 @@ import (
 func contentType(q *Context, ct string) {
 	q.w.Header().Set("Content-Type", ct)
 }
+
 func cache(q *Context) {
 	q.w.Header().Set("Cache-Control", "public, max-age=86400")
+}
+
+func nocache(q *Context) {
+	q.w.Header().Set("Cache-Control", "no-cache")
+	q.w.Header().Add("Pragma", "no-cache")
 }
 
 func static_busy_gif(q *Context) {

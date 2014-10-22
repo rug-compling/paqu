@@ -151,6 +151,7 @@ func main() {
 	handleFunc("xpathcheck", xpathcheck)
 	handleFunc("xpathstats", xpathstats)
 	handleFunc("savemacros", savemacros)
+	handleFunc("macroexpand", macroExpand)
 
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)

@@ -113,7 +113,7 @@ MACROLOOP:
 <head>
 <title></title>
 <script type="text/javascript"><!--
-window.parent._fn.update(`)
+window.parent._fn.update2(`)
 	fmt.Fprintln(q.w, string(b))
 	fmt.Fprint(q.w, `);
 //--></script>
@@ -203,4 +203,25 @@ func getMacrosRules(q *Context) map[string]string {
 		return m.rules
 	}
 	return map[string]string{}
+}
+
+func macroExpand(q *Context) {
+	contentType(q, "text/plain; charset=utf-8")
+	nocache(q)
+
+	if !q.auth {
+		fmt.Fprintln(q.w, "Je bent niet ingelogd")
+		return
+	}
+
+	rules := getMacrosRules(q)
+	fmt.Fprintln(q.w, macroKY.ReplaceAllStringFunc(
+		first(q.r, "xpath"),
+		func(s string) string {
+			if s2, ok := rules[s[1:len(s)-1]]; ok {
+				return s2
+			} else {
+				return s[:len(s)-1] + "|ONBEKEND%"
+			}
+		}))
 }

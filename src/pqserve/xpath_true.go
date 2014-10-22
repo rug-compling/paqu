@@ -408,6 +408,17 @@ func html_xpath_header(q *Context) {
   window._fn = {
     update: function(data) {
       result.html(data);
+    },
+    update2: function(data) {
+      if (data.err == "") {
+          $('#macromsg').addClass('hide');
+          $('#macrotext').val(data.macros);
+          $('#macrotext').text(data.macros);
+          macros = data.keys;
+      } else {
+          $('#macromsg').removeClass('hide').text("Fout: " + data.err);
+      }
+      disableSave();
     }
   }
   function xstatftest() {
@@ -434,6 +445,7 @@ func html_xpath_header(q *Context) {
 
   var lastcall;
   var timer;
+  var reMacro = /%[a-zA-Z][-_a-zA-Z0-9]*%/;
   function qcheck() {
     try {
       window.clearTimeout(timer);
@@ -446,6 +458,11 @@ func html_xpath_header(q *Context) {
         lastcall.abort();
       }
       catch(err) {}
+    }
+    if (reMacro.test(xquery.val())) {
+       $('#btExpand').removeClass('hide');
+    } else {
+       $('#btExpand').addClass('hide');
     }
     lastcall = $.ajax("xpathcheck?" + xquery.serialize())
       .done(function(data) {
@@ -463,6 +480,16 @@ func html_xpath_header(q *Context) {
       .always(function() {
         lastcall = null;
       });
+  }
+
+  function macroExpand() {
+    $.ajax("macroexpand?" + xquery.serialize())
+      .done(function(data) {
+         $("#macroInner").text(data);
+      }).fail(function(e) {
+         $("#macroInner").text(e.responseText);
+      })
+      $('#macroOuter').removeClass('hide');
   }
 
   function openMacro() {
@@ -484,20 +511,6 @@ func html_xpath_header(q *Context) {
       $('#macrosave').attr("disabled", "disabled");
   }
 
-  window._fn = {
-    update: function(data) {
-      if (data.err == "") {
-          $('#macromsg').addClass('hide');
-          $('#macrotext').val(data.macros);
-          $('#macrotext').text(data.macros);
-          macros = data.keys;
-      } else {
-          $('#macromsg').removeClass('hide').text("Fout: " + data.err);
-      }
-      disableSave();
-    }
-  }
-
   $(document).ready(function() {
     result = $('#result');
     try {
@@ -509,6 +522,8 @@ func html_xpath_header(q *Context) {
     } catch (e) {}
     xquery = $('#xquery');
     xquery.on('keyup', qcheck);
+    xquery.on('change', qcheck);
+    xquery.on('click', qcheck);
     qcheckdo();
     $('#openmacro').on('click', openMacro);
     $('#sluitmacro').on('click', sluitMacro);
@@ -521,6 +536,8 @@ func html_xpath_header(q *Context) {
           $('#macrofilesave').removeAttr('disabled');
         }
     });
+    $('#btExpand').on('click', macroExpand);
+    $('#btClose').on('click', function() { $('#macroOuter').addClass('hide'); });
   });
 
   //--></script>
@@ -595,7 +612,12 @@ corpus: <select name="db">
            <input type="submit" value="Zoeken">
            <input type="button" value="Wissen" onClick="javascript:formclear(form)">
            <input type="reset" value="Reset" onClick="javascript:qcheck()">
+           <input type="button" id="btExpand" class="hide" value="Toon macro-expansie">
        </form>
+       <div id="macroOuter" class="hide">
+       <div id="macroInner"></div>
+       <button id="btClose">Sluiten</button>
+       </div>
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node'];
@@ -836,13 +858,13 @@ $('#xquery').textcomplete([
                }
             }
         }
-        var result = [];
+        var rt = [];
         var s = "";
         while (chars.length > 0) {
             s += chars.shift();
-            result.push(s);
+            rt.push(s);
         }
-        callback(result);
+        callback(rt);
     },
     index: 1,
     replace: function (value) {

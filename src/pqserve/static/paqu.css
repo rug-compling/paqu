@@ -336,3 +336,12 @@ a.normal {
     text-decoration: underline;
     color: #0000EE;
 }
+
+#macroOuter {
+  padding: 1em;
+  background-color: #e0e0e0;
+}
+
+#macroInner {
+  margin-bottom: 1em;
+}
