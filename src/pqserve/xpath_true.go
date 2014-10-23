@@ -51,19 +51,27 @@ func init() {
 
 func xpathcheck(q *Context) {
 	contentType(q, "text/plain")
-	cache(q)
 
 	query := first(q.r, "xpath")
 	if query == "" {
+		cache(q)
 		fmt.Fprintln(q.w, "0")
 		return
 	}
 
+	ch := true
 	if strings.Contains(query, "%") {
 		rules := getMacrosRules(q)
 		query = macroKY.ReplaceAllStringFunc(query, func(s string) string {
+			if ch {
+				nocache(q)
+				ch = false
+			}
 			return rules[s[1:len(s)-1]]
 		})
+	}
+	if ch {
+		cache(q)
 	}
 
 	// syntactisch fout -> 2
