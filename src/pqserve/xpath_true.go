@@ -519,15 +519,7 @@ func html_xpath_header(q *Context) {
       $('#macrosave').attr("disabled", "disabled");
   }
 
-  $(document).ready(function() {
-    result = $('#result');
-    try {
-      var f = document.forms["xstatsform"];
-      at1 = f["attr1"];
-      at2 = f["attr2"];
-      at3 = f["attr3"];
-      setForm();
-    } catch (e) {}
+  function init() {
     xquery = $('#xquery');
     xquery.on('keyup', qcheck);
     xquery.on('change', qcheck);
@@ -546,6 +538,17 @@ func html_xpath_header(q *Context) {
     });
     $('#btExpand').on('click', macroExpand);
     $('#btClose').on('click', function() { $('#macroOuter').addClass('hide'); });
+  }
+
+  $(document).ready(function() {
+    result = $('#result');
+    try {
+      var f = document.forms["xstatsform"];
+      at1 = f["attr1"];
+      at2 = f["attr2"];
+      at3 = f["attr3"];
+      setForm();
+    } catch (e) {}
   });
 
   //--></script>
@@ -884,6 +887,8 @@ $('#xquery').textcomplete([
     maxCount: 100,
     debounce: 100,
 });
+
+init();
 
 //--></script>
 `)
