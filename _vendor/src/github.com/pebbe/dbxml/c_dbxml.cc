@@ -121,8 +121,8 @@ extern "C" {
             db->container.putDocument(filename, is, db->context);
 	    r->error = false;
         } catch (DbXml::XmlException &xe) {
-	    r->error = true;
 	    r->result = xe.what();
+	    r->error = true;
         }
 
 	return r;
@@ -146,8 +146,8 @@ extern "C" {
             db->container.putDocument(name, data, db->context);
 	    r->error = false;
         } catch (DbXml::XmlException &xe) {
-	    r->error = true;
 	    r->result = xe.what();
+	    r->error = true;
         }
 	return r;
     }
@@ -172,8 +172,8 @@ extern "C" {
 		db->container.putDocument(doc, db->context);
 		r->error = false;
 	    } catch (DbXml::XmlException &xe) {
-		r->error = true;
 		r->result = xe.what();
+		r->error = true;
 		return r;
 	    }
 	}
@@ -189,8 +189,8 @@ extern "C" {
 	    db->container.deleteDocument(filename, db->context);
 	    r->error = false;
         } catch (DbXml::XmlException &xe) {
-	    r->error = true;
 	    r->result = xe.what();
+	    r->error = true;
 	}
 	return r;
     }
@@ -225,29 +225,6 @@ extern "C" {
 	return docs;
     }
 
-    c_dbxml_docs c_dbxml_get_query(c_dbxml db, char const *query)
-    {
-	c_dbxml_docs docs;
-	docs = new c_dbxml_docs_t;
-	docs->more = true;
-	try {
-
-	    docs->context = db->manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
-	    docs->context.setDefaultCollection(ALIAS);
-	    docs->it = db->manager.query(std::string("collection('" ALIAS "')") + query,
-					 docs->context,
-					 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY | DbXml::DBXML_DOCUMENT_PROJECTION
-					 );
-	    docs->error = false;
-	} catch (DbXml::XmlException const &xe) {
-	    docs->more = false;
-	    docs->error = true;
-	    docs->errstring = xe.what();
-	}
-
-	return docs;
-    }
-
     c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query)
     {
 	c_dbxml_query q;
@@ -257,9 +234,13 @@ extern "C" {
 	    q->context.setDefaultCollection(ALIAS);
 	    q->expression = db->manager.prepare(std::string("collection('" ALIAS "')") + query, q->context);
 	    q->error = false;
+	    if (q->expression.isUpdateExpression()) {
+		q->errstring = "Update Expressions are not allowed";
+		q->error = true;
+	    }
 	} catch (DbXml::XmlException const &xe) {
-	    q->error = true;
 	    q->errstring = xe.what();
+	    q->error = true;
 	}
 	return q;
     }
@@ -272,13 +253,13 @@ extern "C" {
 	docs->context = query->context;
 	try {
 	    docs->it = query->expression.execute(docs->context,
-						 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY | DbXml::DBXML_DOCUMENT_PROJECTION
+						 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY
 						 );
 	    docs->error = false;
 	} catch (DbXml::XmlException const &xe) {
 	    docs->more = false;
-	    docs->error = true;
 	    docs->errstring = xe.what();
+	    docs->error = true;
 	}
 
 	return docs;
@@ -369,9 +350,14 @@ extern "C" {
 	try {
 	    DbXml::XmlManager manager;
 	    DbXml::XmlQueryContext context;
+	    DbXml::XmlQueryExpression expr;
 	    context = manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
-	    manager.prepare(std::string(query), context);
+	    expr = manager.prepare(std::string(query), context);
 	    r->error = false;
+	    if (expr.isUpdateExpression()) {
+		r->result = "Update Expressions are not allowed";
+		r->error = true;
+	    }
 	} catch (DbXml::XmlException const &xe) {
 	    r->result = xe.what();
 	    r->error = true;

@@ -17,6 +17,7 @@ import "C"
 import (
 	"errors"
 	"runtime"
+	"strings"
 	"sync"
 	"unsafe"
 )
@@ -55,6 +56,8 @@ type Query struct {
 var (
 	errclosed      = errors.New("Database is closed")
 	errqueryclosed = errors.New("Query is closed")
+	errempty       = errors.New("Query is empty")
+	errbrackets    = errors.New("Query starts with '('")
 )
 
 //. Open & Close
@@ -273,23 +276,11 @@ func (db *Db) All() (*Docs, error) {
 //          }
 //      }
 func (db *Db) Query(query string) (*Docs, error) {
-	docs := &Docs{}
-	db.lock.Lock()
-	defer db.lock.Unlock()
-
-	if !db.opened {
-		return docs, errclosed
+	q, err := db.Prepare(query)
+	if err != nil {
+		return &Docs{}, err
 	}
-	cs := C.CString(query)
-	defer C.free(unsafe.Pointer(cs))
-	docs.docs = C.c_dbxml_get_query(db.db, cs)
-	if C.c_dbxml_get_query_error(docs.docs) != 0 {
-		C.c_dbxml_docs_free(docs.docs)
-		return docs, errors.New(C.GoString(C.c_dbxml_get_query_errstring(docs.docs)))
-	}
-	runtime.SetFinalizer(docs, (*Docs).Close)
-	docs.opened = true
-	return docs, nil
+	return q.Run()
 }
 
 // Prepare an XPATH query.
@@ -307,7 +298,7 @@ func (db *Db) Prepare(query string) (*Query, error) {
 	defer C.free(unsafe.Pointer(cs))
 	q.query = C.c_dbxml_prepare_query(db.db, cs)
 	if C.c_dbxml_get_prepared_error(q.query) != 0 {
-		C.c_dbxml_query_free(q.query)
+		defer C.c_dbxml_query_free(q.query)
 		return q, errors.New(C.GoString(C.c_dbxml_get_prepared_errstring(q.query)))
 	}
 	// No finalizer: query will be closed when database gets closed
@@ -330,7 +321,7 @@ func (query *Query) Run() (*Docs, error) {
 	}
 	docs.docs = C.c_dbxml_run_query(query.query)
 	if C.c_dbxml_get_query_error(docs.docs) != 0 {
-		C.c_dbxml_docs_free(docs.docs)
+		defer C.c_dbxml_docs_free(docs.docs)
 		return docs, errors.New(C.GoString(C.c_dbxml_get_query_errstring(docs.docs)))
 	}
 	runtime.SetFinalizer(docs, (*Docs).Close)
@@ -448,6 +439,13 @@ func (query *Query) Close() {
 
 // Check if query is valid without opening a database.
 func Check(query string) error {
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return errempty
+	}
+	if query[0] == '(' {
+		return errbrackets
+	}
 	cs := C.CString(query)
 	defer C.free(unsafe.Pointer(cs))
 	r := C.c_dbxml_check(cs)
