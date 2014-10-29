@@ -299,7 +299,9 @@ $('#loading span').html('%.1f%%');
 					xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 					xmlparts = xmlparts[0:0]
 				}
-				curno++
+				if len(queryparts) == 1 {
+					curno++
+				}
 				curdac = dactfile
 				filename = name
 				newdoc = true
