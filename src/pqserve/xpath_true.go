@@ -74,38 +74,48 @@ func xpathcheck(q *Context) {
 		cache(q)
 	}
 
-	// syntactisch fout -> 2
-	if query == "." || query == "/" || dbxml.Check(query) != nil {
-		fmt.Fprintln(q.w, "2")
-		return
-	}
+	lvl := 0
+PARTLOOP:
+	for _, part := range strings.Split(query, "+|+") {
 
-	// geen resultaat -> 1
-	for i, s := range reXpath.FindAllString(query, -1) {
-		if i == 0 && s == "alpino_ds" {
-			continue
+		if strings.TrimSpace(part) == "" {
+			fmt.Fprintln(q.w, "2")
+			return
 		}
-		if s[0] == '\'' || s[0] == '"' {
-			continue
+
+		// syntactisch fout -> 2
+		if part == "." || part == "/" || dbxml.Check(part) != nil {
+			fmt.Fprintln(q.w, "2")
+			return
 		}
-		if s[0] == '@' {
-			if keyTags[s[1:]] {
+
+		// geen resultaat -> 1
+		for i, s := range reXpath.FindAllString(part, -1) {
+			if i == 0 && s == "alpino_ds" {
 				continue
 			}
-			fmt.Fprintln(q.w, "1")
-			return
+			if s[0] == '\'' || s[0] == '"' {
+				continue
+			}
+			if s[0] == '@' {
+				if keyTags[s[1:]] {
+					continue
+				}
+				lvl = 1
+				continue PARTLOOP
+			}
+			if strings.HasSuffix(s, "(") {
+				continue
+			}
+			if !xpathNames[s] {
+				lvl = 1
+				continue PARTLOOP
+			}
 		}
-		if strings.HasSuffix(s, "(") {
-			continue
-		}
-		if !xpathNames[s] {
-			fmt.Fprintln(q.w, "1")
-			return
-		}
+
 	}
 
-	// ok -> 0
-	fmt.Fprintln(q.w, "0")
+	fmt.Fprintln(q.w, lvl)
 }
 
 // TAB: xpath
@@ -225,6 +235,8 @@ func xpath(q *Context) {
 		})
 	}
 
+	queryparts := strings.Split(fullquery, "+|+")
+
 	var seen uint64
 	for _, dactfile := range dactfiles {
 		select {
@@ -249,7 +261,7 @@ $('#loading span').html('%.1f%%');
 			return
 		}
 
-		qu, err := db.Prepare(fullquery)
+		qu, err := db.Prepare(queryparts[0])
 		if err != nil {
 			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
 			db.Close()
@@ -276,24 +288,74 @@ $('#loading span').html('%.1f%%');
 			clearLoading(q.w)
 			return
 		}
+		filename = ""
+	NEXTDOC:
 		for docs.Next() {
 			name := docs.Name()
+			newdoc := false
 			if name != filename {
 				if found && curno > offset && curno <= offset+ZINMAX*2 {
+					found = false
 					xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 					xmlparts = xmlparts[0:0]
 				}
 				curno++
 				curdac = dactfile
 				filename = name
+				newdoc = true
 			}
-			found = true
-			if curno > offset+ZINMAX*2 {
-				docs.Close()
-			} else {
-				if curno > offset && curno <= offset+ZINMAX*2 {
-					xmlall = docs.Content()
-					xmlparts = append(xmlparts, docs.Match())
+			if len(queryparts) == 1 {
+				found = true
+				if curno > offset+ZINMAX*2 {
+					docs.Close()
+				} else {
+					if curno > offset && curno <= offset+ZINMAX*2 {
+						xmlall = docs.Content()
+						xmlparts = append(xmlparts, docs.Match())
+					}
+				}
+			} else if newdoc {
+				newdoc = false
+				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", name)
+				for i := 1; i < len(queryparts)-1; i++ {
+					docs2, err := db.Query(doctxt + queryparts[i])
+					if err != nil {
+						fmt.Fprintln(q.w, html.EscapeString(err.Error()))
+						docs.Close()
+						db.Close()
+						done <- true
+						clearLoading(q.w)
+						return
+					}
+					if !docs2.Next() {
+						continue NEXTDOC
+					}
+					docs2.Close()
+				}
+				docs2, err := db.Query(doctxt + queryparts[len(queryparts)-1])
+				if err != nil {
+					fmt.Fprintln(q.w, html.EscapeString(err.Error()))
+					docs.Close()
+					db.Close()
+					done <- true
+					clearLoading(q.w)
+					return
+				}
+				found = false
+				for docs2.Next() {
+					if !found {
+						found = true
+						curno++
+						if curno > offset+ZINMAX*2 {
+							docs.Close()
+						}
+					}
+					if curno > offset && curno <= offset+ZINMAX*2 {
+						xmlall = docs2.Content()
+						xmlparts = append(xmlparts, docs2.Match())
+					} else {
+						docs2.Close()
+					}
 				}
 			}
 		}

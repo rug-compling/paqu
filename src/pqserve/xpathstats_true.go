@@ -510,6 +510,8 @@ function f(s) {
 	now := time.Now()
 	now2 := time.Now()
 
+	queryparts := strings.Split(query, "+|+")
+
 	sums := make(map[string]int)
 	count := 0
 	tooMany := false
@@ -535,7 +537,7 @@ function f(s) {
 			return
 		}
 
-		qu, err := db.Prepare(query)
+		qu, err := db.Prepare(queryparts[0])
 		if err != nil {
 			updateError(q, err, !download)
 			db.Close()
@@ -559,13 +561,57 @@ function f(s) {
 			db.Close()
 			return
 		}
+		filename := ""
+	NEXTDOC:
 		for docs.Next() {
 			if !download && time.Now().Sub(now2) > 2*time.Second {
 				xpathout(q, sums, attr, count, tooMany, now, download, seen, nlines, false)
 				now2 = time.Now()
 			}
+
+			matches := make([]string, 0)
+			if len(queryparts) == 1 {
+				matches = append(matches, docs.Match())
+			} else {
+				name := docs.Name()
+				if name == filename {
+					continue
+				}
+				filename = name
+				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", name)
+				for i := 1; i < len(queryparts)-1; i++ {
+					docs2, err := db.Query(doctxt + queryparts[i])
+					if err != nil {
+						updateError(q, err, !download)
+						logerr(err)
+						docs.Close()
+						db.Close()
+						return
+					}
+					if !docs2.Next() {
+						continue NEXTDOC
+					}
+					docs2.Close()
+				}
+
+				docs2, err := db.Query(doctxt + queryparts[len(queryparts)-1])
+				if err != nil {
+					updateError(q, err, !download)
+					logerr(err)
+					docs.Close()
+					db.Close()
+					return
+				}
+				for docs2.Next() {
+					matches = append(matches, docs2.Match())
+				}
+			}
+
+			if len(matches) == 0 {
+				continue
+			}
+
 			alpino := Alpino_ds{}
-			alp := Alpino_ds{}
 			err := xml.Unmarshal([]byte(docs.Content()), &alpino)
 			if err != nil {
 				updateError(q, err, !download)
@@ -574,32 +620,35 @@ function f(s) {
 				db.Close()
 				return
 			}
-			err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			for _, match := range matches {
+				alp := Alpino_ds{}
+				err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
-`+docs.Match()+`
+`+match+`
 </alpino_ds>`), &alp)
-			if err != nil {
-				updateError(q, err, !download)
-				logerr(err)
-				docs.Close()
-				db.Close()
-				return
-			}
-			switch nAttr {
-			case 1:
-				sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)]++
-			case 2:
-				sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
-					getFullAttr(attr[1], alp.Node0, alpino.Node0)]++
-			case 3:
-				sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
-					getFullAttr(attr[1], alp.Node0, alpino.Node0)+"\t"+
-					getFullAttr(attr[2], alp.Node0, alpino.Node0)]++
-			}
-			count++
-			if len(sums) >= 100000 {
-				tooMany = true
-				docs.Close()
+				if err != nil {
+					updateError(q, err, !download)
+					logerr(err)
+					docs.Close()
+					db.Close()
+					return
+				}
+				switch nAttr {
+				case 1:
+					sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)]++
+				case 2:
+					sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
+						getFullAttr(attr[1], alp.Node0, alpino.Node0)]++
+				case 3:
+					sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
+						getFullAttr(attr[1], alp.Node0, alpino.Node0)+"\t"+
+						getFullAttr(attr[2], alp.Node0, alpino.Node0)]++
+				}
+				count++
+				if len(sums) >= 100000 {
+					tooMany = true
+					docs.Close()
+				}
 			}
 		}
 		if err := docs.Error(); err != nil {
