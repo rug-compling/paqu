@@ -344,4 +344,6 @@ a.normal {
 
 #macroInner {
   margin-bottom: 1em;
+  white-space: pre-wrap;
+  font-family: monospace;
 }
