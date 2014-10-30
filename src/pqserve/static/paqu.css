@@ -347,3 +347,8 @@ a.normal {
   white-space: pre-wrap;
   font-family: monospace;
 }
+
+.bold {
+    font-weight: bold;
+    border: 2px solid red;
+}

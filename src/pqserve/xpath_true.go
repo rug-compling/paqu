@@ -609,10 +609,12 @@ func html_xpath_header(q *Context) {
 
   function enableSave() {
       $('#macrosave').removeAttr('disabled');
+      $('#macrosave').addClass('bold');
   }
 
   function disableSave() {
       $('#macrosave').attr("disabled", "disabled");
+      $('#macrosave').removeClass('bold');
   }
 
   function init() {
@@ -628,9 +630,14 @@ func html_xpath_header(q *Context) {
     $('#macrofilename').on('change', function() {
         if ($('#macrofilename').val() == "") {
           $('#macrofilesave').attr('disabled', 'disabled');
+          $('#macrofilesave').removeClass('bold');
         } else {
           $('#macrofilesave').removeAttr('disabled');
+          $('#macrofilesave').addClass('bold');
         }
+    });
+    $('#macrofilesave').on('click', function() {
+          $('#macrofilesave').removeClass('bold');
     });
     $('#btExpand').on('click', macroExpand);
     $('#btClose').on('click', function() { $('#macroOuter').addClass('hide'); });
@@ -686,13 +693,13 @@ func html_xpath_form(q *Context) (has_query bool) {
 </div>
 <p>
 <form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">
-<input type="submit" value="Macro's uploaden &rarr;" id="macrofilesave" disabled="disabled">
-<input type="file" id="macrofilename" value="Bestand" name="macrotext" id="macrofilename">
+<input type="submit" value="Uploaden" id="macrofilesave" disabled="disabled">
+<input type="file" id="macrofilename" value="Bestand kiezen" name="macrotext" id="macrofilename">
 </form>
 <p>
 <form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">
 <textarea rows="6" cols="80" id="macrotext" name="macrotext">%s</textarea><br>
-<input type="submit" value="Macro's opslaan" id="macrosave" disabled="disabled">
+<input type="submit" value="Opslaan" id="macrosave" disabled="disabled">
 <input type="reset" value="Reset" id="macroreset">
 </form>
 <p>
