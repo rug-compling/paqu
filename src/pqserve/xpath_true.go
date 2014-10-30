@@ -18,28 +18,60 @@ import (
 )
 
 var (
-	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[a-z][-_a-z]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
+	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[a-z][-_a-z]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
 	keyTags    = make(map[string]bool)
 	xpathNames = map[string]bool{
-		"node":                 true,
-		"div":                  true,
-		"or":                   true,
-		"and":                  true,
-		"mod":                  true,
-		"fn:":                  true,
-		"ancestor::":           true,
 		"ancestor-or-self::":   true,
+		"ancestor::":           true,
 		"attribute::":          true,
 		"child::":              true,
-		"descendant::":         true,
 		"descendant-or-self::": true,
-		"following::":          true,
+		"descendant::":         true,
 		"following-sibling::":  true,
+		"following::":          true,
 		"namespace::":          true,
 		"parent::":             true,
-		"preceding::":          true,
 		"preceding-sibling::":  true,
+		"preceding::":          true,
 		"self::":               true,
+		"fn:":                  true,
+		"and":                  true,
+		"as":                   true,
+		"assert":               true,
+		"at":                   true,
+		"attribute":            true,
+		"cast":                 true,
+		"div":                  true,
+		"element":              true,
+		"else":                 true,
+		"eq":                   true,
+		"every":                true,
+		"except":               true,
+		"follows":              true,
+		"for":                  true,
+		"ge":                   true,
+		"gt":                   true,
+		"in":                   true,
+		"instance":             true,
+		"intersect":            true,
+		"item":                 true,
+		"le":                   true,
+		"lt":                   true,
+		"mod":                  true,
+		"ne":                   true,
+		"node":                 true,
+		"of":                   true,
+		"only":                 true,
+		"or":                   true,
+		"precedes":             true,
+		"return":               true,
+		"satisfies":            true,
+		"some":                 true,
+		"then":                 true,
+		"to":                   true,
+		"treat":                true,
+		"type":                 true,
+		"union":                true,
 	}
 )
 
@@ -94,7 +126,7 @@ PARTLOOP:
 			if i == 0 && s == "alpino_ds" {
 				continue
 			}
-			if s[0] == '\'' || s[0] == '"' {
+			if s[0] == '\'' || s[0] == '"' || s[0] == '$' {
 				continue
 			}
 			if s[0] == '@' {
@@ -681,7 +713,7 @@ corpus: <select name="db">
 	}
 	fmt.Fprintf(q.w, `<p>
 		XPATH query:<br>
-		<textarea name="xpath" rows="6" cols="80" id="xquery">%s</textarea>
+		<textarea name="xpath" rows="6" cols="80" maxlength="1900" id="xquery">%s</textarea>
 		`, html.EscapeString(first(q.r, "xpath")))
 	fmt.Fprint(q.w, `<p>
            <input type="submit" value="Zoeken">
@@ -761,18 +793,18 @@ var axis = [
 		"mod",
 		"or",
 		"fn:",
-		"ancestor::",
 		"ancestor-or-self::",
+		"ancestor::",
 		"attribute::",
 		"child::",
-		"descendant::",
 		"descendant-or-self::",
-		"following::",
+		"descendant::",
 		"following-sibling::",
+		"following::",
 		"namespace::",
 		"parent::",
-		"preceding::",
 		"preceding-sibling::",
+		"preceding::",
 		"self::"];
 
 var macros = [`)
