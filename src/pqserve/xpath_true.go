@@ -656,9 +656,10 @@ func html_xpath_uitleg(q *Context) {
 <p>
 <hr>
 <p>
-Uitleg over XPATH
+PaQu ondersteunt XPath2 met dezelfde extensies als Dact.
 <p>
-<a href="http://rug-compling.github.io/dact/cookbook/">voorbeelden</a>
+Voorbeelden, zie:
+<a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">Dact Cookbook</a>
 `)
 }
 
@@ -712,7 +713,7 @@ corpus: <select name="db">
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
 	}
 	fmt.Fprintf(q.w, `<p>
-		XPATH query:<br>
+		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">voorbeelden</a>):<br>
 		<textarea name="xpath" rows="6" cols="80" maxlength="1900" id="xquery">%s</textarea>
 		`, html.EscapeString(first(q.r, "xpath")))
 	fmt.Fprint(q.w, `<p>
