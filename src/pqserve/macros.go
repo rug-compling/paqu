@@ -39,6 +39,10 @@ func savemacros(q *Context) {
 
 	macros := firstf(q.form, "macrotext")
 
+	macros = strings.Replace(macros, "\r\n", "\n", -1)
+	macros = strings.Replace(macros, "\n\r", "\n", -1)
+	macros = strings.Replace(macros, "\r", "\n", -1)
+
 	result := MacroResult{Keys: make([]string, 0)}
 
 MACROLOOP:
@@ -214,9 +218,13 @@ func macroExpand(q *Context) {
 		return
 	}
 
+	query := first(q.r, "xpath")
+	query = strings.Replace(query, "\r\n", "\n", -1)
+	query = strings.Replace(query, "\n\r", "\n", -1)
+	query = strings.Replace(query, "\r", "\n", -1)
 	rules := getMacrosRules(q)
 	fmt.Fprintln(q.w, macroKY.ReplaceAllStringFunc(
-		first(q.r, "xpath"),
+		query,
 		func(s string) string {
 			if s2, ok := rules[s[1:len(s)-1]]; ok {
 				return s2

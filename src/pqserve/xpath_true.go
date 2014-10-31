@@ -516,8 +516,8 @@ func html_xpath_header(q *Context) {
     update2: function(data) {
       if (data.err == "") {
           $('#macromsg').addClass('hide');
-          $('#macrotext').val(data.macros);
           $('#macrotext').text(data.macros);
+          $('#macrotext').val(data.macros);
           macros = data.keys;
       } else {
           $('#macromsg').removeClass('hide').text("Fout: " + data.err);
