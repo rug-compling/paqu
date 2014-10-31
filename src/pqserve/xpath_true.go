@@ -721,7 +721,7 @@ corpus: <select name="db">
 	}
 	fmt.Fprintf(q.w, `<p>
 		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">voorbeelden</a>):<br>
-		<textarea name="xpath" rows="6" cols="80" maxlength="1900" id="xquery">%s</textarea>
+		<textarea name="xpath" rows="6" cols="80" maxlength="1200" id="xquery">%s</textarea>
 		`, html.EscapeString(first(q.r, "xpath")))
 	fmt.Fprint(q.w, `<p>
            <input type="submit" value="Zoeken">
