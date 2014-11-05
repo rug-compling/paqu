@@ -13,6 +13,11 @@ Inhoud:
 <ul>
 <li><a href="#intro" target="_self">Inleiding</a>
 <li><a href="#rel" target="_self">Soorten relaties</a>
+<ul>
+<li><a href="#relhead" target="_self">Relaties met gewoon hoofd</a>
+<li><a href="#relother" target="_self">Andere relaties</a>
+<li><a href="#relnone" target="_self">Enkelzijdige relaties</a>
+</ul>
 <li><a href="#voorb" target="_self">Zoekvoorbeelden</a>
 <li><a href="#xpath" target="_self">XPath</a>
 <li><a href="#contact" target="_self">Contact</a>
@@ -78,6 +83,10 @@ Centrale.
 
     <h2 id="rel">Soorten relaties</h2>
 
+<h3 id="relhead">Relaties met gewoon hoofd</h3>
+
+<img src="relhead.png">
+
 <dl>
 
 <dt><span class="wrd">app</span>
@@ -87,58 +96,6 @@ Centrale.
    <span class="hfd">Piet</span>, een aardige <span class="wrd">man</span>
   </div>
 
-<dt><span class="wrd">body</span>/<span class="hfd">cmp</span>
-
-<dd>rompzin met voegwoord, zoals in
-  <div class="vb">
-   <span class="hfd">omdat</span> hij geen zin <span class="wrd">had</span>
-</div>
-
-<dt><span class="wrd">body</span>/<span class="hfd">rhd</span>
-
-<dd>voor relatieve bijzinnen: de rompzin en het relatieve deel, zoals in
-  <div class="vb">
-   <span class="hfd">die</span> in Amsterdam <span class="wrd">woont</span>
-</div>
-
-<dt><span class="wrd">body</span>/<span class="hfd">whd</span>
-
-<dd>voor vraagzinnen: de rompzin en het vraagwoord, zoals in
-  <div class="vb">
-   <span class="hfd">wie</span> heb je daar <span class="wrd">ontmoet</span>
-</div>
-
-<dt><span class="wrd">cmp</span>/-
-
-<dd>voor voegwoorden die het hoofd van de zin zijn, zoals in
-  <div class="vb">
-   <span class="wrd">Omdat</span> ik geen zin heb.
-</div>
-
-<dt><span class="wrd">cnj</span>/<span class="hfd">cnj</span>
-
-<dd>voor conjuncten die samen in een conjunctie voorkomen, zoals in
-  <div class="vb">
-<span class="wrd">appels</span> en <span class="hfd">peren</span>
-</div>
-
-<dt><span class="wrd">cnj</span>/<span class="hfd">crd</span>
-
-<dd>voor de relatie tussen een conjunct en de coordinator in een conjunctie, zoals in
-  <div class="vb">
-<span class="wrd">appels</span> <span class="hfd">en</span> peren<br>
-appels <span class="hfd">en</span> <span class="wrd">peren</span>
-</div>
-
-<dt><span class="wrd">crd</span>/<span class="hfd">cnj</span>
-<dd>idem
-
-<dt><span class="wrd">crd</span>/<span class="hfd">crd</span>
-
-<dd>voor de relatie tussen twee coordinatoren in een conjunctie, zoals
-  <div class="vb">
-<span class="wrd">zowel</span> Jan <span class="hfd">als</span> Piet
-</div>
 
 <dt><span class="wrd">det</span>
 
@@ -147,28 +104,6 @@ appels <span class="hfd">en</span> <span class="wrd">peren</span>
 <span class="wrd">het</span> <span class="hfd">boek</span>
 </div>
 
-<dt><span class="wrd">dlink</span>/-
-
-<dd>Voor zinnen die met een coordinator beginnen, zoals in
-  <div class="vb">
-<span class="wrd">En</span> ik kom niet!<br>
-<span class="wrd">Maar</span> hij luisterde niet...
-</div>
-
-<dt><span class="wrd">dp</span>/-
-
-<dd>Voor delen van de zin die geen syntactische relatie met de rest van de zin hebben, zoals in
-  <div class="vb">
-<span class="wrd">Vanochtend</span> veel zon
-</div>
-
-<dt><span class="wrd">hd</span>/-
-
-<dd>Voor het hoofd van de zin, zoals in:
-  <div class="vb">
-Hij <span class="wrd">vertrekt</span>.<br>
-Een <span class="wrd">stap</span> die veel ophef veroorzaakt.
-</div>
 
 <dt><span class="wrd">hdf</span>
 
@@ -182,7 +117,7 @@ Een <span class="wrd">stap</span> die veel ophef veroorzaakt.
 <dd>Voor een hoofd met een locatief/directioneel complement
   <div class="vb">
 Hij <span class="hfd">fietste</span> <span class="wrd">naar</span> Zweden.<br>
-Hij <span class="hfd">rende</span> <span class="wrd">het</span> bos in.
+Hij <span class="hfd">rende</span> het <span class="wrd">bos</span> in.
 </div>
 
 <dt><span class="wrd">me</span>
@@ -201,27 +136,6 @@ Een <span class="wrd">aardige</span> <span class="hfd">jongen</span>.<br>
 Hij <span class="hfd">kwam</span> <span class="wrd">om</span> half zes.
 </div>
 
-<dt><span class="wrd">mod</span>/<span class="hfd">cmp</span>
-
-<dd>Voor een modifier bij een ingebedde bijzin, zoals in
-  <div class="vb">
-<span class="wrd">Vooral</span> <span class="hfd">omdat</span> hij te laat arriveerde.
-</div>
-
-<dt><span class="wrd">nucl</span>/-
-
-<dd>Voor een nucleus die als hoofd van de zin fugeert, zoals in
-  <div class="vb">
-<span class="wrd">Stromingen</span>: twee types kun je onderscheiden
-</div>
-
-<dt><span class="wrd">nucl</span>/<span class="hfd">dlink</span>
-
-<dd>Voor de relatie tussen de coordinator en de rompzin in een zin die met een coordinator begint, zoals in
-  <div class="vb">
-<span class="hfd">En</span> dat <span class="wrd">is</span> wel hard nodig.
-</div>
-
 <dt><span class="wrd">obcomp</span>
 
 <dd>Voor de relatie van een hoofd met een comparatief-complement, zoals in
@@ -237,24 +151,11 @@ Hij <span class="hfd">sloeg</span> zijn <span class="wrd">kinderen</span><br>
 <span class="hfd">In</span> <span class="wrd">april</span>
 </div>
 
-<dt><span class="wrd">obj1</span>/<span class="hfd">su</span>
-
-<dd>Voor de relatie tussen een lijdend voorwerp en een onderwerp
-  <div class="vb">
-<span class="hfd">Hij</span> sloeg zijn <span class="wrd">kinderen</span>
-</div>
-
 <dt><span class="wrd">obj2</span>
 
 <dd>Voor de relatie tussen een hoofd en een indirect object, zoals in
   <div class="vb">
 Hij <span class="hfd">gaf</span> de <span class="wrd">leerlingen</span> een kadootje.
-</div>
-
-<dt><span class="wrd">obj2</span>/<span class="hfd">su</span>
-<dd>Voor de relatie tussen een indirect object en het onderwerp, zoals in
-  <div class="vb">
-<span class="hfd">Hij</span> gaf de <span class="wrd">leerlingen</span> een kadootje.
 </div>
 
 <dt><span class="wrd">pc</span>
@@ -288,13 +189,6 @@ Hij <span class="hfd">kwam</span> <span class="wrd">dronken</span> thuis<br>
 Hij <span class="hfd">verft</span> de kozijnen <span class="wrd">geel</span>
 </div>
 
-<dt><span class="wrd">sat</span>/-
-
-<dd>Voor een sateliet die als hoofd van een zin fungeert, zoals in:
-  <div class="vb">
-Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
-</div>
-
 <dt><span class="wrd">se</span>
 
 <dd>Voor de relatie van een hoofd met een reflexief, zoals in
@@ -308,12 +202,6 @@ Hij <span class="hfd">bevindt</span> <span class="wrd">zich</span> in een grot
   <div class="vb">
 <span class="wrd">Ik</span> <span class="hfd">besta</span>.
 </div>
-
-<dt><span class="wrd">su</span>/<span class="hfd">obj1</span>
-<dd>zie boven
-
-<dt><span class="wrd">su</span>/<span class="hfd">obj2</span>
-<dd>zie boven
 
 <dt><span class="wrd">sup</span>
 
@@ -330,14 +218,6 @@ Hij <span class="hfd">belde</span> me <span class="wrd">op</span><br>
 Het <span class="hfd">gaat</span> het <span class="wrd">voor de wind</span>
 </div>
 
-<dt><span class="wrd">tag</span>/-
-
-<dd>Een tag die als hoofd van de zin voorkomt, zoals:
-  <div class="vb">
-<span class="wrd">1.</span> Voeten vegen.<br>
-<span class="wrd">Kok</span>: We overleggen nog.
-</div>
-
 <dt><span class="wrd">vc</span>
 
 <dd>Voor de relatie tussen een hoofd en een verbaal complement
@@ -345,6 +225,156 @@ Het <span class="hfd">gaat</span> het <span class="wrd">voor de wind</span>
 Ik <span class="hfd">verwacht</span> <span class="wrd">dat</span> hij komt<br>
 Ik <span class="hfd">hoopte</span> hem <span class="wrd">te</span> ontmoeten<br>
 Ik <span class="hfd">wil</span> hem niet langer de hand boven het hoofd <span class="wrd">houden</span>
+</div>
+
+</dl>
+
+<h3 id="relother">Andere relaties</h3>
+
+<img src="relother.png">
+
+<dl>
+
+<dt><span class="wrd">body</span>/<span class="hfd">cmp</span>
+
+<dd>rompzin met voegwoord, zoals in
+  <div class="vb">
+   <span class="hfd">omdat</span> hij geen zin <span class="wrd">had</span>
+</div>
+
+
+<dt><span class="wrd">body</span>/<span class="hfd">rhd</span>
+
+<dd>voor relatieve bijzinnen: de rompzin en het relatieve deel, zoals in
+  <div class="vb">
+   <span class="hfd">die</span> in Amsterdam <span class="wrd">woont</span>
+</div>
+
+<dt><span class="wrd">body</span>/<span class="hfd">whd</span>
+
+<dd>voor vraagzinnen: de rompzin en het vraagwoord, zoals in
+  <div class="vb">
+   <span class="hfd">wie</span> heb je daar <span class="wrd">ontmoet</span>
+</div>
+
+<dt><span class="wrd">cnj</span>/<span class="hfd">cnj</span>
+
+<dd>voor conjuncten die samen in een conjunctie voorkomen, zoals in
+  <div class="vb">
+<span class="wrd">appels</span> en <span class="hfd">peren</span>
+</div>
+
+<dt><span class="wrd">cnj</span>/<span class="hfd">crd</span>
+
+<dd>voor de relatie tussen een conjunct en de coordinator in een conjunctie, zoals in
+  <div class="vb">
+<span class="wrd">appels</span> <span class="hfd">en</span> peren<br>
+appels <span class="hfd">en</span> <span class="wrd">peren</span>
+</div>
+
+<dt><span class="wrd">crd</span>/<span class="hfd">cnj</span>
+<dd>idem
+
+<dt><span class="wrd">crd</span>/<span class="hfd">crd</span>
+
+<dd>voor de relatie tussen twee coordinatoren in een conjunctie, zoals
+  <div class="vb">
+<span class="wrd">zowel</span> Jan <span class="hfd">als</span> Piet
+</div>
+
+<dt><span class="wrd">mod</span>/<span class="hfd">cmp</span>
+
+<dd>Voor een modifier bij een ingebedde bijzin, zoals in
+  <div class="vb">
+<span class="wrd">Vooral</span> <span class="hfd">omdat</span> hij te laat arriveerde.
+</div>
+
+<dt><span class="wrd">nucl</span>/<span class="hfd">dlink</span>
+
+<dd>Voor de relatie tussen de coordinator en de rompzin in een zin die met een coordinator begint, zoals in
+  <div class="vb">
+<span class="hfd">En</span> dat <span class="wrd">is</span> wel hard nodig.
+</div>
+
+<dt><span class="wrd">obj1</span>/<span class="hfd">su</span>
+
+<dd>Voor de relatie tussen een lijdend voorwerp en een onderwerp
+  <div class="vb">
+<span class="hfd">Hij</span> sloeg zijn <span class="wrd">kinderen</span>
+</div>
+
+<dt><span class="wrd">obj2</span>/<span class="hfd">su</span>
+<dd>Voor de relatie tussen een indirect object en het onderwerp, zoals in
+  <div class="vb">
+<span class="hfd">Hij</span> gaf de <span class="wrd">leerlingen</span> een kadootje.
+</div>
+
+<dt><span class="wrd">su</span>/<span class="hfd">obj1</span>
+<dd>zie boven
+
+<dt><span class="wrd">su</span>/<span class="hfd">obj2</span>
+<dd>zie boven
+
+</dl>
+
+<h3 id="relnone">Enkelzijdige relaties</h3>
+
+<img src="relnone.png">
+
+
+<dl>
+
+
+<dt><span class="wrd">cmp</span>/-
+
+<dd>voor voegwoorden die het hoofd van de zin zijn, zoals in
+  <div class="vb">
+   <span class="wrd">Omdat</span> ik geen zin heb.
+</div>
+
+<dt><span class="wrd">dlink</span>/-
+
+<dd>Voor zinnen die met een coordinator beginnen, zoals in
+  <div class="vb">
+<span class="wrd">En</span> ik kom niet!<br>
+<span class="wrd">Maar</span> hij luisterde niet...
+</div>
+
+<dt><span class="wrd">dp</span>/-
+
+<dd>Voor delen van de zin die geen syntactische relatie met de rest van de zin hebben, zoals in
+  <div class="vb">
+<span class="wrd">Vanochtend</span> veel zon
+</div>
+
+<dt><span class="wrd">hd</span>/-
+
+<dd>Voor het hoofd van de zin, zoals in:
+  <div class="vb">
+Hij <span class="wrd">vertrekt</span>.<br>
+Een <span class="wrd">stap</span> die veel ophef veroorzaakt.
+</div>
+
+<dt><span class="wrd">nucl</span>/-
+
+<dd>Voor een nucleus die als hoofd van de zin fugeert, zoals in
+  <div class="vb">
+<span class="wrd">Stromingen</span>: twee types kun je onderscheiden
+</div>
+
+<dt><span class="wrd">sat</span>/-
+
+<dd>Voor een sateliet die als hoofd van een zin fungeert, zoals in:
+  <div class="vb">
+Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
+</div>
+
+<dt><span class="wrd">tag</span>/-
+
+<dd>Een tag die als hoofd van de zin voorkomt, zoals:
+  <div class="vb">
+<span class="wrd">1.</span> Voeten vegen.<br>
+<span class="wrd">Kok</span>: We overleggen nog.
 </div>
 
 </dl>
@@ -393,7 +423,7 @@ Ik <span class="hfd">wil</span> hem niet langer de hand boven het hoofd <span cl
 PaQu ondersteunt XPath2 met dezelfde extensies als Dact.
 <p>
 Voorbeelden, zie:
-<a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">Dact Cookbook</a>
+<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">Dact Cookbook</a>
 
 <hr>
     <h2 id="contact">Contact</h2>

@@ -61,22 +61,40 @@ func static_jquery_textcomplete_js(q *Context) {
 	fmt.Fprint(q.w, file__jquery__textcomplete__js)
 }
 
-func static_paqu_css(q *Context) {
-	contentType(q, "text/css")
-	cache(q)
-	fmt.Fprint(q.w, file__paqu__css)
-}
-
 func static_leeg_html(q *Context) {
 	contentType(q, "text/html")
 	cache(q)
 	fmt.Fprintln(q.w, "<!DOCTYPE html>\n<html><head><title></title></head><body></body></html>")
 }
 
+func static_paqu_css(q *Context) {
+	contentType(q, "text/css")
+	cache(q)
+	fmt.Fprint(q.w, file__paqu__css)
+}
+
 func static_paqu_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
 	fmt.Fprint(q.w, file__paqu__png)
+}
+
+func static_relhead_png(q *Context) {
+	contentType(q, "image/png")
+	cache(q)
+	fmt.Fprint(q.w, file__relhead__png)
+}
+
+func static_relnone_png(q *Context) {
+	contentType(q, "image/png")
+	cache(q)
+	fmt.Fprint(q.w, file__relnone__png)
+}
+
+func static_relother_png(q *Context) {
+	contentType(q, "image/png")
+	cache(q)
+	fmt.Fprint(q.w, file__relother__png)
 }
 
 func static_robots_txt(q *Context) {

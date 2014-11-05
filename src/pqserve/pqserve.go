@@ -164,6 +164,9 @@ func main() {
 	handleFunc("delete", remove)
 
 	handleFunc("info.html", static_info_html)
+	handleFunc("relhead.png", static_relhead_png)
+	handleFunc("relnone.png", static_relnone_png)
+	handleFunc("relother.png", static_relother_png)
 
 	handleStatic("debug/env", environment)
 

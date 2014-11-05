@@ -10,6 +10,9 @@ DEPS = \
 	jquery.textcomplete.js \
 	paqu.css \
 	paqu.png \
+	relhead.png \
+	relnone.png \
+	relother.png \
 	robots.txt \
 	tooltip.css \
 	tooltip.js \
