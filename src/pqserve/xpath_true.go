@@ -607,6 +607,13 @@ func html_xpath_header(q *Context) {
       $('#macromsg').addClass('hide');
   }
 
+  function enableDeleteSave(e) {
+      var k = e.which;
+      if (k == 8 || k == 46) {
+        enableSave();
+      }
+  }
+
   function enableSave() {
       $('#macrosave').removeAttr('disabled');
       $('#macrosave').addClass('bold');
@@ -626,7 +633,8 @@ func html_xpath_header(q *Context) {
     $('#openmacro').on('click', openMacro);
     $('#sluitmacro').on('click', sluitMacro);
     $('#macroreset').on('click', disableSave);
-    $('#macrotext').on('keyup', enableSave);
+    $('#macrotext').on('keypress', enableSave);
+    $('#macrotext').on('keyup', enableDeleteSave);
     $('#macrofilename').on('change', function() {
         if ($('#macrofilename').val() == "") {
           $('#macrofilesave').attr('disabled', 'disabled');
@@ -663,7 +671,7 @@ func html_xpath_uitleg(q *Context) {
 <p>
 <hr>
 <p>
-PaQu ondersteunt XPath2 met dezelfde extensies als Dact.
+PaQu ondersteunt XPath2 met dezelfde extensies als Dact: macro's en pipelines.
 <p>
 Voorbeelden, zie:
 <a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">Dact Cookbook</a>
@@ -701,6 +709,7 @@ func html_xpath_form(q *Context) (has_query bool) {
 <textarea rows="6" cols="80" id="macrotext" name="macrotext">%s</textarea><br>
 <input type="submit" value="Opslaan" id="macrosave" disabled="disabled">
 <input type="reset" value="Reset" id="macroreset">
+<input type="button" value="Download" onclick="window.location.assign('downloadmacros')">
 </form>
 <p>
 <hr>

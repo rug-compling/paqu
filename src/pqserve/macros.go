@@ -31,6 +31,36 @@ var (
 	macroMap  = make(map[string]Macros)
 )
 
+func downloadmacros(q *Context) {
+	if !has_dbxml {
+		http.NotFound(q.w, q.r)
+		return
+	}
+
+	if !q.auth {
+		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
+		return
+	}
+
+	contentType(q, "text/plain")
+	q.w.Header().Set("Content-Disposition", "attachment; filename=macros.txt")
+	nocache(q)
+
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+	if err != nil {
+		logerr(err)
+		fmt.Fprintln(q.w, "Fout:", err)
+		return
+	}
+
+	text := ""
+	if rows.Next() {
+		rows.Scan(&text)
+		rows.Close()
+	}
+	fmt.Fprintln(q.w, text)
+}
+
 func savemacros(q *Context) {
 	if !has_dbxml {
 		http.NotFound(q.w, q.r)
