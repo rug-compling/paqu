@@ -18,7 +18,7 @@ func get_dact(archive, filename string) ([]byte, error) {
 	return []byte{}, errGeenDact
 }
 
-func makeDact(dact, xml string, chKill chan bool) error {
+func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 	return errGeenDact
 }
 

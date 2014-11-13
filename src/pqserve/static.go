@@ -40,8 +40,12 @@ func static_favicon_ico(q *Context) {
 
 func static_info_html(q *Context) {
 	writeHead(q, "Info", 4)
-	i := strings.Index(file__info__html, "<body>")
-	s := file__info__html[i+6:]
+	s := "<div>\n"
+	if !has_dbxml {
+		s = "<div class=\"nodbxml\">\n"
+	}
+	i := strings.Index(file__info__html, "<!--##START-->")
+	s += file__info__html[i+15:]
 	data, err := ioutil.ReadFile(path.Join(paqudir, "contact.html"))
 	if err == nil {
 		s = strings.Replace(s, "<!--##CONTACT##-->", string(data), 1)

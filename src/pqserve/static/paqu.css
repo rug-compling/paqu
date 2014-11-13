@@ -352,3 +352,8 @@ a.normal {
     font-weight: bold;
     border: 4px solid #FF6600;
 }
+
+div.nodbxml .dbxml {
+    display: none;
+    visibility: hidden;
+}
