@@ -357,3 +357,12 @@ div.nodbxml .dbxml {
     display: none;
     visibility: hidden;
 }
+
+img.left {
+    float: left;
+    margin: 0px 1em 1em 0px;
+}
+
+br.both {
+    clear: both;
+}

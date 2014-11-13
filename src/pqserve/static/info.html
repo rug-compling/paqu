@@ -14,14 +14,21 @@
 Inhoud:
 <ul>
 <li><a href="#intro" target="_self">Inleiding</a>
-<li><a href="#rel" target="_self">Soorten relaties</a>
-<ul>
-<li><a href="#relhead" target="_self">Relaties met gewoon hoofd</a>
-<li><a href="#relother" target="_self">Andere relaties</a>
-<li><a href="#relnone" target="_self">Enkelzijdige relaties</a>
-</ul>
-<li><a href="#voorb" target="_self">Zoekvoorbeelden</a>
-<li class="dbxml"><a href="#xpath" target="_self" class="dbxml">XPath</a>
+  <ul>
+  <li><a href="#inlnk" target="_self">Links</a>
+  </ul>
+<li><a href="#zoeken" target="_self">Zoeken naar woordrelaties</a>
+  <ul>
+  <li><a href="#rel" target="_self">Soorten relaties</a>
+  <ul>
+    <li><a href="#relhead" target="_self">Relaties met gewoon hoofd</a>
+    <li><a href="#relother" target="_self">Andere relaties</a>
+    <li><a href="#relnone" target="_self">Enkelzijdige relaties</a>
+  </ul>
+  <li><a href="#woorden" target="_self">Woorden en lemma's</a>
+  </ul>
+<li class="dbxml"><a href="#xpath" target="_self" class="dbxml">Zoeken met XPath</a>
+<li><a href="#corpora" target="_self">Corpora</a>
 <li><a href="#contact" target="_self">Contact</a>
 </ul>
 
@@ -36,6 +43,33 @@ syntactische ontleding handmatig gecheckt. In de Lassy Groot treebank
 (700 miljoen woorden) is de syntactische ontleding automatisch
 toegevoegd door de automatische parser Alpino.
 <p>
+De Lassy treebanks zijn gemaakt door de KU Leuven en de
+Rijksuniversiteit Groningen door middel van een financiering van de
+Nederlandse Taalunie. De treebanks kunnen worden verkregen bij de TST
+Centrale.
+
+   <h3 id="inlnk">Links</h3>
+
+De preciese uitleg voor de syntactische annotatie is beschikbaar in de het document
+<a href="http://www.let.rug.nl/vannoord/Lassy/sa-man_lassy.pdf" target="_blank">Lassy Syntactische Annotatie</a> (pdf).
+<p>
+
+De annotatie van woordsoorten en lemma's is beschikbaar in het document
+<a href="http://www.let.rug.nl/vannoord/Lassy/POS_manual.pdf"
+ target="_blank">Part of speech tagging en lemmatisering van het D-coi corpus</a> (pdf).
+
+<p>
+Overige bronnen:
+<p>
+<a href="http://tst-centrale.org">TST Centrale</a><br>
+<a href="http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66">Lassy Klein</a><br>
+<a href="http://tst-centrale.org/producten/corpora/lassy-groot-corpus/6-67">Lassy Groot</a><br>
+<a href="http://www.let.rug.nl/vannoord/Lassy/">Achtergrondinformatie over Lassy</a><br>
+<a href="http://www.let.rug.nl/vannoord/alp/Alpino/">Achtergrondinformatie over Alpino</a>
+
+<hr>
+    <h2 id="zoeken">Zoeken naar woordrelaties</h2>
+
 In de toepassing kun je zoeken naar woord-paren en hun syntactische
 relatie (zoals onderwerp, lijdend voorwerp, bepaling). In welke zinnen
 komt
@@ -67,27 +101,30 @@ Op de bladzijde met de gevonden zinnen kun je per zin de preciese
 syntactische structuur bekijken door op de <em>boom</em>-link te klikken. Je
 kunt op de <em>statistiek</em>-knop klikken om de frequentie-informatie van
 alle gevonden zinnen en woord-paren te zien te krijgen.
+
+    <h3 id="rel">Soorten relaties</h3>
+
+<h4 id="relhead">Relaties met gewoon hoofd</h4>
+
+<img src="relhead.png" alt="su" class="left">
+
+Een relatie zoals "su" bestaat tussen een hoofd en zijn onderwerp. De relatie
+geldt
+in het plaatje bijvoorbeeld tussen <span class="hfd">fietsen</span> en
+      <span class="wrd">kinderen</span>.
 <p>
-De Lassy treebanks zijn gemaakt door de KU Leuven en de
-Rijksuniversiteit Groningen door middel van een financiering van de
-Nederlandse Taalunie. De treebanks kunnen worden verkregen bij de TST
-Centrale.
+<a href="/?db=_default&amp;rel=obj1&amp;hword=stelen&amp;postag=n" target="_blank">Voorbeeld 1:</a> Je kunt deze relatie gebruiken om te zoeken naar alle
+			      zelfstandig naamwoorden (n) die als
+			      lijdend voorwerp (obj1) bij
+<span class="hfd">stelen</span> voorkomen.
+<p>
+<a href="/?db=_default&amp;word=graag&amp;rel=mod&amp;hpostag=ww"
+ target="_blank">Voorbeeld 2:</a>
+ Zoek naar alle werkwoorden (ww) waarbij <span class="wrd">graag</span> als
+modifier (mod) optreedt.
 
-	      <h3>Links</h3>
 
-<a href="http://tst-centrale.org">TST Centrale</a><br>
-<a href="http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66">Lassy Klein</a><br>
-<a href="http://tst-centrale.org/producten/corpora/lassy-groot-corpus/6-67">Lassy Groot</a><br>
-<a href="http://www.let.rug.nl/vannoord/Lassy/">Achtergrondinformatie over Lassy</a><br>
-<a href="http://www.let.rug.nl/vannoord/alp/Alpino/">Achtergrondinformatie over Alpino</a>
-
-<hr>
-
-    <h2 id="rel">Soorten relaties</h2>
-
-<h3 id="relhead">Relaties met gewoon hoofd</h3>
-
-<img src="relhead.png" alt="su">
+<br class="both">
 
 <dl>
 
@@ -231,9 +268,29 @@ Ik <span class="hfd">wil</span> hem niet langer de hand boven het hoofd <span cl
 
 </dl>
 
-<h3 id="relother">Andere relaties</h3>
+<h4 id="relother">Andere relaties</h4>
 
-<img src="relother.png" alt="body/whd">
+<img src="relother.png" alt="body/whd" class="left">
+
+In de syntactische annotatie zijn er ook andere relaties dan relaties tussen
+hoofden en complementen en bepalingen. Voorbeelden van deze relaties zijn onder
+andere de relatie tussen een voegwoord en de rompzin, of de relatie tussen een
+vraagwoordgroep en de rompzin.
+<p>
+De relatie <b>body/whd</b> bestaat in het plaatje tussen
+het woord <span class="wrd">fietsen</span> en
+<span class="hfd">kinderen</span>, omdat <span class="wrd">fietsen</span> het
+hoofd is van de rompzin (<b>body</b>) die
+hoort bij de vraagwoordgroep (<b>whd</b>) waarvan <span class="hfd">kinderen</span> het hoofd is.
+<p>
+<a href="/?db=_default&amp;rel=cnj%2Fcnj&amp;hword=appel&amp;postag=n" target="_blank">Voorbeeld:</a>
+Deze relaties kun
+je gebruiken om te zoeken naar alle zelfstandig naamwoorden
+(n) die in de relatie
+cnj/cnj met <span class="hfd">appel</span> voorkomen.
+
+
+<br class="both">
 
 <dl>
 
@@ -319,10 +376,27 @@ appels <span class="hfd">en</span> <span class="wrd">peren</span>
 
 </dl>
 
-<h3 id="relnone">Enkelzijdige relaties</h3>
+<h4 id="relnone">Enkelzijdige relaties</h4>
 
-<img src="relnone.png" alt="cmp/-">
+<img src="relnone.png" alt="cmp/-" class="left">
 
+Sommige woorden zijn zelf niet het complement of de bepaling bij een ander
+woord.
+In het plaatje is <span class="wrd">Omdat</span> geen afhankelijk element, want er is geen ander woord
+waar <span class="wrd">Omdat</span> een bepaling of complement bij is. In zulke gevallen zou je kunnen
+zeggen dat <span class="wrd">Omdat</span> afhankelijk is van de &quot;top&quot;-knoop.
+<p>
+Om zulke woorden in de
+interface te kunnen vinden, worden de (pseudo)-relaties cmp/-, dlink/-, hd/-, etc
+gebruikt.
+<p>
+<a href="/?db=_default&amp;rel=hd%2F-&amp;postag=ww" target="_blank">Voorbeeld:</a>
+Op deze manier kun je zoeken naar werkwoorden die als
+hoofd van de hele uiting optreden, door naar de relatie 'hd/-' en postag 'ww'
+te zoeken.
+
+
+<br class="both">
 
 <dl>
 
@@ -380,10 +454,10 @@ Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
 </div>
 
 </dl>
-<hr>
 
-    <h2 id="voorb">Zoekvoorbeelden</h2>
-    <h3>Zoeken naar woorden</h3>
+
+    <h3 id="woorden">Zoeken naar woorden en lemma's</h3>
+
     Zoek naar het woord <em>fiets</em>, inclusief vervoegingen en
     varianten in collocatie (hoofdletters/kleine letters, met/zonder accenten):
     <div class="example">
@@ -411,22 +485,20 @@ Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
     <div class="example">
       <span class="wrd">woord</span>: <a href="/?db=_default&amp;word=fiets%25">fiets%</a>
     </div>
-    <h3>Complexere voorbeelden</h3>
-    Wat er gestolen wordt:
-    <div class="example">
-      <span class="wrd">woord</span>, postag: n <br>
-      relatie: obj1<br>
-      <span class="hfd">hoofdwoord</span>: <a href="/?db=_default&amp;rel=obj1&amp;hword=stelen&amp;postag=n&amp;hpostag=ww">stelen</a>, postag: ww
-    </div>
 
 <hr class="dbxml">
-<h2 id="xpath" class="dbxml">XPath</h2>
+<h2 id="xpath" class="dbxml">Zoeken met XPath</h2>
 <div class="dbxml">
-  PaQu ondersteunt XPath2 met dezelfde extensies als Dact.
+  PaQu ondersteunt XPath2 met dezelfde extensies als Dact: macro's en pipelines.
   <p>
   Voorbeelden, zie:
   <a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">Dact Cookbook</a>
 </div>
+
+<hr>
+    <h2 id="corpora">Corpora</h2>
+
+Over beschikbare corpora en zelf corpora toevoegen
 
 <hr>
     <h2 id="contact">Contact</h2>
