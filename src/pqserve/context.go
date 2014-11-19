@@ -147,7 +147,7 @@ func handleFunc(url string, handler func(*Context)) {
 			if q.auth {
 				s = fmt.Sprintf("IF(`i`.`owner` = \"none\", \"A\", IF(`i`.`owner` = %q, \"B\", \"C\")) ", q.user)
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
-				o = "6, 2"
+				o = "7, 2"
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+
