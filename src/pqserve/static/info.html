@@ -15,9 +15,9 @@ Inhoud:
 <ul>
 <li><a href="#intro" target="_self">Inleiding</a>
   <ul>
-  <li><a href="#inlnk" target="_self">Links</a>
+  <li><a href="#inlnk" target="_self">Nadere informatie</a>
   </ul>
-<li><a href="#zoeken" target="_self">Zoeken naar woordrelaties</a>
+<li><a href="#zoeken" target="_self">Zoeken naar woordparen</a>
   <ul>
   <li><a href="#rel" target="_self">Soorten relaties</a>
   <ul>
@@ -35,53 +35,69 @@ Inhoud:
 <hr>
     <h2 id="intro">Inleiding</h2>
 
-Met deze toepassing kun je zoeken naar woord-paren in delen van de
-Lassy treebanks. De Lassy treebanks bestaan uit Nederlandstalige
-zinnen die voorzien zijn van hun syntactische ontleding. In de Lassy
-Klein treebank (1 miljoen woorden) is voor elke zin de
-syntactische ontleding handmatig gecheckt. In de Lassy Groot treebank
-(700 miljoen woorden) is de syntactische ontleding automatisch
-toegevoegd door de automatische parser Alpino.
+Met PaQu kun je zoeken in syntactisch geannoteerde Nederlandstalige
+corpora. PaQu ondersteunt twee manieren van zoeken. Met de eerste,
+eenvoudige, manier kun je naar woordparen zoeken, met daarbij
+eventueel hun syntactische relatie. De tweede, ingewikkeldere, manier
+gebruikt de zoektaal XPath.
 <p>
-De Lassy treebanks zijn gemaakt door de KU Leuven en de
-Rijksuniversiteit Groningen door middel van een financiering van de
-Nederlandse Taalunie. De treebanks kunnen worden verkregen bij de TST
-Centrale.
+In PaQu is een aantal syntactisch geannoteerde corpora standaard
+beschikbaar. Maar het is ook mogelijk om je eigen teksten aan te
+bieden. Deze teksten worden dan door de automatische ontleder
+geanalyseerd, en opgeslagen. Vervolgens kun je dan op dezelfde manier
+in je eigen teksten zoeken, dus zowel zoeken naar woordparen als
+zoeken met XPath.
+<p>
+Om eigen teksten aan PaQu aan te kunnen bieden, en om in die eigen
+teksten te kunnen zoeken moet je ingelogd zijn. Vervolgens kun je via
+de tab <em>Corpora</em> je eigen teksten beheren. Je hebt daarbij de keus
+om je teksten ook voor andere gebruikers doorzoekbaar te maken.
+<p>
+De syntactische annotatie die PaQu ondersteunt volgt de richtlijnen
+die in het Lassy-project zijn gebruikt om de treebanks van Lassy te
+maken. Er zijn twee van die treebanks. In Lassy Klein (1
+miljoen woorden) is voor elke zin de syntactische ontleding handmatig
+gecheckt. In Lassy Groot (700 miljoen woorden) is de
+syntactische ontleding automatisch toegevoegd door de automatische
+parser Alpino. Beide treebanks worden door PaQu ondersteund.
 
-   <h3 id="inlnk">Links</h3>
+<h3 id="inlnk">Nadere informatie</h3>
 
 De preciese uitleg voor de syntactische annotatie is beschikbaar in de het document
 <a href="http://www.let.rug.nl/vannoord/Lassy/sa-man_lassy.pdf" target="_blank">Lassy Syntactische Annotatie</a> (pdf).
 <p>
-
 De annotatie van woordsoorten en lemma's is beschikbaar in het document
 <a href="http://www.let.rug.nl/vannoord/Lassy/POS_manual.pdf"
  target="_blank">Part of speech tagging en lemmatisering van het D-coi corpus</a> (pdf).
+<p>
+Achtergrondinformatie is beschikbaar over
+<a href="http://www.let.rug.nl/vannoord/Lassy/">Lassy</a>
+en
+<a href="http://www.let.rug.nl/vannoord/alp/Alpino/">Alpino</a>.
+<p>
 
-<p>
-Overige bronnen:
-<p>
-<a href="http://tst-centrale.org">TST Centrale</a><br>
-<a href="http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66">Lassy Klein</a><br>
-<a href="http://tst-centrale.org/producten/corpora/lassy-groot-corpus/6-67">Lassy Groot</a><br>
-<a href="http://www.let.rug.nl/vannoord/Lassy/">Achtergrondinformatie over Lassy</a><br>
-<a href="http://www.let.rug.nl/vannoord/alp/Alpino/">Achtergrondinformatie over Alpino</a>
+De Lassy treebanks zijn te verkrijgen via de
+<a href="http://tst-centrale.org">TST Centrale</a>:
+<ul>
+<li><a href="http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66">Lassy Klein</a><br>
+<li><a href="http://tst-centrale.org/producten/corpora/lassy-groot-corpus/6-67">Lassy Groot</a><br>
+</ul>
 
 <hr>
-    <h2 id="zoeken">Zoeken naar woordrelaties</h2>
+    <h2 id="zoeken">Zoeken naar woordparen</h2>
 
 In de toepassing kun je zoeken naar woord-paren en hun syntactische
 relatie (zoals onderwerp, lijdend voorwerp, bepaling). In welke zinnen
 komt
-<a href="/?db=_default&amp;word=auto&amp;rel=obj1&amp;hword=stelen">het
-	  woord <em>auto</em> voor als lijdend voorwerp van het
-	  werkwoord <em>stelen</em></a>?
+<a href="/?db=_default&amp;word=bier&amp;rel=obj1&amp;hword=drinken">het
+	  woord <em>bier</em> voor als lijdend voorwerp van het
+	  werkwoord <em>drinken</em></a>?
 In welke zinnen komen
-<a href="/?db=_default&amp;word=beschuit&amp;rel=cnj%2Fcnj&amp;hword=appel">de woorden <em>beschuit</em> en <em>appel</em> voor
+<a href="/?db=_default&amp;word=Nederland&amp;rel=cnj%2Fcnj&amp;hword=België">de woorden <em>Nederland</em> en <em>België</em> voor
 als conjuncten in een coordinatie</a>?
 In welke zinnen komt
-<a href="/?db=_default&amp;word=geen&amp;rel=det&amp;hword=toekomst&amp;postag=&amp;hpostag=">het woord <em>geen</em>
-voor als determiner bij het woord <em>toekomst</em></a>?
+<a href="/?db=_default&amp;word=geen&amp;rel=det&amp;hword=geld&amp;postag=&amp;hpostag=">het woord <em>geen</em>
+voor als determiner bij het woord <em>geld</em></a>?
 <p>
 Voor elke zoekvraag kun je dus twee woorden specificeren, en eventueel
 de gezochte syntactische relatie. Je kunt van elk woord ook de
@@ -98,8 +114,8 @@ In welke zinnen komt
 <a href="/?db=_default&amp;postag=bw&amp;rel=mod&amp;hpostag=ww">een bijwoord voor als bepaling bij een werkwoord</a>?
 <p>
 Op de bladzijde met de gevonden zinnen kun je per zin de preciese
-syntactische structuur bekijken door op de <em>boom</em>-link te klikken. Je
-kunt op de <em>statistiek</em>-knop klikken om de frequentie-informatie van
+syntactische structuur bekijken door op de <em>boom</em>-link &#10020; te klikken.
+Je kunt op de knoppen voor tellingen klikken om de informatie van
 alle gevonden zinnen en woord-paren te zien te krijgen.
 
     <h3 id="rel">Soorten relaties</h3>
@@ -490,8 +506,12 @@ Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
 <hr class="dbxml">
 <h2 id="xpath" class="dbxml">Zoeken met XPath</h2>
 <div class="dbxml">
-  PaQu ondersteunt XPath2 met dezelfde extensies als Dact: macro's en pipelines.
-  <p>
+  PaQu ondersteunt XPath2 met twee extensies, namelijk het gebruik van macro's, en het
+gebruik van pipelines, zoals dat in
+<a href="http://rug-compling.github.io/dact/">Dact</a> is ontwikkeld. Om macro's te
+kunnen gebruiken moet je zijn ingelogd. Klik op de knop <em>Macro's</em> om
+macro's te kunnen uploaden en/of te bewerken.
+<p>
   Voorbeelden, zie:
   <a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">Dact Cookbook</a>
 </div>
@@ -499,6 +519,7 @@ Het antwoord ligt voor de hand: <span class="wrd">luiheid</span>.
 <hr>
     <h2 id="corpora">Corpora</h2>
 
+TODO:
 Over beschikbare corpora en zelf corpora toevoegen
 
 <hr>

@@ -465,7 +465,7 @@ $('#loading span').html('%.1f%%');
 
 	fmt.Fprint(q.w, `
 		<p>
-		<input type="submit" value="statistiek">
+		<input type="submit" value="tellingen">
 		</form>
 		<p>
         <iframe src="leeg.html" name="xframe" class="hide"></iframe>

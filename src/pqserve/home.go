@@ -301,7 +301,7 @@ func home(q *Context) {
 		<input type="hidden" name="hpostag" value="%s">
 		<input type="hidden" name="hword" value="%s">
 		<input type="hidden" name="db" value="%s">
-		<input type="submit" value="statistiek &mdash; algemeen">
+		<input type="submit" value="tellingen &mdash; algemeen">
 		</form>
 		</div>
         <img src="busy.gif" id="busy" class="hide" alt="aan het werk...">
@@ -341,7 +341,7 @@ func home(q *Context) {
 		  <td><input type="checkbox" name="chpostag" value="1">postag
 		</table>
 		<p>
-		<input type="submit" value="statistiek &mdash; gerelateerd">
+		<input type="submit" value="tellingen van combinaties">
 		</form>
 		<p>
 		<div id="statresults">
