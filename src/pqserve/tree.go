@@ -47,7 +47,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -316,7 +315,7 @@ func tree(q *Context) {
 	set_refs(ctx, alpino.Node0)
 
 	// Nodes
-	print_nodes(ctx, alpino.Node0)
+	print_nodes(q, ctx, alpino.Node0)
 
 	// Terminals
 	ctx.graph.WriteString("\n    node [fontname=\"Helvetica-Oblique\", shape=box, color=\"#d3d3d3\", style=filled];\n\n")
@@ -463,7 +462,7 @@ func set_refs(ctx *TreeContext, node *Node) {
 	}
 }
 
-func print_nodes(ctx *TreeContext, node *Node) {
+func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 	idx := ""
 	style := ""
 
@@ -489,16 +488,7 @@ func print_nodes(ctx *TreeContext, node *Node) {
 	// attributen
 	var tooltip bytes.Buffer
 	tooltip.WriteString("<table class=\"attr\">")
-	keys := NodeTags
-	if node.FullNode.other != nil {
-		keys = make([]string, len(NodeTags), len(NodeTags)+len(node.FullNode.other))
-		copy(keys, NodeTags)
-		for key := range node.FullNode.other {
-			keys = append(keys, key)
-		}
-		sort.Strings(keys)
-	}
-	for _, attr := range keys {
+	for _, attr := range q.attrlist {
 		if value := getAttr(attr, &node.FullNode); value != "" {
 			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", html.EscapeString(attr), html.EscapeString(value)))
 		}
@@ -514,7 +504,7 @@ func print_nodes(ctx *TreeContext, node *Node) {
 
 	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v%v\"%s, tooltip=\"%s\"];\n", node.Id, idx, lbl, style, dotquote2(tooltip.String())))
 	for _, d := range node.NodeList {
-		print_nodes(ctx, d)
+		print_nodes(q, ctx, d)
 	}
 }
 

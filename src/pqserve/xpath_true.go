@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[a-z][-_a-z]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
+	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
 	keyTags    = make(map[string]bool)
 	xpathNames = map[string]bool{
 		"ancestor-or-self::":   true,
@@ -124,7 +124,7 @@ PARTLOOP:
 				continue
 			}
 			if s[0] == '@' {
-				if keyTags[s[1:]] {
+				if keyTags[s[1:]] || q.attrmap[s[1:]] {
 					continue
 				}
 				lvl = 1
@@ -451,7 +451,7 @@ $('#loading span').html('%.1f%%');
 
 	for i := 1; i <= 3; i++ {
 		fmt.Fprintf(q.w, "<select name=\"attr%d\">\n<option value=\"\">--</option>\n", i)
-		for _, s := range NodeTags {
+		for _, s := range q.attrlist {
 			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
 		}
 		fmt.Fprintln(q.w, "</select>")
@@ -739,63 +739,11 @@ corpus: <select name="db">
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node'];
-var other = ['/node',
-        "@aform",
-        "@begin",
-        "@buiging",
-        "@case",
-        "@cat",
-        "@comparative",
-        "@conjtype",
-        "@def",
-        "@dial",
-        "@end",
-        "@frame",
-        "@gen",
-        "@genus",
-        "@getal",
-        "@getal-n",
-        "@graad",
-        "@id",
-        "@index",
-        "@infl",
-        "@lcat",
-        "@lemma",
-        "@lwtype",
-        "@mwu_root",
-        "@mwu_sense",
-        "@naamval",
-        "@neclass",
-        "@npagr",
-        "@ntype",
-        "@num",
-        "@numtype",
-        "@pb",
-        "@pdtype",
-        "@per",
-        "@persoon",
-        "@pos",
-        "@positie",
-        "@postag",
-        "@pt",
-        "@pvagr",
-        "@pvtijd",
-        "@refl",
-        "@rel",
-        "@root",
-        "@sc",
-        "@sense",
-        "@special",
-        "@spectype",
-        "@status",
-        "@tense",
-        "@vform",
-        "@vwtype",
-        "@vztype",
-        "@wh",
-        "@wk",
-        "@word",
-        "@wvorm"];
+var other = ['/node'`)
+	for _, a := range q.attrlist {
+		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
+	}
+	fmt.Fprint(q.w, `];
 
 var axis = [
 		"node",
