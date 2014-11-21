@@ -85,6 +85,66 @@ const (
 //. Variabelen
 
 var (
+	NodeTags = []string{
+		"aform",
+		"begin",
+		"buiging",
+		"case",
+		"cat",
+		"comparative",
+		"conjtype",
+		"def",
+		"dial",
+		"end",
+		"frame",
+		"gen",
+		"genus",
+		"getal",
+		"getal-n",
+		"graad",
+		"id",
+		"index",
+		"infl",
+		"lcat",
+		"lemma",
+		"lwtype",
+		"mwu_root",
+		"mwu_sense",
+		"naamval",
+		"neclass",
+		"npagr",
+		"ntype",
+		"num",
+		"numtype",
+		"pb",
+		"pdtype",
+		"per",
+		"persoon",
+		"pos",
+		"positie",
+		"postag",
+		"pt",
+		"pvagr",
+		"pvtijd",
+		"refl",
+		"rel",
+		"root",
+		"sc",
+		"sense",
+		"special",
+		"spectype",
+		"status",
+		"tense",
+		"vform",
+		"vwtype",
+		"vztype",
+		"wh",
+		"wk",
+		"word",
+		"wvorm",
+	}
+	keyTags = make(map[string]bool)
+
 	db *sql.DB
 
 	lineno = 0
@@ -123,6 +183,8 @@ var (
 	Cfg Config
 
 	utfRE = regexp.MustCompile("[^\001-\uFFFF]")
+
+	attributes = make(map[string]bool)
 )
 
 //. Main
@@ -247,6 +309,17 @@ Opties:
 				}
 				rows.Close()
 			}
+			rows, err = db.Query("SELECT `attr` FROM `" + Cfg.Prefix + "_info` WHERE `id` = \"" + prefix + "\"")
+			util.CheckErr(err)
+			if rows.Next() {
+				var s string
+				if rows.Scan(&s) != nil {
+					for _, attr := range strings.Fields(s) {
+						attributes[attr] = true
+					}
+				}
+				rows.Close()
+			}
 			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_deprel ...")
 			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel
 				DROP INDEX word,
@@ -341,6 +414,10 @@ Opties:
 		util.CheckErr(err)
 	}
 
+	for _, tag := range NodeTags {
+		keyTags[tag] = true
+	}
+
 	/*
 		Bestandnamen van stdin inlezen en verwerken.
 	*/
@@ -393,6 +470,13 @@ Opties:
 	buf_flush(SENT)
 	buf_flush(FILE)
 	buf_flush(ARCH)
+
+	attrs := make([]string, 0, len(attributes))
+	for attr := range attributes {
+		attrs = append(attrs, attr)
+	}
+	db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `attr` = %q WHERE `id` = %q", Cfg.Prefix, strings.Join(attrs, " "), prefix))
+
 	db.Exec("COMMIT;")
 
 	fmt.Println("Tijd:", time.Now().Sub(now))
@@ -1342,4 +1426,15 @@ func noext(name string, ext ...string) string {
 		}
 	}
 	return name
+}
+
+type NodeTT Node
+
+func (x *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	for _, attr := range start.Attr {
+		if n := attr.Name.Local; !keyTags[n] {
+			attributes[n] = true
+		}
+	}
+	return d.DecodeElement((*NodeTT)(x), &start)
 }
