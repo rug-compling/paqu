@@ -492,9 +492,7 @@ func print_nodes(ctx *TreeContext, node *Node) {
 	keys := NodeTags
 	if node.FullNode.other != nil {
 		keys = make([]string, len(NodeTags), len(NodeTags)+len(node.FullNode.other))
-		for i, key := range NodeTags {
-			keys[i] = key
-		}
+		copy(keys, NodeTags)
 		for key := range node.FullNode.other {
 			keys = append(keys, key)
 		}
