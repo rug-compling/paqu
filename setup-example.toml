@@ -2,12 +2,14 @@
 ## Dit bestand is in toml-formaat, zie: https://github.com/mojombo/toml
 ##
 ## Dit is de setup voor deze programma's:
-##  - dbinit
 ##  - pqbuild
+##  - pqconfig
+##  - pqinit
+##  - pqrmcorpus
+##  - pqrmuser
 ##  - pqserve
+##  - pqsetquota
 ##  - pqstatus
-##  - rmuser
-##  - setquota
 ##
 ## Dit bestand word ingelezen als: $PAQU/setup.toml
 ##
@@ -47,7 +49,7 @@ smtppass = ""
 login = "username:password@/paqu"
 
 # Elke table in MySQL krijgt dit als prefix, gevolgd door een
-# underscore, om conflicten met andere tepassingen in dezelfde database
+# underscore, om conflicten met andere toepassingen in dezelfde database
 # te vermijden.
 prefix = "pq"
 
@@ -158,7 +160,7 @@ addr  = [ "all" ]
 # Wie mag een account aanmaken, en dus zelf corpora uploaden?
 # Selectie op basis van e-mailadres.
 # Als dit ontbreekt mag iedereen een account aanmaken.
-# Een mailadres is een reguliere expressie, zonder hoofdletters.
+# Een mailadres is een reguliere expressie, zonder hoofdletters, of het woord "all".
 # De EERSTE regel die matcht bepaalt of de bezoeker toegang heeft.
 # Als geen enkele regel matcht heeft de gebruiker toegang.
 
