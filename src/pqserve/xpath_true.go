@@ -75,12 +75,6 @@ var (
 	}
 )
 
-func init() {
-	for _, tag := range NodeTags {
-		keyTags[tag] = true
-	}
-}
-
 func xpathcheck(q *Context) {
 	contentType(q, "text/plain")
 

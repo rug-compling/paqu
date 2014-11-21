@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"html"
 	"net/http"
+	"strconv"
 )
 
 type FullNode struct {
@@ -63,6 +65,7 @@ type FullNode struct {
 	Wk          string `xml:"wk,attr"`
 	Word        string `xml:"word,attr"`
 	Wvorm       string `xml:"wvorm,attr"`
+	other       map[string]string
 }
 
 var NodeTags = []string{
@@ -239,7 +242,142 @@ func getAttr(attr string, n *FullNode) string {
 	case "wvorm":
 		return n.Wvorm
 	}
+	if n.other != nil {
+		return n.other[attr]
+	}
 	return ""
+}
+
+type NodeTT Node
+
+func (x *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+
+	for _, attr := range start.Attr {
+
+		n := attr.Name.Local
+		v := attr.Value
+
+		switch n {
+		case "aform":
+			x.Aform = v
+		case "begin":
+			x.Begin, _ = strconv.Atoi(v)
+		case "buiging":
+			x.Buiging = v
+		case "case":
+			x.Case = v
+		case "cat":
+			x.Cat = v
+		case "comparative":
+			x.Comparative = v
+		case "conjtype":
+			x.Conjtype = v
+		case "def":
+			x.Def = v
+		case "dial":
+			x.Dial = v
+		case "end":
+			x.End, _ = strconv.Atoi(v)
+		case "frame":
+			x.Frame = v
+		case "gen":
+			x.Gen = v
+		case "genus":
+			x.Genus = v
+		case "getal":
+			x.Getal = v
+		case "getal-n":
+			x.GetalN = v
+		case "graad":
+			x.Graad = v
+		case "id":
+			x.Id = v
+		case "index":
+			x.Index = v
+		case "infl":
+			x.Infl = v
+		case "lcat":
+			x.Lcat = v
+		case "lemma":
+			x.Lemma = v
+		case "lwtype":
+			x.Lwtype = v
+		case "mwu_root":
+			x.MwuRoot = v
+		case "mwu_sense":
+			x.MwuSense = v
+		case "naamval":
+			x.Naamval = v
+		case "neclass":
+			x.Neclass = v
+		case "npagr":
+			x.Npagr = v
+		case "ntype":
+			x.Ntype = v
+		case "num":
+			x.Num = v
+		case "numtype":
+			x.Numtype = v
+		case "pb":
+			x.Pb = v
+		case "pdtype":
+			x.Pdtype = v
+		case "per":
+			x.Per = v
+		case "persoon":
+			x.Persoon = v
+		case "pos":
+			x.Pos = v
+		case "positie":
+			x.Positie = v
+		case "postag":
+			x.Postag = v
+		case "pt":
+			x.Pt = v
+		case "pvagr":
+			x.Pvagr = v
+		case "pvtijd":
+			x.Pvtijd = v
+		case "refl":
+			x.Refl = v
+		case "rel":
+			x.Rel = v
+		case "root":
+			x.Root = v
+		case "sc":
+			x.Sc = v
+		case "sense":
+			x.Sense = v
+		case "special":
+			x.Special = v
+		case "spectype":
+			x.Spectype = v
+		case "status":
+			x.Status = v
+		case "tense":
+			x.Tense = v
+		case "vform":
+			x.Vform = v
+		case "vwtype":
+			x.Vwtype = v
+		case "vztype":
+			x.Vztype = v
+		case "wh":
+			x.Wh = v
+		case "wk":
+			x.Wk = v
+		case "word":
+			x.Word = v
+		case "wvorm":
+			x.Wvorm = v
+		default:
+			if x.other == nil {
+				x.other = make(map[string]string)
+			}
+			x.other[n] = v
+		}
+	}
+	return d.DecodeElement((*NodeTT)(x), &start)
 }
 
 func updateText(q *Context, s string) {
@@ -258,5 +396,11 @@ func updateError(q *Context, err error, is_html bool) {
 		updateText(q, "Interne fout: "+html.EscapeString(s))
 	} else {
 		fmt.Fprintln(q.w, "Interne fout:", s)
+	}
+}
+
+func init() {
+	for _, tag := range NodeTags {
+		keyTags[tag] = true
 	}
 }

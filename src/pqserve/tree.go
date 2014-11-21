@@ -47,6 +47,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -488,9 +489,20 @@ func print_nodes(ctx *TreeContext, node *Node) {
 	// attributen
 	var tooltip bytes.Buffer
 	tooltip.WriteString("<table class=\"attr\">")
-	for _, attr := range NodeTags {
+	keys := NodeTags
+	if node.FullNode.other != nil {
+		keys = make([]string, len(NodeTags), len(NodeTags)+len(node.FullNode.other))
+		for i, key := range NodeTags {
+			keys[i] = key
+		}
+		for key := range node.FullNode.other {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+	}
+	for _, attr := range keys {
 		if value := getAttr(attr, &node.FullNode); value != "" {
-			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", attr, html.EscapeString(value)))
+			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", html.EscapeString(attr), html.EscapeString(value)))
 		}
 	}
 	tooltip.WriteString("</table>")
