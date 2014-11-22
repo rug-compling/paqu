@@ -85,19 +85,13 @@ func xpathcheck(q *Context) {
 		return
 	}
 
-	ch := true
+	nocache(q)
+
 	if strings.Contains(query, "%") {
 		rules := getMacrosRules(q)
 		query = macroKY.ReplaceAllStringFunc(query, func(s string) string {
-			if ch {
-				nocache(q)
-				ch = false
-			}
 			return rules[s[1:len(s)-1]]
 		})
-	}
-	if ch {
-		cache(q)
 	}
 
 	lvl := 0
