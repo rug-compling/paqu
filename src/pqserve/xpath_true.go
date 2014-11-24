@@ -235,7 +235,7 @@ func xpath(q *Context) {
 
 	fmt.Fprintf(q.w, "<ol start=\"%d\" id=\"ol\" class=\"xpath\">\n</ol>\n", offset+1)
 
-	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\"> <span></span></div>")
+	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\" alt=\"[bezig]\"> <span></span></div>")
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
@@ -503,12 +503,12 @@ func html_xpath_header(q *Context) {
     },
     update2: function(data) {
       if (data.err == "") {
-          $('#macromsg').addClass('hide');
+          $('#macromsg').slideUp(200);
           $('#macrotext').text(data.macros);
           $('#macrotext').val(data.macros);
           macros = data.keys;
       } else {
-          $('#macromsg').removeClass('hide').text("Fout: " + data.err);
+          $('#macromsg').text("Fout: " + data.err).slideDown(400);
       }
       disableSave();
     }
@@ -552,9 +552,9 @@ func html_xpath_header(q *Context) {
       catch(err) {}
     }
     if (reMacro.test(xquery.val())) {
-       $('#btExpand').removeClass('hide');
+       $('#btExpand').show(400);
     } else {
-       $('#btExpand').addClass('hide');
+       $('#btExpand').hide(200);
     }
     lastcall = $.ajax("xpathcheck?" + xquery.serialize())
       .done(function(data) {
@@ -581,18 +581,20 @@ func html_xpath_header(q *Context) {
       }).fail(function(e) {
          $("#macroInner").text(e.responseText);
       })
-      $('#macroOuter').removeClass('hide');
+      $('#macroOuter').slideUp(200).slideDown(400);
   }
 
+  var macroIsOpen = false;
   function openMacro() {
-      $('#openmacro').addClass('hide');
-      $('#macros').removeClass('hide');
-  }
-
-  function sluitMacro() {
-      $('#openmacro').removeClass('hide');
-      $('#macros').addClass('hide');
-      $('#macromsg').addClass('hide');
+    if (macroIsOpen) {
+      $("#openmacro").text("Macro's")
+      $('#macros').slideUp(200);
+      macroIsOpen = false;
+    } else {
+      $("#openmacro").text("Macro's sluiten")
+      $('#macros').slideDown(400);
+      macroIsOpen = true;
+    }
   }
 
   function enableDeleteSave(e) {
@@ -619,7 +621,6 @@ func html_xpath_header(q *Context) {
     xquery.on('click', qcheck);
     qcheckdo();
     $('#openmacro').on('click', openMacro);
-    $('#sluitmacro').on('click', sluitMacro);
     $('#macroreset').on('click', disableSave);
     $('#macrotext').on('keypress', enableSave);
     $('#macrotext').on('keyup', enableDeleteSave);
@@ -636,7 +637,7 @@ func html_xpath_header(q *Context) {
           $('#macrofilesave').removeClass('bold');
     });
     $('#btExpand').on('click', macroExpand);
-    $('#btClose').on('click', function() { $('#macroOuter').addClass('hide'); });
+    $('#btClose').on('click', function() { $('#macroOuter').slideUp(200); });
   }
 
   $(document).ready(function() {
@@ -662,7 +663,7 @@ func html_xpath_uitleg(q *Context) {
 PaQu ondersteunt XPath2 met dezelfde extensies als Dact: macro's en pipelines.
 <p>
 Voorbeelden, zie:
-<a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">Dact Cookbook</a>
+<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">Dact Cookbook</a>
 `)
 }
 
@@ -683,10 +684,8 @@ func html_xpath_form(q *Context) (has_query bool) {
 		}
 		fmt.Fprintf(q.w, `
 <button id="openmacro">Macro's</button>
-<div id="macros" class="hide">
-<button id="sluitmacro">Macro's sluiten</button>
-<div class="hide warning" id="macromsg">
-</div>
+<div id="macros" style="display:none">
+<div class="warning" id="macromsg" style="display:none"></div>
 <p>
 <form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">
 <input type="submit" value="Uploaden" id="macrofilesave" disabled="disabled">
@@ -717,16 +716,16 @@ corpus: <select name="db">
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
 	}
 	fmt.Fprintf(q.w, `<p>
-		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blanc">voorbeelden</a>):<br>
+		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">voorbeelden</a>):<br>
 		<textarea name="xpath" rows="6" cols="80" maxlength="1200" id="xquery">%s</textarea>
 		`, html.EscapeString(first(q.r, "xpath")))
 	fmt.Fprint(q.w, `<p>
            <input type="submit" value="Zoeken">
            <input type="button" value="Wissen" onClick="javascript:formclear(form)">
            <input type="reset" value="Reset" onClick="javascript:qcheck()">
-           <input type="button" id="btExpand" class="hide" value="Toon macro-expansie">
+           <input type="button" id="btExpand" value="Toon macro-expansie" style="display:none">
        </form>
-       <div id="macroOuter" class="hide">
+       <div id="macroOuter" style="display:none">
        <div id="macroInner"></div>
        <button id="btClose">Sluiten</button>
        </div>
