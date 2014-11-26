@@ -41,7 +41,7 @@ func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
 		*values = append(*values, &ValueItem{-1, -1, n.Index})
 		return
 	}
-	if s := getAttr(attr, &n.FullNode); s != "" {
+	if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
 		*values = append(*values, &ValueItem{n.Begin, n.End, s})
 		return
 	}
@@ -69,7 +69,7 @@ func getFullAttr(attr string, n, top *Node) string {
 		return ""
 	}
 
-	if s := getAttr(attr, &n.FullNode); s != "" {
+	if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
 		return s
 	}
 	values := make([]*ValueItem, 0)
@@ -102,7 +102,12 @@ func getFullAttr(attr string, n, top *Node) string {
 			s = append(s, v.value)
 		}
 	}
+	if len(s) == 0 {
+		// alleen indexen
+		return ""
+	}
 	return "  " + strings.Join(s, " ")
+
 }
 
 func xpathstats(q *Context) {
