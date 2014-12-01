@@ -365,4 +365,9 @@ extern "C" {
 	return r;
     }
 
+    void c_dbxml_version(int *major, int *minor, int *patch)
+    {
+	DbXml::dbxml_version(major, minor, patch);
+    }
+
 }

@@ -114,7 +114,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 
 		nline++
 
-		if nline % 10000 == 1 {
+		if nline%10000 == 1 {
 			nd++
 			sdir = fmt.Sprintf("%04d", nd)
 			os.Mkdir(path.Join(xmldir, sdir), 0777)
@@ -157,4 +157,9 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 	}
 
 	return tokens, nline, nil
+}
+
+func dbxml_version() string {
+	x, y, z := dbxml.Version()
+	return fmt.Sprintf("Version %d.%d.%d", x, y, z)
 }

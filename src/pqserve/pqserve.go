@@ -78,7 +78,7 @@ func main() {
 		cookiepath = "/" + cookiepath
 	}
 
-	logf("Met DbXML: %v", has_dbxml)
+	logf("DbXML: %v", dbxml_version())
 
 	db, err := dbopen()
 	util.CheckErr(err)

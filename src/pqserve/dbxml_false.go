@@ -25,3 +25,7 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nline int, err error) {
 	return 0, 0, errGeenDact
 }
+
+func dbxml_version() string {
+	return "not available"
+}
