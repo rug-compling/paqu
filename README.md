@@ -62,6 +62,11 @@ http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/down
 
 Let op dat je de software met XML in de naam downloadt.
 
+LET OP: Versie 6.0.17 heeft een ernstige bug waardoor de zoekresultaten
+met XPATH vaak verre van compleet zijn. Je kunt versie 2.5.16 hier
+downloaden: https://github.com/rug-compling/dbxml
+
+
 ### Go ###
 
 De meeste programma's zijn geschreven in de programmeertaal Go. Je hebt
