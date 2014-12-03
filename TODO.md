@@ -32,6 +32,8 @@ Zie ook: TODO in diverse bestanden
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
 	- documentatie
+  - DbXml
+    - zonodig bestanden in verkeerde DbXml-versie omzetten naar goede versie?
 
 ## Gebruik/codering van labels ##
 
