@@ -22,6 +22,9 @@ Zie ook: TODO in diverse bestanden
     - pqserve: alle javascript onderbrengen in één apart bestand
     - Organisatie + documentatie
   - pqserve:
+    - gewoon zoeken
+	  - Nu alleen link naar boom achter gevonden zinnen. Toevoegen: link
+        naar boom achter elke woord/tag-combinatie onder elke zin.
     - XPath
       - zoeken: POST i.p.v. GET?
 	    - anders url misschien te lang
