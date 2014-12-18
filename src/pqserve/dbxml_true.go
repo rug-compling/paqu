@@ -76,7 +76,9 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 
 	dc, err := dbxml.Open(dact)
 	if err != nil {
-		return 0, 0, fmt.Errorf("Openen dact-bestand: %s", err)
+		return 0, 0, fmt.Errorf(
+			"Openen mislukt. PaQu kan geen dact-bestanden lezen die gemaakt zijn met DbXml nieuwer dan versie %d",
+			dbxml_version_major())
 	}
 	defer dc.Close()
 
@@ -162,4 +164,9 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 func dbxml_version() string {
 	x, y, z := dbxml.Version()
 	return fmt.Sprintf("Version %d.%d.%d", x, y, z)
+}
+
+func dbxml_version_major() int {
+	x, _, _ := dbxml.Version()
+	return x
 }
