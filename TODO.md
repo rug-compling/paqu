@@ -9,7 +9,7 @@ Zie ook: TODO in diverse bestanden
       - zie ook TODOs in `work.go`
   - Gebruikershandleiding
     - Introtekst op hoofdpagina
-    - Tekst achter *Meer info...*
+    - Tekst voor pagina *Info*: onder kopje *Corpora*
     - Helptekst voor pagina *XPath*
   - Interface
     - https zonder http? de combinatie maakt het erg ingewikkeld
