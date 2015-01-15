@@ -31,6 +31,9 @@ Zie ook: TODO in diverse bestanden
 		- maar dan werken links naar volgende pagina niet meer
 		- pagina updaten i.p.v. opnieuw laden bij uitvoeren van zoeken?
     - weergave op mobiel of tablet
+	- cache
+	 - voor zoekresultaten
+	 - voor tellingen
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
