@@ -174,13 +174,13 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 	qs := fmt.Sprintf("id=%s&amp;lbl=%s", urlencode(id), urlencode(lbl))
 	if offset > 0 || nzin == 2*ZINMAX {
 		if offset > 0 {
-			fmt.Fprintf(q.w, "<a href=\"/browse?%s&amp;offset=%d\">vorige</a>", qs, offset-2*ZINMAX)
+			fmt.Fprintf(q.w, "<a href=\"browse?%s&amp;offset=%d\">vorige</a>", qs, offset-2*ZINMAX)
 		} else {
 			fmt.Fprint(q.w, "vorige")
 		}
 		fmt.Fprint(q.w, " | ")
 		if nzin == 2*ZINMAX {
-			fmt.Fprintf(q.w, "<a href=\"/browse?%s&amp;offset=%d\">volgende</a>", qs, offset+2*ZINMAX)
+			fmt.Fprintf(q.w, "<a href=\"browse?%s&amp;offset=%d\">volgende</a>", qs, offset+2*ZINMAX)
 		} else {
 			fmt.Fprint(q.w, "volgende")
 		}

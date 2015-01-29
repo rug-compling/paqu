@@ -237,7 +237,7 @@ func home(q *Context) {
 		for m := range mark {
 			ms = append(ms, m)
 		}
-		fmt.Fprintf(q.w, "\n<a href=\"/tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%s&amp;gr=%s&amp;ms=%s\" class=\"ico\">&#10020;</a>\n<ul>\n",
+		fmt.Fprintf(q.w, "\n<a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%s&amp;gr=%s&amp;ms=%s\" class=\"ico\">&#10020;</a>\n<ul>\n",
 			prefix,
 			zin.arch,
 			zin.file,
@@ -257,7 +257,7 @@ func home(q *Context) {
 			}
 			seen[s] = true
 			qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, prefix)
-			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"/?%s\">%s</a>\n", qq, html.EscapeString(unHigh(s)))
+			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"?%s\">%s</a>\n", qq, html.EscapeString(unHigh(s)))
 		}
 
 		// Einde zin + dependency relations
@@ -275,13 +275,13 @@ func home(q *Context) {
 		first(q.r, "db"))
 	if offset > 0 || len(zinnen) == ZINMAX {
 		if offset > 0 {
-			fmt.Fprintf(q.w, "<a href=\"/?%s&amp;offset=%d\">vorige</a>", qs, offset-ZINMAX)
+			fmt.Fprintf(q.w, "<a href=\"?%s&amp;offset=%d\">vorige</a>", qs, offset-ZINMAX)
 		} else {
 			fmt.Fprint(q.w, "vorige")
 		}
 		fmt.Fprint(q.w, " | ")
 		if len(zinnen) == ZINMAX {
-			fmt.Fprintf(q.w, "<a href=\"/?%s&amp;offset=%d\">volgende</a>", qs, offset+ZINMAX)
+			fmt.Fprintf(q.w, "<a href=\"?%s&amp;offset=%d\">volgende</a>", qs, offset+ZINMAX)
 		} else {
 			fmt.Fprint(q.w, "volgende")
 		}
@@ -485,7 +485,7 @@ func html_footer(q *Context) {
 <div class="foot">
 mede mogelijk gemaakt door:
 <p>
-<a href="http://www.clarin.nl/" target="_blank"><img src="/clarinnl.png" class="noborder" alt="Clarin NL"></a>
+<a href="http://www.clarin.nl/" target="_blank"><img src="clarinnl.png" class="noborder" alt="Clarin NL"></a>
 </div>
 </body>
 </html>

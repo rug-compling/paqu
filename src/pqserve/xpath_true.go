@@ -415,13 +415,13 @@ $('#loading span').html('%.1f%%');
 	qs := "xpath=" + urlencode(query)
 	if offset > 0 || curno > offset+ZINMAX*2 {
 		if offset > 0 {
-			fmt.Fprintf(q.w, "<a href=\"/xpath?%s&amp;offset=%d\">vorige</a>", qs, offset-ZINMAX*2)
+			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">vorige</a>", qs, offset-ZINMAX*2)
 		} else {
 			fmt.Fprint(q.w, "vorige")
 		}
 		fmt.Fprint(q.w, " | ")
 		if curno > offset+ZINMAX*2 {
-			fmt.Fprintf(q.w, "<a href=\"/xpath?%s&amp;offset=%d\">volgende</a>", qs, offset+ZINMAX*2)
+			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">volgende</a>", qs, offset+ZINMAX*2)
 		} else {
 			fmt.Fprint(q.w, "volgende")
 		}
@@ -993,7 +993,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		fmt.Fprint(&buf, " ")
 	}
 
-	fmt.Fprintf(&buf, "\n<a href=\"/tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",
+	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",
 		prefix,
 		html.EscapeString(dactfile),
 		html.EscapeString(filename),
