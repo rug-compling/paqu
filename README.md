@@ -197,12 +197,13 @@ te maken.
 Dit duurt wel even, dus wellicht wil je bovenstaande regel in een script
 zetten en dat aanroepen met `nohup`.
 
-Nadat het corpus in PaQu is opgenomen moet je de xml-bestanden van Lassy Klein
-laten staan waar ze staan. Die xml-bestanden worden zelf niet in PaQu
-opgenomen, alleen de analyse van die bestanden. De bestanden zelf zijn
-ook nog nodig voor het werken met PaQu.
+Nadat het corpus in PaQu is opgenomen moet je het dact-bestand (of de
+xml-bestanden) van Lassy Klein laten staan waar het staat. Dat bestand
+wordt zelf niet in PaQu opgenomen, alleen de analyse ervan. Het bestand
+zelf is nog steeds nodig voor het werken met PaQu.
 
-Wel kun je de xml-bestanden na verwerking comprimeren met `gzip`:
+Wel kun je, als je xml-bestanden hebt gebruikt i.p.v. het dact-bestand,
+die xml-bestanden na verwerking comprimeren met `gzip`:
 
     find ~/corpora/LassySmall/Treebank -name '*.xml' | xargs gzip
 
