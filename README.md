@@ -149,6 +149,10 @@ Stel dat je server voor gebruikers toegankelijk is via
 `paqu.myserver.nl`, geef dan de volgende commando's:
 
     cd ~/.paqu
+    go run `go env GOROOT`/src/crypto/tls/generate_cert.go -host=paqu.myserver.nl
+
+Krijg je een foutmelding `no such file or directory`, doe dan:
+
     go run `go env GOROOT`/src/pkg/crypto/tls/generate_cert.go -host=paqu.myserver.nl
 
 Er staan nu twee nieuwe bestanden in `~/.paqu`: `cert.pem` en `key.pem`
