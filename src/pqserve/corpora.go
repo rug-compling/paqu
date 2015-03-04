@@ -186,7 +186,7 @@ function rm(idx) {
 <li><a href="rename?id=%s">hernoemen</a>
 <li><a href="share?id=%s">delen</a>
 <li><a href="browse?id=%s">overzicht</a>
-<li><a href="download?dl=zinnen&amp;id=%s">download zinnen</a>
+<li><a href="download?dl=zinnen&amp;id=%s">bekijk zinnen</a>
 <li><a href="download?dl=xml&amp;id=%s">download xml</a>
 `, id, id, id, id, id, id)
 					if has_dbxml && Cfg.Dact {
@@ -194,8 +194,8 @@ function rm(idx) {
 					}
 				}
 				fmt.Fprintf(q.w, `
-<li><a href="download?dl=stdout&amp;id=%s">download stdout</a>
-<li><a href="download?dl=stderr&amp;id=%s">download stderr</a>
+<li><a href="download?dl=stdout&amp;id=%s">bekijk stdout</a>
+<li><a href="download?dl=stderr&amp;id=%s">bekijk stderr</a>
 </ul>
 </div>
 `, id, id)

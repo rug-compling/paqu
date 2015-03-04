@@ -119,6 +119,7 @@ func xpathstats(q *Context) {
 
 	if download {
 		contentType(q, "text/plain; charset=utf-8")
+		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
 		cache(q)
 	} else {
 		contentType(q, "text/html; charset=utf-8")
@@ -525,7 +526,7 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 
 	if !download {
 		fmt.Fprintf(&buf,
-			"</table>\n<hr><a href=\"xpathstats?%s&amp;d=1\" target=\"_blank\">download</a>\n",
+			"</table>\n<hr><a href=\"xpathstats?%s&amp;d=1\">download</a>\n",
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 		updateText(q, buf.String())
 	}

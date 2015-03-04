@@ -57,6 +57,7 @@ func stats(q *Context) {
 
 	if download {
 		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
 		cache(q)
 	} else {
 		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -188,7 +189,7 @@ window.parent._fn.started();
 
 	if !download {
 		fmt.Fprintf(&buf,
-			"<hr>tijd: %s\n<p>\n<a href=\"stats?%s&amp;d=1\" target=\"_blank\">download</a>\n",
+			"<hr>tijd: %s\n<p>\n<a href=\"stats?%s&amp;d=1\">download</a>\n",
 			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 		updateText(q, buf.String())
@@ -269,6 +270,7 @@ func statsrel(q *Context) {
 
 	if download {
 		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
 	} else {
 		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	}
@@ -390,7 +392,7 @@ func statsrel(q *Context) {
 
 	if !download {
 		fmt.Fprintf(q.w,
-			"<hr>tijd: %s\n<p>\n<a href=\"statsrel?%s&amp;d=1\" target=\"_blank\">download</a>\n",
+			"<hr>tijd: %s\n<p>\n<a href=\"statsrel?%s&amp;d=1\">download</a>\n",
 			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 	}
