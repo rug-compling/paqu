@@ -110,8 +110,8 @@ PARTLOOP:
 		}
 
 		// geen resultaat -> 1
-		for i, s := range reXpath.FindAllString(part, -1) {
-			if i == 0 && s == "alpino_ds" {
+		for _, s := range reXpath.FindAllString(part, -1) {
+			if s == "alpino_ds" {
 				continue
 			}
 			if s[0] == '\'' || s[0] == '"' || s[0] == '$' {
