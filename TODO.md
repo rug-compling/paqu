@@ -34,6 +34,7 @@ Zie ook: TODO in diverse bestanden
 	- cache
 	 - voor zoekresultaten
 	 - voor tellingen
+	- optie `loginurl` in `setup-example.toml` documenteren
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen

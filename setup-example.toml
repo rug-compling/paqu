@@ -138,6 +138,10 @@ forwarded = false
 # ook onderbroken.
 querytimeout = 120
 
+# Gebruik extern programma om in te loggen
+# TODO: documentatie voor deze optie
+loginurl =
+
 # Wie mag de site bekijken?
 # Selectie op basis van ip-adres.
 # Als dit ontbreekt heeft iedereen toegang.

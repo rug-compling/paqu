@@ -48,6 +48,8 @@ type Config struct {
 
 	Querytimeout int // in secondes
 
+	Loginurl string
+
 	View   []ViewType
 	Access []AccessType
 }
