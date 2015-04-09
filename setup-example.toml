@@ -138,8 +138,10 @@ forwarded = false
 # ook onderbroken.
 querytimeout = 120
 
-# Gebruik extern programma om in te loggen
-# TODO: documentatie voor deze optie
+# Gebruik extern programma om in te loggen.
+# Dit is de url van een externe website.
+# Als dit is gedefinieerd vervangt het de ingebouwde manier van inloggen.
+# Zie voorbeeld: extra/pqlogin.go
 loginurl =
 
 # Wie mag de site bekijken?
