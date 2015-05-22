@@ -534,11 +534,11 @@ corpus: <select name="db">
 		   <select name="postag" style="width: 100%">
 	   `)
 	html_opts(q, opt_postag, first(q.r, "postag"), "postag")
-	fmt.Fprintf(q.w, `
+	fmt.Fprint(q.w, `
 		   </select>
 		 <td>
 		 <td>
-		   <select name="hpostag" style="width:100%%" >
+		   <select name="hpostag" style="width:100%" >
 	   `)
 	html_opts(q, opt_hpostag, first(q.r, "hpostag"), "postag")
 	fmt.Fprint(q.w, `
