@@ -985,7 +985,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			l++
 			fmt.Fprintf(&buf, "<span class=\"c%d\">", l)
 		}
-		fmt.Fprintf(&buf, html.EscapeString(woord))
+		fmt.Fprint(&buf, html.EscapeString(woord))
 		for l > lvl[i+1] {
 			l--
 			fmt.Fprint(&buf, "</span>")
