@@ -168,6 +168,8 @@ func main() {
 	handleFunc("relnone.png", static_relnone_png)
 	handleFunc("relother.png", static_relother_png)
 
+	handleFunc("ext", extension)
+
 	handleStatic("debug/env", environment)
 
 	handleStatic("busy.gif", static_busy_gif)
