@@ -113,6 +113,9 @@ func first(r *http.Request, opt string) string {
 }
 
 func firstf(form *multipart.Form, opt string) string {
+	if form == nil {
+		return ""
+	}
 	if len(form.File[opt]) > 0 {
 		file, err := form.File[opt][0].Open()
 		if logerr(err) {
