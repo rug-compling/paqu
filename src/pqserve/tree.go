@@ -352,7 +352,9 @@ func tree(q *Context) {
 	// BEGIN: svg nabewerken en printen
 
 	// XML-declaratie en DOCtype overslaan
-	svg = svg[strings.Index(svg, "<svg"):]
+	if i := strings.Index(svg, "<svg"); i > 0 {
+		svg = svg[i:]
+	}
 
 	a := ""
 	for _, line := range strings.SplitAfter(svg, "\n") {
