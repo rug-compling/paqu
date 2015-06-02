@@ -41,6 +41,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"html"
 	"io/ioutil"
@@ -352,7 +353,9 @@ func tree(q *Context) {
 	// BEGIN: svg nabewerken en printen
 
 	// XML-declaratie en DOCtype overslaan
-	if i := strings.Index(svg, "<svg"); i > 0 {
+	if i := strings.Index(svg, "<svg"); i < 0 {
+		logerr(errors.New(fmt.Sprintf("BUG: %v %v", q.r.Method, q.r.URL)))
+	} else {
 		svg = svg[i:]
 	}
 
