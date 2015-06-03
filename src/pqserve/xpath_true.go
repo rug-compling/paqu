@@ -258,6 +258,7 @@ func xpath(q *Context) {
 	queryparts := strings.Split(fullquery, "+|+")
 
 	var seen uint64
+	var okdocs = true
 	for _, dactfile := range dactfiles {
 		select {
 		case <-chClose:
@@ -383,6 +384,8 @@ $('#loading span').html('%.1f%%');
 		}
 		if err := docs.Error(); err != nil {
 			logerr(err)
+			fmt.Fprint(q.w, html.EscapeString(err.Error()))
+			okdocs = false
 		}
 		if n, err := db.Size(); err == nil {
 			seen += n
@@ -403,11 +406,14 @@ $('#loading span').html('%.1f%%');
 		if curno > offset+ZINMAX*2 {
 			break
 		}
+		if !okdocs {
+			break
+		}
 	}
 
 	clearLoading(q.w)
 
-	if curno == 0 {
+	if okdocs && curno == 0 {
 		fmt.Fprintf(q.w, "geen match gevonden")
 	}
 
