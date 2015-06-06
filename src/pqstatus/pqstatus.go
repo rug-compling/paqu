@@ -59,6 +59,9 @@ func main() {
 			Cfg.Prefix))
 	util.CheckErr(err)
 
+	corpora := make(map[string]int)
+	words := make(map[string]int)
+
 	fmt.Print("\nCORPORA\n\nlaatst gebruikt\tid\t\t\ttokens\t\tstatus\t\teigenaar\n")
 	for rows.Next() {
 		var id, owner, status string
@@ -72,6 +75,8 @@ func main() {
 			status,
 			owner)
 		disk[id] = false
+		corpora[owner]++
+		words[owner] += nword
 	}
 
 	rows, err = db.Query(
@@ -79,15 +84,17 @@ func main() {
 			"SELECT `mail`, `active`, `quotum` FROM `%s_users` ORDER BY `active` DESC",
 			Cfg.Prefix))
 	util.CheckErr(err)
-	fmt.Print("\n\nGEBRUIKERS\n\nlaatst actief\tquotum\t\tmail\n")
+	fmt.Print("\n\nGEBRUIKERS\n\nlaatst actief\tquotum\t\tcorpora\ttokens\t\tmail\n")
 	for rows.Next() {
 		var mail string
 		var quotum int
 		var active time.Time
 		util.CheckErr(rows.Scan(&mail, &active, &quotum))
-		fmt.Printf("%v\t%-15s\t%v\n",
+		fmt.Printf("%v\t%-15s\t%v\t%-15s\t%v\n",
 			date(active),
 			fmt.Sprint(quotum),
+			corpora[mail],
+			fmt.Sprint(words[mail]),
 			mail)
 	}
 
