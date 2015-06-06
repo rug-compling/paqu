@@ -10,6 +10,7 @@ all:
 	mkdir -p ../bin
 	make -C pqalpino
 	make -C pqbuild
+	make -C pqclean
 	make -C pqconfig
 	make -C pqinit
 	make -C pqrmcorpus

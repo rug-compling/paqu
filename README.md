@@ -246,6 +246,9 @@ op de server:
 
 ### Beheer ###
 
+Met het programma `pqclean` verwijder je automatisch alle gebruikers
+zonder corpora die twee maanden niet actief geweest zijn.
+
 Met het programma `pqrmcorpus` kun je een corpus uit de MySQL-database
 verwijderen. Is het een corpus dat door een gebruiker is ge-upload, dan
 worden de bijbehorende bestanden ook van schijf verwijderd.
