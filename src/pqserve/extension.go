@@ -1,3 +1,5 @@
+// +build !extension
+
 package main
 
 import (
