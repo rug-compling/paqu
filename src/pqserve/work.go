@@ -3,9 +3,10 @@ package main
 import (
 	"github.com/pebbe/util"
 
-	"archive/zip"
+	"compress/gzip"
 	"database/sql"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,11 +14,14 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
+)
+
+var (
+	LeegArchief = errors.New("Leeg zipbestand of tarbestand")
 )
 
 func quote(s string) string {
@@ -67,6 +71,99 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	stderr := path.Join(dirname, "stderr.txt")
 	summary := path.Join(dirname, "summary.txt")
 
+	// gzip
+	var fp *os.File
+	fp, err = os.Open(data)
+	if err != nil {
+		return
+	}
+	b := make([]byte, 2)
+	io.ReadFull(fp, b)
+	fp.Close()
+	if string(b) == "\x1F\x8B" {
+		// gzip
+		fpin, _ := os.Open(data)
+		r, e := gzip.NewReader(fpin)
+		if e != nil {
+			fpin.Close()
+			err = e
+			return
+		}
+		fpout, _ := os.Create(data + ".tmp")
+		_, err = io.Copy(fpout, r)
+		fpout.Close()
+		r.Close()
+		fpin.Close()
+		if err != nil {
+			return
+		}
+		os.Rename(data+".tmp", data)
+	}
+
+	var ar *arch
+	ar, err = NewArchReader(data)
+	if err == nil {
+
+		//    als eerste bestand alpino-xml is
+		//       params is xmlzip
+		//    anders uitpakken en alles aan elkaar plakken in data, met newline aan eind van elk deel
+
+		e := ar.Next()
+		if e == io.EOF {
+			ar.Close()
+			err = LeegArchief
+			return
+		}
+		if e != nil {
+			ar.Close()
+			err = e
+			return
+		}
+
+		var b []byte
+		b, err = ar.ReadN(200)
+		if err != nil {
+			ar.Close()
+			return
+		}
+
+		if strings.Contains(string(b), "<alpino_ds") {
+			params = "xmlzip"
+			setinvoer(db, params, task.id)
+			ar.Close()
+		} else {
+			ar.Close()
+			var fp *os.File
+			fp, err = os.Create(data + ".tmp")
+			if err != nil {
+				return
+			}
+			ar, err = NewArchReader(data)
+			for {
+				e := ar.Next()
+				if e == io.EOF {
+					break
+				}
+				if e != nil {
+					ar.Close()
+					fp.Close()
+					err = e
+					return
+				}
+				err = ar.Copy(fp)
+				if err != nil {
+					fp.Close()
+					ar.Close()
+					return
+				}
+				fmt.Fprintln(fp)
+			}
+			fp.Close()
+			ar.Close()
+			os.Rename(data+".tmp", data)
+		}
+	}
+
 	if params == "auto" {
 		params, err = invoersoort(db, data, task.id)
 		if err != nil {
@@ -88,6 +185,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		default:
 		}
 		os.Remove(data + ".lines.tmp")
+		os.Remove(data + ".tmp")
 		for _, f := range []string{data, data + ".lines", stdout, stderr, summary} {
 			if f == data && (params == "dact" || params == "xmlzip") {
 				continue
@@ -658,20 +756,6 @@ func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
 	return err
 }
 
-type XmlFiles []*zip.File
-
-func (x XmlFiles) Less(i, j int) bool {
-	return x[i].Name < x[j].Name
-}
-
-func (x XmlFiles) Swap(i, j int) {
-	x[i], x[j] = x[j], x[i]
-}
-
-func (x XmlFiles) Len() int {
-	return len(x)
-}
-
 func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int, err error) {
 
 	os.Mkdir(xmldir, 0777)
@@ -688,20 +772,25 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 	}
 	defer fplines.Close()
 
-	z, err := zip.OpenReader(data)
+	ar, err := NewArchReader(data)
 	if err != nil {
 		return 0, 0, err
 	}
-	defer z.Close()
+	defer ar.Close()
 
 	tokens = 0
 	nline = 0
 	nd := -1
 	sdir := ""
 
-	sort.Sort(XmlFiles(z.Reader.File))
-
-	for _, f := range z.File {
+	for {
+		err := ar.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return 0, 0, err
+		}
 
 		select {
 		case <-chGlobalExit:
@@ -711,12 +800,7 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 		default:
 		}
 
-		rc, err := f.Open()
-		if err != nil {
-			return 0, 0, err
-		}
-		bindata, err := ioutil.ReadAll(rc)
-		rc.Close()
+		bindata, err := ar.Read()
 		if len(bindata) == 0 {
 			continue
 		}
@@ -729,7 +813,7 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 			os.Mkdir(path.Join(xmldir, sdir), 0777)
 		}
 
-		name := f.Name
+		name := ar.Name()
 		if strings.HasSuffix(strings.ToLower(name), ".xml") {
 			name = name[:len(name)-4]
 		}
@@ -748,7 +832,7 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 		alpino := Alpino_ds_no_node{}
 		err = xml.Unmarshal(bindata, &alpino)
 		if err != nil {
-			return 0, 0, fmt.Errorf("Parsen van %q uit zip-bestand: %s", f.Name, err)
+			return 0, 0, fmt.Errorf("Parsen van %q uit zip-bestand: %s", ar.Name(), err)
 		}
 		tokens += len(strings.Fields(alpino.Sentence))
 		fmt.Fprintf(fplines, "%s|%s\n", name, strings.TrimSpace(alpino.Sentence))

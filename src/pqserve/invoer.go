@@ -18,7 +18,7 @@ var (
 		"line-lbl":     "een zin per regel, met labels",
 		"line-tok":     "een zin per regel, getokeniseerd",
 		"line-lbl-tok": "een zin per regel, met labels, getokeniseerd",
-		"xmlzip":       "Alpino XML-bestanden in zipbestand",
+		"xmlzip":       "Alpino XML-bestanden in zipbestand of tarbestand",
 		"dact":         "Dact-bestand",
 	}
 
@@ -26,12 +26,16 @@ var (
 	reMidPoint = regexp.MustCompile(`\pL\pL\pP*[.!?]\s+\S`)
 )
 
+func setinvoer(db *sql.DB, soort string, id string) error {
+	_, err := db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `params` = %q, `msg` = %q WHERE `id` = %q",
+		Cfg.Prefix, soort, "Bron: "+invoertabel[soort], id))
+	return err
+}
+
 func invoersoort(db *sql.DB, data, id string) (string, error) {
 
 	set := func(soort string) (string, error) {
-		_, err := db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `params` = %q, `msg` = %q WHERE `id` = %q",
-			Cfg.Prefix, soort, "Bron: "+invoertabel[soort], id))
-		return soort, err
+		return soort, setinvoer(db, soort, id)
 	}
 
 	fp, err := os.Open(data)
@@ -46,9 +50,6 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 
 	if n >= 3 {
 		s := string(b[:4])
-		if s == "PK\x03\x04" || s == "PK\x05\x06" || s == "PK\x07\x08" {
-			return set("xmlzip")
-		}
 		if s == "\x00\x06\x15\x61" || s == "\x61\x15\x06\x00" || s == "\x00\x05\x31\x62" || s == "\x62\x31\x05\x00" {
 			return set("dact")
 		}
@@ -106,25 +107,9 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 	if nlabel == ln {
 		soort += "-lbl"
 	}
-	if ntok > (3 * ln) / 4 {
+	if ntok > (3*ln)/4 {
 		soort += "-tok"
 	}
 
 	return set(soort)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
