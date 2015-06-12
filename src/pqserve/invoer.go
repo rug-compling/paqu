@@ -20,6 +20,7 @@ var (
 		"line-lbl-tok": "een zin per regel, met labels, getokeniseerd",
 		"xmlzip":       "Alpino XML-bestanden in zipbestand of tarbestand",
 		"dact":         "Dact-bestand",
+		"folia":        "FoLiA-bestand",
 	}
 
 	reEndPoint = regexp.MustCompile(`[.!?]\s*$`)
@@ -44,7 +45,7 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 	}
 	defer fp.Close()
 
-	b := make([]byte, 16)
+	b := make([]byte, 200)
 	n, _ := io.ReadFull(fp, b)
 	fp.Seek(0, 0)
 
@@ -62,6 +63,10 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 			s == "\x00\x04\x22\x53" || s == "\x53\x22\x04\x00" {
 			return set("dact")
 		}
+	}
+
+	if strings.Contains(string(b), "<FoLiA") {
+		return set("folia")
 	}
 
 	lines := make([]string, 0, 20)

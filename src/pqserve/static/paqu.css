@@ -270,12 +270,18 @@ div.submenu {
   text-decoration: none;
 }
 
-.submenu li a.normal {
-  color: #0000c0;
+.corpushelp li a {
+  color: #0000EE;
   display: inline;
   font-family: verdana;
   font-weight: normal;
   padding: 0px;
+  text-decoration: underline;
+}
+
+.corpushelp li a:hover {
+  background: white;
+  color: #0000EE;
   text-decoration: underline;
 }
 
@@ -295,6 +301,10 @@ div.a9999 {
 
 div.corpushelp {
     margin: 1em 2em;
+}
+
+div.corpushelp li {
+    margin: .5em 0px;
 }
 
 ol.xpath li {

@@ -227,7 +227,7 @@ function rm(idx) {
 				processLock.RUnlock()
 				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
 			} else if st == "bezig" {
-				if corpus.params == "run" || strings.HasPrefix(corpus.params, "line") {
+				if corpus.params == "run" || strings.HasPrefix(corpus.params, "line") || corpus.params == "folia" {
 					p := 0
 					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"))
 					if err == nil {
@@ -288,7 +288,7 @@ Keuzes voor het soort document
   Dit is de tweede zin .
 </pre>
 Als tekst al getokeniseerd is worden sommige tekens speciaal behandeld. Zie:
-<a href="http://www.let.rug.nl/vannoord/alp/Alpino/AlpinoUserGuide.html#_special_symbols_in_the_input" target="_blank" class="normal">Special
+<a href="http://www.let.rug.nl/vannoord/alp/Alpino/AlpinoUserGuide.html#_special_symbols_in_the_input" target="_blank">Special
 symbols in the input</a>.
 <dt>Een zin per regel, met labels, getokeniseerd
 <dd>Tekst die al getokeniseerd is, en waar labels aan de zinnen is toegevoegd. Voorbeeld:
@@ -305,10 +305,11 @@ symbols in the input</a>.
 	if has_dbxml {
 		fmt.Fprint(q.w, `
 <li>Een bestand in het DbXML-formaat, waarin Alpino XML-bestanden zijn opgeslagen. Dit formaat wordt onder andere gebruikt door het programma
-<a href="http://rug-compling.github.io/dact/" target="_blank" class="normal">dact</a>.
+<a href="http://rug-compling.github.io/dact/" target="_blank">dact</a>.
 `)
 	}
 	fmt.Fprint(q.w, `
+<li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>.
 </ul>
 Als je een zip- of tarbestand gebruikt, dan moeten de bestanden die daarin zitten allemaal hetzelfde formaat hebben.
 <p>
