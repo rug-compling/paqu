@@ -182,6 +182,14 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		os.Rename(data+".tmp", data)
 	}
 
+	if params == "tei" {
+		err = tei(data, data+".tmp")
+		if err != nil {
+			return
+		}
+		os.Rename(data+".tmp", data)
+	}
+
 	defer func() {
 		select {
 		case <-chGlobalExit:
@@ -320,10 +328,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 		} else { // if !reuse
 			var has_tok, has_lbl bool
-			if strings.Contains(params, "-lbl") || params == "folia" {
+			if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 				has_lbl = true
 			}
-			if strings.Contains(params, "-tok") || params == "folia" {
+			if strings.Contains(params, "-tok") || params == "folia" || params == "tei" {
 				has_tok = true
 			}
 
@@ -464,10 +472,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				a[1] = strings.Join(a[1:ln-3], "|")
 			}
 			fname := a[0][2:]
-			if params == "run" || strings.HasPrefix(params, "line") || params == "folia" {
+			if params == "run" || strings.HasPrefix(params, "line") || params == "folia" || params == "tei" {
 				fname = decode_filename(a[0][2:])
 			}
-			if strings.Contains(params, "-lbl") || params == "folia" {
+			if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 				fname = fname[1+strings.Index(fname, "-"):]
 			}
 			errlines = append(errlines, fname+"\t"+a[ln-3]+"\t"+a[ln-2]+"\t"+a[1]+"\n")
@@ -485,7 +493,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	p := regexp.QuoteMeta(xml + "/")
 	d := ""
-	if strings.Contains(params, "-lbl") || params == "folia" {
+	if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 		p += "[0-9]+/[0-9]+-"
 		d = "-d"
 	} else if params == "dact" || params == "xmlzip" {
@@ -506,7 +514,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	if Cfg.Dact && params != "dact" {
 		p := ""
-		if strings.Contains(params, "-lbl") || params == "folia" {
+		if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 			p = "-"
 		} else if params == "xmlzip" {
 			p = "/"

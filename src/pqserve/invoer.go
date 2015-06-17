@@ -21,6 +21,7 @@ var (
 		"xmlzip":       "Alpino XML-bestanden in zipbestand of tarbestand",
 		"dact":         "Dact-bestand",
 		"folia":        "FoLiA-bestand",
+		"tei":          "TEI-bestand",
 	}
 
 	reEndPoint = regexp.MustCompile(`[.!?]\s*$`)
@@ -67,6 +68,10 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 
 	if strings.Contains(string(b), "<FoLiA") {
 		return set("folia")
+	}
+
+	if strings.Contains(string(b), "<TEI") {
+		return set("tei")
 	}
 
 	lines := make([]string, 0, 20)

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func folia(infile, outfile string) error {
+func tei(infile, outfile string) error {
 
 	fpin, err := os.Open(infile)
 	if err != nil {
@@ -23,7 +23,7 @@ func folia(infile, outfile string) error {
 	defer fpout.Close()
 
 	d := xml.NewDecoder(fpin)
-	var inS, inW, inT, inCorrection, inOriginal bool
+	var inS, inW, inPC bool
 	var label string
 	var teller uint64
 	words := make([]string, 0, 500)
@@ -37,12 +37,6 @@ func folia(infile, outfile string) error {
 		}
 		if t, ok := tt.(xml.StartElement); ok {
 			switch t.Name.Local {
-			case "whitespace":
-				if len(words) > 0 {
-					fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
-					words = words[0:0]
-					label += ".b"
-				}
 			case "s":
 				teller++
 				label = fmt.Sprintf("s.%d", teller)
@@ -54,21 +48,13 @@ func folia(infile, outfile string) error {
 				}
 				inS = true
 				inW = false
-				inT = false
-				inCorrection = false
-				inOriginal = false
+				inPC = false
 			case "w":
 				inW = true
-				inT = false
-			case "t":
-				inT = true
-			case "correction":
-				inCorrection = true
-				inOriginal = false
-			case "original":
-				if inCorrection {
-					inOriginal = true
-				}
+				inPC = false
+			case "pc":
+				inPC = true
+				inW = false
 			}
 		} else if t, ok := tt.(xml.EndElement); ok {
 			switch t.Name.Local {
@@ -81,39 +67,19 @@ func folia(infile, outfile string) error {
 				}
 				inS = false
 				inW = false
-				inT = false
+				inPC = false
 			case "w":
 				inW = false
-				inT = false
-			case "t":
-				inT = false
-			case "correction":
-				inCorrection = false
-				inOriginal = false
-			case "original":
-				inOriginal = false
+			case "pc":
+				inPC = false
 			}
 		} else if t, ok := tt.(xml.CharData); ok {
-			if inS && inW && inT && !inOriginal {
+			if inS && (inW || inPC) {
 				words = append(words, alpinoEscape(string(t)))
 				inW = false
-				inT = false
+				inPC = false
 			}
 		}
 	}
 	return nil
-}
-
-func alpinoEscape(s string) string {
-	switch s {
-	case `[`:
-		return `\[`
-	case `]`:
-		return `\]`
-	case `\[`:
-		return `\\[`
-	case `\]`:
-		return `\\]`
-	}
-	return s
 }

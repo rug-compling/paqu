@@ -54,7 +54,7 @@ func download(q *Context) {
 	case "stderr":
 		filename = "stderr.txt"
 	case "zinnen":
-		if !strings.Contains(params, "-lbl") && params != "folia" {
+		if !strings.Contains(params, "-lbl") && params != "folia" && params != "tei" {
 			filename = "data.lines"
 		}
 	case "dact":
@@ -152,7 +152,7 @@ func download(q *Context) {
 		name := decode_filename(gzname[:len(gzname)-3])
 		if params == "dact" || params == "xmlzip" {
 			name = name[1+strings.Index(name, "/"):]
-		} else if strings.Contains(params, "-lbl") || params == "folia" {
+		} else if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 			name = name[1+strings.Index(name, "-"):]
 		}
 		if err != nil {

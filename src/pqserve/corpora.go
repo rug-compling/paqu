@@ -227,7 +227,7 @@ function rm(idx) {
 				processLock.RUnlock()
 				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
 			} else if st == "bezig" {
-				if corpus.params == "run" || strings.HasPrefix(corpus.params, "line") || corpus.params == "folia" {
+				if corpus.params == "run" || strings.HasPrefix(corpus.params, "line") || corpus.params == "folia" || params == "tei" {
 					p := 0
 					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"))
 					if err == nil {
@@ -270,7 +270,7 @@ Keuzes voor het soort document
   de tweede zin. Dit is zin nummer drie.
 </pre>
 <dt>Een zin per regel
-<dd>Een bestand met platte tekst, met één zinper regel. Voorbeeld:
+<dd>Een bestand met platte tekst, met één zin per regel. Voorbeeld:
 <pre>
   Dit is de eerste zin.
   Dit is de tweede zin.
@@ -309,7 +309,8 @@ symbols in the input</a>.
 `)
 	}
 	fmt.Fprint(q.w, `
-<li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>.
+<li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>. De tekst moet getokeniseerd zijn.
+<li>Een bestand in TEI-formaat: <a href="http://www.tei-c.org/" target="_blank">Text Encoding Initiative</a>. De tekst moet getokeniseerd zijn.
 </ul>
 Als je een zip- of tarbestand gebruikt, dan moeten de bestanden die daarin zitten allemaal hetzelfde formaat hebben.
 <p>
