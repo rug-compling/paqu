@@ -9,6 +9,7 @@ info:
 all:
 	mkdir -p ../bin
 	make -C pqalpino
+	make -C pqbugtest
 	make -C pqbuild
 	make -C pqclean
 	make -C pqconfig

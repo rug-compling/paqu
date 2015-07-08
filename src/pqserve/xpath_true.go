@@ -7,9 +7,12 @@ import (
 
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"html"
 	"net/http"
+	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
@@ -277,8 +280,15 @@ $('#loading span').html('%.1f%%');
 			}
 		}
 
+		err := bugtest(dactfile, queryparts[0])
+		if doErr(q, err) {
+			clearLoading(q.w)
+			return
+		}
+
 		db, err := dbxml.Open(dactfile)
 		if doErr(q, err) {
+			clearLoading(q.w)
 			return
 		}
 
@@ -1051,4 +1061,16 @@ func clearLoading(w http.ResponseWriter) {
 $('#loading').addClass('hide');
 //--></script>
 `)
+}
+
+func bugtest(filename, xpath string) error {
+	b, err := exec.Command(path.Dir(os.Args[0])+"/pqbugtest", filename, xpath).CombinedOutput()
+	if err != nil {
+		return err
+	}
+	s := strings.TrimSpace(string(b))
+	if s == "OK" {
+		return nil
+	}
+	return errors.New(s)
 }
