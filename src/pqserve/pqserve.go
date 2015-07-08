@@ -192,17 +192,13 @@ func main() {
 	}
 	logf("Server beschikbaar op http%s://127.0.0.1:%v", s, Cfg.Port)
 
+	var errserve error
 	addr := fmt.Sprint(":", Cfg.Port)
-	if Cfg.Https || Cfg.Httpdual {
-
-		if !Cfg.Httpdual {
-
-			// De simpele oplossing: accepteer alleen https.
-
-			logerr(http.ListenAndServeTLS(addr, path.Join(paqudir, "cert.pem"), path.Join(paqudir, "key.pem"), Log(http.DefaultServeMux)))
-			return
-
-		}
+	if !Cfg.Https && !Cfg.Httpdual {
+		errserve = http.ListenAndServe(addr, Log(http.DefaultServeMux))
+	} else if Cfg.Https && !Cfg.Httpdual {
+		errserve = http.ListenAndServeTLS(addr, path.Join(paqudir, "cert.pem"), path.Join(paqudir, "key.pem"), Log(http.DefaultServeMux))
+	} else {
 
 		// De ingewikkelde oplossing: acepteer zowel http als https.
 		// Http wordt omgezet in redirect naar https.
@@ -215,7 +211,7 @@ func main() {
 		util.CheckErr(err)
 		ln, err := net.Listen("tcp", addr)
 		util.CheckErr(err)
-		logerr(http.Serve(
+		errserve = http.Serve(
 			&SplitListener{Listener: ln},
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.TLS == nil {
@@ -230,10 +226,16 @@ func main() {
 				} else {
 					Log(http.DefaultServeMux).ServeHTTP(w, r)
 				}
-			})))
-	} else {
-		logerr(http.ListenAndServe(addr, Log(http.DefaultServeMux)))
+			}))
 	}
+	logerr(errserve)
+
+	close(chGlobalExit)
+	wg.Wait()
+
+	logf("Uptime: %v", time.Now().Sub(started))
+	close(chLoggerExit)
+	wgLogger.Wait()
 }
 
 func Log(handler http.Handler) http.Handler {
