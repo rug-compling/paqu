@@ -57,7 +57,7 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 		}
 	}
 
-	if n == 16 {
+	if n > 15 {
 		s := string(b[12:16])
 		if s == "\x00\x06\x15\x61" || s == "\x61\x15\x06\x00" ||
 			s == "\x00\x05\x31\x62" || s == "\x62\x31\x05\x00" ||
