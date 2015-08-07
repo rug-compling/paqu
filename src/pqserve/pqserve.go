@@ -164,6 +164,7 @@ func main() {
 	handleFunc("delete", remove)
 
 	handleFunc("savez", savez)
+	handleFunc("savez2", savez2)
 
 	handleFunc("info.html", static_info_html)
 	handleFunc("relhead.png", static_relhead_png)
