@@ -1,0 +1,86 @@
+LABELS <-> FILENAMES
+
+    encode:
+
+    leeg            -> _
+    _               -> __
+    [^-._a-zA-Z0-9] -> _%2X
+    ^[-.]           -> _%2X
+
+    decode:
+
+    ^_$                   -> leeg
+    _[0-9A-F][0-9A-F]|__  -> teken
+
+
+GLOBALE CORPORA
+
+    .dact
+
+    mysql arch: compleet path naar dact-bestand
+    mysql file: naam in dact-bestand, exact, zonder extensie als die er ook niet was
+
+    .xml(.gz)
+
+    mysql arch leeg
+    mysql file: compleet path naar xml-bestand, zonder.gz
+
+
+USER CORPORA
+
+auto          moet nog bepaald worden
+
+    ..
+
+
+run           doorlopende tekst
+line          een zin per regel
+line-lbl      een zin per regel, met labels
+line-tok      een zin per regel, getokeniseerd
+line-lbl-tok  een zin per regel, met labels, getokeniseerd
+
+    Zonder -lbl :
+
+    mysql arch leeg
+    mysql file: compleet path naar xml-bestand, zonder .gz
+                .../0000/0000.xml
+    dact: 0000/0000.xml
+
+    Met -lbl :
+
+    mysql arch leeg
+    mysql file: compleet path naar xml-bestand, zonder .gz
+                .../0000/0000-gecodeerdlabel.xml
+    dact: label.xml
+
+
+xmlzip        Alpino XML-bestanden in zipbestand of tarbestand
+
+    label is bestandsnaam (inclusief path) in zip-bestand, zonder extentie .xml
+
+    mysql arch leeg
+    mysql file: compleet path naar xml-bestand, zonder .gz
+                .../0000/gecodeerdlabel.xml
+    dact: label.xml
+
+
+dact          Dact-bestand
+
+    label is bestandsnaam (inclusief path) in dact-bestand, zonder extentie .xml
+
+    mysql arch leeg
+    mysql file: compleet path naar xml-bestand, zonder .gz
+                .../0000/gecodeerdlabel.xml
+
+    dact: origineel label (zonder .xml, als het origineel dat ook niet had)
+
+
+folia         FoLiA-bestand
+tei           TEI-bestand
+
+    mysql arch leeg
+    mysql file: compleet path naar xml-bestand, zonder .gz
+                .../0000/0000-gecodeerdlabel.xml
+    dact: label.xml
+
+
