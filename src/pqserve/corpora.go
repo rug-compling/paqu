@@ -423,7 +423,12 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	_, err = q.db.Exec(fmt.Sprintf("INSERT %s_info (id, description, owner, status, params, msg) VALUES (%q, %q, %q, \"QUEUED\", %q, %q);",
+	newCorpus(q, dirname, title, how)
+}
+
+func newCorpus(q *Context, dirname, title, how string) {
+
+	_, err := q.db.Exec(fmt.Sprintf("INSERT %s_info (id, description, owner, status, params, msg) VALUES (%q, %q, %q, \"QUEUED\", %q, %q);",
 		Cfg.Prefix,
 		dirname, title, q.user, how, "Bron: "+invoertabel[how]))
 	if err != nil {

@@ -287,11 +287,31 @@ func home(q *Context) {
 		}
 	}
 
+	if offset > 0 || len(zinnen) > 0 {
+		fmt.Fprintf(q.w, `<p>
+<form action="savez">
+<input type="hidden" name="word" value="%s">
+<input type="hidden" name="postag" value="%s">
+<input type="hidden" name="rel" value="%s">
+<input type="hidden" name="hpostag" value="%s">
+<input type="hidden" name="hword" value="%s">
+<input type="hidden" name="db" value="%s">
+<input type="submit" value="nieuw corpus maken op basis van deze zoekopdracht">
+</form>
+`,
+			html.EscapeString(first(q.r, "word")),
+			html.EscapeString(first(q.r, "postag")),
+			html.EscapeString(first(q.r, "rel")),
+			html.EscapeString(first(q.r, "hpostag")),
+			html.EscapeString(first(q.r, "hword")),
+			html.EscapeString(prefix))
+	}
+
 	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small>")
 
 	// Links naar statistieken
-
 	if offset > 0 || len(zinnen) > 0 {
+
 		fmt.Fprintf(q.w, `<hr><p>
 		<div id="stats">
 		<div id="inner">
@@ -355,6 +375,7 @@ func home(q *Context) {
 			html.EscapeString(first(q.r, "hpostag")),
 			html.EscapeString(first(q.r, "hword")),
 			html.EscapeString(prefix))
+
 	}
 
 	html_footer(q)

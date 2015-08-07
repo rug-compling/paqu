@@ -163,6 +163,8 @@ func main() {
 	handleFunc("download", download)
 	handleFunc("delete", remove)
 
+	handleFunc("savez", savez)
+
 	handleFunc("info.html", static_info_html)
 	handleFunc("relhead.png", static_relhead_png)
 	handleFunc("relnone.png", static_relnone_png)
