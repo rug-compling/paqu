@@ -255,8 +255,8 @@ div.submenu {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
-.submenu li a {
-  color: #555555;
+.submenu li a,
+.submenu li span.disabled {
   display: block;
   font-family: helvetica, arial;
   font-weight: bold;
@@ -264,10 +264,18 @@ div.submenu {
   text-decoration: none;
 }
 
+.submenu li a {
+  color: #555555;
+}
+
 .submenu li a:hover {
   background: #0000c0;
   color: #FFFFFF;
   text-decoration: none;
+}
+
+.submenu li span.disabled {
+  color: #c0c0c0;
 }
 
 .corpushelp li a {

@@ -26,6 +26,7 @@ type Context struct {
 	ignore     map[string]bool
 	prefixes   map[string]bool
 	myprefixes map[string]bool
+	protected  map[string]bool
 	desc       map[string]string
 	lines      map[string]int
 	shared     map[string]string
@@ -70,6 +71,7 @@ func handleFunc(url string, handler func(*Context)) {
 				opt_db:     make([]string, 0),
 				prefixes:   make(map[string]bool),
 				myprefixes: make(map[string]bool),
+				protected:  make(map[string]bool),
 				desc:       make(map[string]string),
 				lines:      make(map[string]int),
 				shared:     make(map[string]string),
@@ -154,7 +156,7 @@ func handleFunc(url string, handler func(*Context)) {
 				o = "7, 2"
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`attr` "+
+				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`attr`, `i`.`protected` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -168,9 +170,9 @@ func handleFunc(url string, handler func(*Context)) {
 				return
 			}
 			var id, desc, owner, shared, params, group, attlist string
-			var zinnen int
+			var zinnen, protected int
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &params, &group, &attlist)
+				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &params, &group, &attlist, &protected)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -189,6 +191,7 @@ func handleFunc(url string, handler func(*Context)) {
 				q.lines[id] = zinnen
 				q.shared[id] = shared
 				q.params[id] = params
+				q.protected[id] = protected > 0
 				if q.auth && owner == q.user {
 					q.myprefixes[id] = true
 				}

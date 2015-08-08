@@ -19,6 +19,8 @@ var (
 		"line-tok":     "een zin per regel, getokeniseerd",
 		"line-lbl-tok": "een zin per regel, met labels, getokeniseerd",
 		"xmlzip":       "Alpino XML-bestanden in zipbestand of tarbestand",
+		"xmlzip-d":     "afgeleid van een of meer andere corpora",
+		"xmlzip-p":     "afgeleid van een of meer andere corpora (beschermd)",
 		"dact":         "Dact-bestand",
 		"folia":        "FoLiA-bestand",
 		"tei":          "TEI-bestand",

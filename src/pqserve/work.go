@@ -128,7 +128,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 
 		if strings.Contains(string(b), "<alpino_ds") {
-			params = "xmlzip"
+			if !strings.HasPrefix(params, "xmlzip") {
+				params = "xmlzip"
+			}
 			setinvoer(db, params, task.id)
 			ar.Close()
 		} else {
@@ -203,7 +205,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		os.Remove(data + ".lines.tmp")
 		os.Remove(data + ".tmp")
 		for _, f := range []string{data, data + ".lines", stdout, stderr, summary} {
-			if f == data && (params == "dact" || params == "xmlzip") {
+			if f == data && (params == "dact" || strings.HasPrefix(params, "xmlzip")) {
 				continue
 			}
 			if f == dact && !Cfg.Dact {
@@ -230,7 +232,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		if params == "dact" && !Cfg.Dact {
 			os.Remove(dact)
 		}
-		if params == "xmlzip" {
+		if strings.HasPrefix(params, "xmlzip") {
 			os.Remove(data)
 		}
 	}()
@@ -259,7 +261,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			os.RemoveAll(xml)
 			return
 		}
-	} else if params == "xmlzip" {
+	} else if strings.HasPrefix(params, "xmlzip") {
 		var tokens, nlines int
 		tokens, nlines, err = unpackXml(data, xml, stderr, task.chKill)
 		if err != nil {
@@ -496,7 +498,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 		p += "[0-9]+/[0-9]+-"
 		d = "-d"
-	} else if params == "dact" || params == "xmlzip" {
+	} else if params == "dact" || strings.HasPrefix(params, "xmlzip") {
 		p += "[0-9]+/"
 		d = "-d"
 	}
@@ -516,7 +518,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		p := ""
 		if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 			p = "-"
-		} else if params == "xmlzip" {
+		} else if strings.HasPrefix(params, "xmlzip") {
 			p = "/"
 		}
 		err = makeDact(dact, xml, p, task.chKill)
@@ -643,7 +645,22 @@ func work(task *Process) {
 	if err == nil {
 		logf("FINISHED: " + task.id)
 		sendmail(user, "Corpus klaar", fmt.Sprintf("Je corpus \"%s\" staat klaar op %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
-		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `msg` = \"\" WHERE `id` = %q", Cfg.Prefix, task.id))
+		var params string
+		rows, err := db.Query(fmt.Sprintf("SELECT `params` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, task.id))
+		if err == nil {
+			for rows.Next() {
+				rows.Scan(&params)
+			}
+			rows.Close()
+		}
+		msg := ""
+		switch params {
+		case "xmlzip-d":
+			msg = "afgeleid corpus"
+		case "xmlzip-p":
+			msg = "afgeleid corpus, beschermd"
+		}
+		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, msg, task.id))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
 		if !task.killed {

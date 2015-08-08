@@ -44,6 +44,11 @@ func download(q *Context) {
 		}
 	}
 
+	if q.protected[id] && (dl == "xml" || dl == "dact") {
+		http.Error(q.w, "Dat is afgeleid van een corpus dat niet van jou is", http.StatusUnauthorized)
+		return
+	}
+
 	datadir := path.Join(paqudir, "data", id)
 	var filename string
 	switch dl {
@@ -150,7 +155,7 @@ func download(q *Context) {
 		fullgzname := path.Join(datadir, gzname)
 		file, err := os.Stat(fullgzname)
 		name := decode_filename(gzname[:len(gzname)-3])
-		if params == "dact" || params == "xmlzip" {
+		if params == "dact" || strings.HasPrefix(params, "xmlzip") {
 			name = name[1+strings.Index(name, "/"):]
 		} else if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
 			name = name[1+strings.Index(name, "-"):]

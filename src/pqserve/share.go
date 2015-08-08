@@ -21,6 +21,11 @@ func share(q *Context) {
 		return
 	}
 
+	if q.protected[id] {
+		http.Error(q.w, "Dat is afgeleid van een corpus dat niet van jou is", http.StatusUnauthorized)
+		return
+	}
+
 	/*
 		parameters:
 		- corpusomschrijving, htmlescaped

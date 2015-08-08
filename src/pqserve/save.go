@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"compress/gzip"
+	"database/sql"
 	"fmt"
 	"html"
 	"io/ioutil"
@@ -26,9 +27,20 @@ func savez(q *Context) {
 	for _, c := range q.r.Form["db"] {
 		choice[c] = " checked"
 	}
+	var gr byte
 	for _, c := range q.opt_db {
-		if c[0] != 'B' {
-			continue
+		if c[0] != gr {
+			gr = c[0]
+			var t string
+			switch gr {
+			case 'A':
+				t = "algemene corpora"
+			case 'B':
+				t = "mijn corpora"
+			case 'C':
+				t = "corpora gedeeld door anderen"
+			}
+			fmt.Fprintln(q.w, "<b>&mdash;", t, "&mdash;</b><br>")
 		}
 		p := strings.Fields(c)
 		txt := strings.Join(p[1:], " ")
@@ -88,6 +100,7 @@ func savez2(q *Context) {
 	var fpz, fpgz *os.File
 	var z *zip.Writer
 	var gz *gzip.Reader
+	var dact interface{}
 
 	close := func() {
 		if z != nil {
@@ -102,7 +115,10 @@ func savez2(q *Context) {
 		if fpgz != nil {
 			fpgz.Close()
 		}
+		saveCloseDact(dact)
 	}
+
+	protected := 0
 
 	if !q.auth {
 		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
@@ -111,9 +127,12 @@ func savez2(q *Context) {
 
 	corpora := q.r.Form["db"]
 	for _, corpus := range corpora {
-		if !q.myprefixes[corpus] {
-			http.Error(q.w, "Dat is niet je corpus", http.StatusUnauthorized)
+		if !q.prefixes[corpus] {
+			http.Error(q.w, "Geen toegang tot corpus", http.StatusUnauthorized)
 			return
+		}
+		if q.protected[corpus] || !q.myprefixes[corpus] {
+			protected = 1
 		}
 	}
 
@@ -181,7 +200,9 @@ func savez2(q *Context) {
 
 	chClose := make(<-chan bool)
 	for _, prefix := range corpora {
-		pathlen := len(path.Join(paqudir, "data", prefix, "xml")) + 1
+
+		global := isGlobal(q, prefix)
+		pathlen := getPathLen(q, prefix, global)
 
 		query, err := makeQuery(q, prefix, chClose)
 		if doErr(q, err) {
@@ -189,7 +210,7 @@ func savez2(q *Context) {
 			return
 		}
 		query = strings.Replace(query, " `", " `c`.`", -1)
-		query = fmt.Sprintf("SELECT DISTINCT `f`.`file` FROM `%s_c_%s_deprel` `c`, `%s_c_%s_file` `f` WHERE `c`.%s AND `f`.`id` = `c`.`file`",
+		query = fmt.Sprintf("SELECT DISTINCT `f`.`file`, `c`.`arch` FROM `%s_c_%s_deprel` `c`, `%s_c_%s_file` `f` WHERE `c`.%s AND `f`.`id` = `c`.`file`",
 			Cfg.Prefix, prefix,
 			Cfg.Prefix, prefix,
 			query)
@@ -198,39 +219,75 @@ func savez2(q *Context) {
 			close()
 			return
 		}
-		var filename string
+		currentarch := -1
+		dact = nil
+		var arch int
+		var filename, dactname string
 		for rows.Next() {
-			err := rows.Scan(&filename)
+			err := rows.Scan(&filename, &arch)
 			if doErr(q, err) {
 				close()
 				return
 			}
 
-			fpgz, err = os.Open(filename + ".gz")
-			if doErr(q, err) {
-				close()
-				return
-			}
-			gz, err = gzip.NewReader(fpgz)
-			if doErr(q, err) {
-				close()
-				return
-			}
-			data, err := ioutil.ReadAll(gz)
-			if doErr(q, err) {
-				close()
-				return
-			}
-			gz.Close()
-			gz = nil
-			fpgz.Close()
-			fpgz = nil
+			var data []byte
+			if arch < 0 {
+				fpgz, err = os.Open(filename + ".gz")
+				if err == nil {
+					gz, err = gzip.NewReader(fpgz)
+					if doErr(q, err) {
+						close()
+						return
+					}
+					data, err = ioutil.ReadAll(gz)
+					if doErr(q, err) {
+						close()
+						return
+					}
+					gz.Close()
+					gz = nil
+					fpgz.Close()
+					fpgz = nil
+				} else {
+					fpgz, err = os.Open(filename)
+					if doErr(q, err) {
+						close()
+						return
+					}
+					data, err = ioutil.ReadAll(fpgz)
+					if doErr(q, err) {
+						close()
+						return
+					}
+					fpgz.Close()
+					fpgz = nil
+				}
 
-			newfile := filename[pathlen:]
-			if strings.Contains(q.params[prefix], "-lbl") || q.params[prefix] == "folia" || q.params[prefix] == "tei" {
-				newfile = decode_filename(newfile[10:])
-			} else if q.params[prefix] == "xmlzip" || q.params[prefix] == "dact" {
-				newfile = decode_filename(newfile[5:])
+			} else {
+
+				if arch != currentarch {
+					currentarch = arch
+					saveCloseDact(dact)
+					dact, dactname = saveOpenDact(q, prefix, arch)
+				}
+
+				data = saveGetDact(q, dact, filename)
+
+			}
+
+			var newfile string
+			if arch < 0 {
+				newfile = filename[pathlen:]
+				if !global {
+					if strings.Contains(q.params[prefix], "-lbl") || q.params[prefix] == "folia" || q.params[prefix] == "tei" {
+						newfile = decode_filename(newfile[10:])
+					} else if strings.HasPrefix(q.params[prefix], "xmlzip") || q.params[prefix] == "dact" {
+						newfile = decode_filename(newfile[5:])
+					}
+				}
+			} else {
+				// to do
+				newfile = dactname[pathlen:] + "::" + filename
 			}
 			if len(corpora) > 1 {
 				newfile = prefix + "/" + newfile
@@ -253,7 +310,8 @@ func savez2(q *Context) {
 			close()
 			return
 		}
-
+		saveCloseDact(dact)
+		dact = nil
 	}
 
 	if doErr(q, z.Close()) {
@@ -263,5 +321,111 @@ func savez2(q *Context) {
 	}
 	fpz.Close()
 
-	newCorpus(q, dirname, title, "xmlzip")
+	//fmt.Println(protected)
+	s := "xmlzip-d"
+	if protected != 0 {
+		s = "xmlzip-p"
+	}
+	newCorpus(q, dirname, title, s, protected)
+}
+
+func isGlobal(q *Context, prefix string) (global bool) {
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	if doErr(q, err) {
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var s string
+		err := rows.Scan(&s)
+		if doErr(q, err) {
+			return
+		}
+		global = !strings.Contains(s, "@")
+	}
+	return
+}
+
+func getPathLen(q *Context, prefix string, global bool) int {
+
+	if !global {
+		return len(path.Join(paqudir, "data", prefix, "xml")) + 1
+	}
+
+	var min, max sql.NullInt64
+	rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
+	if doErr(q, err) {
+		return 0
+	}
+	for rows.Next() {
+		err := rows.Scan(&min, &max)
+		if doErr(q, err) {
+			rows.Close()
+			return 0
+		}
+	}
+	rows.Close()
+
+	files := make([]string, 0, 2)
+	if min.Valid && max.Valid {
+		rows, err = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
+			Cfg.Prefix, prefix, min.Int64, max.Int64))
+		if doErr(q, err) {
+			return 0
+		}
+		for rows.Next() {
+			var s string
+			err := rows.Scan(&s)
+			if doErr(q, err) {
+				rows.Close()
+				return 0
+			}
+			files = append(files, s)
+		}
+		rows.Close()
+	} else {
+		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
+		if doErr(q, err) {
+			return 0
+		}
+		for rows.Next() {
+			err := rows.Scan(&min, &max)
+			if doErr(q, err) {
+				rows.Close()
+				return 0
+			}
+		}
+		rows.Close()
+		rows, err = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
+			Cfg.Prefix, prefix, min.Int64, max.Int64))
+		if doErr(q, err) {
+			return 0
+		}
+		for rows.Next() {
+			var s string
+			err := rows.Scan(&s)
+			if doErr(q, err) {
+				rows.Close()
+				return 0
+			}
+			files = append(files, s)
+		}
+		rows.Close()
+	}
+	if len(files) == 1 {
+		files = append(files, files[0])
+	}
+	if len(files) != 2 {
+		return 0
+	}
+
+	a1 := strings.Split(files[0], "/")
+	a2 := strings.Split(files[1], "/")
+	var i int
+	for i = 0; i < len(a1)-1 && i < len(a2)-1; i++ {
+		if a1[i] != a2[i] {
+			break
+		}
+	}
+	return len(strings.Join(a1[:i], "/")) + 1
 }

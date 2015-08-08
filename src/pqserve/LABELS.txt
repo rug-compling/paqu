@@ -54,7 +54,9 @@ line-lbl-tok  een zin per regel, met labels, getokeniseerd
     dact: label.xml
 
 
-xmlzip        Alpino XML-bestanden in zipbestand of tarbestand
+xmlzip       Alpino XML-bestanden in zipbestand of tarbestand
+xmlzip-d
+xmlzip-p
 
     label is bestandsnaam (inclusief path) in zip-bestand, zonder extentie .xml
 

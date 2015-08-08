@@ -184,13 +184,31 @@ function rm(idx) {
 					fmt.Fprintf(q.w, `
 <li><a href=".?db=%s">doorzoeken</a>
 <li><a href="rename?id=%s">hernoemen</a>
+`, id, id)
+					if !q.protected[id] {
+						fmt.Fprintf(q.w, `
 <li><a href="share?id=%s">delen</a>
+`, id)
+					} else {
+						fmt.Fprintln(q.w, `<li><span class="disabled">delen</span>`)
+					}
+					fmt.Fprintf(q.w, `
 <li><a href="browse?id=%s">overzicht</a>
 <li><a href="download?dl=zinnen&amp;id=%s">bekijk zinnen</a>
+`, id, id)
+					if !q.protected[id] {
+						fmt.Fprintf(q.w, `
 <li><a href="download?dl=xml&amp;id=%s">download xml</a>
-`, id, id, id, id, id, id)
+`, id)
+					} else {
+						fmt.Fprintln(q.w, `<li><span class="disabled">download xml</span>`)
+					}
 					if has_dbxml && Cfg.Dact {
-						fmt.Fprintf(q.w, `<li><a href="download?dl=dact&amp;id=%s">download dact</a>`, id)
+						if !q.protected[id] {
+							fmt.Fprintf(q.w, `<li><a href="download?dl=dact&amp;id=%s">download dact</a>`, id)
+						} else {
+							fmt.Fprintln(q.w, `<li><span class="disabled">download dact</span>`)
+						}
 					}
 				}
 				fmt.Fprintf(q.w, `
@@ -423,14 +441,15 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	newCorpus(q, dirname, title, how)
+	newCorpus(q, dirname, title, how, 0)
 }
 
-func newCorpus(q *Context, dirname, title, how string) {
+func newCorpus(q *Context, dirname, title, how string, protected int) {
 
-	_, err := q.db.Exec(fmt.Sprintf("INSERT %s_info (id, description, owner, status, params, msg) VALUES (%q, %q, %q, \"QUEUED\", %q, %q);",
+	_, err := q.db.Exec(fmt.Sprintf(
+		"INSERT %s_info (id, description, owner, status, params, msg, protected) VALUES (%q, %q, %q, \"QUEUED\", %q, %q, \"%d\");",
 		Cfg.Prefix,
-		dirname, title, q.user, how, "Bron: "+invoertabel[how]))
+		dirname, title, q.user, how, "Bron: "+invoertabel[how], protected))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
