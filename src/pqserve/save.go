@@ -325,7 +325,6 @@ func savez2(q *Context) {
 					}
 				}
 			} else {
-				// to do
 				newfile = dactname[pathlen:] + "::" + filename
 			}
 			if len(corpora) > 1 {
