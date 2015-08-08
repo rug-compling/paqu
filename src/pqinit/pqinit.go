@@ -79,6 +79,7 @@ Syntax: %s [-w]
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		active      datetime     NOT NULL,
 		attr        text         NOT NULL,
+        protected   boolean      NOT NULL DEFAULT 0,
 		UNIQUE INDEX (id),
 		INDEX (description),
 		INDEX (owner),

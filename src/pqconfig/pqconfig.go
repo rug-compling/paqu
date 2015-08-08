@@ -26,6 +26,7 @@ type Config struct {
 
 	Maxjob int
 	Maxwrd int
+	Maxdup int
 	Dact   bool
 
 	Secret string

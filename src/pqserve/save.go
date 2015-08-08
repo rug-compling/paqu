@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 )
 
@@ -72,6 +73,16 @@ Titel:<br>
 		html.EscapeString(first(q.r, "hword")),
 		html.EscapeString(first(q.r, "postag")),
 		html.EscapeString(first(q.r, "hpostag")))
+
+	s := "default: geen limit"
+	if Cfg.Maxdup > 0 {
+		s = fmt.Sprintf("default is maximum van %d", Cfg.Maxdup)
+	}
+	fmt.Fprintf(q.w, `
+<p>
+Maximum aantal zinnen (%s):<br>
+<input type="text" name="maxdup" size="8" maxlength="10">
+`, s)
 
 	fmt.Fprintf(q.w, `<p>
 <input type="hidden" name="word" value="%s">
@@ -157,12 +168,12 @@ func savez2(q *Context) {
 		return
 	}
 
-	writeHead(q, "Nieuw corpus opslaan", 0)
-
-	if title == "" {
-		http.Error(q.w, "Titel ontbreekt", http.StatusPreconditionFailed)
-		return
+	maxdup, _ := strconv.Atoi(first(q.r, "maxdup"))
+	if maxdup < 1 || maxdup > Cfg.Maxdup {
+		maxdup = Cfg.Maxdup
 	}
+
+	writeHead(q, "Nieuw corpus opslaan", 0)
 
 	dirname := reNoAz.ReplaceAllString(strings.ToLower(title), "")
 	if len(dirname) > 20 {
@@ -198,8 +209,13 @@ func savez2(q *Context) {
 	}
 	z = zip.NewWriter(fpz)
 
+	linecount := 0
+
 	chClose := make(<-chan bool)
 	for _, prefix := range corpora {
+		if linecount == maxdup && maxdup > 0 {
+			break
+		}
 
 		global := isGlobal(q, prefix)
 		pathlen := getPathLen(q, prefix, global)
@@ -224,6 +240,10 @@ func savez2(q *Context) {
 		var arch int
 		var filename, dactname string
 		for rows.Next() {
+			if linecount == maxdup && maxdup > 0 {
+				rows.Close()
+				break
+			}
 			err := rows.Scan(&filename, &arch)
 			if doErr(q, err) {
 				close()
@@ -303,7 +323,7 @@ func savez2(q *Context) {
 				close()
 				return
 			}
-
+			linecount++
 		}
 		err = rows.Err()
 		if doErr(q, err) {
