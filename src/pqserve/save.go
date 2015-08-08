@@ -23,7 +23,26 @@ func savez(q *Context) {
 
 	writeHead(q, "Nieuw corpus maken", 0)
 
-	fmt.Fprintln(q.w, "<form action=\"savez2\">\nKies een of meer corpora:\n<p>\n")
+	fmt.Fprint(q.w, `
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript"><!--
+var submitted = false;
+function submitter() {
+    if (submitted) {
+        return false;
+    }
+    submitted = true;
+    $('#subbut').addClass('hide');
+    $('#subsp').removeClass('hide');
+    return true;
+}
+//<input type="submit" value="nieuw corpus maken" id="subbut">
+//<span id="subsp" class="hide">Even geduld...</span>
+//--></script>
+<form action="savez2" onsubmit="javascript:return submitter()">
+Kies een of meer corpora:
+<p>
+`)
 	choice := make(map[string]string)
 	for _, c := range q.r.Form["db"] {
 		choice[c] = " checked"
@@ -90,8 +109,8 @@ Maximum aantal zinnen (%s):<br>
 <input type="hidden" name="rel" value="%s">
 <input type="hidden" name="hpostag" value="%s">
 <input type="hidden" name="hword" value="%s">
-<input type="submit" value="nieuw corpus maken">
-</form>
+<input type="submit" value="nieuw corpus maken" id="subbut">
+<span id="subsp" class="hide">Even geduld...</span>
 `,
 		html.EscapeString(first(q.r, "word")),
 		html.EscapeString(first(q.r, "postag")),
