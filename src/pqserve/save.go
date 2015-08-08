@@ -131,6 +131,7 @@ func savez2(q *Context) {
 	var z *zip.Writer
 	var gz *gzip.Reader
 	var dact interface{}
+	var err error
 
 	close := func() {
 		if z != nil {
@@ -192,38 +193,15 @@ func savez2(q *Context) {
 		maxdup = Cfg.Maxdup
 	}
 
-	writeHead(q, "Nieuw corpus opslaan", 0)
-
-	dirname := reNoAz.ReplaceAllString(strings.ToLower(title), "")
-	if len(dirname) > 20 {
-		dirname = dirname[:20]
-	} else if dirname == "" {
-		dirname = "a"
-	}
-
-	dirnameLock.Lock()
-	defer dirnameLock.Unlock()
-	for i := 0; true; i++ {
-		d := dirname + abc(i)
-		rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
-		if doErr(q, err) {
-			return
-		}
-		if rows.Next() {
-			rows.Close()
-			continue
-		}
-		dirname = d
-		break
-	}
-	fulldirname := path.Join(paqudir, "data", dirname)
-	err := os.Mkdir(fulldirname, 0700)
-	if doErr(q, err) {
+	dirname, fulldirname, ok := beginNewCorpus(q, title)
+	if !ok {
 		return
 	}
 
 	fpz, err = os.Create(fulldirname + "/data")
-	if doErr(q, err) {
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
 		return
 	}
 	z = zip.NewWriter(fpz)
@@ -236,11 +214,21 @@ func savez2(q *Context) {
 			break
 		}
 
-		global := isGlobal(q, prefix)
-		pathlen := getPathLen(q, prefix, global)
+		global, ok := isGlobal(q, prefix)
+		if !ok {
+			close()
+			return
+		}
+		pathlen, ok := getPathLen(q, prefix, global)
+		if !ok {
+			close()
+			return
+		}
 
 		query, err := makeQuery(q, prefix, chClose)
-		if doErr(q, err) {
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
 			close()
 			return
 		}
@@ -250,7 +238,9 @@ func savez2(q *Context) {
 			Cfg.Prefix, prefix,
 			query)
 		rows, err := q.db.Query(query)
-		if doErr(q, err) {
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
 			close()
 			return
 		}
@@ -264,7 +254,9 @@ func savez2(q *Context) {
 				break
 			}
 			err := rows.Scan(&filename, &arch)
-			if doErr(q, err) {
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
 				close()
 				return
 			}
@@ -274,12 +266,16 @@ func savez2(q *Context) {
 				fpgz, err = os.Open(filename + ".gz")
 				if err == nil {
 					gz, err = gzip.NewReader(fpgz)
-					if doErr(q, err) {
+					if err != nil {
+						http.Error(q.w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
 						close()
 						return
 					}
 					data, err = ioutil.ReadAll(gz)
-					if doErr(q, err) {
+					if err != nil {
+						http.Error(q.w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
 						close()
 						return
 					}
@@ -289,12 +285,16 @@ func savez2(q *Context) {
 					fpgz = nil
 				} else {
 					fpgz, err = os.Open(filename)
-					if doErr(q, err) {
+					if err != nil {
+						http.Error(q.w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
 						close()
 						return
 					}
 					data, err = ioutil.ReadAll(fpgz)
-					if doErr(q, err) {
+					if err != nil {
+						http.Error(q.w, err.Error(), http.StatusInternalServerError)
+						logerr(err)
 						close()
 						return
 					}
@@ -332,19 +332,25 @@ func savez2(q *Context) {
 			}
 
 			f, err := z.Create(newfile)
-			if doErr(q, err) {
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
 				close()
 				return
 			}
 			_, err = f.Write(data)
-			if doErr(q, err) {
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
 				close()
 				return
 			}
 			linecount++
 		}
 		err = rows.Err()
-		if doErr(q, err) {
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
 			close()
 			return
 		}
@@ -352,14 +358,16 @@ func savez2(q *Context) {
 		dact = nil
 	}
 
-	if doErr(q, z.Close()) {
+	err = z.Close()
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
 		z = nil
 		close()
 		return
 	}
 	fpz.Close()
 
-	//fmt.Println(protected)
 	s := "xmlzip-d"
 	if protected != 0 {
 		s = "xmlzip-p"
@@ -367,39 +375,47 @@ func savez2(q *Context) {
 	newCorpus(q, dirname, title, s, protected)
 }
 
-func isGlobal(q *Context, prefix string) (global bool) {
+func isGlobal(q *Context, prefix string) (global bool, ok bool) {
 	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
-	if doErr(q, err) {
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var s string
-		err := rows.Scan(&s)
-		if doErr(q, err) {
+		err = rows.Scan(&s)
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
 			return
 		}
 		global = !strings.Contains(s, "@")
 	}
-	return
+	return global, true
 }
 
-func getPathLen(q *Context, prefix string, global bool) int {
+func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 
 	if !global {
-		return len(path.Join(paqudir, "data", prefix, "xml")) + 1
+		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, true
 	}
 
 	var min, max sql.NullInt64
 	rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
-	if doErr(q, err) {
-		return 0
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
+		return
 	}
 	for rows.Next() {
 		err := rows.Scan(&min, &max)
-		if doErr(q, err) {
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
 			rows.Close()
-			return 0
+			return
 		}
 	}
 	rows.Close()
@@ -408,43 +424,55 @@ func getPathLen(q *Context, prefix string, global bool) int {
 	if min.Valid && max.Valid {
 		rows, err = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
-		if doErr(q, err) {
-			return 0
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
 		}
 		for rows.Next() {
 			var s string
 			err := rows.Scan(&s)
-			if doErr(q, err) {
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
 				rows.Close()
-				return 0
+				return
 			}
 			files = append(files, s)
 		}
 		rows.Close()
 	} else {
 		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
-		if doErr(q, err) {
-			return 0
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
 		}
 		for rows.Next() {
 			err := rows.Scan(&min, &max)
-			if doErr(q, err) {
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
 				rows.Close()
-				return 0
+				return
 			}
 		}
 		rows.Close()
 		rows, err = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
-		if doErr(q, err) {
-			return 0
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return
 		}
 		for rows.Next() {
 			var s string
 			err := rows.Scan(&s)
-			if doErr(q, err) {
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
 				rows.Close()
-				return 0
+				return
 			}
 			files = append(files, s)
 		}
@@ -454,7 +482,7 @@ func getPathLen(q *Context, prefix string, global bool) int {
 		files = append(files, files[0])
 	}
 	if len(files) != 2 {
-		return 0
+		return
 	}
 
 	a1 := strings.Split(files[0], "/")
@@ -465,5 +493,5 @@ func getPathLen(q *Context, prefix string, global bool) int {
 			break
 		}
 	}
-	return len(strings.Join(a1[:i], "/")) + 1
+	return len(strings.Join(a1[:i], "/")) + 1, true
 }

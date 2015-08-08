@@ -70,7 +70,7 @@ Syntax: %s [-w]
 		id          varchar(128) NOT NULL,
 		description varchar(128) NOT NULL COLLATE utf8_unicode_ci,
 		owner       varchar(128) NOT NULL DEFAULT 'none',
-		status      enum('QUEUED','WORKING','FINISHED','FAILED') NOT NULL DEFAULT 'QUEUED',
+		status      enum('QUEUED','WORKING','FINISHED','FAILED','WAIT') NOT NULL DEFAULT 'WAIT',
 		msg         varchar(256) NOT NULL,
 		nline       int          NOT NULL DEFAULT 0,
 		nword       int          NOT NULL DEFAULT 0,

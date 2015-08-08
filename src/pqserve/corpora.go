@@ -386,35 +386,8 @@ func submitCorpus(q *Context) {
 		return
 	}
 
-	dirname := reNoAz.ReplaceAllString(strings.ToLower(title), "")
-	if len(dirname) > 20 {
-		dirname = dirname[:20]
-	} else if dirname == "" {
-		dirname = "a"
-	}
-
-	dirnameLock.Lock()
-	defer dirnameLock.Unlock()
-	for i := 0; true; i++ {
-		d := dirname + abc(i)
-		rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			return
-		}
-		if rows.Next() {
-			rows.Close()
-			continue
-		}
-		dirname = d
-		break
-	}
-	fulldirname := path.Join(paqudir, "data", dirname)
-	err := os.Mkdir(fulldirname, 0700)
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	dirname, fulldirname, ok := beginNewCorpus(q, title)
+	if !ok {
 		return
 	}
 
@@ -447,9 +420,10 @@ func submitCorpus(q *Context) {
 func newCorpus(q *Context, dirname, title, how string, protected int) {
 
 	_, err := q.db.Exec(fmt.Sprintf(
-		"INSERT %s_info (id, description, owner, status, params, msg, protected) VALUES (%q, %q, %q, \"QUEUED\", %q, %q, \"%d\");",
+		"UPDATE %s_info SET `description` = %q, `owner` = %q, `status` = \"QUEUED\", `params` = %q, `msg` = %q, `protected` = %d WHERE `id` = %q;",
 		Cfg.Prefix,
-		dirname, title, q.user, how, "Bron: "+invoertabel[how], protected))
+		title, q.user, how, "Bron: "+invoertabel[how], protected,
+		dirname))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -481,6 +455,53 @@ Let op: Dit kan even duren. Minuten, uren, of dagen, afhankelijk van de grootte 
 <p>
 <b>Je krijgt een e-mail als het corpus klaar is.</b>
 `)
+}
+
+func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok bool) {
+	dirname = reNoAz.ReplaceAllString(strings.ToLower(title), "")
+	if len(dirname) > 20 {
+		dirname = dirname[:20]
+	} else if dirname == "" {
+		dirname = "a"
+	}
+
+	dirnameLock.Lock()
+	defer dirnameLock.Unlock()
+	for i := 0; true; i++ {
+		d := dirname + abc(i)
+		rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
+		if err != nil {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			logerr(err)
+			return "", "", false
+		}
+		if rows.Next() {
+			rows.Close()
+			continue
+		}
+		dirname = d
+		break
+	}
+	fulldirname = path.Join(paqudir, "data", dirname)
+	err := os.Mkdir(fulldirname, 0700)
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
+		return "", "", false
+	}
+
+	_, err = q.db.Exec(fmt.Sprintf(
+		"INSERT %s_info (id) VALUES (%q);",
+		Cfg.Prefix,
+		dirname))
+
+	if err != nil {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		logerr(err)
+		return "", "", false
+	}
+
+	return dirname, fulldirname, true
 }
 
 func abc(i int) string {
