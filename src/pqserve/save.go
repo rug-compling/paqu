@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"compress/gzip"
 	"database/sql"
+	"errors"
 	"fmt"
 	"html"
 	"io/ioutil"
@@ -131,9 +132,9 @@ func savez2(q *Context) {
 	var z *zip.Writer
 	var gz *gzip.Reader
 	var dact interface{}
-	var err error
+	var errval error
 
-	close := func() {
+	defer func() {
 		if z != nil {
 			z.Close()
 		}
@@ -147,7 +148,11 @@ func savez2(q *Context) {
 			fpgz.Close()
 		}
 		saveCloseDact(dact)
-	}
+		if errval != nil {
+			http.Error(q.w, errval.Error(), http.StatusInternalServerError)
+			logerr(errval)
+		}
+	}()
 
 	protected := 0
 
@@ -198,10 +203,9 @@ func savez2(q *Context) {
 		return
 	}
 
-	fpz, err = os.Create(fulldirname + "/data")
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	fpz, errval = os.Create(fulldirname + "/data")
+	if errval != nil {
+		fpz = nil
 		return
 	}
 	z = zip.NewWriter(fpz)
@@ -214,22 +218,20 @@ func savez2(q *Context) {
 			break
 		}
 
-		global, ok := isGlobal(q, prefix)
-		if !ok {
-			close()
+		global, err := isGlobal(q, prefix)
+		if err != nil {
+			errval = err
 			return
 		}
-		pathlen, ok := getPathLen(q, prefix, global)
-		if !ok {
-			close()
+		pathlen, err := getPathLen(q, prefix, global)
+		if err != nil {
+			errval = err
 			return
 		}
 
 		query, err := makeQuery(q, prefix, chClose)
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			close()
+			errval = err
 			return
 		}
 		query = strings.Replace(query, " `", " `c`.`", -1)
@@ -239,9 +241,7 @@ func savez2(q *Context) {
 			query)
 		rows, err := q.db.Query(query)
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			close()
+			errval = err
 			return
 		}
 		currentarch := -1
@@ -253,30 +253,24 @@ func savez2(q *Context) {
 				rows.Close()
 				break
 			}
-			err := rows.Scan(&filename, &arch)
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				close()
+			errval = rows.Scan(&filename, &arch)
+			if errval != nil {
+				rows.Close()
 				return
 			}
-
 			var data []byte
 			if arch < 0 {
 				fpgz, err = os.Open(filename + ".gz")
 				if err == nil {
-					gz, err = gzip.NewReader(fpgz)
-					if err != nil {
-						http.Error(q.w, err.Error(), http.StatusInternalServerError)
-						logerr(err)
-						close()
+					gz, errval = gzip.NewReader(fpgz)
+					if errval != nil {
+						gz = nil
+						rows.Close()
 						return
 					}
-					data, err = ioutil.ReadAll(gz)
-					if err != nil {
-						http.Error(q.w, err.Error(), http.StatusInternalServerError)
-						logerr(err)
-						close()
+					data, errval = ioutil.ReadAll(gz)
+					if errval != nil {
+						rows.Close()
 						return
 					}
 					gz.Close()
@@ -284,34 +278,27 @@ func savez2(q *Context) {
 					fpgz.Close()
 					fpgz = nil
 				} else {
-					fpgz, err = os.Open(filename)
-					if err != nil {
-						http.Error(q.w, err.Error(), http.StatusInternalServerError)
-						logerr(err)
-						close()
+					fpgz, errval = os.Open(filename)
+					if errval != nil {
+						fpgz = nil
+						rows.Close()
 						return
 					}
-					data, err = ioutil.ReadAll(fpgz)
-					if err != nil {
-						http.Error(q.w, err.Error(), http.StatusInternalServerError)
-						logerr(err)
-						close()
+					data, errval = ioutil.ReadAll(fpgz)
+					if errval != nil {
+						rows.Close()
 						return
 					}
 					fpgz.Close()
 					fpgz = nil
 				}
-
 			} else {
-
 				if arch != currentarch {
 					currentarch = arch
 					saveCloseDact(dact)
 					dact, dactname = saveOpenDact(q, prefix, arch)
 				}
-
 				data = saveGetDact(q, dact, filename)
-
 			}
 
 			var newfile string
@@ -333,40 +320,32 @@ func savez2(q *Context) {
 
 			f, err := z.Create(newfile)
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				close()
+				errval = err
+				rows.Close()
 				return
 			}
-			_, err = f.Write(data)
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				close()
+			_, errval = f.Write(data)
+			if errval != nil {
+				rows.Close()
 				return
 			}
 			linecount++
-		}
-		err = rows.Err()
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			close()
+		} // for rows.Next()
+		errval = rows.Err()
+		if errval != nil {
 			return
 		}
 		saveCloseDact(dact)
 		dact = nil
 	}
 
-	err = z.Close()
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
-		z = nil
-		close()
+	errval = z.Close()
+	z = nil
+	if errval != nil {
 		return
 	}
 	fpz.Close()
+	fpz = nil
 
 	s := "xmlzip-d"
 	if protected != 0 {
@@ -375,45 +354,38 @@ func savez2(q *Context) {
 	newCorpus(q, dirname, title, s, protected)
 }
 
-func isGlobal(q *Context, prefix string) (global bool, ok bool) {
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+func isGlobal(q *Context, prefix string) (global bool, errval error) {
+
+	rows, errval := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	if errval != nil {
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var s string
-		err = rows.Scan(&s)
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		errval = rows.Scan(&s)
+		if errval != nil {
 			return
 		}
 		global = !strings.Contains(s, "@")
 	}
-	return global, true
+	return global, nil
 }
 
-func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
+func getPathLen(q *Context, prefix string, global bool) (length int, errval error) {
 
 	if !global {
-		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, true
+		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, nil
 	}
 
 	var min, max sql.NullInt64
-	rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	rows, errval := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
+	if errval != nil {
 		return
 	}
 	for rows.Next() {
-		err := rows.Scan(&min, &max)
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		errval = rows.Scan(&min, &max)
+		if errval != nil {
 			rows.Close()
 			return
 		}
@@ -422,19 +394,15 @@ func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 
 	files := make([]string, 0, 2)
 	if min.Valid && max.Valid {
-		rows, err = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
+		rows, errval = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		if errval != nil {
 			return
 		}
 		for rows.Next() {
 			var s string
-			err := rows.Scan(&s)
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
+			errval = rows.Scan(&s)
+			if errval != nil {
 				rows.Close()
 				return
 			}
@@ -442,35 +410,27 @@ func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 		}
 		rows.Close()
 	} else {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		rows, errval = q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
+		if errval != nil {
 			return
 		}
 		for rows.Next() {
-			err := rows.Scan(&min, &max)
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
+			errval = rows.Scan(&min, &max)
+			if errval != nil {
 				rows.Close()
 				return
 			}
 		}
 		rows.Close()
-		rows, err = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
+		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		if errval != nil {
 			return
 		}
 		for rows.Next() {
 			var s string
-			err := rows.Scan(&s)
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
+			errval = rows.Scan(&s)
+			if errval != nil {
 				rows.Close()
 				return
 			}
@@ -482,7 +442,7 @@ func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 		files = append(files, files[0])
 	}
 	if len(files) != 2 {
-		return
+		return 0, errors.New("Missing records in file or arch")
 	}
 
 	a1 := strings.Split(files[0], "/")
@@ -493,5 +453,5 @@ func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 			break
 		}
 	}
-	return len(strings.Join(a1[:i], "/")) + 1, true
+	return len(strings.Join(a1[:i], "/")) + 1, nil
 }

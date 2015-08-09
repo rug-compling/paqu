@@ -35,6 +35,14 @@ var (
 // TAB: Corpora
 func corpora(q *Context) {
 
+	var errval error
+	defer func() {
+		if errval != nil {
+			http.Error(q.w, errval.Error(), http.StatusInternalServerError)
+			logerr(errval)
+		}
+	}()
+
 	if !q.auth {
 		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
 		return
@@ -46,8 +54,7 @@ func corpora(q *Context) {
 			Cfg.Prefix,
 			q.user))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+		errval = err
 		return
 	}
 
@@ -56,10 +63,9 @@ func corpora(q *Context) {
 	var id, desc, status, msg, shared, params string
 	var zinnen, woorden int
 	for rows.Next() {
-		err := rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared, &params)
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		errval = rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared, &params)
+		if errval != nil {
+			rows.Close()
 			return
 		}
 		gebruikt += woorden
@@ -373,6 +379,14 @@ Een tarbestand zelf mag wel gecomprimeerd zijn met gzip.
 
 func submitCorpus(q *Context) {
 
+	var errval error
+	defer func() {
+		if errval != nil {
+			http.Error(q.w, errval.Error(), http.StatusInternalServerError)
+			logerr(errval)
+		}
+	}()
+
 	if !q.auth {
 		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
 		return
@@ -394,22 +408,18 @@ func submitCorpus(q *Context) {
 	if len(q.form.File["data"]) > 0 {
 		fpout, err := os.Create(path.Join(fulldirname, "data"))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+			errval = err
 			return
 		}
 		defer fpout.Close()
 		fpin, err := q.form.File["data"][0].Open()
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+			errval = err
 			return
 		}
 		defer fpin.Close()
-		_, err = io.Copy(fpout, fpin)
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+		_, errval = io.Copy(fpout, fpin)
+		if errval != nil {
 			return
 		}
 	}
@@ -458,6 +468,15 @@ Let op: Dit kan even duren. Minuten, uren, of dagen, afhankelijk van de grootte 
 }
 
 func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok bool) {
+
+	var errval error
+	defer func() {
+		if errval != nil {
+			http.Error(q.w, errval.Error(), http.StatusInternalServerError)
+			logerr(errval)
+		}
+	}()
+
 	dirname = reNoAz.ReplaceAllString(strings.ToLower(title), "")
 	if len(dirname) > 20 {
 		dirname = dirname[:20]
@@ -471,8 +490,7 @@ func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok b
 		d := dirname + abc(i)
 		rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
+			errval = err
 			return "", "", false
 		}
 		if rows.Next() {
@@ -483,21 +501,17 @@ func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok b
 		break
 	}
 	fulldirname = path.Join(paqudir, "data", dirname)
-	err := os.Mkdir(fulldirname, 0700)
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	errval = os.Mkdir(fulldirname, 0700)
+	if errval != nil {
 		return "", "", false
 	}
 
-	_, err = q.db.Exec(fmt.Sprintf(
+	_, errval = q.db.Exec(fmt.Sprintf(
 		"INSERT %s_info (id) VALUES (%q);",
 		Cfg.Prefix,
 		dirname))
 
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	if errval != nil {
 		return "", "", false
 	}
 
