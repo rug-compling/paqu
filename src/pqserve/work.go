@@ -715,19 +715,34 @@ func recover() {
 	util.CheckErr(err)
 
 	ids := make([]string, 0)
+	queuing := make([]string, 0)
 
 	_, err = db.Exec(
 		"UPDATE `" + Cfg.Prefix + "_info` SET `nword` = 0, `status` = \"QUEUED\" WHERE `status` = \"WORKING\"")
 	util.CheckErr(err)
 
-	rows, err := db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" ORDER BY `created`")
+	rows, err := db.Query("SELECT `id`,`status` FROM `" +
+		Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" OR `status` = \"QUEUING\"  ORDER BY `created`")
 	util.CheckErr(err)
 	for rows.Next() {
-		var id string
-		util.CheckErr(rows.Scan(&id))
-		ids = append(ids, id)
+		var id, status string
+		util.CheckErr(rows.Scan(&id, &status))
+		if status == "QUEUED" {
+			ids = append(ids, id)
+		} else {
+			queuing = append(queuing, id)
+		}
 	}
 	util.CheckErr(rows.Err())
+
+	if len(queuing) > 0 {
+		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `status` = \"QUEUING\"", Cfg.Prefix))
+		util.CheckErr(err)
+	}
+	for _, corpus := range queuing {
+		util.CheckErr(os.RemoveAll(path.Join(paqudir, "data", corpus)))
+		logf("QUEUING: rm -r %s: ok", path.Join(paqudir, "data", corpus))
+	}
 
 	db.Close()
 
