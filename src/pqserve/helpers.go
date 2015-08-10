@@ -51,6 +51,27 @@ func doErr(q *Context, err error) bool {
 	return true
 }
 
+func hErr(q *Context, err error) bool {
+	if err == nil {
+		return false
+	}
+
+	s := err.Error()
+
+	var s1 string
+	_, filename, lineno, ok := runtime.Caller(1)
+	if ok {
+		s1 = fmt.Sprintf("FOUT: %v:%v: %v", path.Base(filename), lineno, s)
+	} else {
+		s1 = "FOUT: " + s
+	}
+	chLog <- s1
+
+	http.Error(q.w, s, http.StatusInternalServerError)
+
+	return true
+}
+
 func writeHead(q *Context, title string, tab int) {
 	q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	q.w.Header().Set("Cache-Control", "no-cache")

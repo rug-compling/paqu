@@ -132,7 +132,7 @@ func savez2(q *Context) {
 	var z *zip.Writer
 	var gz *gzip.Reader
 	var dact interface{}
-	var errval error
+	var err error
 
 	defer func() {
 		if z != nil {
@@ -148,10 +148,6 @@ func savez2(q *Context) {
 			fpgz.Close()
 		}
 		saveCloseDact(dact)
-		if errval != nil {
-			http.Error(q.w, errval.Error(), http.StatusInternalServerError)
-			logerr(errval)
-		}
 	}()
 
 	protected := 0
@@ -203,8 +199,8 @@ func savez2(q *Context) {
 		return
 	}
 
-	fpz, errval = os.Create(fulldirname + "/data")
-	if errval != nil {
+	fpz, err = os.Create(fulldirname + "/data")
+	if hErr(q, err) {
 		fpz = nil
 		return
 	}
@@ -218,20 +214,17 @@ func savez2(q *Context) {
 			break
 		}
 
-		global, err := isGlobal(q, prefix)
-		if err != nil {
-			errval = err
+		global, ok := isGlobal(q, prefix)
+		if !ok {
 			return
 		}
-		pathlen, err := getPathLen(q, prefix, global)
-		if err != nil {
-			errval = err
+		pathlen, ok := getPathLen(q, prefix, global)
+		if !ok {
 			return
 		}
 
 		query, err := makeQuery(q, prefix, chClose)
-		if err != nil {
-			errval = err
+		if hErr(q, err) {
 			return
 		}
 		query = strings.Replace(query, " `", " `c`.`", -1)
@@ -240,8 +233,7 @@ func savez2(q *Context) {
 			Cfg.Prefix, prefix,
 			query)
 		rows, err := q.db.Query(query)
-		if err != nil {
-			errval = err
+		if hErr(q, err) {
 			return
 		}
 		currentarch := -1
@@ -253,8 +245,8 @@ func savez2(q *Context) {
 				rows.Close()
 				break
 			}
-			errval = rows.Scan(&filename, &arch)
-			if errval != nil {
+			err = rows.Scan(&filename, &arch)
+			if hErr(q, err) {
 				rows.Close()
 				return
 			}
@@ -262,14 +254,14 @@ func savez2(q *Context) {
 			if arch < 0 {
 				fpgz, err = os.Open(filename + ".gz")
 				if err == nil {
-					gz, errval = gzip.NewReader(fpgz)
-					if errval != nil {
+					gz, err = gzip.NewReader(fpgz)
+					if hErr(q, err) {
 						gz = nil
 						rows.Close()
 						return
 					}
-					data, errval = ioutil.ReadAll(gz)
-					if errval != nil {
+					data, err = ioutil.ReadAll(gz)
+					if hErr(q, err) {
 						rows.Close()
 						return
 					}
@@ -278,14 +270,14 @@ func savez2(q *Context) {
 					fpgz.Close()
 					fpgz = nil
 				} else {
-					fpgz, errval = os.Open(filename)
-					if errval != nil {
+					fpgz, err = os.Open(filename)
+					if hErr(q, err) {
 						fpgz = nil
 						rows.Close()
 						return
 					}
-					data, errval = ioutil.ReadAll(fpgz)
-					if errval != nil {
+					data, err = ioutil.ReadAll(fpgz)
+					if hErr(q, err) {
 						rows.Close()
 						return
 					}
@@ -319,29 +311,28 @@ func savez2(q *Context) {
 			}
 
 			f, err := z.Create(newfile)
-			if err != nil {
-				errval = err
+			if hErr(q, err) {
 				rows.Close()
 				return
 			}
-			_, errval = f.Write(data)
-			if errval != nil {
+			_, err = f.Write(data)
+			if hErr(q, err) {
 				rows.Close()
 				return
 			}
 			linecount++
 		} // for rows.Next()
-		errval = rows.Err()
-		if errval != nil {
+		err = rows.Err()
+		if hErr(q, err) {
 			return
 		}
 		saveCloseDact(dact)
 		dact = nil
 	}
 
-	errval = z.Close()
+	err = z.Close()
 	z = nil
-	if errval != nil {
+	if hErr(q, err) {
 		return
 	}
 	fpz.Close()
@@ -354,38 +345,38 @@ func savez2(q *Context) {
 	newCorpus(q, dirname, title, s, protected)
 }
 
-func isGlobal(q *Context, prefix string) (global bool, errval error) {
+func isGlobal(q *Context, prefix string) (global bool, ok bool) {
 
-	rows, errval := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
-	if errval != nil {
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	if hErr(q, err) {
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var s string
-		errval = rows.Scan(&s)
-		if errval != nil {
+		err = rows.Scan(&s)
+		if hErr(q, err) {
 			return
 		}
 		global = !strings.Contains(s, "@")
 	}
-	return global, nil
+	return global, true
 }
 
-func getPathLen(q *Context, prefix string, global bool) (length int, errval error) {
+func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 
 	if !global {
-		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, nil
+		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, true
 	}
 
 	var min, max sql.NullInt64
-	rows, errval := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
-	if errval != nil {
+	rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
+	if hErr(q, err) {
 		return
 	}
 	for rows.Next() {
-		errval = rows.Scan(&min, &max)
-		if errval != nil {
+		err = rows.Scan(&min, &max)
+		if hErr(q, err) {
 			rows.Close()
 			return
 		}
@@ -394,15 +385,15 @@ func getPathLen(q *Context, prefix string, global bool) (length int, errval erro
 
 	files := make([]string, 0, 2)
 	if min.Valid && max.Valid {
-		rows, errval = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
+		rows, err = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
-		if errval != nil {
+		if hErr(q, err) {
 			return
 		}
 		for rows.Next() {
 			var s string
-			errval = rows.Scan(&s)
-			if errval != nil {
+			err = rows.Scan(&s)
+			if hErr(q, err) {
 				rows.Close()
 				return
 			}
@@ -410,27 +401,27 @@ func getPathLen(q *Context, prefix string, global bool) (length int, errval erro
 		}
 		rows.Close()
 	} else {
-		rows, errval = q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
-		if errval != nil {
+		rows, err = q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
+		if hErr(q, err) {
 			return
 		}
 		for rows.Next() {
-			errval = rows.Scan(&min, &max)
-			if errval != nil {
+			err = rows.Scan(&min, &max)
+			if hErr(q, err) {
 				rows.Close()
 				return
 			}
 		}
 		rows.Close()
-		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
+		rows, err = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
-		if errval != nil {
+		if hErr(q, err) {
 			return
 		}
 		for rows.Next() {
 			var s string
-			errval = rows.Scan(&s)
-			if errval != nil {
+			err = rows.Scan(&s)
+			if hErr(q, err) {
 				rows.Close()
 				return
 			}
@@ -442,7 +433,8 @@ func getPathLen(q *Context, prefix string, global bool) (length int, errval erro
 		files = append(files, files[0])
 	}
 	if len(files) != 2 {
-		return 0, errors.New("Missing records in file or arch")
+		hErr(q, errors.New("Missing records in file or arch"))
+		return
 	}
 
 	a1 := strings.Split(files[0], "/")
@@ -453,5 +445,5 @@ func getPathLen(q *Context, prefix string, global bool) (length int, errval erro
 			break
 		}
 	}
-	return len(strings.Join(a1[:i], "/")) + 1, nil
+	return len(strings.Join(a1[:i], "/")) + 1, true
 }
