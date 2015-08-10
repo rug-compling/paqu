@@ -82,6 +82,7 @@ func main() {
 
 	db, err := dbopen()
 	util.CheckErr(err)
+	upgrade(db)
 	rows, err := db.Query("SELECT `VARIABLE_VALUE` FROM `information_schema`.`GLOBAL_VARIABLES` WHERE `VARIABLE_NAME` = \"VERSION\"")
 	util.CheckErr(err)
 	if rows.Next() {
