@@ -37,8 +37,6 @@ function submitter() {
     $('#subsp').removeClass('hide');
     return true;
 }
-//<input type="submit" value="nieuw corpus maken" id="subbut">
-//<span id="subsp" class="hide">Even geduld...</span>
 //--></script>
 <form action="savez2" method="post" enctype="multipart/form-data" accept-charset="utf-8" onsubmit="javascript:return submitter()">
 Kies een of meer corpora:
@@ -92,7 +90,7 @@ Titel:<br>
 		html.EscapeString(firstf(q.form, "postag")),
 		html.EscapeString(firstf(q.form, "hpostag")))
 
-	s := "default: geen limit"
+	s := "default: geen limiet"
 	if Cfg.Maxdup > 0 {
 		s = fmt.Sprintf("default is maximum van %d", Cfg.Maxdup)
 	}
@@ -221,7 +219,7 @@ func savez2(q *Context) {
 		if !ok {
 			return
 		}
-		pathlen, ok := getPathLen(q, prefix, global)
+		pathlen, ok := getPathLen(q, prefix, global, false)
 		if !ok {
 			return
 		}
@@ -366,29 +364,34 @@ func isGlobal(q *Context, prefix string) (global bool, ok bool) {
 	return global, true
 }
 
-func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
+func getPathLen(q *Context, prefix string, global, archonly bool) (length int, ok bool) {
 
 	if !global {
 		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, true
 	}
 
 	var min, max sql.NullInt64
-	rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
-	if hErr(q, err) {
-		return
-	}
-	for rows.Next() {
-		err = rows.Scan(&min, &max)
+
+	if !archonly {
+
+		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
 		if hErr(q, err) {
-			rows.Close()
 			return
 		}
+		for rows.Next() {
+			err = rows.Scan(&min, &max)
+			if hErr(q, err) {
+				rows.Close()
+				return
+			}
+		}
+		rows.Close()
+
 	}
-	rows.Close()
 
 	files := make([]string, 0, 2)
-	if min.Valid && max.Valid {
-		rows, err = q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
+	if !archonly && min.Valid && max.Valid {
+		rows, err := q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
 		if hErr(q, err) {
 			return
@@ -404,7 +407,7 @@ func getPathLen(q *Context, prefix string, global bool) (length int, ok bool) {
 		}
 		rows.Close()
 	} else {
-		rows, err = q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
+		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
 		if hErr(q, err) {
 			return
 		}

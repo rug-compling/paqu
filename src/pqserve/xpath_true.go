@@ -443,7 +443,19 @@ $('#loading span').html('%.1f%%');
 		}
 	}
 
-	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small><hr>")
+	if !(okdocs && curno == 0) {
+		fmt.Fprintf(q.w, `<p>
+<form action="xsavez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
+<input type="hidden" name="xpath" value="%s">
+<input type="hidden" name="db" value="%s">
+<input type="submit" value="nieuw corpus maken op basis van deze zoekopdracht">
+</form>
+`,
+			html.EscapeString(first(q.r, "xpath")),
+			html.EscapeString(prefix))
+	}
+
+	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small>")
 
 	if curno == 0 {
 		html_footer(q)
@@ -451,7 +463,7 @@ $('#loading span').html('%.1f%%');
 	}
 
 	// Links naar statistieken
-	fmt.Fprintf(q.w, `<p>
+	fmt.Fprintf(q.w, `<hr><p>
 		<div id="xstats">
 		<form action="xpathstats" target="xframe" name="xstatsform" onsubmit="javascript:return xstatftest()">
 		<input type="hidden" name="xpath" value="%s">

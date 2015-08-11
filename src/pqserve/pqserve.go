@@ -166,6 +166,8 @@ func main() {
 
 	handleFunc("savez", savez)
 	handleFunc("savez2", savez2)
+	handleFunc("xsavez", xsavez)
+	handleFunc("xsavez2", xsavez2)
 
 	handleFunc("info.html", static_info_html)
 	handleFunc("relhead.png", static_relhead_png)
