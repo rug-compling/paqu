@@ -40,14 +40,12 @@ function submitter() {
 //<input type="submit" value="nieuw corpus maken" id="subbut">
 //<span id="subsp" class="hide">Even geduld...</span>
 //--></script>
-<form action="savez2" onsubmit="javascript:return submitter()">
+<form action="savez2" method="post" enctype="multipart/form-data" accept-charset="utf-8" onsubmit="javascript:return submitter()">
 Kies een of meer corpora:
 <p>
 `)
 	choice := make(map[string]string)
-	for _, c := range q.r.Form["db"] {
-		choice[c] = " checked"
-	}
+	choice[firstf(q.form, "db")] = " checked"
 	var gr byte
 	for _, c := range q.opt_db {
 		if c[0] != gr {
@@ -88,11 +86,11 @@ Zoekopdracht:
 Titel:<br>
 <input type="text" name="title" size="80" maxlength="64">
 `,
-		html.EscapeString(first(q.r, "word")),
-		html.EscapeString(first(q.r, "rel")),
-		html.EscapeString(first(q.r, "hword")),
-		html.EscapeString(first(q.r, "postag")),
-		html.EscapeString(first(q.r, "hpostag")))
+		html.EscapeString(firstf(q.form, "word")),
+		html.EscapeString(firstf(q.form, "rel")),
+		html.EscapeString(firstf(q.form, "hword")),
+		html.EscapeString(firstf(q.form, "postag")),
+		html.EscapeString(firstf(q.form, "hpostag")))
 
 	s := "default: geen limit"
 	if Cfg.Maxdup > 0 {
@@ -113,11 +111,11 @@ Maximum aantal zinnen (%s):<br>
 <input type="submit" value="nieuw corpus maken" id="subbut">
 <span id="subsp" class="hide">Even geduld...</span>
 `,
-		html.EscapeString(first(q.r, "word")),
-		html.EscapeString(first(q.r, "postag")),
-		html.EscapeString(first(q.r, "rel")),
-		html.EscapeString(first(q.r, "hpostag")),
-		html.EscapeString(first(q.r, "hword")))
+		html.EscapeString(firstf(q.form, "word")),
+		html.EscapeString(firstf(q.form, "postag")),
+		html.EscapeString(firstf(q.form, "rel")),
+		html.EscapeString(firstf(q.form, "hpostag")),
+		html.EscapeString(firstf(q.form, "hword")))
 
 	fmt.Fprint(q.w, `
 </body>
@@ -157,7 +155,12 @@ func savez2(q *Context) {
 		return
 	}
 
-	corpora := q.r.Form["db"]
+	corpora := make([]string, 0, len(q.form.Value["db"]))
+	for _, c := range q.form.Value["db"] {
+		if s := strings.TrimSpace(c); s != "" {
+			corpora = append(corpora, s)
+		}
+	}
 	for _, corpus := range corpora {
 		if !q.prefixes[corpus] {
 			http.Error(q.w, "Geen toegang tot corpus", http.StatusUnauthorized)
@@ -173,23 +176,23 @@ func savez2(q *Context) {
 		return
 	}
 
-	word := first(q.r, "word")
-	rel := first(q.r, "rel")
-	hword := first(q.r, "hword")
-	postag := first(q.r, "postag")
-	hpostag := first(q.r, "hpostag")
+	word := firstf(q.form, "word")
+	rel := firstf(q.form, "rel")
+	hword := firstf(q.form, "hword")
+	postag := firstf(q.form, "postag")
+	hpostag := firstf(q.form, "hpostag")
 	if word == "" && hword == "" && rel == "" && postag == "" && hpostag == "" {
 		writeHtml(q, "Fout", "Zoektermen ontbreken")
 		return
 	}
 
-	title := maxtitlelen(first(q.r, "title"))
+	title := maxtitlelen(firstf(q.form, "title"))
 	if title == "" {
 		writeHtml(q, "Fout", "Titel ontbreekt")
 		return
 	}
 
-	maxdup, _ := strconv.Atoi(first(q.r, "maxdup"))
+	maxdup, _ := strconv.Atoi(firstf(q.form, "maxdup"))
 	if maxdup < 1 || maxdup > Cfg.Maxdup {
 		maxdup = Cfg.Maxdup
 	}
@@ -223,7 +226,7 @@ func savez2(q *Context) {
 			return
 		}
 
-		query, err := makeQuery(q, prefix, chClose)
+		query, err := makeQueryF(q, prefix, chClose)
 		if hErr(q, err) {
 			return
 		}

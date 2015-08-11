@@ -12,11 +12,30 @@ import (
 
 // Opstellen van query voor hoofdformulier, en voor stats
 func makeQuery(q *Context, prefix string, chClose <-chan bool) (string, error) {
+	return makeQueryDo(q, prefix, chClose, false)
+}
+
+func makeQueryF(q *Context, prefix string, chClose <-chan bool) (string, error) {
+	return makeQueryDo(q, prefix, chClose, true)
+}
+
+func makeQueryDo(q *Context, prefix string, chClose <-chan bool, form bool) (string, error) {
+
+	var frst func(s string) string
+	if form {
+		frst = func(s string) string {
+			return firstf(q.form, s)
+		}
+	} else {
+		frst = func(s string) string {
+			return first(q.r, s)
+		}
+	}
 
 	parts := make([]string, 0, 6)
 	for _, p := range []string{"", "h"} {
-		if first(q.r, p+"word") != "" {
-			wrd := setHigh(first(q.r, p+"word"))
+		if frst(p+"word") != "" {
+			wrd := setHigh(frst(p + "word"))
 			if wrd[0] == '+' {
 				parts = append(parts, fmt.Sprintf("`"+p+"lemma` = %q", wrd[1:]))
 			} else if wrd[0] == '@' {
@@ -69,13 +88,13 @@ func makeQuery(q *Context, prefix string, chClose <-chan bool) (string, error) {
 			}
 		}
 	}
-	if s := first(q.r, "postag"); s != "" {
+	if s := frst("postag"); s != "" {
 		parts = append(parts, fmt.Sprintf("`postag` = %q", s))
 	}
-	if s := first(q.r, "rel"); s != "" {
+	if s := frst("rel"); s != "" {
 		parts = append(parts, fmt.Sprintf("`rel` = %q", s))
 	}
-	if s := first(q.r, "hpostag"); s != "" {
+	if s := frst("hpostag"); s != "" {
 		if s == "--LEEG--" {
 			s = ""
 		}
