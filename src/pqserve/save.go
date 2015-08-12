@@ -129,6 +129,8 @@ func savez2(q *Context) {
 	var gz *gzip.Reader
 	var dact interface{}
 	var err error
+	var dirname, fulldirname string
+	var okall bool
 
 	defer func() {
 		if z != nil {
@@ -144,6 +146,10 @@ func savez2(q *Context) {
 			fpgz.Close()
 		}
 		saveCloseDact(dact)
+		if !okall {
+			os.RemoveAll(fulldirname)
+			q.db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, dirname))
+		}
 	}()
 
 	protected := 0
@@ -344,6 +350,7 @@ func savez2(q *Context) {
 		s = "xmlzip-p"
 	}
 	newCorpus(q, dirname, title, s, protected)
+	okall = true
 }
 
 func isGlobal(q *Context, prefix string) (global bool, ok bool) {

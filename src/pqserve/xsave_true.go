@@ -112,6 +112,8 @@ func xsavez2(q *Context) {
 	var gz *gzip.Reader
 	var dact *dbxml.Db
 	var docs *dbxml.Docs
+	var dirname, fulldirname string
+	var okall bool
 
 	defer func() {
 		if z != nil {
@@ -131,6 +133,10 @@ func xsavez2(q *Context) {
 		}
 		if dact != nil {
 			dact.Close()
+		}
+		if !okall {
+			os.RemoveAll(fulldirname)
+			q.db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, dirname))
 		}
 	}()
 
@@ -341,4 +347,5 @@ func xsavez2(q *Context) {
 		s = "xmlzip-p"
 	}
 	newCorpus(q, dirname, title, s, protected)
+	okall = true
 }
