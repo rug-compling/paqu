@@ -32,7 +32,7 @@ func main() {
 		fmt.Printf(`
 Syntax: %s [-w]
 
- -w : bestaande database overschrijven
+ -w : bestaande database overschrijven : OUDE GEGEVENS WORDEN GEWIST
 
 `, os.Args[0])
 		return

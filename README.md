@@ -173,6 +173,11 @@ Om de database te initialiseren, run:
 
     pqinit
 
+Als je een nieuwere versie van PaQu gaat gebruiken, dan moet misschien de
+database aangepast worden. Om dat te doen, run:
+
+    pqupgrade
+
 ### Lassy Klein ###
 
 Het is zeer aan te bevelen om alvast een corpus te installeren voordat

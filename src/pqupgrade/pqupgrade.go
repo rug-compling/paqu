@@ -1,13 +1,39 @@
 package main
 
 import (
+	"github.com/BurntSushi/toml"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
 
 	"database/sql"
+	"fmt"
+	"os"
+	"path"
 	"strings"
 )
 
-func upgrade(db *sql.DB) {
+type Config struct {
+	Login  string
+	Prefix string
+}
+
+func main() {
+
+	paqudir := os.Getenv("PAQU")
+	if paqudir == "" {
+		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+	}
+	var Cfg Config
+	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	util.CheckErr(err)
+
+	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	util.CheckErr(err)
+	defer db.Close()
+
+	changed := false
+
+	////////////////////////////////////////////////////////////////
 
 	// tabel <prefix>_info
 	// veld `protected` toevoegen
@@ -18,8 +44,10 @@ func upgrade(db *sql.DB) {
 	} else {
 		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `protected` BOOLEAN NOT NULL DEFAULT '0'")
 		util.CheckErr(err)
-		logf("UPGRADE: nieuw veld `protected` in tabel `%s_info`", Cfg.Prefix)
+		changed = true
 	}
+
+	////////////////////////////////////////////////////////////////
 
 	// tabel <prefix>_info
 	// optie "QUEUING" toevoegen aan veld `status`, en default maken
@@ -39,7 +67,15 @@ func upgrade(db *sql.DB) {
 		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix +
 			"_info` CHANGE `status` `status` ENUM('QUEUED', 'WORKING', 'FINISHED', 'FAILED', 'QUEUING') NOT NULL DEFAULT 'QUEUING'")
 		util.CheckErr(err)
-		logf("UPGRADE: default optie 'QUEUING' in veld `status` in tabel `%s_info`", Cfg.Prefix)
+		changed = true
+
 	}
 
+	////////////////////////////////////////////////////////////////
+
+	if changed {
+		fmt.Println("Database is aangepast")
+	} else {
+		fmt.Println("Niets veranderd")
+	}
 }

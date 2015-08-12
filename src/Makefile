@@ -20,3 +20,4 @@ all:
 	make -C pqsetquota
 	make -C pqstatus
 	make -C pqtexter
+	make -C pqupgrade
