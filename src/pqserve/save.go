@@ -439,7 +439,11 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 		files = append(files, files[0])
 	}
 	if len(files) != 2 {
-		hErr(q, errors.New("Missing records in file or arch"))
+		if archonly {
+			hErr(q, errors.New("Er zijn geen dactbestanden voor corpus "+prefix))
+		} else {
+			hErr(q, errors.New("Missing records in file or arch"))
+		}
 		return
 	}
 

@@ -207,22 +207,26 @@ func xsavez2(q *Context) {
 		}
 
 		dactfiles := make([]string, 0)
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
-		if hErr(q, err) {
-			return
-		}
-		for rows.Next() {
-			var s string
-			if hErr(q, rows.Scan(&s)) {
-				rows.Close()
+		if !global {
+			dactfiles = append(dactfiles, fmt.Sprintf("%s/data/%s/data.dact", paqudir, prefix))
+		} else {
+			rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+			if hErr(q, err) {
 				return
 			}
-			if strings.HasSuffix(s, ".dact") {
-				dactfiles = append(dactfiles, s)
+			for rows.Next() {
+				var s string
+				if hErr(q, rows.Scan(&s)) {
+					rows.Close()
+					return
+				}
+				if strings.HasSuffix(s, ".dact") {
+					dactfiles = append(dactfiles, s)
+				}
 			}
-		}
-		if hErr(q, rows.Err()) {
-			return
+			if hErr(q, rows.Err()) {
+				return
+			}
 		}
 
 		fullquery := xpath
@@ -297,7 +301,10 @@ func xsavez2(q *Context) {
 					continue
 				}
 
-				newfile := dactfile[pathlen:] + "::" + filename
+				newfile := filename
+				if global {
+					newfile = dactfile[pathlen:len(dactfile)-5] + "::" + filename
+				}
 				if len(corpora) > 1 {
 					newfile = prefix + "/" + newfile
 				}
