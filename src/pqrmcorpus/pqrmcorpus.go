@@ -64,14 +64,23 @@ func main() {
 	util.CheckErr(err)
 	fmt.Printf("DELETE FROM `%s_info`: %#v rij(en)\n", Cfg.Prefix, rijen(n))
 
-	n, err = db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`",
+	_, err = db.Exec(fmt.Sprintf(
+		"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`, `%s_c_%s_midx`, `%s_c_%s_meta`",
+		Cfg.Prefix, corpus,
+		Cfg.Prefix, corpus,
 		Cfg.Prefix, corpus,
 		Cfg.Prefix, corpus,
 		Cfg.Prefix, corpus,
 		Cfg.Prefix, corpus,
 		Cfg.Prefix, corpus))
 	util.CheckErr(err)
-	fmt.Printf("DROP TABLE IF EXISTS `%s_c_%s_*` (5): ok\n", Cfg.Prefix, corpus)
+	fmt.Printf("DROP TABLE IF EXISTS `%s_c_%s_*` (7): ok\n", Cfg.Prefix, corpus)
+
+	_, err = db.Exec(fmt.Sprintf(
+		"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta`",
+		Cfg.Prefix, corpus))
+	util.CheckErr(err)
+	fmt.Printf("DROP VIEW IF EXISTS `%s_c_%s_deprel_meta`: ok\n", Cfg.Prefix, corpus)
 
 	if strings.Contains(owner, "@") {
 		util.CheckErr(os.RemoveAll(path.Join(paqudir, "data", corpus)))

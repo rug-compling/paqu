@@ -265,6 +265,8 @@ func home(q *Context) {
 	}
 	fmt.Fprint(q.w, "</ol>\n<p>\n")
 
+	defer html_footer(q)
+
 	// Links naar volgende en vorige pagina's met resultaten
 	qs := make_query_string(
 		first(q.r, "word"),
@@ -309,10 +311,12 @@ func home(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small>")
 
-	// Links naar statistieken
-	if offset > 0 || len(zinnen) > 0 {
+	if offset == 0 && len(zinnen) == 0 {
+		return
+	}
 
-		fmt.Fprintf(q.w, `<hr><p>
+	// Links naar statistieken
+	fmt.Fprintf(q.w, `<hr><p>
 		<div id="stats">
 		<div id="inner">
 		<form action="stats" target="sframe">
@@ -329,14 +333,42 @@ func home(q *Context) {
 		</div>
 		<iframe src="leeg.html" name="sframe" class="hide"></iframe>
 `,
+		html.EscapeString(first(q.r, "word")),
+		html.EscapeString(first(q.r, "postag")),
+		html.EscapeString(first(q.r, "rel")),
+		html.EscapeString(first(q.r, "hpostag")),
+		html.EscapeString(first(q.r, "hword")),
+		html.EscapeString(prefix))
+
+	hasmeta := hasMeta(q, prefix)
+
+	if hasmeta {
+		fmt.Fprintf(q.w, `<p>
+		<div id="statsmeta">
+		<div id="innermeta">
+		<form action="statsmeta" target="sframemeta">
+		<input type="hidden" name="word" value="%s">
+		<input type="hidden" name="postag" value="%s">
+		<input type="hidden" name="rel" value="%s">
+		<input type="hidden" name="hpostag" value="%s">
+		<input type="hidden" name="hword" value="%s">
+		<input type="hidden" name="db" value="%s">
+		<input type="submit" value="tellingen &mdash; metadata">
+		</form>
+		</div>
+        <img src="busy.gif" id="busymeta" class="hide" alt="aan het werk...">
+		</div>
+		<iframe src="leeg.html" name="sframemeta" class="hide"></iframe>
+`,
 			html.EscapeString(first(q.r, "word")),
 			html.EscapeString(first(q.r, "postag")),
 			html.EscapeString(first(q.r, "rel")),
 			html.EscapeString(first(q.r, "hpostag")),
 			html.EscapeString(first(q.r, "hword")),
 			html.EscapeString(prefix))
+	}
 
-		fmt.Fprintf(q.w, `<p>
+	fmt.Fprintf(q.w, `<p>
 		<div id="statsrel">
 		<form action="javascript:$.fn.statsrel()" name="statsrelform" onsubmit="javascript:return statftest()">
 		<input type="hidden" name="word" value="%s">
@@ -369,16 +401,12 @@ func home(q *Context) {
 		</div>
 		</div>
 `,
-			html.EscapeString(first(q.r, "word")),
-			html.EscapeString(first(q.r, "postag")),
-			html.EscapeString(first(q.r, "rel")),
-			html.EscapeString(first(q.r, "hpostag")),
-			html.EscapeString(first(q.r, "hword")),
-			html.EscapeString(prefix))
-
-	}
-
-	html_footer(q)
+		html.EscapeString(first(q.r, "word")),
+		html.EscapeString(first(q.r, "postag")),
+		html.EscapeString(first(q.r, "rel")),
+		html.EscapeString(first(q.r, "hpostag")),
+		html.EscapeString(first(q.r, "hword")),
+		html.EscapeString(prefix))
 
 }
 
@@ -423,7 +451,9 @@ func html_header(q *Context) {
   }
 
   var result;
+  var resultmeta;
   var busy;
+  var busymeta;
 
   window._fn = {
     update: function(data) {
@@ -435,6 +465,16 @@ func html_header(q *Context) {
     },
     completed: function() {
       busy.addClass('hide');
+    },
+    updatemeta: function(data) {
+      resultmeta.append(data);
+    },
+    startedmeta: function() {
+      resultmeta.html('');
+      busymeta.removeClass('hide');
+    },
+    completedmeta: function() {
+      busymeta.addClass('hide');
     }
   }
 
@@ -478,6 +518,8 @@ func html_header(q *Context) {
   $(document).ready(function() {
     result = $('#inner');
     busy = $('#busy');
+    resultmeta = $('#innermeta');
+    busymeta = $('#busymeta');
   });
 
   //--></script>

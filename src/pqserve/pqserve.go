@@ -136,6 +136,7 @@ func main() {
 	handleFunc("", home)
 	handleFunc("tree", tree)
 	handleFunc("stats", stats)
+	handleFunc("statsmeta", statsmeta)
 	handleFunc("statsrel", statsrel)
 
 	handleFunc("logout", logout)

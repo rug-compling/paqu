@@ -340,3 +340,31 @@ var reTijd = regexp.MustCompile(`\.[0-9]+([a-z]+)$`)
 func tijd(t time.Duration) string {
 	return reTijd.ReplaceAllString(t.String(), "$1")
 }
+
+func hasMeta(q *Context, prefix string) bool {
+	rows, err := q.db.Query(fmt.Sprintf("SELECT COUNT(*) FROM `%s_c_%s_midx`", Cfg.Prefix, prefix))
+	if err != nil {
+		return false
+	}
+	var n int
+	for rows.Next() {
+		rows.Scan(&n)
+	}
+	return n > 0
+}
+
+func getMeta(q *Context, prefix string) [][2]string {
+	result := make([][2]string, 0)
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `name`,`type` FROM `%s_c_%s_midx`", Cfg.Prefix, prefix))
+	if err != nil {
+		return result
+	}
+	var n, t string
+	for rows.Next() {
+		err := rows.Scan(&n, &t)
+		if err == nil {
+			result = append(result, [2]string{n, t})
+		}
+	}
+	return result
+}

@@ -50,7 +50,7 @@ a.ico {
 a.ico:hover {
     text-decoration: none;
 }
-#stats, #statsrel, #xstats {
+#stats, #statsmeta, #statsrel, #xstats {
    background:#e0e0e0;
    padding: 10px;
    font-size: small;

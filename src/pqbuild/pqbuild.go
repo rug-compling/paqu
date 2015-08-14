@@ -31,8 +31,15 @@ import (
 
 type Alpino_ds struct {
 	XMLName  xml.Name `xml:"alpino_ds"`
+	Meta     []MetaT  `xml:"metadata>meta"`
 	Node0    *Node    `xml:"node"`
 	Sentence string   `xml:"sentence"`
+}
+
+type MetaT struct {
+	Type  string `xml:"type,attr"`
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
 }
 
 type Node struct {
@@ -72,6 +79,11 @@ type Config struct {
 	Prefix string
 }
 
+type MetaIdx struct {
+	Id   int
+	Type string
+}
+
 //. Constanten
 
 const (
@@ -80,6 +92,8 @@ const (
 	WORD
 	FILE
 	ARCH
+	META
+	MIDX
 )
 
 //. Variabelen
@@ -162,10 +176,11 @@ var (
 
 	topfile  = -1
 	toparch  = -1
+	topmidx  = -1
 	lastarch string
 
-	buffer       [5]bytes.Buffer
-	buf_has_data [5]bool
+	buffer       [7]bytes.Buffer
+	buf_has_data [7]bool
 
 	db_append       bool
 	db_overwrite    bool
@@ -185,6 +200,8 @@ var (
 	utfRE = regexp.MustCompile("[^\001-\uFFFF]")
 
 	attributes = make(map[string]bool)
+
+	meta = make(map[string]MetaIdx)
 )
 
 //. Main
@@ -198,6 +215,8 @@ func main() {
 	buffer[WORD].Grow(50000)
 	buffer[FILE].Grow(50000)
 	buffer[ARCH].Grow(50000)
+	buffer[META].Grow(50000)
+	buffer[MIDX].Grow(50000)
 
 	db_makeindex = true
 	db_updatestatus = true
@@ -309,6 +328,14 @@ Opties:
 				}
 				rows.Close()
 			}
+			rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_midx")
+			util.CheckErr(err)
+			if rows.Next() {
+				if rows.Scan(&topmidx) != nil {
+					topmidx = -1
+				}
+				rows.Close()
+			}
 			rows, err = db.Query("SELECT `attr` FROM `" + Cfg.Prefix + "_info` WHERE `id` = \"" + prefix + "\"")
 			util.CheckErr(err)
 			if rows.Next() {
@@ -344,6 +371,23 @@ Opties:
 			fmt.Println("Verwijderen index uit " + Cfg.Prefix + "_c_" + prefix + "_arch ...")
 			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_arch
 				DROP INDEX id;`)
+			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
+			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta
+				DROP INDEX id,
+				DROP INDEX file,
+				DROP INDEX arch,
+				DROP INDEX tval,
+				DROP INDEX ival,
+				DROP INDEX fval;`)
+			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
+			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
+				DROP INDEX id,
+				DROP INDEX name;`)
+			fmt.Println("Verwijderen view " + Cfg.Prefix + "_c_" + prefix + "_deprel_meta")
+			db.Exec(fmt.Sprintf(
+				"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta;`",
+				Cfg.Prefix,
+				prefix))
 		}
 	}
 
@@ -360,10 +404,14 @@ Opties:
 	_, err = db.Exec("DELETE FROM " + Cfg.Prefix + "_corpora WHERE `prefix` = \"" + prefix + "\";")
 	util.CheckErr(err)
 
-	// tabellen <prefix>_deprel en <prefix>_sent aanmaken
+	// oude tabellen weggooien
 	if !db_exists || db_overwrite {
 		_, err := db.Exec(fmt.Sprintf(
-			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`; ",
+			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_meta`, `%s_c_%s_midx`; ",
+			Cfg.Prefix,
+			prefix,
+			Cfg.Prefix,
+			prefix,
 			Cfg.Prefix,
 			prefix,
 			Cfg.Prefix,
@@ -372,6 +420,11 @@ Opties:
 			prefix,
 			Cfg.Prefix,
 			prefix))
+		_, err = db.Exec(fmt.Sprintf(
+			"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta;`",
+			Cfg.Prefix,
+			prefix))
+		// nieuwe tabellen aanmaken
 		util.CheckErr(err)
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel (
 			word    varchar(128) NOT NULL,
@@ -392,7 +445,6 @@ Opties:
 			mark    varchar(128) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
-
 		util.CheckErr(err)
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent (
 			arch int          NOT NULL,
@@ -411,6 +463,23 @@ Opties:
 			id   int          NOT NULL,
 			arch varchar(260) NOT NULL)
 			DEFAULT CHARACTER SET utf8;`)
+		util.CheckErr(err)
+		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
+			id   int          NOT NULL,
+			type enum('TEXT','INT','FLOAT') NOT NULL DEFAULT 'TEXT',
+			name varchar(128) NOT NULL)
+			DEFAULT CHARACTER SET utf8
+			DEFAULT COLLATE utf8_unicode_ci;`)
+		util.CheckErr(err)
+		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
+			id   int          NOT NULL,
+			arch int          NOT NULL,
+			file int          NOT NULL,
+			tval varchar(128) NOT NULL DEFAULT "",
+			ival int          NOT NULL DEFAULT 0,
+			fval float        NOT NULL DEFAULT 0.0)
+			DEFAULT CHARACTER SET utf8
+			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
 	}
 
@@ -470,6 +539,8 @@ Opties:
 	buf_flush(SENT)
 	buf_flush(FILE)
 	buf_flush(ARCH)
+	buf_flush(META)
+	buf_flush(MIDX)
 
 	attrs := make([]string, 0, len(attributes))
 	for attr := range attributes {
@@ -516,6 +587,22 @@ Opties:
 	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_arch ...")
 	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_arch
 		ADD UNIQUE INDEX (id);`)
+	util.CheckErr(err)
+
+	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
+	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
+		ADD INDEX (name),
+		ADD UNIQUE INDEX (id);`)
+	util.CheckErr(err)
+
+	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
+	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta
+		ADD INDEX (id),
+		ADD INDEX (file),
+		ADD INDEX (arch),
+		ADD INDEX (tval),
+		ADD INDEX (ival),
+		ADD INDEX (fval);`)
 	util.CheckErr(err)
 
 	// tijd voor aanmaken tabellen <prefix>_deprel en <prefix>_sent
@@ -652,6 +739,19 @@ Opties:
 	_, err = db.Exec(fmt.Sprintf("INSERT `%s_corpora` (`user`, `prefix`) VALUES (%q, %q);", Cfg.Prefix, user, prefix))
 	util.CheckErr(err)
 
+	fmt.Println("Aanmaken view " + Cfg.Prefix + "_c_" + prefix + "_deprel_meta")
+	_, err = db.Exec(fmt.Sprintf(
+		"CREATE VIEW `%s_c_%s_deprel_meta` AS "+
+			"SELECT * "+
+			"FROM `%s_c_%s_deprel` "+
+			"JOIN `%s_c_%s_meta` USING (`arch`,`file`) "+
+			"JOIN `%s_c_%s_midx` USING (`id`);",
+		Cfg.Prefix, prefix,
+		Cfg.Prefix, prefix,
+		Cfg.Prefix, prefix,
+		Cfg.Prefix, prefix))
+	util.CheckErr(err)
+
 	//fmt.Println("Bijwerken menu's voor postag, rel en hpostag ...")
 	//tags()
 
@@ -697,6 +797,34 @@ func do_data(archname, filename string, data []byte) {
 	alpino := Alpino_ds{}
 	err := xml.Unmarshal(data, &alpino)
 	util.CheckErr(err)
+
+	for _, m := range alpino.Meta {
+		if m.Type != "text" && m.Type != "int" && m.Type != "float" {
+			util.CheckErr(fmt.Errorf("Ongeldig type in %s||%s: %s", archname, filename, m.Type))
+		}
+		if _, ok := meta[m.Name]; !ok {
+			topmidx++
+			meta[m.Name] = MetaIdx{Id: topmidx, Type: m.Type}
+			midx_buf_put(topmidx, m.Name, m.Type)
+		}
+		mi := meta[m.Name]
+		if m.Type != mi.Type {
+			util.CheckErr(fmt.Errorf("Ongeldig type in %s||%s: %s, eerder gedefinieerd als %s", archname, filename, m.Type, mi.Type))
+		}
+		var txt string
+		var intval int
+		var floatval float64
+		if m.Type == "int" {
+			intval, err = strconv.Atoi(m.Value)
+			util.CheckErr(err)
+		} else if m.Type == "float" {
+			floatval, err = strconv.ParseFloat(m.Value, 64)
+			util.CheckErr(err)
+		} else {
+			txt = m.Value
+		}
+		meta_buf_put(mi.Id, arch, file, txt, intval, floatval)
+	}
 
 	// zin opslaan in <prefix>_sent
 	sent_buf_put(arch, file, alpino.Sentence, archname, filename)
@@ -1140,6 +1268,36 @@ func file_buf_put(name string, n int) {
 	}
 }
 
+// Zet een meta-item in de buffer.
+// Als de buffer vol raakt, stuur alles naar de database.
+func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval float64) {
+	komma := ","
+	if !buf_has_data[META] {
+		komma = ""
+		buf_has_data[META] = true
+		fmt.Fprintf(&buffer[META], "INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`tval`,`ival`,`fval`) VALUES", Cfg.Prefix, prefix)
+	}
+	fmt.Fprintf(&buffer[META], "%s\n(%d,%d,%d,%q,%d,%g)", komma, id, arch, file, txt, intval, floatval)
+	if buffer[META].Len() > 49500 {
+		buf_flush(META)
+	}
+}
+
+// Zet een meta-indexitem in de buffer.
+// Als de buffer vol raakt, stuur alles naar de database.
+func midx_buf_put(id int, name string, mtype string) {
+	komma := ","
+	if !buf_has_data[MIDX] {
+		komma = ""
+		buf_has_data[MIDX] = true
+		fmt.Fprintf(&buffer[MIDX], "INSERT `%s_c_%s_midx` (`id`,`type`,`name`) VALUES", Cfg.Prefix, prefix)
+	}
+	fmt.Fprintf(&buffer[MIDX], "%s\n(%d,%q,%q)", komma, id, strings.ToUpper(mtype), name)
+	if buffer[MIDX].Len() > 49500 {
+		buf_flush(MIDX)
+	}
+}
+
 // Stuur een volle buffer naar de database.
 // Reset buffer.
 func buf_flush(buf int) {
@@ -1184,7 +1342,7 @@ func sizes() {
 	var d, i, total int
 	var t string
 	rows, err := db.Query("SELECT TABLE_NAME, DATA_LENGTH, INDEX_LENGTH FROM `information_schema`.`TABLES` WHERE TABLE_NAME LIKE '" +
-		Cfg.Prefix + "_c_" + prefix + "_%' ORDER BY 1;")
+		Cfg.Prefix + "_c_" + prefix + "_%' AND NOT TABLE_NAME = '" + Cfg.Prefix + "_c_" + prefix + "_deprel_meta' ORDER BY 1;")
 	util.CheckErr(err)
 	fmt.Println()
 	for rows.Next() {

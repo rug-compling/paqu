@@ -77,6 +77,9 @@ func remove(q *Context) {
 		Cfg.Prefix, id,
 		Cfg.Prefix, id))
 	logerr(err)
+	_, err = q.db.Exec(fmt.Sprintf("DROP VIEW IF EXISTS `%s_c_%s_deprel_meta`",
+		Cfg.Prefix, id))
+	logerr(err)
 	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
 	logerr(err)
 	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `prefix` = %q", Cfg.Prefix, id))

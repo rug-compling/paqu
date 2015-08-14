@@ -68,11 +68,19 @@ func main() {
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `prefix` = %q", Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
-		_, err = db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`",
+		_, err = db.Exec(fmt.Sprintf(
+			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`, `%s_c_%s_midx`, `%s_c_%s_meta`",
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
+			Cfg.Prefix, corpus,
+			Cfg.Prefix, corpus,
+			Cfg.Prefix, corpus))
+		util.CheckErr(err)
+
+		_, err = db.Exec(fmt.Sprintf(
+			"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta`",
 			Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
