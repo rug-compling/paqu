@@ -443,7 +443,7 @@ $('#loading span').html('%.1f%%');
 		}
 	}
 
-	if !(okdocs && curno == 0) {
+	if q.auth && !(okdocs && curno == 0) {
 		fmt.Fprintf(q.w, `<p>
 <form action="xsavez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="xpath" value="%s">

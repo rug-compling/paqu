@@ -289,7 +289,7 @@ func home(q *Context) {
 		}
 	}
 
-	if offset > 0 || len(zinnen) > 0 {
+	if q.auth && (offset > 0 || len(zinnen) > 0) {
 		fmt.Fprintf(q.w, `<p>
 <form action="savez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="word" value="%s">
