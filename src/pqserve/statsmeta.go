@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"sort"
 	"strings"
 	"time"
 )
@@ -47,14 +46,7 @@ func statsmeta(q *Context) {
 		return
 	}
 
-	metai := getMeta(q, prefix)
-	metas := make([]string, 0, len(metai))
-	metat := make(map[string]string)
-	for _, m := range metai {
-		metas = append(metas, m[0])
-		metat[m[0]] = m[1]
-	}
-	sort.Strings(metas)
+	metas := getMeta(q, prefix)
 
 	query, err := makeQuery(q, prefix, chClose)
 	if err != nil {
@@ -97,7 +89,8 @@ window.parent._fn.startedmeta();
 	}
 
 	// Tellingen van onderdelen
-	for _, ww := range metas {
+	for _, meta := range metas {
+		ww := meta[0]
 		for run := 0; run < 2; run++ {
 			var j, count int
 			var s, p, limit string
@@ -109,9 +102,9 @@ window.parent._fn.startedmeta();
 				}
 			} else {
 				if run == 0 {
-					fmt.Fprintln(&buf, "<p><b>"+ww+"</b> per item: ")
+					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(ww)+"</b> per item: ")
 				} else {
-					fmt.Fprintln(&buf, "<p><b>"+ww+"</b> per zin: ")
+					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(ww)+"</b> per zin: ")
 				}
 				limit = " LIMIT " + fmt.Sprint(WRDMAX)
 			}
@@ -122,9 +115,9 @@ window.parent._fn.startedmeta();
 			default:
 			}
 			val := "tval"
-			if metat[ww] == "INT" {
+			if meta[1] == "INT" {
 				val = "ival"
-			} else if metat[ww] == "FLOAT" {
+			} else if meta[1] == "FLOAT" {
 				val = "wval"
 			}
 			var qu string

@@ -471,10 +471,28 @@ $('#loading span').html('%.1f%%');
 		Selecteer &eacute;&eacute;n tot drie attributen:<br>
 `, html.EscapeString(query), html.EscapeString(prefix))
 
+	var metas [][2]string
+	hasmeta := hasMeta(q, prefix)
+	if hasmeta {
+		metas = getMeta(q, prefix)
+	}
+
 	for i := 1; i <= 3; i++ {
+
 		fmt.Fprintf(q.w, "<select name=\"attr%d\">\n<option value=\"\">--</option>\n", i)
+		if hasmeta {
+			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; metadata &mdash;\">")
+			for _, m := range metas {
+				fmt.Fprintf(q.w, "<option value=\"::META::%s\">%s</option>\n", html.EscapeString(m[0]), html.EscapeString(m[0]))
+			}
+			fmt.Fprintln(q.w, "</optgroup>")
+			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; attributen &mdash;\">")
+		}
 		for _, s := range q.attrlist {
 			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
+		}
+		if hasmeta {
+			fmt.Fprintln(q.w, "</optgroup>")
 		}
 		fmt.Fprintln(q.w, "</select>")
 	}
@@ -550,16 +568,32 @@ func html_xpath_header(q *Context) {
       alert("Geen attribuut geselecteerd");
       return false;
     }
-    setCookie("xpattr1", at1.selectedIndex, 14);
-    setCookie("xpattr2", at2.selectedIndex, 14);
-    setCookie("xpattr3", at3.selectedIndex, 14);
+    setCookie("xpattr1", at1.value, 14);
+    setCookie("xpattr2", at2.value, 14);
+    setCookie("xpattr3", at3.value, 14);
     return true;
   }
   function setForm() {
+    at1.selectedIndex = 0;
+    at2.selectedIndex = 0;
+    at3.selectedIndex = 0;
     try {
-      at1.selectedIndex = getCookie("xpattr1");
-      at2.selectedIndex = getCookie("xpattr2");
-      at3.selectedIndex = getCookie("xpattr3");
+      var a = getCookie("xpattr1");
+      if (a != "" ) {
+          at1.value = a;
+      }
+    } catch (e) { }
+    try {
+      var a = getCookie("xpattr2");
+      if (a != "" ) {
+          at2.value = a;
+      }
+    } catch (e) { }
+    try {
+      var a = getCookie("xpattr3");
+      if (a != "" ) {
+          at3.value = a;
+      }
     } catch (e) { }
   }
 
@@ -717,7 +751,7 @@ func html_xpath_form(q *Context) (has_query bool) {
 <p>
 <form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">
 <input type="submit" value="Uploaden" id="macrofilesave" disabled="disabled">
-<input type="file" id="macrofilename" value="Bestand kiezen" name="macrotext" id="macrofilename">
+<input type="file" name="macrotext" id="macrofilename">
 </form>
 <p>
 <form action="savemacros" method="post" target="hiddenframe" enctype="multipart/form-data">

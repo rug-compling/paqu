@@ -371,34 +371,68 @@ function f(s) {
 				db.Close()
 				return
 			}
-			for _, match := range matches {
-				alp := Alpino_ds{}
-				err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+
+			var mm [3][]string
+			for i := 0; i < 3; i++ {
+				mm[i] = make([]string, 0, 4)
+			}
+			for i := 0; i < 3; i++ {
+				if strings.HasPrefix(attr[i], "::META::") {
+					a := attr[i][8:]
+					for _, m := range alpino.Meta {
+						if m.Name == a {
+							mm[i] = append(mm[i], m.Value)
+						}
+					}
+				}
+			}
+			for i := 0; i < 3; i++ {
+				if len(mm[i]) == 0 {
+					mm[i] = append(mm[i], "")
+				}
+			}
+
+			var at [3]string
+			for _, at[0] = range mm[0] {
+				for _, at[1] = range mm[1] {
+					for _, at[2] = range mm[2] {
+						for _, match := range matches {
+							alp := Alpino_ds{}
+							err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+match+`
 </alpino_ds>`), &alp)
-				if err != nil {
-					updateError(q, err, !download)
-					logerr(err)
-					docs.Close()
-					db.Close()
-					return
-				}
-				switch nAttr {
-				case 1:
-					sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)]++
-				case 2:
-					sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
-						getFullAttr(attr[1], alp.Node0, alpino.Node0)]++
-				case 3:
-					sums[getFullAttr(attr[0], alp.Node0, alpino.Node0)+"\t"+
-						getFullAttr(attr[1], alp.Node0, alpino.Node0)+"\t"+
-						getFullAttr(attr[2], alp.Node0, alpino.Node0)]++
-				}
-				count++
-				if len(sums) >= 100000 {
-					tooMany = true
-					docs.Close()
+							if err != nil {
+								updateError(q, err, !download)
+								logerr(err)
+								docs.Close()
+								db.Close()
+								return
+							}
+							if nAttr > 0 && !strings.HasPrefix(attr[0], "::META::") {
+								at[0] = getFullAttr(attr[0], alp.Node0, alpino.Node0)
+							}
+							if nAttr > 1 && !strings.HasPrefix(attr[1], "::META::") {
+								at[1] = getFullAttr(attr[1], alp.Node0, alpino.Node0)
+							}
+							if nAttr > 2 && !strings.HasPrefix(attr[2], "::META::") {
+								at[2] = getFullAttr(attr[2], alp.Node0, alpino.Node0)
+							}
+							switch nAttr {
+							case 1:
+								sums[at[0]]++
+							case 2:
+								sums[at[0]+"\t"+at[1]]++
+							case 3:
+								sums[at[0]+"\t"+at[1]+"\t"+at[2]]++
+							}
+							count++
+							if len(sums) >= 100000 {
+								tooMany = true
+								docs.Close()
+							}
+						}
+					}
 				}
 			}
 		}
@@ -474,10 +508,14 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 		fmt.Fprint(&buf, "<table class=\"breed\">\n<tr class=\"odd\"><th><th>")
 	}
 	for i := 0; i < nAttr; i++ {
+		a := attr[i]
+		if strings.HasPrefix(a, "::META::") {
+			a = a[8:]
+		}
 		if download {
-			fmt.Fprintf(q.w, "\t%s", attr[i])
+			fmt.Fprintf(q.w, "\t%s", a)
 		} else {
-			fmt.Fprintf(&buf, "<th>%s", html.EscapeString(attr[i]))
+			fmt.Fprintf(&buf, "<th>%s", html.EscapeString(a))
 		}
 	}
 	fmt.Fprintln(q.w)

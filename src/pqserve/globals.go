@@ -95,6 +95,7 @@ type Sentence struct {
 
 type Alpino_ds struct {
 	XMLName  xml.Name `xml:"alpino_ds"`
+	Meta     []MetaT  `xml:"metadata>meta"`
 	Node0    *Node    `xml:"node"`
 	Sentence string   `xml:"sentence"`
 }
@@ -103,6 +104,12 @@ type Alpino_ds_no_node struct {
 	XMLName  xml.Name      `xml:"alpino_ds"`
 	Sentence string        `xml:"sentence"`
 	Comments []CommentType `xml:"comments"`
+}
+
+type MetaT struct {
+	Type  string `xml:"type,attr"`
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
 }
 
 type CommentType struct {
