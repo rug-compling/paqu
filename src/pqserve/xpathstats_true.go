@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -179,6 +180,66 @@ function f(s) {
 	for i := 0; i < 3; i++ {
 		if attr[i] != "" {
 			nAttr = i + 1
+		}
+	}
+
+	var isMeta [3]bool
+	var isInt [3]bool
+	var isFloat [3]bool
+	var iranges [3]*irange
+	var franges [3]*frange
+	for i := 0; i < 3; i++ {
+		if strings.HasPrefix(attr[i], "::META::") {
+			isMeta[i] = true
+			name := attr[i][8:]
+			rows, err := q.db.Query(fmt.Sprintf("SELECT `type` FROM `%s_c_%s_midx` WHERE `name` = %q",
+				Cfg.Prefix, prefix, name))
+			if err != nil {
+				updateError(q, err, !download)
+				logerr(err)
+				return
+			}
+			var t string
+			for rows.Next() {
+				rows.Scan(&t)
+			}
+			if t == "INT" {
+				rows, err := q.db.Query(fmt.Sprintf(
+					"SELECT MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+					Cfg.Prefix, prefix,
+					Cfg.Prefix, prefix,
+					name))
+				if err != nil {
+					updateError(q, err, !download)
+					logerr(err)
+					return
+				}
+				var min, max, count int
+				for rows.Next() {
+					if rows.Scan(&min, &max, &count) == nil {
+						iranges[i] = newIrange(min, max, count)
+						isInt[i] = true
+					}
+				}
+			} else if t == "FLOAT" {
+				rows, err := q.db.Query(fmt.Sprintf(
+					"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+					Cfg.Prefix, prefix,
+					Cfg.Prefix, prefix,
+					name))
+				if err != nil {
+					updateError(q, err, !download)
+					logerr(err)
+					return
+				}
+				var min, max float64
+				for rows.Next() {
+					if rows.Scan(&min, &max) == nil {
+						franges[i] = newFrange(min, max)
+						isFloat[i] = true
+					}
+				}
+			}
 		}
 	}
 
@@ -377,11 +438,29 @@ function f(s) {
 				mm[i] = make([]string, 0, 4)
 			}
 			for i := 0; i < 3; i++ {
-				if strings.HasPrefix(attr[i], "::META::") {
-					a := attr[i][8:]
+				if isMeta[i] {
+					name := attr[i][8:]
 					for _, m := range alpino.Meta {
-						if m.Name == a {
-							mm[i] = append(mm[i], m.Value)
+						if m.Name == name {
+							if isInt[i] {
+								v, err := strconv.Atoi(m.Value)
+								if err == nil {
+									vv, _ := iranges[i].value(v)
+									mm[i] = append(mm[i], vv)
+								} else {
+									mm[i] = append(mm[i], err.Error())
+								}
+							} else if isFloat[i] {
+								v, err := strconv.ParseFloat(m.Value, 64)
+								if err == nil {
+									vv, _ := franges[i].value(v)
+									mm[i] = append(mm[i], vv)
+								} else {
+									mm[i] = append(mm[i], err.Error())
+								}
+							} else {
+								mm[i] = append(mm[i], m.Value)
+							}
 						}
 					}
 				}
