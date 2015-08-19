@@ -3,6 +3,7 @@
 ##
 ## Dit is de setup voor deze programma's:
 ##  - pqbuild
+##  - pqclean
 ##  - pqconfig
 ##  - pqinit
 ##  - pqrmcorpus
@@ -10,6 +11,8 @@
 ##  - pqserve
 ##  - pqsetquota
 ##  - pqstatus
+##  - pqupgrade
+
 ##
 ## Dit bestand word ingelezen als: $PAQU/setup.toml
 ##
