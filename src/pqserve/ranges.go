@@ -13,6 +13,7 @@ type frange struct {
 type irange struct {
 	min, step int
 	s         []string
+	indexed   bool
 }
 
 func newFrange(min, max float64) *frange {
@@ -38,6 +39,10 @@ func newIrange(min, max, count int) *irange {
 	if count <= 20 || ir.step < 1 {
 		ir.step = 1
 	}
+	if ir.step == 1 && max-min > 1000 {
+		return &ir
+	}
+	ir.indexed = true
 	if ir.step >= 100 {
 		ir.step /= 5
 	} else if ir.step == 10 {
@@ -63,6 +68,7 @@ func newIrange(min, max, count int) *irange {
 			ir.s = append(ir.s, fmt.Sprintf(f, i, i+ir.step-1))
 		}
 	}
+
 	return &ir
 }
 
@@ -75,6 +81,9 @@ func (fr *frange) value(val float64) (string, int) {
 }
 
 func (ir *irange) value(val int) (string, int) {
+	if !ir.indexed {
+		return fmt.Sprint(val), val
+	}
 	i := (val - ir.min) / ir.step
 	if i < 0 || i >= len(ir.s) {
 		return "UNDEF", -1
