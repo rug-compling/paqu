@@ -298,6 +298,12 @@ func tree(q *Context) {
 <p>
 `, title, strings.Join(ctx.words, " "))
 
+		if len(alpino.Meta) > 0 {
+			for _, m := range alpino.Meta {
+				fmt.Fprintf(q.w, "%s: %s<br>\n", html.EscapeString(m.Name), html.EscapeString(m.Value))
+			}
+			fmt.Fprintln(q.w, "<p>")
+		}
 	}
 
 	// BEGIN: definitie van dot-bestand aanmaken.
