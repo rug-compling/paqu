@@ -9,7 +9,8 @@
 TAGS =
 
 # Extra opties voor 'go'
-OPTS = -v
+# Gebruik de optie -i alleen als je pakketten in _vendor gebruikt (zie onder)
+OPTS = -v -i
 
 #### Environment-variabelen
 

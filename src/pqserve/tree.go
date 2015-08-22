@@ -50,6 +50,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 	"unsafe"
 )
 
@@ -300,7 +301,25 @@ func tree(q *Context) {
 
 		if len(alpino.Meta) > 0 {
 			for _, m := range alpino.Meta {
-				fmt.Fprintf(q.w, "%s: %s<br>\n", html.EscapeString(m.Name), html.EscapeString(m.Value))
+				var v string
+				if m.Type == "date" {
+					t, err := time.Parse("2006-01-02", m.Value)
+					if err != nil {
+						v = err.Error()
+					} else {
+						v = printDate(t, false)
+					}
+				} else if m.Type == "datetime" {
+					t, err := time.Parse("2006-01-02 15:04", m.Value)
+					if err != nil {
+						v = err.Error()
+					} else {
+						v = printDate(t, true)
+					}
+				} else {
+					v = m.Value
+				}
+				fmt.Fprintf(q.w, "%s: %s<br>\n", html.EscapeString(m.Name), html.EscapeString(v))
 			}
 			fmt.Fprintln(q.w, "<p>")
 		}

@@ -77,7 +77,7 @@ Syntax: %s [-w]
 		params      varchar(128) NOT NULL,
 		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		active      datetime     NOT NULL,
+		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
 		attr        text         NOT NULL,
         protected   boolean      NOT NULL DEFAULT 0,
 		UNIQUE INDEX (id),
@@ -100,7 +100,7 @@ Syntax: %s [-w]
 		mail   varchar(128) NOT NULL,
 		sec    char(16)     NOT NULL,
 		pw     char(16)     NOT NULL,
-		active datetime     NOT NULL,
+		active datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
 		quotum int          NOT NULL DEFAULT 0,
 		UNIQUE INDEX (mail),
 		INDEX (active))

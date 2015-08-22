@@ -118,7 +118,9 @@ window.parent._fn.startedmeta();
 			if meta[1] == "INT" {
 				val = "ival"
 			} else if meta[1] == "FLOAT" {
-				val = "wval"
+				val = "fval"
+			} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
+				val = "dval"
 			}
 			var qu string
 			if run == 0 {
@@ -147,7 +149,18 @@ window.parent._fn.startedmeta();
 				return
 			}
 			for rows.Next() {
-				err := rows.Scan(&j, &s)
+				var err error
+				if meta[1] == "DATE" {
+					var t time.Time
+					err = rows.Scan(&j, &t)
+					s = printDate(t, false)
+				} else if meta[1] == "DATETIME" {
+					var t time.Time
+					err = rows.Scan(&j, &t)
+					s = printDate(t, true)
+				} else {
+					err = rows.Scan(&j, &s)
+				}
 				if err != nil {
 					updateError(q, err, !download)
 					completedmeta(q, download)

@@ -378,7 +378,8 @@ Opties:
 				DROP INDEX arch,
 				DROP INDEX tval,
 				DROP INDEX ival,
-				DROP INDEX fval;`)
+				DROP INDEX fval,
+				DROP INDEX dval;`)
 			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
 			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
 				DROP INDEX id,
@@ -466,18 +467,20 @@ Opties:
 		util.CheckErr(err)
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
 			id   int          NOT NULL,
-			type enum('TEXT','INT','FLOAT') NOT NULL DEFAULT 'TEXT',
+			type enum('TEXT','INT','FLOAT','DATE','DATETIME') NOT NULL DEFAULT 'TEXT',
 			name varchar(128) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
-			id   int          NOT NULL,
-			arch int          NOT NULL,
-			file int          NOT NULL,
-			tval varchar(128) NOT NULL DEFAULT "",
-			ival int          NOT NULL DEFAULT 0,
-			fval float        NOT NULL DEFAULT 0.0)
+			id    int          NOT NULL,
+			arch  int          NOT NULL,
+			file  int          NOT NULL,
+			tval  varchar(128) NOT NULL DEFAULT "",
+			ival  int          NOT NULL DEFAULT 0,
+			fval  float        NOT NULL DEFAULT 0.0,
+			dval  datetime     NOT NULL DEFAULT "1000-01-01 00:00:00"
+)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
@@ -602,7 +605,8 @@ Opties:
 		ADD INDEX (arch),
 		ADD INDEX (tval),
 		ADD INDEX (ival),
-		ADD INDEX (fval);`)
+		ADD INDEX (fval),
+		ADD INDEX (dval);`)
 	util.CheckErr(err)
 
 	// tijd voor aanmaken tabellen <prefix>_deprel en <prefix>_sent
@@ -799,7 +803,7 @@ func do_data(archname, filename string, data []byte) {
 	util.CheckErr(err)
 
 	for _, m := range alpino.Meta {
-		if m.Type != "text" && m.Type != "int" && m.Type != "float" {
+		if m.Type != "text" && m.Type != "int" && m.Type != "float" && m.Type != "date" && m.Type != "datetime" {
 			util.CheckErr(fmt.Errorf("Ongeldig type in %s||%s: %s", archname, filename, m.Type))
 		}
 		if _, ok := meta[m.Name]; !ok {
@@ -814,16 +818,28 @@ func do_data(archname, filename string, data []byte) {
 		var txt string
 		var intval int
 		var floatval float64
+		dateval := "1000-01-01 00:00:00"
 		if m.Type == "int" {
 			intval, err = strconv.Atoi(m.Value)
 			util.CheckErr(err)
 		} else if m.Type == "float" {
 			floatval, err = strconv.ParseFloat(m.Value, 64)
 			util.CheckErr(err)
+		} else if m.Type == "date" {
+			t, err := time.Parse("2006-01-02", m.Value)
+			util.CheckErr(err)
+			dateval = fmt.Sprintf("%04d-%02d-%02d 00:00:00", t.Year(), t.Month(), t.Day())
+		} else if m.Type == "datetime" {
+			t, err := time.Parse("2006-01-02 15:04", m.Value)
+			if err != nil {
+				t, err = time.Parse("2006-01-02 15:04:05", m.Value)
+			}
+			util.CheckErr(err)
+			dateval = fmt.Sprintf("%04d-%02d-%02d %02d:%02d:00", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())
 		} else {
 			txt = m.Value
 		}
-		meta_buf_put(mi.Id, arch, file, txt, intval, floatval)
+		meta_buf_put(mi.Id, arch, file, txt, intval, floatval, dateval)
 	}
 
 	// zin opslaan in <prefix>_sent
@@ -1270,14 +1286,14 @@ func file_buf_put(name string, n int) {
 
 // Zet een meta-item in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
-func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval float64) {
+func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval float64, dateval string) {
 	komma := ","
 	if !buf_has_data[META] {
 		komma = ""
 		buf_has_data[META] = true
-		fmt.Fprintf(&buffer[META], "INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`tval`,`ival`,`fval`) VALUES", Cfg.Prefix, prefix)
+		fmt.Fprintf(&buffer[META], "INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`tval`,`ival`,`fval`,`dval`) VALUES", Cfg.Prefix, prefix)
 	}
-	fmt.Fprintf(&buffer[META], "%s\n(%d,%d,%d,%q,%d,%g)", komma, id, arch, file, txt, intval, floatval)
+	fmt.Fprintf(&buffer[META], "%s\n(%d,%d,%d,%q,%d,%g,%q)", komma, id, arch, file, txt, intval, floatval, dateval)
 	if buffer[META].Len() > 49500 {
 		buf_flush(META)
 	}

@@ -186,8 +186,11 @@ function f(s) {
 	var isMeta [3]bool
 	var isInt [3]bool
 	var isFloat [3]bool
+	var isDate [3]bool
+	var isDateTime [3]bool
 	var iranges [3]*irange
 	var franges [3]*frange
+	var dranges [3]*drange
 	for i := 0; i < 3; i++ {
 		if strings.HasPrefix(attr[i], "::META::") {
 			isMeta[i] = true
@@ -237,6 +240,29 @@ function f(s) {
 					if rows.Scan(&min, &max) == nil {
 						franges[i] = newFrange(min, max)
 						isFloat[i] = true
+					}
+				}
+			} else if t == "DATE" || t == "DATETIME" {
+				rows, err := q.db.Query(fmt.Sprintf(
+					"SELECT MIN(`dval`), MAX(`dval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+					Cfg.Prefix, prefix,
+					Cfg.Prefix, prefix,
+					name))
+				if err != nil {
+					updateError(q, err, !download)
+					logerr(err)
+					return
+				}
+				var min, max time.Time
+				for rows.Next() {
+					if rows.Scan(&min, &max) == nil {
+						if t == "DATE" {
+							dranges[i] = newDrange(min, max, false)
+							isDate[i] = true
+						} else {
+							dranges[i] = newDrange(min, max, true)
+							isDateTime[i] = true
+						}
 					}
 				}
 			}
@@ -454,6 +480,22 @@ function f(s) {
 								v, err := strconv.ParseFloat(m.Value, 64)
 								if err == nil {
 									vv, _ := franges[i].value(v)
+									mm[i] = append(mm[i], vv)
+								} else {
+									mm[i] = append(mm[i], err.Error())
+								}
+							} else if isDate[i] {
+								v, err := time.Parse("2006-01-02", m.Value)
+								if err == nil {
+									vv, _ := dranges[i].value(v)
+									mm[i] = append(mm[i], vv)
+								} else {
+									mm[i] = append(mm[i], err.Error())
+								}
+							} else if isDateTime[i] {
+								v, err := time.Parse("2006-01-02 15:04", m.Value)
+								if err == nil {
+									vv, _ := dranges[i].value(v)
 									mm[i] = append(mm[i], vv)
 								} else {
 									mm[i] = append(mm[i], err.Error())
