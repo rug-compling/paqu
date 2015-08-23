@@ -90,7 +90,68 @@ window.parent._fn.startedmeta();
 
 	// Tellingen van onderdelen
 	for _, meta := range metas {
+		var ir *irange
+		var fr *frange
+		var dr *drange
 		ww := meta[0]
+		if meta[1] == "INT" {
+			rows, err := q.db.Query(fmt.Sprintf(
+				"SELECT MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+				Cfg.Prefix, prefix,
+				Cfg.Prefix, prefix,
+				ww))
+			if err != nil {
+				updateError(q, err, !download)
+				completedmeta(q, download)
+				logerr(err)
+				return
+			}
+			var v1, v2, vx int
+			for rows.Next() {
+				rows.Scan(&v1, &v2, &vx)
+			}
+			ir = newIrange(v1, v2, vx)
+		} else if meta[1] == "FLOAT" {
+			rows, err := q.db.Query(fmt.Sprintf(
+				"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+				Cfg.Prefix, prefix,
+				Cfg.Prefix, prefix,
+				ww))
+			if err != nil {
+				updateError(q, err, !download)
+				completedmeta(q, download)
+				logerr(err)
+				return
+			}
+			var v1, v2 float64
+			for rows.Next() {
+				rows.Scan(&v1, &v2)
+			}
+			fr = newFrange(v1, v2)
+		} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
+			dis := "0"
+			if meta[1] == "DATE" {
+				dis = "COUNT(DISTINCT `dval`)"
+			}
+			rows, err := q.db.Query(fmt.Sprintf(
+				"SELECT MIN(`dval`), MAX(`dval`), %s FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+				dis,
+				Cfg.Prefix, prefix,
+				Cfg.Prefix, prefix,
+				ww))
+			if err != nil {
+				updateError(q, err, !download)
+				completedmeta(q, download)
+				logerr(err)
+				return
+			}
+			var v1, v2 time.Time
+			var i int
+			for rows.Next() {
+				rows.Scan(&v1, &v2, &i)
+			}
+			dr = newDrange(v1, v2, i, meta[1] == "DATETIME")
+		}
 		for run := 0; run < 2; run++ {
 			var j, count int
 			var s, p, limit string
@@ -114,32 +175,49 @@ window.parent._fn.startedmeta();
 				return
 			default:
 			}
-			val := "tval"
+			val := "`tval`"
 			if meta[1] == "INT" {
-				val = "ival"
+				val = fmt.Sprintf("%d * FLOOR(`ival`/%d)", ir.step, ir.step)
 			} else if meta[1] == "FLOAT" {
-				val = "fval"
+				val = fmt.Sprintf("%g * FLOOR(`fval`/%g)", fr.step, fr.step)
 			} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
-				val = "dval"
+				if !dr.indexed {
+					val = "DATE(`dval`)"
+				} else {
+					switch dr.r {
+					case dr_hour:
+						val = "STR_TO_DATE(CONCAT(DATE(`dval`), \",\", HOUR(`dval`)), \"%Y-%m-%d,%H\")"
+					case dr_day:
+						val = "DATE(`dval`)"
+					case dr_month:
+						val = "STR_TO_DATE(CONCAT(YEAR(`dval`), \"-\", MONTH(`dval`), \"-01\"), \"%Y-%m-%d\")"
+					case dr_year:
+						val = "STR_TO_DATE(CONCAT(YEAR(`dval`), \"-01-01\"), \"%Y-%m-%d\")"
+					case dr_dec:
+						val = "STR_TO_DATE(CONCAT(10*FLOOR(YEAR(`dval`)/10), \"-01-01\"), \"%Y-%m-%d\")"
+					case dr_cent:
+						val = "STR_TO_DATE(CONCAT(100*FLOOR(YEAR(`dval`)/100), \"-01-01\"), \"%Y-%m-%d\")"
+					}
+				}
 			}
 			var qu string
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT count(*), `%s` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY 1 DESC, 2",
+					"SELECT count(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY 1 DESC, 2",
 					val,
 					Cfg.Prefix, prefix,
 					ww,
 					query)
 			} else {
 				qu = fmt.Sprintf(
-					"SELECT DISTINCT `arch`,`file`,`%s` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s",
+					"SELECT DISTINCT `arch`,`file`,%s AS `val` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s",
 					val,
 					Cfg.Prefix, prefix,
 					ww,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`%s`), `a`.`%s` FROM ( %s ) `a` GROUP BY 2 ORDER BY 1 DESC, 2",
-					val, val, qu)
+					"SELECT COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2 ORDER BY 1 DESC, 2",
+					qu)
 			}
 			rows, err := timeoutQuery(q, chClose, qu+limit)
 			if err != nil {
@@ -150,14 +228,18 @@ window.parent._fn.startedmeta();
 			}
 			for rows.Next() {
 				var err error
-				if meta[1] == "DATE" {
-					var t time.Time
-					err = rows.Scan(&j, &t)
-					s = printDate(t, false)
-				} else if meta[1] == "DATETIME" {
-					var t time.Time
-					err = rows.Scan(&j, &t)
-					s = printDate(t, true)
+				if meta[1] == "DATE" || meta[1] == "DATETIME" {
+					var v time.Time
+					err = rows.Scan(&j, &v)
+					s, _ = dr.value(v)
+				} else if meta[1] == "INT" {
+					var v int
+					err = rows.Scan(&j, &v)
+					s, _ = ir.value(v)
+				} else if meta[1] == "FLOAT" {
+					var v float64
+					err = rows.Scan(&j, &v)
+					s, _ = fr.value(v)
 				} else {
 					err = rows.Scan(&j, &s)
 				}

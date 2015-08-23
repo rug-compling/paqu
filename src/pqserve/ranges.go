@@ -24,6 +24,7 @@ type drange struct {
 	min, max time.Time
 	r        int
 	s        []string
+	indexed  bool
 }
 
 type frange struct {
@@ -37,10 +38,20 @@ type irange struct {
 	indexed   bool
 }
 
-func newDrange(min, max time.Time, hasTime bool) *drange {
+func newDrange(min, max time.Time, count int, hasTime bool) *drange {
 	dr := drange{
 		s: make([]string, 0),
 	}
+
+	/*
+		if count > 1 && count < 20 && !hasTime {
+			dr.indexed = false
+			dr.r = dr_day
+			return &dr
+		}
+	*/
+
+	dr.indexed = true
 
 	// tijdzone strippen
 	min = time.Date(min.Year(), min.Month(), min.Day(), min.Hour(), min.Minute(), min.Second(), 0, time.UTC)
@@ -173,6 +184,14 @@ func newIrange(min, max, count int) *irange {
 }
 
 func (dr *drange) value(val time.Time) (string, int) {
+	if !dr.indexed {
+		return fmt.Sprintf("%s %2d %s %d", dagen[val.Weekday()], val.Day(), maanden[val.Month()], val.Year()),
+			val.Day() + 31*int(val.Month()) + 31*12*val.Year()
+	}
+
+	// tijdzone strippen
+	val = time.Date(val.Year(), val.Month(), val.Day(), val.Hour(), val.Minute(), val.Second(), 0, time.UTC)
+
 	if val.Before(dr.min) || dr.max.Before(val) {
 		return "UNDEF", -1
 	}

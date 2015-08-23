@@ -257,10 +257,10 @@ function f(s) {
 				for rows.Next() {
 					if rows.Scan(&min, &max) == nil {
 						if t == "DATE" {
-							dranges[i] = newDrange(min, max, false)
+							dranges[i] = newDrange(min, max, 0, false)
 							isDate[i] = true
 						} else {
-							dranges[i] = newDrange(min, max, true)
+							dranges[i] = newDrange(min, max, 0, true)
 							isDateTime[i] = true
 						}
 					}
