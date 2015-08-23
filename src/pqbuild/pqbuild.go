@@ -828,14 +828,22 @@ func do_data(archname, filename string, data []byte) {
 		} else if m.Type == "date" {
 			t, err := time.Parse("2006-01-02", m.Value)
 			util.CheckErr(err)
-			dateval = fmt.Sprintf("%04d-%02d-%02d 00:00:00", t.Year(), t.Month(), t.Day())
+			year := t.Year()
+			if year < 1000 || year > 9999 {
+				util.CheckErr(fmt.Errorf("Jaartal niet in bereik 1000-9999: %d", year))
+			}
+			dateval = fmt.Sprintf("%04d-%02d-%02d 00:00:00", year, t.Month(), t.Day())
 		} else if m.Type == "datetime" {
 			t, err := time.Parse("2006-01-02 15:04", m.Value)
 			if err != nil {
 				t, err = time.Parse("2006-01-02 15:04:05", m.Value)
 			}
 			util.CheckErr(err)
-			dateval = fmt.Sprintf("%04d-%02d-%02d %02d:%02d:00", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())
+			year := t.Year()
+			if year < 1000 || year > 9999 {
+				util.CheckErr(fmt.Errorf("Jaartal niet in bereik 1000-9999: %d", year))
+			}
+			dateval = fmt.Sprintf("%04d-%02d-%02d %02d:%02d:00", year, t.Month(), t.Day(), t.Hour(), t.Minute())
 		} else {
 			txt = m.Value
 		}
