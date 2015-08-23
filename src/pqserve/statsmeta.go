@@ -203,7 +203,7 @@ window.parent._fn.startedmeta();
 			var qu string
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT count(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY 1 DESC, 2",
+					"SELECT COUNT(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY 1 DESC, 2",
 					val,
 					Cfg.Prefix, prefix,
 					ww,
