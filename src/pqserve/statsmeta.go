@@ -156,7 +156,7 @@ window.parent._fn.startedmeta();
 		if meta[1] == "TEXT" {
 			order = "1 DESC, 2"
 			if !download {
-				limit = " LIMIT " + fmt.Sprint(WRDMAX)
+				limit = "LIMIT " + fmt.Sprint(WRDMAX)
 			}
 		} else {
 			order = "2"
@@ -211,12 +211,13 @@ window.parent._fn.startedmeta();
 			var qu string
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY %s",
+					"SELECT COUNT(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY %s %s",
 					val,
 					Cfg.Prefix, prefix,
 					ww,
 					query,
-					order)
+					order,
+					limit)
 			} else {
 				qu = fmt.Sprintf(
 					"SELECT DISTINCT `arch`,`file`,%s AS `val` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s",
@@ -225,11 +226,12 @@ window.parent._fn.startedmeta();
 					ww,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2 ORDER BY %s",
+					"SELECT COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2 ORDER BY %s %s",
 					qu,
-					order)
+					order,
+					limit)
 			}
-			rows, err := timeoutQuery(q, chClose, qu+limit)
+			rows, err := timeoutQuery(q, chClose, qu)
 			if err != nil {
 				updateError(q, err, !download)
 				completedmeta(q, download)
