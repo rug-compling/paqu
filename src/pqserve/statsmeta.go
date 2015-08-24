@@ -152,9 +152,18 @@ window.parent._fn.startedmeta();
 			}
 			dr = newDrange(v1, v2, i, meta[1] == "DATETIME")
 		}
+		var limit, order string
+		if meta[1] == "TEXT" {
+			order = "1 DESC, 2"
+			if !download {
+				limit = " LIMIT " + fmt.Sprint(WRDMAX)
+			}
+		} else {
+			order = "2"
+		}
 		for run := 0; run < 2; run++ {
 			var j, count int
-			var s, p, limit string
+			var s string
 			if download {
 				if run == 0 {
 					fmt.Fprintln(q.w, "# "+ww+" per item\t")
@@ -163,11 +172,10 @@ window.parent._fn.startedmeta();
 				}
 			} else {
 				if run == 0 {
-					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(ww)+"</b> per item: ")
+					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(ww)+"</b><table><tr><td>per item:<table class=\"right\">")
 				} else {
-					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(ww)+"</b> per zin: ")
+					fmt.Fprintln(&buf, "<td>per zin:<table class=\"right\">")
 				}
-				limit = " LIMIT " + fmt.Sprint(WRDMAX)
 			}
 			select {
 			case <-chClose:
@@ -203,11 +211,12 @@ window.parent._fn.startedmeta();
 			var qu string
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY 1 DESC, 2",
+					"SELECT COUNT(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY %s",
 					val,
 					Cfg.Prefix, prefix,
 					ww,
-					query)
+					query,
+					order)
 			} else {
 				qu = fmt.Sprintf(
 					"SELECT DISTINCT `arch`,`file`,%s AS `val` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s",
@@ -216,8 +225,9 @@ window.parent._fn.startedmeta();
 					ww,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2 ORDER BY 1 DESC, 2",
-					qu)
+					"SELECT COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2 ORDER BY %s",
+					qu,
+					order)
 			}
 			rows, err := timeoutQuery(q, chClose, qu+limit)
 			if err != nil {
@@ -256,9 +266,12 @@ window.parent._fn.startedmeta();
 				if download {
 					fmt.Fprintf(q.w, "%d\t%s\n", j, s)
 				} else {
-					fmt.Fprint(&buf, p, j, "&times;&nbsp;", html.EscapeString(s))
-					p = ", "
-					count++
+					td := "<td>"
+					if meta[1] == "TEXT" {
+						td = "<td class=\"left\">"
+						count++
+					}
+					fmt.Fprintln(&buf, "<tr><td>", j, td, html.EscapeString(s))
 				}
 			}
 			err = rows.Err()
@@ -270,13 +283,17 @@ window.parent._fn.startedmeta();
 			}
 			if !download {
 				if count == WRDMAX {
-					fmt.Fprint(&buf, ", ...")
+					fmt.Fprint(&buf, "<tr><td><td class=\"left\">...")
 				}
-				fmt.Fprint(&buf, "\n<BR>\n")
-				updateText(q, buf.String())
-				buf.Reset()
+				fmt.Fprintln(&buf, "</table>")
+				if run == 1 {
+					fmt.Fprintln(&buf, "</table>")
+					updateText(q, buf.String())
+					buf.Reset()
+				}
 			}
 		}
+
 	}
 
 	if !download {
