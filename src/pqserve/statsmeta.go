@@ -173,6 +173,8 @@ window.parent._fn.startedmeta();
 		} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
 			val = dr.sql()
 		}
+		// hier moet (de view van) de join met *_deprel gebruikt worden, omdat mogelijk niet alle zinnen trippels hebben
+		// anders zou je een join van alleen *_meta en *_midx kunnen gebruiken
 		qu := fmt.Sprintf(
 			"SELECT DISTINCT `arch`,`file`,%s AS `val` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q",
 			val,
