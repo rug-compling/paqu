@@ -1062,8 +1062,8 @@ TARGET:
 
 // Sla alle resterende woorden, waarvoor geen dependency relation is gevonden op in de tabel 'deprels'.
 func traverse2(node *Node) {
-	// negeer woorden met relatie == "--"
-	if node.Word != "" && node.Rel != "--" && !node.used {
+	// negeer woorden met relatie == "--" en pt == "let"
+	if node.Word != "" && !(node.Rel == "--" && node.Postag == "let") && !node.used {
 		lassy_deprel(node.Word, node.Lemma, node.Root, node.Postag, node.Rel,
 			"", "", "", "", "", node.Begin, node.End, 0, 0, []string{}, []string{})
 	}
@@ -1092,8 +1092,8 @@ func find_head(node *Node) []*NodePath {
 		Als het woord niet leeg is, dan hebben we een terminal bereikt.
 	*/
 	if node.Word != "" {
-		// negeer woorden met relatie == "--"
-		if node.Rel == "--" {
+		// negeer woorden met relatie == "--" en pt == "let"
+		if node.Rel == "--" && node.Postag == "let" {
 			return []*NodePath{}
 		}
 		return []*NodePath{&NodePath{node: node, path: path}}
