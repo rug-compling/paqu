@@ -233,7 +233,7 @@ window.parent._fn.startedmeta();
 		if meta[1] == "TEXT" {
 			order = "1 DESC, 2"
 			if !download {
-				limit = "LIMIT " + fmt.Sprint(WRDMAX)
+				limit = "LIMIT " + fmt.Sprint(METAMAX)
 			}
 		} else {
 			order = "2"
@@ -366,7 +366,7 @@ window.parent._fn.startedmeta();
 				}
 			}
 			if !download {
-				if count == WRDMAX {
+				if count == METAMAX {
 					fmt.Fprint(&buf, "<tr><td><td class=\"left\">...")
 				}
 				fmt.Fprintln(&buf, "</table>")

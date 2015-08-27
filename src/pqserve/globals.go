@@ -150,6 +150,7 @@ const (
 	MAXTITLELEN = 64
 	ZINMAX      = 10
 	WRDMAX      = 250
+	METAMAX     = 20
 	YELLOW      = "<span style=\"background-color: yellow\">"
 	GREEN       = "<span style=\"background-color: lightgreen\">"
 	YELGRN      = "<span style=\"background-color: cyan\">"
