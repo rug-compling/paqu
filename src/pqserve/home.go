@@ -257,7 +257,7 @@ func home(q *Context) {
 			}
 			seen[s] = true
 			qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, prefix)
-			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"?%s\">%s</a>\n", qq, html.EscapeString(unHigh(s)))
+			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"?%s\">%s</a>\n", qq, s)
 		}
 
 		// Einde zin + dependency relations
