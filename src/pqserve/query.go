@@ -11,15 +11,19 @@ import (
 )
 
 // Opstellen van query voor hoofdformulier, en voor stats
-func makeQuery(q *Context, prefix string, chClose <-chan bool) (string, error) {
-	return makeQueryDo(q, prefix, chClose, false)
+func makeQuery(q *Context, prefix, table string, chClose <-chan bool) (string, error) {
+	return makeQueryDo(q, prefix, table, chClose, false)
 }
 
-func makeQueryF(q *Context, prefix string, chClose <-chan bool) (string, error) {
-	return makeQueryDo(q, prefix, chClose, true)
+func makeQueryF(q *Context, prefix, table string, chClose <-chan bool) (string, error) {
+	return makeQueryDo(q, prefix, table, chClose, true)
 }
 
-func makeQueryDo(q *Context, prefix string, chClose <-chan bool, form bool) (string, error) {
+func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form bool) (string, error) {
+
+	if table != "" {
+		table = "`" + table + "`."
+	}
 
 	var frst func(s string) string
 	if form {
@@ -37,15 +41,15 @@ func makeQueryDo(q *Context, prefix string, chClose <-chan bool, form bool) (str
 		if frst(p+"word") != "" {
 			wrd := setHigh(frst(p + "word"))
 			if wrd[0] == '+' {
-				parts = append(parts, fmt.Sprintf("`"+p+"lemma` = %q", wrd[1:]))
+				parts = append(parts, fmt.Sprintf(table+"`"+p+"lemma` = %q", wrd[1:]))
 			} else if wrd[0] == '@' {
-				parts = append(parts, fmt.Sprintf("`"+p+"root` = %q", wrd[1:]))
+				parts = append(parts, fmt.Sprintf(table+"`"+p+"root` = %q", wrd[1:]))
 			} else if wrd[0] == '=' {
-				parts = append(parts, fmt.Sprintf("`"+p+"word` = %q COLLATE \"utf8_bin\"", wrd[1:]))
+				parts = append(parts, fmt.Sprintf(table+"`"+p+"word` = %q COLLATE \"utf8_bin\"", wrd[1:]))
 			} else if wrd[0] == '?' {
-				parts = append(parts, fmt.Sprintf("`"+p+"word` = %q", wrd[1:]))
+				parts = append(parts, fmt.Sprintf(table+"`"+p+"word` = %q", wrd[1:]))
 			} else if strings.Index(wrd, "%") >= 0 {
-				parts = append(parts, fmt.Sprintf("`"+p+"word` LIKE %q", wrd))
+				parts = append(parts, fmt.Sprintf(table+"`"+p+"word` LIKE %q", wrd))
 			} else {
 				var s string
 				select {
@@ -78,27 +82,27 @@ func makeQueryDo(q *Context, prefix string, chClose <-chan bool, form bool) (str
 						ll = append(ll, key)
 					}
 					if len(ll) == 1 {
-						parts = append(parts, "`"+p+"lemma` = "+ll[0])
+						parts = append(parts, table+"`"+p+"lemma` = "+ll[0])
 					} else {
-						parts = append(parts, "`"+p+"lemma` IN ("+strings.Join(ll, ", ")+")")
+						parts = append(parts, table+"`"+p+"lemma` IN ("+strings.Join(ll, ", ")+")")
 					}
 				} else {
-					parts = append(parts, fmt.Sprintf("`"+p+"word` = %q", wrd))
+					parts = append(parts, fmt.Sprintf(table+"`"+p+"word` = %q", wrd))
 				}
 			}
 		}
 	}
 	if s := frst("postag"); s != "" {
-		parts = append(parts, fmt.Sprintf("`postag` = %q", s))
+		parts = append(parts, fmt.Sprintf(table+"`postag` = %q", s))
 	}
 	if s := frst("rel"); s != "" {
-		parts = append(parts, fmt.Sprintf("`rel` = %q", s))
+		parts = append(parts, fmt.Sprintf(table+"`rel` = %q", s))
 	}
 	if s := frst("hpostag"); s != "" {
 		if s == "--LEEG--" {
 			s = ""
 		}
-		parts = append(parts, fmt.Sprintf("`hpostag` = %q", s))
+		parts = append(parts, fmt.Sprintf(table+"`hpostag` = %q", s))
 	}
 
 	return strings.Join(parts, " AND "), nil

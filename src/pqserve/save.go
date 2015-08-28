@@ -230,12 +230,11 @@ func savez2(q *Context) {
 			return
 		}
 
-		query, err := makeQueryF(q, prefix, chClose)
+		query, err := makeQueryF(q, prefix, "c", chClose)
 		if hErr(q, err) {
 			return
 		}
-		query = strings.Replace(query, " `", " `c`.`", -1)
-		query = fmt.Sprintf("SELECT DISTINCT `f`.`file`, `c`.`arch` FROM `%s_c_%s_deprel` `c`, `%s_c_%s_file` `f` WHERE `c`.%s AND `f`.`id` = `c`.`file`",
+		query = fmt.Sprintf("SELECT DISTINCT `f`.`file`, `c`.`arch` FROM `%s_c_%s_deprel` `c`, `%s_c_%s_file` `f` WHERE %s AND `f`.`id` = `c`.`file`",
 			Cfg.Prefix, prefix,
 			Cfg.Prefix, prefix,
 			query)

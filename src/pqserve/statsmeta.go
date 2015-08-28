@@ -53,7 +53,7 @@ func statsmeta(q *Context) {
 
 	metas := getMeta(q, prefix)
 
-	query, err := makeQuery(q, prefix, chClose)
+	query, err := makeQuery(q, prefix, "", chClose)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -101,8 +101,8 @@ window.parent._fn.startedmeta();
 		var ir *irange
 		var fr *frange
 		var dr *drange
-		ww := meta[0]
-		if meta[1] == "INT" {
+		ww := meta.name
+		if meta.mtype == "INT" {
 			rows, err := q.db.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
 				Cfg.Prefix, prefix,
@@ -119,7 +119,7 @@ window.parent._fn.startedmeta();
 				rows.Scan(&v1, &v2, &vx)
 			}
 			ir = newIrange(v1, v2, vx)
-		} else if meta[1] == "FLOAT" {
+		} else if meta.mtype == "FLOAT" {
 			rows, err := q.db.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
 				Cfg.Prefix, prefix,
@@ -136,9 +136,9 @@ window.parent._fn.startedmeta();
 				rows.Scan(&v1, &v2)
 			}
 			fr = newFrange(v1, v2)
-		} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
+		} else if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
 			dis := "0"
-			if meta[1] == "DATE" {
+			if meta.mtype == "DATE" {
 				dis = "COUNT(DISTINCT `dval`)"
 			}
 			rows, err := timeoutQuery(q, chClose, fmt.Sprintf(
@@ -158,7 +158,7 @@ window.parent._fn.startedmeta();
 			for rows.Next() {
 				rows.Scan(&v1, &v2, &i)
 			}
-			dr = newDrange(v1, v2, i, meta[1] == "DATETIME")
+			dr = newDrange(v1, v2, i, meta.mtype == "DATETIME")
 		}
 
 		// telling van metadata over alle zinnen
@@ -166,12 +166,12 @@ window.parent._fn.startedmeta();
 		fsum := 0
 		fcount := make(map[string]int)
 		val := "`tval`"
-		if meta[1] == "INT" {
-			val = ir.sql()
-		} else if meta[1] == "FLOAT" {
-			val = fr.sql()
-		} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
-			val = dr.sql()
+		if meta.mtype == "INT" {
+			val = ir.sql("")
+		} else if meta.mtype == "FLOAT" {
+			val = fr.sql("")
+		} else if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
+			val = dr.sql("")
 		}
 		// hier moet (de view van) de join met *_deprel gebruikt worden, omdat mogelijk niet alle zinnen trippels hebben
 		// anders zou je een join van alleen *_meta en *_midx kunnen gebruiken
@@ -201,15 +201,15 @@ window.parent._fn.startedmeta();
 			var s string
 			var j int
 			var err error
-			if meta[1] == "DATE" || meta[1] == "DATETIME" {
+			if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
 				var v time.Time
 				err = rows.Scan(&j, &v)
 				s, _ = dr.value(v)
-			} else if meta[1] == "INT" {
+			} else if meta.mtype == "INT" {
 				var v int
 				err = rows.Scan(&j, &v)
 				s, _ = ir.value(v)
-			} else if meta[1] == "FLOAT" {
+			} else if meta.mtype == "FLOAT" {
 				var v float64
 				err = rows.Scan(&j, &v)
 				s, _ = fr.value(v)
@@ -230,7 +230,7 @@ window.parent._fn.startedmeta();
 		// telling van metadata in matchende zinnen
 
 		var limit, order string
-		if meta[1] == "TEXT" {
+		if meta.mtype == "TEXT" {
 			order = "1 DESC, 2"
 			if !download {
 				limit = "LIMIT " + fmt.Sprint(METAMAX)
@@ -263,12 +263,12 @@ window.parent._fn.startedmeta();
 			default:
 			}
 			val := "`tval`"
-			if meta[1] == "INT" {
-				val = ir.sql()
-			} else if meta[1] == "FLOAT" {
-				val = fr.sql()
-			} else if meta[1] == "DATE" || meta[1] == "DATETIME" {
-				val = dr.sql()
+			if meta.mtype == "INT" {
+				val = ir.sql("")
+			} else if meta.mtype == "FLOAT" {
+				val = fr.sql("")
+			} else if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
+				val = dr.sql("")
 			}
 			var qu string
 			if run == 0 {
@@ -309,15 +309,15 @@ window.parent._fn.startedmeta();
 				default:
 				}
 				var err error
-				if meta[1] == "DATE" || meta[1] == "DATETIME" {
+				if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
 					var v time.Time
 					err = rows.Scan(&j, &v)
 					s, _ = dr.value(v)
-				} else if meta[1] == "INT" {
+				} else if meta.mtype == "INT" {
 					var v int
 					err = rows.Scan(&j, &v)
 					s, _ = ir.value(v)
-				} else if meta[1] == "FLOAT" {
+				} else if meta.mtype == "FLOAT" {
 					var v float64
 					err = rows.Scan(&j, &v)
 					s, _ = fr.value(v)
@@ -354,7 +354,7 @@ window.parent._fn.startedmeta();
 					}
 				} else {
 					td := "<td>"
-					if meta[1] == "TEXT" {
+					if meta.mtype == "TEXT" {
 						td = "<td class=\"left\">"
 						count++
 					}

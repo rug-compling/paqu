@@ -265,35 +265,44 @@ func (ir *irange) value(val int) (string, int) {
 	return ir.s[i], i
 }
 
-func (dr *drange) sql() string {
-	val := "`dval`"
+func (dr *drange) sql(table string) string {
+	if table != "" {
+		table = "`" + table + "`."
+	}
+	val := table + "`dval`"
 	if !dr.indexed {
-		val = "DATE(`dval`)"
+		val = "DATE(" + table + "`dval`)"
 	} else {
 		switch dr.r {
 		case dr_hour:
-			val = "STR_TO_DATE(CONCAT(DATE(`dval`), \",\", HOUR(`dval`)), \"%Y-%m-%d,%H\")"
+			val = "STR_TO_DATE(CONCAT(DATE(" + table + "`dval`), \",\", HOUR(" + table + "`dval`)), \"%Y-%m-%d,%H\")"
 		case dr_day:
-			val = "DATE(`dval`)"
+			val = "DATE(" + table + "`dval`)"
 		case dr_month:
-			val = "STR_TO_DATE(CONCAT(YEAR(`dval`), \"-\", MONTH(`dval`), \"-01\"), \"%Y-%m-%d\")"
+			val = "STR_TO_DATE(CONCAT(YEAR(" + table + "`dval`), \"-\", MONTH(" + table + "`dval`), \"-01\"), \"%Y-%m-%d\")"
 		case dr_year:
-			val = "STR_TO_DATE(CONCAT(YEAR(`dval`), \"-01-01\"), \"%Y-%m-%d\")"
+			val = "STR_TO_DATE(CONCAT(YEAR(" + table + "`dval`), \"-01-01\"), \"%Y-%m-%d\")"
 		case dr_dec:
-			val = "STR_TO_DATE(CONCAT(10*FLOOR(YEAR(`dval`)/10), \"-01-01\"), \"%Y-%m-%d\")"
+			val = "STR_TO_DATE(CONCAT(10*FLOOR(YEAR(" + table + "`dval`)/10), \"-01-01\"), \"%Y-%m-%d\")"
 		case dr_cent:
-			val = "STR_TO_DATE(CONCAT(100*FLOOR(YEAR(`dval`)/100), \"-01-01\"), \"%Y-%m-%d\")"
+			val = "STR_TO_DATE(CONCAT(100*FLOOR(YEAR(" + table + "`dval`)/100), \"-01-01\"), \"%Y-%m-%d\")"
 		}
 	}
 	return val
 }
 
-func (fr *frange) sql() string {
-	return fmt.Sprintf("%g * FLOOR(`fval`/%g)", fr.step, fr.step)
+func (fr *frange) sql(table string) string {
+	if table != "" {
+		table = "`" + table + "`."
+	}
+	return fmt.Sprintf("%g * FLOOR(%s`fval`/%g)", fr.step, table, fr.step)
 }
 
-func (ir *irange) sql() string {
-	return fmt.Sprintf("%d * FLOOR(`ival`/%d)", ir.step, ir.step)
+func (ir *irange) sql(table string) string {
+	if table != "" {
+		table = "`" + table + "`."
+	}
+	return fmt.Sprintf("%d * FLOOR(%s`ival`/%d)", ir.step, table, ir.step)
 }
 
 func printDate(t time.Time, hasTime bool) string {

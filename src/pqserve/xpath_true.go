@@ -471,7 +471,7 @@ $('#loading span').html('%.1f%%');
 		Selecteer &eacute;&eacute;n tot drie attributen:<br>
 `, html.EscapeString(query), html.EscapeString(prefix))
 
-	var metas [][2]string
+	var metas []MetaType
 	hasmeta := hasMeta(q, prefix)
 	if hasmeta {
 		metas = getMeta(q, prefix)
@@ -483,7 +483,7 @@ $('#loading span').html('%.1f%%');
 		if hasmeta {
 			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; metadata &mdash;\">")
 			for _, m := range metas {
-				fmt.Fprintf(q.w, "<option value=\"::META::%s\">%s</option>\n", html.EscapeString(m[0]), html.EscapeString(m[0]))
+				fmt.Fprintf(q.w, "<option value=\"::META::%s\">%s</option>\n", html.EscapeString(m.name), html.EscapeString(m.name))
 			}
 			fmt.Fprintln(q.w, "</optgroup>")
 			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; attributen &mdash;\">")

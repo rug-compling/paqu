@@ -353,17 +353,18 @@ func hasMeta(q *Context, prefix string) bool {
 	return n > 0
 }
 
-func getMeta(q *Context, prefix string) [][2]string {
-	result := make([][2]string, 0)
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `name`,`type` FROM `%s_c_%s_midx` ORDER BY 1", Cfg.Prefix, prefix))
+func getMeta(q *Context, prefix string) []MetaType {
+	result := make([]MetaType, 0)
+	rows, err := q.db.Query(fmt.Sprintf("SELECT `id`,`name`,`type` FROM `%s_c_%s_midx` ORDER BY 2", Cfg.Prefix, prefix))
 	if err != nil {
 		return result
 	}
+	var i int
 	var n, t string
 	for rows.Next() {
-		err := rows.Scan(&n, &t)
+		err := rows.Scan(&i, &n, &t)
 		if err == nil {
-			result = append(result, [2]string{n, t})
+			result = append(result, MetaType{i, n, t})
 		}
 	}
 	return result

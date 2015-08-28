@@ -46,7 +46,7 @@ func stats(q *Context) {
 		return
 	}
 
-	query, err := makeQuery(q, prefix, chClose)
+	query, err := makeQuery(q, prefix, "", chClose)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -242,22 +242,129 @@ func statsrel(q *Context) {
 		return
 	}
 
-	items := make([]string, 0, 7)
+	hasmeta := hasMeta(q, prefix)
+	var metas []MetaType
+	if hasmeta {
+		metas = getMeta(q, prefix)
+	}
+	metai := make(map[string]int)
+	metat := make(map[string]string)
+	for _, meta := range metas {
+		metai[meta.name] = meta.id
+		metat[meta.name] = meta.mtype
+	}
+
+	qselect := "COUNT(*)"
+	qfrom := fmt.Sprintf("`%s_c_%s_deprel` `a`", Cfg.Prefix, prefix)
+	qwhere := ""
+	ncols := 0
+	fields := make([]interface{}, 0)
+	fields = append(fields, new(int))
+
 	cols := make([]string, 1, 8)
 	for _, t := range []string{"word", "lemma", "postag", "rel", "hword", "hlemma", "hpostag"} {
 		if first(q.r, "c"+t) == "1" {
-			items = append(items, "`"+t+"`")
+			qselect += ",`a`.`" + t + "`"
+			ncols++
 			cols = append(cols, t)
+			fields = append(fields, new(string))
 		}
 	}
-	st := strings.Join(items, ",")
 
-	query, err := makeQuery(q, prefix, chClose)
+	iranges := make([]*irange, ncols+len(q.r.Form["cmeta"]))
+	franges := make([]*frange, ncols+len(q.r.Form["cmeta"]))
+	dranges := make([]*drange, ncols+len(q.r.Form["cmeta"]))
+
+	for i, meta := range q.r.Form["cmeta"] {
+		cols = append(cols, "meta:"+meta)
+		table := fmt.Sprintf("m%d", i)
+		qfrom += fmt.Sprintf(" JOIN `%s_c_%s_meta` `%s` USING(`arch`,`file`)", Cfg.Prefix, prefix, table)
+		qwhere += fmt.Sprintf(" AND `%s`.`id` = %d", table, metai[meta])
+		ncols++
+		var qu string
+		if metat[meta] == "TEXT" {
+			qu = "`" + table + "`.`tval`"
+			fields = append(fields, new(string))
+		} else if metat[meta] == "INT" {
+			rows, err := q.db.Query(fmt.Sprintf(
+				"SELECT SQL_CACHE MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			var v1, v2, vx int
+			for rows.Next() {
+				rows.Scan(&v1, &v2, &vx)
+			}
+			iranges[ncols-1] = newIrange(v1, v2, vx)
+			qu = iranges[ncols-1].sql(table)
+			fields = append(fields, new(int))
+		} else if metat[meta] == "FLOAT" {
+			rows, err := q.db.Query(fmt.Sprintf(
+				"SELECT SQL_CACHE MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			var v1, v2 float64
+			for rows.Next() {
+				rows.Scan(&v1, &v2)
+			}
+			franges[ncols-1] = newFrange(v1, v2)
+			qu = franges[ncols-1].sql(table)
+			fields = append(fields, new(float64))
+		} else if metat[meta] == "DATE" || metat[meta] == "DATETIME" {
+			dis := "0"
+			if metat[meta] == "DATE" {
+				dis = "COUNT(DISTINCT `dval`)"
+			}
+			rows, err := timeoutQuery(q, chClose, fmt.Sprintf(
+				"SELECT SQL_CACHE MIN(`dval`), MAX(`dval`), %s FROM `%s_c_%s_meta` WHERE `id` = %d",
+				dis,
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			if err != nil {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				logerr(err)
+				return
+			}
+			var v1, v2 time.Time
+			var i int
+			for rows.Next() {
+				rows.Scan(&v1, &v2, &i)
+			}
+			dranges[ncols-1] = newDrange(v1, v2, i, metat[meta] == "DATETIME")
+			qu = dranges[ncols-1].sql(table)
+			fields = append(fields, new(time.Time))
+		}
+		qselect += "," + qu
+	}
+
+	query, err := makeQuery(q, prefix, "a", chClose)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
+
+	qgroupby := ""
+	qorder := "1 DESC"
+	for i := 0; i < ncols; i++ {
+		n := fmt.Sprint(i + 2)
+		if i > 0 {
+			qgroupby += ","
+		}
+		qgroupby += n
+		qorder += "," + n
+	}
+	fullquery := fmt.Sprintf("SELECT %s FROM %s WHERE %s %s GROUP BY %s ORDER BY %s",
+		qselect, qfrom, query, qwhere, qgroupby, qorder)
 
 	qword := urlencode(first(q.r, "word"))
 	qpostag := urlencode(first(q.r, "postag"))
@@ -288,13 +395,11 @@ func statsrel(q *Context) {
 	default:
 	}
 
-	limit := ""
 	if !download {
-		limit = fmt.Sprintf(" LIMIT %d", WRDMAX+1)
+		fullquery += fmt.Sprintf(" LIMIT %d", WRDMAX+1)
 	}
 
-	rows, err := timeoutQuery(q, chClose, "SELECT count(*),"+st+" FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+
-		query+" GROUP BY "+st+" ORDER BY 1 DESC,"+st+limit)
+	rows, err := timeoutQuery(q, chClose, fullquery)
 	if err != nil {
 		interneFoutRegel(q, err, !download)
 		logerr(err)
@@ -304,6 +409,9 @@ func statsrel(q *Context) {
 	if !download {
 		fmt.Fprintln(q.w, "<table class=\"breed\"><tr class=\"odd\">")
 		for _, c := range cols {
+			if strings.HasPrefix(c, "meta:") {
+				c = c[5:]
+			}
 			fmt.Fprintln(q.w, "<th>"+c)
 		}
 	} else {
@@ -314,11 +422,6 @@ func statsrel(q *Context) {
 		fmt.Fprintln(q.w)
 	}
 
-	fields := make([]interface{}, 1+len(items))
-	fields[0] = new(string)
-	for i := 0; i < len(items); i++ {
-		fields[i+1] = new(string)
-	}
 	n := 0
 	for rows.Next() {
 		n++
@@ -336,32 +439,51 @@ func statsrel(q *Context) {
 			}
 		}
 		for i, e := range fields {
-			value := unHigh(*(e.(*string)))
+			var value, class string
+			switch v := e.(type) {
+			case *string:
+				value = unHigh(*v)
+			case *int:
+				if i == 0 {
+					value = fmt.Sprint(*v)
+				} else {
+					value, _ = iranges[i-1].value(*v)
+					class = ` class="right"`
+				}
+			case *float64:
+				value, _ = franges[i-1].value(*v)
+				class = ` class="right"`
+			case *time.Time:
+				value, _ = dranges[i-1].value(*v)
+				class = ` class="right"`
+			}
 			if !download && n > WRDMAX {
 				value = "..."
 			}
 			if !download {
-				var a1, a2, class string
+				var a1, a2 string
 				if i == 0 {
 					for j := len(cols) - 1; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
-						s := *fields[j].(*string)
-						switch cols[j] {
-						case "word":
-							qword = urlencode("=" + unHigh(s))
-						case "lemma":
-							qword = urlencode("+" + unHigh(s))
-						case "postag":
-							qpostag = urlencode(s)
-						case "rel":
-							qrel = urlencode(s)
-						case "hword":
-							qhword = urlencode("=" + unHigh(s))
-						case "hlemma":
-							qhword = urlencode("+" + unHigh(s))
-						case "hpostag":
-							qhpostag = urlencode(s)
-							if qhpostag == "" {
-								qhpostag = "--LEEG--"
+						if sp, ok := fields[j].(*string); ok {
+							s := *sp
+							switch cols[j] {
+							case "word":
+								qword = urlencode("=" + unHigh(s))
+							case "lemma":
+								qword = urlencode("+" + unHigh(s))
+							case "postag":
+								qpostag = urlencode(s)
+							case "rel":
+								qrel = urlencode(s)
+							case "hword":
+								qhword = urlencode("=" + unHigh(s))
+							case "hlemma":
+								qhword = urlencode("+" + unHigh(s))
+							case "hpostag":
+								qhpostag = urlencode(s)
+								if qhpostag == "" {
+									qhpostag = "--LEEG--"
+								}
 							}
 						}
 					}

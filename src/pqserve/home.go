@@ -58,7 +58,7 @@ func home(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr>")
 
-	query, err := makeQuery(q, prefix, chClose)
+	query, err := makeQuery(q, prefix, "", chClose)
 	if doErr(q, err) {
 		return
 	}
@@ -380,6 +380,8 @@ func home(q *Context) {
 		Selecteer twee of meer elementen om ze te koppelen:
 		<p>
 		<table>
+		<tr style="vertical-align:top"><td>
+		<table>
 		<tr>
 		  <td style="background-color: yellow"><input type="checkbox" name="cword" value="1">woord
 		  <td>
@@ -393,13 +395,7 @@ func home(q *Context) {
 		  <td>
 		  <td><input type="checkbox" name="chpostag" value="1">postag
 		</table>
-		<p>
-		<input type="submit" value="tellingen van combinaties">
-		</form>
-		<p>
-		<div id="statresults">
-		</div>
-		</div>
+        <td>
 `,
 		html.EscapeString(first(q.r, "word")),
 		html.EscapeString(first(q.r, "postag")),
@@ -408,6 +404,22 @@ func home(q *Context) {
 		html.EscapeString(first(q.r, "hword")),
 		html.EscapeString(prefix))
 
+	if hasmeta {
+		for _, meta := range getMeta(q, prefix) {
+			fmt.Fprintf(q.w, "<input type=\"checkbox\" name=\"cmeta\" value=\"%s\">%s<br>\n", html.EscapeString(meta.name), html.EscapeString(meta.name))
+		}
+	}
+
+	fmt.Fprint(q.w, `
+        </table>
+		<p>
+		<input type="submit" value="tellingen van combinaties">
+		</form>
+		<p>
+		<div id="statresults">
+		</div>
+		</div>
+`)
 }
 
 //. Hulpfuncties
@@ -508,6 +520,9 @@ func html_header(q *Context) {
     if (f.chword.checked  ) { n++; }
     if (f.chlemma.checked ) { n++; }
     if (f.chpostag.checked) { n++; }
+    for (i = 0; i < f.cmeta.length; i++) {
+       if (f.cmeta[i].checked) { n++; }
+    }
     if (n < 2) {
       alert("Selecteer minimaal twee elementen");
       return false;

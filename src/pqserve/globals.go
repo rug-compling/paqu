@@ -142,6 +142,12 @@ type Process struct {
 	lock   sync.Mutex
 }
 
+type MetaType struct {
+	id    int
+	name  string
+	mtype string
+}
+
 type ProcessMap map[string]*Process
 
 //. Constanten
