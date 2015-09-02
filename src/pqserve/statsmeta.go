@@ -127,9 +127,7 @@ window.parent._fn.startedmeta();
 			var qu string
 			var order string
 			if meta.mtype == "TEXT" {
-				order = "1 DESC, `idx`"
-			} else {
-				order = "`idx`"
+				order = "1 DESC,"
 			}
 			if run == 0 {
 				qu = fmt.Sprintf(
@@ -138,7 +136,7 @@ window.parent._fn.startedmeta();
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
 						"WHERE `id` = %d AND %s "+
-						"GROUP BY `text` ORDER BY %s",
+						"GROUP BY `text` ORDER BY %s `idx`",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
@@ -158,7 +156,7 @@ window.parent._fn.startedmeta();
 					meta.id,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`ntrip`,`a`.`rtrip` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s",
+					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`ntrip`,`a`.`rtrip` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
 					qu,
 					order)
 			}
