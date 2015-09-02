@@ -711,30 +711,7 @@ Opties:
 		ADD UNIQUE INDEX (word);`)
 	util.CheckErr(err)
 
-	// zet info over corpus in de database
-
-	lines := 0
-	rows, err = db.Query("SELECT COUNT(*) FROM " + Cfg.Prefix + "_c_" + prefix + "_sent")
-	util.CheckErr(err)
-	if rows.Next() {
-		util.CheckErr(rows.Scan(&lines))
-		rows.Close()
-	}
-	if db_updatestatus {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW() WHERE `id` = %q",
-			Cfg.Prefix, lines, prefix))
-	} else {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW() WHERE `id` = %q",
-			Cfg.Prefix, lines, prefix))
-	}
-	util.CheckErr(err)
-
-	user := owner
-	if public == "1" {
-		user = "all"
-	}
-	_, err = db.Exec(fmt.Sprintf("INSERT `%s_corpora` (`user`, `prefix`) VALUES (%q, %q);", Cfg.Prefix, user, prefix))
-	util.CheckErr(err)
+	fmt.Println("Tijd:", time.Now().Sub(now))
 
 	//
 	// ranges
@@ -754,6 +731,8 @@ Opties:
 			id    int          NOT NULL DEFAULT 0,
 			idx   int          NOT NULL DEFAULT 0,
 			text  varchar(260) NOT NULL DEFAULT 0,
+			nall  int          NOT NULL DEFAULT 0,
+			ntrip int          NOT NULL DEFAULT 0,
 			rall  float        NOT NULL DEFAULT 0.0,
 			rtrip float        NOT NULL DEFAULT 0.0)
 			DEFAULT CHARACTER SET utf8
@@ -931,6 +910,28 @@ Opties:
 			}
 			util.CheckErr(rows.Err())
 		}
+
+		// zinnen waarvoor geen metadata is, die toevoegen
+		rows, err = db.Query(fmt.Sprintf(
+			"SELECT DISTINCT `arch`, `file` FROM `%s_c_%s_sent` `s` WHERE NOT EXISTS ( "+
+				"SELECT `arch`, `file` FROM `%s_c_%s_meta` `m` WHERE `s`.`arch`=`m`.`arch` AND `s`.`file`=`m`.`file` AND `id`=%d )",
+			Cfg.Prefix, prefix,
+			Cfg.Prefix, prefix,
+			metai[meta]))
+		util.CheckErr(err)
+		for rows.Next() {
+			idx[-7654321] = ""
+			var a, f int
+			util.CheckErr(rows.Scan(&a, &f))
+			_, err := db.Exec(fmt.Sprintf(
+				"INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`idx`) VALUES (%d,%d,%d,-7654321)",
+				Cfg.Prefix, prefix,
+				metai[meta],
+				a, f))
+			util.CheckErr(err)
+		}
+		util.CheckErr(err)
+
 		for ix := range idx {
 			_, err = db.Exec(fmt.Sprintf(
 				"INSERT `%s_c_%s_mval` (`id`,`idx`,`text`) VALUES (%d,%d,%q)",
@@ -992,14 +993,41 @@ Opties:
 
 		for s := range sums1 {
 			_, err = db.Exec(fmt.Sprintf(
-				"UPDATE `%s_c_%s_mval` SET `rall` = %g, `rtrip` = %g WHERE `id` = %d AND `idx` = %d",
+				"UPDATE `%s_c_%s_mval` SET `nall` = %d, `rall` = %g, `ntrip` = %d, `rtrip` = %g WHERE `id` = %d AND `idx` = %d",
 				Cfg.Prefix, prefix,
+				sums1[s],
 				float64(sums1[s])/float64(sum1),
+				sums2[s],
 				float64(sums2[s])/float64(sum2),
 				metai[meta], s))
 			util.CheckErr(err)
 		}
 	}
+
+	// zet info over corpus in de database
+
+	lines := 0
+	rows, err = db.Query("SELECT COUNT(*) FROM " + Cfg.Prefix + "_c_" + prefix + "_sent")
+	util.CheckErr(err)
+	if rows.Next() {
+		util.CheckErr(rows.Scan(&lines))
+		rows.Close()
+	}
+	if db_updatestatus {
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW() WHERE `id` = %q",
+			Cfg.Prefix, lines, prefix))
+	} else {
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW() WHERE `id` = %q",
+			Cfg.Prefix, lines, prefix))
+	}
+	util.CheckErr(err)
+
+	user := owner
+	if public == "1" {
+		user = "all"
+	}
+	_, err = db.Exec(fmt.Sprintf("INSERT `%s_corpora` (`user`, `prefix`) VALUES (%q, %q);", Cfg.Prefix, user, prefix))
+	util.CheckErr(err)
 
 	//fmt.Println("Bijwerken menu's voor postag, rel en hpostag ...")
 	//tags()

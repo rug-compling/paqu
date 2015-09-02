@@ -262,88 +262,33 @@ func statsrel(q *Context) {
 	fields = append(fields, new(int))
 
 	cols := make([]string, 1, 8)
+	aligns := make([]string, 1, 8)
+	aligns[0] = "right"
 	for _, t := range []string{"word", "lemma", "postag", "rel", "hword", "hlemma", "hpostag"} {
 		if first(q.r, "c"+t) == "1" {
 			qselect += ",`a`.`" + t + "`"
 			ncols++
 			cols = append(cols, t)
+			aligns = append(aligns, "left")
 			fields = append(fields, new(string))
 		}
 	}
 
-	iranges := make([]*irange, ncols+len(q.r.Form["cmeta"]))
-	franges := make([]*frange, ncols+len(q.r.Form["cmeta"]))
-	dranges := make([]*drange, ncols+len(q.r.Form["cmeta"]))
-
-	for i, meta := range q.r.Form["cmeta"] {
+	for _, meta := range q.r.Form["cmeta"] {
 		cols = append(cols, "meta:"+meta)
-		table := fmt.Sprintf("m%d", i)
-		qfrom += fmt.Sprintf(" JOIN `%s_c_%s_meta` `%s` USING(`arch`,`file`)", Cfg.Prefix, prefix, table)
-		qwhere += fmt.Sprintf(" AND `%s`.`id` = %d", table, metai[meta])
-		ncols++
-		var qu string
 		if metat[meta] == "TEXT" {
-			qu = "`" + table + "`.`tval`"
-			fields = append(fields, new(string))
-		} else if metat[meta] == "INT" {
-			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` WHERE `id` = %d",
-				Cfg.Prefix, prefix,
-				metai[meta]))
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			var v1, v2, vx int
-			for rows.Next() {
-				rows.Scan(&v1, &v2, &vx)
-			}
-			iranges[ncols-1] = newIrange(v1, v2, vx)
-			qu = iranges[ncols-1].sql(table)
-			fields = append(fields, new(int))
-		} else if metat[meta] == "FLOAT" {
-			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` WHERE `id` = %d",
-				Cfg.Prefix, prefix,
-				metai[meta]))
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			var v1, v2 float64
-			for rows.Next() {
-				rows.Scan(&v1, &v2)
-			}
-			franges[ncols-1] = newFrange(v1, v2)
-			qu = franges[ncols-1].sql(table)
-			fields = append(fields, new(float64))
-		} else if metat[meta] == "DATE" || metat[meta] == "DATETIME" {
-			dis := "0"
-			if metat[meta] == "DATE" {
-				dis = "COUNT(DISTINCT `dval`)"
-			}
-			rows, err := timeoutQuery(q, chClose, fmt.Sprintf(
-				"SELECT SQL_CACHE MIN(`dval`), MAX(`dval`), %s FROM `%s_c_%s_meta` WHERE `id` = %d",
-				dis,
-				Cfg.Prefix, prefix,
-				metai[meta]))
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			var v1, v2 time.Time
-			var i int
-			for rows.Next() {
-				rows.Scan(&v1, &v2, &i)
-			}
-			dranges[ncols-1] = newDrange(v1, v2, i, metat[meta] == "DATETIME")
-			qu = dranges[ncols-1].sql(table)
-			fields = append(fields, new(time.Time))
+			aligns = append(aligns, "left")
+		} else {
+			aligns = append(aligns, "right")
 		}
-		qselect += "," + qu
+		ncols++
+		fields = append(fields, new(string))
+		table := fmt.Sprintf("m%d", metai[meta])
+		qfrom += fmt.Sprintf(" JOIN ( `%s_c_%s_meta` `%s`", Cfg.Prefix, prefix, table)
+		qfrom += fmt.Sprintf(" JOIN `%s_c_%s_mval` `%sv` USING(`id`,`idx`)", Cfg.Prefix, prefix, table)
+		qfrom += " ) USING(`arch`,`file`)"
+		qwhere += fmt.Sprintf(" AND `%s`.`id` = %d", table, metai[meta])
+		qselect += ", `" + table + "v`.`text`"
 	}
 
 	query, err := makeQuery(q, prefix, "a", chClose)
@@ -439,23 +384,12 @@ func statsrel(q *Context) {
 			}
 		}
 		for i, e := range fields {
-			var value, class string
+			var value string
 			switch v := e.(type) {
 			case *string:
 				value = unHigh(*v)
 			case *int:
-				if i == 0 {
-					value = fmt.Sprint(*v)
-				} else {
-					value, _ = iranges[i-1].value(*v)
-					class = ` class="right"`
-				}
-			case *float64:
-				value, _ = franges[i-1].value(*v)
-				class = ` class="right"`
-			case *time.Time:
-				value, _ = dranges[i-1].value(*v)
-				class = ` class="right"`
+				value = fmt.Sprint(*v)
 			}
 			if !download && n > WRDMAX {
 				value = "..."
@@ -490,9 +424,16 @@ func statsrel(q *Context) {
 					a1 = fmt.Sprintf("<a href=\".?db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s\">",
 						qdb, qword, qpostag, qrel, qhword, qhpostag)
 					a2 = "</a>"
-					class = " class=\"right\""
 				}
-				fmt.Fprintf(q.w, " <td%s>%s%s%s\n", class, a1, html.EscapeString(value), a2)
+				var s string
+				var c string
+				if value == "" {
+					s = "(leeg)"
+					c = " nil"
+				} else {
+					s = html.EscapeString(value)
+				}
+				fmt.Fprintf(q.w, " <td class=\"%s%s\">%s%s%s\n", aligns[i], c, a1, s, a2)
 			} else {
 				var t string
 				if i != 0 {

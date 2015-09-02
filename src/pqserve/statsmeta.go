@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -13,6 +14,7 @@ type Statline struct {
 	s string
 	i int
 	r float64
+	n int
 }
 
 func statsmeta(q *Context) {
@@ -123,33 +125,29 @@ window.parent._fn.startedmeta();
 			default:
 			}
 			var qu string
-			var limit, order string
+			var order string
 			if meta.mtype == "TEXT" {
 				order = "1 DESC, `idx`"
-				if !download {
-					limit = "LIMIT " + fmt.Sprint(METAMAX)
-				}
 			} else {
 				order = "`idx`"
 			}
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`text`), `text`, 0 "+
+					"SELECT COUNT(`text`), `text`, 0, 0 "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
 						"WHERE `id` = %d AND %s "+
-						"GROUP BY `text` ORDER BY %s %s",
+						"GROUP BY `text` ORDER BY %s",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					meta.id,
 					query,
-					order,
-					limit)
+					order)
 			} else {
 				qu = fmt.Sprintf(
-					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`rtrip` "+
+					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`ntrip`,`rtrip` "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
@@ -160,10 +158,9 @@ window.parent._fn.startedmeta();
 					meta.id,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`rtrip` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s %s",
+					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`ntrip`,`a`.`rtrip` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s",
 					qu,
-					order,
-					limit)
+					order)
 			}
 			rows, err := timeoutQuery(q, chClose, qu)
 			if err != nil {
@@ -180,18 +177,20 @@ window.parent._fn.startedmeta();
 					return
 				default:
 				}
-				var cnt int
+				var cnt, n int
 				var text string
 				var r float64
-				err := rows.Scan(&cnt, &text, &r)
+				err := rows.Scan(&cnt, &text, &n, &r)
 				if err != nil {
 					updateError(q, err, !download)
 					completedmeta(q, download)
 					logerr(err)
 					return
 				}
-				text = unHigh(text)
-				lines = append(lines, Statline{text, cnt, float64(cnt) / r})
+				if len(lines) < METAMAX {
+					text = unHigh(text)
+					lines = append(lines, Statline{text, cnt, float64(cnt) / r, n})
+				}
 				sum += float64(cnt) / r
 			}
 			err = rows.Err()
@@ -208,19 +207,37 @@ window.parent._fn.startedmeta();
 				}
 				if download {
 					if run == 1 {
-						fmt.Fprintf(q.w, "%d\t%.2f%%\t%s\n", line.i, float32(p), line.s)
+						v := 0.0
+						if line.i != line.n {
+							v = -math.Log2(float64(line.i) / float64(line.n))
+						}
+						fmt.Fprintf(q.w, "%d\t%.2f%%\t%g\t%s\n", line.i, float32(p), v, line.s)
 					} else {
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
 					}
 				} else {
 					td := "<td>"
+					if line.s == "" {
+						td = `<td class="nil">`
+					}
 					if meta.mtype == "TEXT" {
-						td = "<td class=\"left\">"
+						if line.s == "" {
+							td = `<td class="left nil">`
+						} else {
+							td = `<td class="left">`
+						}
 						count++
 					}
 					fmt.Fprintln(&buf, "<tr><td>", line.i)
 					if run == 1 {
-						fmt.Fprintf(&buf, "<td>%.2f%%", float32(p))
+						v := 0.0
+						if line.i != line.n {
+							v = -math.Log2(float64(line.i) / float64(line.n))
+						}
+						fmt.Fprintf(&buf, "<td>%.2f%%<td>%g", float32(p), v)
+					}
+					if line.s == "" {
+						line.s = "(leeg)"
 					}
 					fmt.Fprintln(&buf, td, html.EscapeString(line.s))
 				}
