@@ -187,7 +187,7 @@ window.parent._fn.startedmeta();
 					logerr(err)
 					return
 				}
-				if len(lines) < METAMAX {
+				if len(lines) < METAMAX || download {
 					text = unHigh(text)
 					lines = append(lines, Statline{text, cnt, float64(cnt) / r, n})
 				}
@@ -211,7 +211,7 @@ window.parent._fn.startedmeta();
 						if line.i != line.n {
 							v = -math.Log2(float64(line.i) / float64(line.n))
 						}
-						fmt.Fprintf(q.w, "%d\t%.2f%%\t%g\t%s\n", line.i, float32(p), v, line.s)
+						fmt.Fprintf(q.w, "%d\t%.2f%%\t%.2f\t%s\n", line.i, float32(p), v, line.s)
 					} else {
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
 					}
@@ -234,7 +234,7 @@ window.parent._fn.startedmeta();
 						if line.i != line.n {
 							v = -math.Log2(float64(line.i) / float64(line.n))
 						}
-						fmt.Fprintf(&buf, "<td>%.2f%%<td>%g", float32(p), v)
+						fmt.Fprintf(&buf, "<td>%.2f%%<td>%.2f", float32(p), v)
 					}
 					if line.s == "" {
 						line.s = "(leeg)"
