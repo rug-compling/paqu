@@ -242,7 +242,15 @@ window.parent._fn.startedmeta();
 			}
 			if !download {
 				if count == METAMAX {
-					fmt.Fprint(&buf, "<tr><td><td class=\"left\">...")
+					fmt.Fprint(&buf, "<tr><td>")
+					if run == 1 {
+						fmt.Fprint(&buf, "<td>...<td>...")
+					}
+					if meta.mtype == "TEXT" {
+						fmt.Fprint(&buf, "<td class=\"left\">...")
+					} else {
+						fmt.Fprint(&buf, "<td>...")
+					}
 				}
 				fmt.Fprintln(&buf, "</table>")
 				if run == 1 {

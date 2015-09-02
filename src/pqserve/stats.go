@@ -392,11 +392,15 @@ func statsrel(q *Context) {
 				value = fmt.Sprint(*v)
 			}
 			if !download && n > WRDMAX {
-				value = "..."
+				if i == 0 {
+					value = " " // met spatie!
+				} else {
+					value = "..."
+				}
 			}
 			if !download {
 				var a1, a2 string
-				if i == 0 {
+				if i == 0 && n <= WRDMAX {
 					for j := len(cols) - 1; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
 						if sp, ok := fields[j].(*string); ok {
 							s := *sp
