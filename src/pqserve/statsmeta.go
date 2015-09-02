@@ -12,6 +12,7 @@ import (
 type Statline struct {
 	s string
 	i int
+	r float64
 }
 
 func statsmeta(q *Context) {
@@ -96,162 +97,21 @@ window.parent._fn.startedmeta();
 	// Tellingen van onderdelen
 	for _, meta := range metas {
 
-		// ranges definieren
-
-		var ir *irange
-		var fr *frange
-		var dr *drange
-		ww := meta.name
-		if meta.mtype == "INT" {
-			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
-				Cfg.Prefix, prefix,
-				Cfg.Prefix, prefix,
-				ww))
-			if err != nil {
-				updateError(q, err, !download)
-				completedmeta(q, download)
-				logerr(err)
-				return
-			}
-			var v1, v2, vx int
-			for rows.Next() {
-				rows.Scan(&v1, &v2, &vx)
-			}
-			ir = newIrange(v1, v2, vx)
-		} else if meta.mtype == "FLOAT" {
-			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
-				Cfg.Prefix, prefix,
-				Cfg.Prefix, prefix,
-				ww))
-			if err != nil {
-				updateError(q, err, !download)
-				completedmeta(q, download)
-				logerr(err)
-				return
-			}
-			var v1, v2 float64
-			for rows.Next() {
-				rows.Scan(&v1, &v2)
-			}
-			fr = newFrange(v1, v2)
-		} else if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
-			dis := "0"
-			if meta.mtype == "DATE" {
-				dis = "COUNT(DISTINCT `dval`)"
-			}
-			rows, err := timeoutQuery(q, chClose, fmt.Sprintf(
-				"SELECT SQL_CACHE MIN(`dval`), MAX(`dval`), %s FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
-				dis,
-				Cfg.Prefix, prefix,
-				Cfg.Prefix, prefix,
-				ww))
-			if err != nil {
-				updateError(q, err, !download)
-				completedmeta(q, download)
-				logerr(err)
-				return
-			}
-			var v1, v2 time.Time
-			var i int
-			for rows.Next() {
-				rows.Scan(&v1, &v2, &i)
-			}
-			dr = newDrange(v1, v2, i, meta.mtype == "DATETIME")
-		}
-
-		// telling van metadata over alle zinnen
-
-		fsum := 0
-		fcount := make(map[string]int)
-		val := "`tval`"
-		if meta.mtype == "INT" {
-			val = ir.sql("")
-		} else if meta.mtype == "FLOAT" {
-			val = fr.sql("")
-		} else if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
-			val = dr.sql("")
-		}
-		// hier moet (de view van) de join met *_deprel gebruikt worden, omdat mogelijk niet alle zinnen trippels hebben
-		// anders zou je een join van alleen *_meta en *_midx kunnen gebruiken
-		qu := fmt.Sprintf(
-			"SELECT DISTINCT `arch`,`file`,%s AS `val` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q",
-			val,
-			Cfg.Prefix, prefix,
-			ww)
-		qu = fmt.Sprintf(
-			"SELECT SQL_CACHE COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2",
-			qu)
-		rows, err := timeoutQuery(q, chClose, qu)
-		if err != nil {
-			updateError(q, err, !download)
-			completedmeta(q, download)
-			logerr(err)
-			return
-		}
-		for rows.Next() {
-			select {
-			case <-chClose:
-				rows.Close()
-				logerr(errConnectionClosed)
-				return
-			default:
-			}
-			var s string
-			var j int
-			var err error
-			if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
-				var v time.Time
-				err = rows.Scan(&j, &v)
-				s, _ = dr.value(v)
-			} else if meta.mtype == "INT" {
-				var v int
-				err = rows.Scan(&j, &v)
-				s, _ = ir.value(v)
-			} else if meta.mtype == "FLOAT" {
-				var v float64
-				err = rows.Scan(&j, &v)
-				s, _ = fr.value(v)
-			} else {
-				err = rows.Scan(&j, &s)
-			}
-			if err != nil {
-				updateError(q, err, !download)
-				completedmeta(q, download)
-				logerr(err)
-				return
-			}
-			s = unHigh(s)
-			fsum += j
-			fcount[s] = j
-		}
-
 		// telling van metadata in matchende zinnen
 
-		var limit, order string
-		if meta.mtype == "TEXT" {
-			order = "1 DESC, 2"
-			if !download {
-				limit = "LIMIT " + fmt.Sprint(METAMAX)
-			}
-		} else {
-			order = "2"
-		}
 		for run := 0; run < 2; run++ {
 			lines := make([]Statline, 0)
-			var j, count int
-			var s string
+			var count int
 			var sum = 0.0
 			if download {
 				if run == 0 {
-					fmt.Fprintln(q.w, "# "+ww+" per item\t")
+					fmt.Fprintln(q.w, "# "+meta.name+" per item\t")
 				} else {
-					fmt.Fprintln(q.w, "# "+ww+" per zin\t")
+					fmt.Fprintln(q.w, "# "+meta.name+" per zin\t")
 				}
 			} else {
 				if run == 0 {
-					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(ww)+"</b><table><tr><td>per item:<table class=\"right\">")
+					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(meta.name)+"</b><table><tr><td>per item:<table class=\"right\">")
 				} else {
 					fmt.Fprintln(&buf, "<td>per zin:<table class=\"right\">")
 				}
@@ -262,33 +122,45 @@ window.parent._fn.startedmeta();
 				return
 			default:
 			}
-			val := "`tval`"
-			if meta.mtype == "INT" {
-				val = ir.sql("")
-			} else if meta.mtype == "FLOAT" {
-				val = fr.sql("")
-			} else if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
-				val = dr.sql("")
-			}
 			var qu string
+			var limit, order string
+			if meta.mtype == "TEXT" {
+				order = "1 DESC, `idx`"
+				if !download {
+					limit = "LIMIT " + fmt.Sprint(METAMAX)
+				}
+			} else {
+				order = "`idx`"
+			}
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(*), %s FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s GROUP BY 2 ORDER BY %s %s",
-					val,
+					"SELECT COUNT(`text`), `text`, 0 "+
+						"FROM `%s_c_%s_deprel` "+
+						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
+						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
+						"WHERE `id` = %d AND %s "+
+						"GROUP BY `text` ORDER BY %s %s",
 					Cfg.Prefix, prefix,
-					ww,
+					Cfg.Prefix, prefix,
+					Cfg.Prefix, prefix,
+					meta.id,
 					query,
 					order,
 					limit)
 			} else {
 				qu = fmt.Sprintf(
-					"SELECT DISTINCT `arch`,`file`,%s AS `val` FROM `%s_c_%s_deprel_meta` WHERE `name` = %q AND %s",
-					val,
+					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`rtrip` "+
+						"FROM `%s_c_%s_deprel` "+
+						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
+						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
+						"WHERE `id` = %d AND %s",
 					Cfg.Prefix, prefix,
-					ww,
+					Cfg.Prefix, prefix,
+					Cfg.Prefix, prefix,
+					meta.id,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`val`), `a`.`val` FROM ( %s ) `a` GROUP BY 2 ORDER BY %s %s",
+					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`rtrip` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s %s",
 					qu,
 					order,
 					limit)
@@ -308,31 +180,19 @@ window.parent._fn.startedmeta();
 					return
 				default:
 				}
-				var err error
-				if meta.mtype == "DATE" || meta.mtype == "DATETIME" {
-					var v time.Time
-					err = rows.Scan(&j, &v)
-					s, _ = dr.value(v)
-				} else if meta.mtype == "INT" {
-					var v int
-					err = rows.Scan(&j, &v)
-					s, _ = ir.value(v)
-				} else if meta.mtype == "FLOAT" {
-					var v float64
-					err = rows.Scan(&j, &v)
-					s, _ = fr.value(v)
-				} else {
-					err = rows.Scan(&j, &s)
-				}
+				var cnt int
+				var text string
+				var r float64
+				err := rows.Scan(&cnt, &text, &r)
 				if err != nil {
 					updateError(q, err, !download)
 					completedmeta(q, download)
 					logerr(err)
 					return
 				}
-				s = unHigh(s)
-				lines = append(lines, Statline{s, j})
-				sum += float64(j) / (float64(fcount[s]) / float64(fsum))
+				text = unHigh(text)
+				lines = append(lines, Statline{text, cnt, float64(cnt) / r})
+				sum += float64(cnt) / r
 			}
 			err = rows.Err()
 			if err != nil {
@@ -344,7 +204,7 @@ window.parent._fn.startedmeta();
 			for _, line := range lines {
 				var p float64
 				if run == 1 {
-					p = float64(line.i) / (float64(fcount[line.s]) / float64(fsum)) / sum * 100.0
+					p = float64(line.r) / sum * 100.0
 				}
 				if download {
 					if run == 1 {

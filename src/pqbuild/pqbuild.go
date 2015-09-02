@@ -379,16 +379,12 @@ Opties:
 				DROP INDEX tval,
 				DROP INDEX ival,
 				DROP INDEX fval,
-				DROP INDEX dval;`)
+				DROP INDEX dval,
+				DROP INDEX idx;`)
 			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
 			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
 				DROP INDEX id,
 				DROP INDEX name;`)
-			fmt.Println("Verwijderen view " + Cfg.Prefix + "_c_" + prefix + "_deprel_meta")
-			db.Exec(fmt.Sprintf(
-				"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta;`",
-				Cfg.Prefix,
-				prefix))
 		}
 	}
 
@@ -421,12 +417,8 @@ Opties:
 			prefix,
 			Cfg.Prefix,
 			prefix))
-		_, err = db.Exec(fmt.Sprintf(
-			"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta;`",
-			Cfg.Prefix,
-			prefix))
-		// nieuwe tabellen aanmaken
 		util.CheckErr(err)
+		// nieuwe tabellen aanmaken
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel (
 			word    varchar(128) NOT NULL,
 			lemma   varchar(128) NOT NULL,
@@ -473,14 +465,14 @@ Opties:
 			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
-			id    int          NOT NULL,
-			arch  int          NOT NULL,
-			file  int          NOT NULL,
-			tval  varchar(128) NOT NULL DEFAULT "",
-			ival  int          NOT NULL DEFAULT 0,
-			fval  float        NOT NULL DEFAULT 0.0,
-			dval  datetime     NOT NULL DEFAULT "1000-01-01 00:00:00"
-)
+			id   int          NOT NULL,
+			arch int          NOT NULL,
+			file int          NOT NULL,
+			tval varchar(128) NOT NULL DEFAULT "",
+			ival int          NOT NULL DEFAULT 0,
+			fval float        NOT NULL DEFAULT 0.0,
+			dval datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
+			idx  int          NOT NULL DEFAULT -1)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
@@ -592,13 +584,13 @@ Opties:
 		ADD UNIQUE INDEX (id);`)
 	util.CheckErr(err)
 
-	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
+	fmt.Println("Aanmaken indexen op " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
 	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
 		ADD INDEX (name),
 		ADD UNIQUE INDEX (id);`)
 	util.CheckErr(err)
 
-	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
+	fmt.Println("Aanmaken indexen op " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
 	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta
 		ADD INDEX (id),
 		ADD INDEX (file),
@@ -606,7 +598,8 @@ Opties:
 		ADD INDEX (tval),
 		ADD INDEX (ival),
 		ADD INDEX (fval),
-		ADD INDEX (dval);`)
+		ADD INDEX (dval),
+		ADD INDEX (idx);`)
 	util.CheckErr(err)
 
 	// tijd voor aanmaken tabellen <prefix>_deprel en <prefix>_sent
@@ -743,18 +736,270 @@ Opties:
 	_, err = db.Exec(fmt.Sprintf("INSERT `%s_corpora` (`user`, `prefix`) VALUES (%q, %q);", Cfg.Prefix, user, prefix))
 	util.CheckErr(err)
 
-	fmt.Println("Aanmaken view " + Cfg.Prefix + "_c_" + prefix + "_deprel_meta")
+	//
+	// ranges
+	//
+
+	fmt.Println("Ranges bepalen voor " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
+
 	_, err = db.Exec(fmt.Sprintf(
-		"CREATE VIEW `%s_c_%s_deprel_meta` AS "+
-			"SELECT * "+
-			"FROM `%s_c_%s_deprel` "+
-			"JOIN `%s_c_%s_meta` USING (`arch`,`file`) "+
-			"JOIN `%s_c_%s_midx` USING (`id`);",
-		Cfg.Prefix, prefix,
-		Cfg.Prefix, prefix,
-		Cfg.Prefix, prefix,
-		Cfg.Prefix, prefix))
+		"DROP TABLE IF EXISTS `%s_c_%s_mval`, %s_c_%s_minf; ",
+		Cfg.Prefix,
+		prefix,
+		Cfg.Prefix,
+		prefix))
 	util.CheckErr(err)
+
+	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_mval (
+			id    int          NOT NULL DEFAULT 0,
+			idx   int          NOT NULL DEFAULT 0,
+			text  varchar(260) NOT NULL DEFAULT 0,
+			rall  float        NOT NULL DEFAULT 0.0,
+			rtrip float        NOT NULL DEFAULT 0.0)
+			DEFAULT CHARACTER SET utf8
+			DEFAULT COLLATE utf8_unicode_ci;`)
+	util.CheckErr(err)
+
+	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_minf (
+			id      int      NOT NULL DEFAULT 0,
+			indexed boolean  NOT NULL DEFAULT 1,
+			size    int      NOT NULL DEFAULT 0,
+			dmin    datetime NOT NULL DEFAULT "1000-01-01 00:00:00",
+			dmax    datetime NOT NULL DEFAULT "1000-01-01 00:00:00",
+			dtype   int      NOT NULL DEFAULT 0,
+			fmin    float    NOT NULL DEFAULT 0.0,
+			fstep   float    NOT NULL DEFAULT 0.0,
+			imin    int      NOT NULL DEFAULT 0,
+			istep   int      NOT NULL DEFAULT 0);`)
+	util.CheckErr(err)
+
+	metas := make([]string, 0)
+	metat := make(map[string]string)
+	metai := make(map[string]int)
+	rows, err = db.Query(fmt.Sprintf("SELECT `id`,`name`,`type` FROM `%s_c_%s_midx` ORDER BY 2", Cfg.Prefix, prefix))
+	util.CheckErr(err)
+	for rows.Next() {
+		var i int
+		var n, t string
+		util.CheckErr(rows.Scan(&i, &n, &t))
+		metas = append(metas, n)
+		metat[n] = t
+		metai[n] = i
+	}
+	util.CheckErr(rows.Err())
+	for _, meta := range metas {
+		idx := make(map[int]string)
+		switch metat[meta] {
+		case "TEXT":
+			rows, err := db.Query(fmt.Sprintf(
+				"SELECT DISTINCT `tval` FROM `%s_c_%s_meta` WHERE `id` = %d ORDER BY 1",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			ix := 0
+			for rows.Next() {
+				var s string
+				util.CheckErr(rows.Scan(&s))
+				idx[ix] = s
+				_, err = db.Exec(fmt.Sprintf(
+					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `tval` = %q",
+					Cfg.Prefix, prefix, ix, metai[meta], s))
+				util.CheckErr(err)
+				ix++
+			}
+			util.CheckErr(rows.Err())
+		case "INT":
+			rows, err := db.Query(fmt.Sprintf(
+				"SELECT MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			var v1, v2, vx int
+			for rows.Next() {
+				rows.Scan(&v1, &v2, &vx)
+			}
+			ir := newIrange(v1, v2, vx)
+			indexed := 0
+			if ir.indexed {
+				indexed = 1
+			}
+			_, err = db.Exec(fmt.Sprintf(
+				"INSERT `%s_c_%s_minf` (`id`,`imin`,`istep`,`indexed`,`size`) VALUES (%d,%d,%d,%d,%d)",
+				Cfg.Prefix, prefix,
+				metai[meta], ir.min, ir.step, indexed, len(ir.s)))
+			util.CheckErr(err)
+			rows, err = db.Query(fmt.Sprintf(
+				"SELECT DISTINCT `ival` FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			var v int
+			for rows.Next() {
+				util.CheckErr(rows.Scan(&v))
+				s, ix := ir.value(v)
+				idx[ix] = s
+				_, err = db.Exec(fmt.Sprintf(
+					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `ival` = %d",
+					Cfg.Prefix, prefix,
+					ix,
+					metai[meta],
+					v))
+				util.CheckErr(err)
+			}
+			util.CheckErr(rows.Err())
+		case "FLOAT":
+			rows, err := db.Query(fmt.Sprintf(
+				"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			var v1, v2 float64
+			for rows.Next() {
+				rows.Scan(&v1, &v2)
+			}
+			fr := newFrange(v1, v2)
+			_, err = db.Exec(fmt.Sprintf(
+				"INSERT `%s_c_%s_minf` (`id`,`fmin`,`fstep`,`size`) VALUES (%d,%g,%g,%d)",
+				Cfg.Prefix, prefix,
+				metai[meta], fr.min, fr.step, len(fr.s)))
+			util.CheckErr(err)
+			_, err = db.Exec(fmt.Sprintf(
+				"UPDATE `%s_c_%s_meta` SET `idx` = FLOOR((`fval` - %g) / %g) WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				fr.min,
+				fr.step,
+				metai[meta]))
+			util.CheckErr(err)
+			rows, err = db.Query(fmt.Sprintf(
+				"SELECT DISTINCT `idx` FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			for rows.Next() {
+				var i int
+				util.CheckErr(rows.Scan(&i))
+				idx[i] = fr.s[i]
+			}
+			util.CheckErr(err)
+		case "DATE", "DATETIME":
+			dis := "0"
+			if metat[meta] == "DATE" {
+				dis = "COUNT(DISTINCT `dval`)"
+			}
+			rows, err := db.Query(fmt.Sprintf(
+				"SELECT MIN(`dval`), MAX(`dval`), %s FROM `%s_c_%s_meta` WHERE `id` = %d",
+				dis,
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			var v1, v2 time.Time
+			var i int
+			for rows.Next() {
+				rows.Scan(&v1, &v2, &i)
+			}
+			dr := newDrange(v1, v2, i, metat[meta] == "DATETIME")
+			indexed := 0
+			if dr.indexed {
+				indexed = 1
+			}
+			_, err = db.Exec(fmt.Sprintf(
+				"INSERT `%s_c_%s_minf` (`id`,`dmin`,`dmax`,`dtype`,`indexed`,`size`) VALUES (%d,\"%04d-%02d-%02d %02d:%02d:%02d\",\"%04d-%02d-%02d %02d:%02d:%02d\",%d,%d,%d)",
+				Cfg.Prefix, prefix,
+				metai[meta],
+				dr.min.Year(), dr.min.Month(), dr.min.Day(), dr.min.Hour(), dr.min.Minute(), dr.min.Second(),
+				dr.max.Year(), dr.max.Month(), dr.max.Day(), dr.max.Hour(), dr.max.Minute(), dr.max.Second(),
+				dr.r, indexed, len(dr.s)))
+			util.CheckErr(err)
+			rows, err = db.Query(fmt.Sprintf(
+				"SELECT `dval` FROM `%s_c_%s_meta` WHERE `id` = %d",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			var v time.Time
+			for rows.Next() {
+				util.CheckErr(rows.Scan(&v))
+				s, ix := dr.value(v)
+				idx[ix] = s
+				_, err = db.Exec(fmt.Sprintf(
+					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `dval` = \"%04d-%02d-%02d %02d-%02d-%02d\"",
+					Cfg.Prefix, prefix,
+					ix,
+					metai[meta],
+					v.Year(), v.Month(), v.Day(),
+					v.Hour(), v.Minute(), v.Second()))
+				util.CheckErr(err)
+			}
+			util.CheckErr(rows.Err())
+		}
+		for ix := range idx {
+			_, err = db.Exec(fmt.Sprintf(
+				"INSERT `%s_c_%s_mval` (`id`,`idx`,`text`) VALUES (%d,%d,%q)",
+				Cfg.Prefix, prefix,
+				metai[meta],
+				ix,
+				idx[ix]))
+			util.CheckErr(err)
+		}
+	}
+
+	fmt.Println("Aanmaken indexen op " + Cfg.Prefix + "_c_" + prefix + "_mval ...")
+	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_mval
+		ADD INDEX (id),
+		ADD INDEX (idx);`)
+	util.CheckErr(err)
+
+	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_minf ...")
+	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_minf
+		ADD INDEX (id);`)
+	util.CheckErr(err)
+
+	fmt.Println("Telling van ranges ...")
+	for _, meta := range metas {
+		sum1 := 0
+		sums1 := make(map[int]int)
+		rows, err := db.Query(fmt.Sprintf(
+			"SELECT COUNT(`idx`),`idx` FROM `%s_c_%s_meta` WHERE `id` = %d GROUP BY `idx`",
+			Cfg.Prefix, prefix,
+			metai[meta]))
+		util.CheckErr(err)
+		for rows.Next() {
+			var c, i int
+			util.CheckErr(rows.Scan(&c, &i))
+			sum1 += c
+			sums1[i] = c
+		}
+		util.CheckErr(rows.Err())
+
+		sum2 := 0
+		sums2 := make(map[int]int)
+		qu := fmt.Sprintf(
+			"SELECT DISTINCT `arch`,`file`,`idx` FROM `%s_c_%s_deprel` JOIN `%s_c_%s_meta` USING(`arch`,`file`) WHERE `id` = %d",
+			Cfg.Prefix, prefix,
+			Cfg.Prefix, prefix,
+			metai[meta])
+		qu = fmt.Sprintf(
+			"SELECT COUNT(`a`.`idx`), `a`.`idx` FROM ( %s ) `a` GROUP BY 2",
+			qu)
+		rows, err = db.Query(qu)
+		util.CheckErr(err)
+		for rows.Next() {
+			var c, i int
+			util.CheckErr(rows.Scan(&c, &i))
+			sum2 += c
+			sums2[i] = c
+		}
+		util.CheckErr(rows.Err())
+
+		for s := range sums1 {
+			_, err = db.Exec(fmt.Sprintf(
+				"UPDATE `%s_c_%s_mval` SET `rall` = %g, `rtrip` = %g WHERE `id` = %d AND `idx` = %d",
+				Cfg.Prefix, prefix,
+				float64(sums1[s])/float64(sum1),
+				float64(sums2[s])/float64(sum2),
+				metai[meta], s))
+			util.CheckErr(err)
+		}
+	}
 
 	//fmt.Println("Bijwerken menu's voor postag, rel en hpostag ...")
 	//tags()
@@ -1366,7 +1611,7 @@ func sizes() {
 	var d, i, total int
 	var t string
 	rows, err := db.Query("SELECT TABLE_NAME, DATA_LENGTH, INDEX_LENGTH FROM `information_schema`.`TABLES` WHERE TABLE_NAME LIKE '" +
-		Cfg.Prefix + "_c_" + prefix + "_%' AND NOT TABLE_NAME = '" + Cfg.Prefix + "_c_" + prefix + "_deprel_meta' ORDER BY 1;")
+		Cfg.Prefix + "_c_" + prefix + "_%' ORDER BY 1;")
 	util.CheckErr(err)
 	fmt.Println()
 	for rows.Next() {

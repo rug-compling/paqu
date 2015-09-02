@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	// DEZE WAARDES NIET MEER VERANDEREN
 	dr_hour = iota
 	dr_day
 	dr_month
@@ -44,7 +45,7 @@ func newDrange(min, max time.Time, count int, hasTime bool) *drange {
 	}
 
 	/*
-		if count > 1 && count < 20 && !hasTime {
+		if count < 21 && !hasTime {
 			dr.indexed = false
 			dr.r = dr_day
 			return &dr

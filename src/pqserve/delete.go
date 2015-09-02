@@ -70,14 +70,17 @@ func remove(q *Context) {
 		}
 	}()
 
-	_, err = q.db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch` , `%s_c_%s_word`",
+	_, err = q.db.Exec(fmt.Sprintf(
+		"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch` , `%s_c_%s_word`, "+
+			"`%s_c_%s_meta`, `%s_c_%s_midx`, `%s_c_%s_minf` , `%s_c_%s_mval`",
 		Cfg.Prefix, id,
 		Cfg.Prefix, id,
 		Cfg.Prefix, id,
 		Cfg.Prefix, id,
-		Cfg.Prefix, id))
-	logerr(err)
-	_, err = q.db.Exec(fmt.Sprintf("DROP VIEW IF EXISTS `%s_c_%s_deprel_meta`",
+		Cfg.Prefix, id,
+		Cfg.Prefix, id,
+		Cfg.Prefix, id,
+		Cfg.Prefix, id,
 		Cfg.Prefix, id))
 	logerr(err)
 	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))

@@ -69,18 +69,16 @@ func main() {
 		util.CheckErr(err)
 
 		_, err = db.Exec(fmt.Sprintf(
-			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`, `%s_c_%s_midx`, `%s_c_%s_meta`",
+			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_word`, "+
+				"`%s_c_%s_meta`, `%s_c_%s_midx`, `%s_c_%s_minf`, `%s_c_%s_mval`",
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus,
-			Cfg.Prefix, corpus))
-		util.CheckErr(err)
-
-		_, err = db.Exec(fmt.Sprintf(
-			"DROP VIEW IF EXISTS `%s_c_%s_deprel_meta`",
+			Cfg.Prefix, corpus,
+			Cfg.Prefix, corpus,
 			Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
