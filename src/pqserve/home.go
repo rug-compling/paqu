@@ -343,6 +343,7 @@ func home(q *Context) {
 	hasmeta := hasMeta(q, prefix)
 
 	if hasmeta {
+		metahelp(q)
 		fmt.Fprintf(q.w, `<p>
 		<div id="statsmeta">
 		<div id="innermeta">
@@ -489,6 +490,25 @@ func html_header(q *Context) {
       busymeta.addClass('hide');
     }
   }
+
+  var metavisible = false;
+  function metahelp() {
+    var e = $("#helpmeta");
+    e.show();
+    e.css("zIndex", 9999);
+    metavisible = true;
+    return false;
+  }
+
+  $(document).mouseup(
+    function(e) {
+      if (metavisible) {
+        var e = $("#helpmeta");
+        e.hide();
+        e.css("zIndex", 1);
+        metavisible = false;
+      }
+    });
 
   var lastcall = null;
   $.fn.statsrel = function() {

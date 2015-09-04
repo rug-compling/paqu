@@ -74,6 +74,11 @@ td.ok {
 td.error {
     background-color: #ff8080;
 }
+td.next {
+    padding-left: 1em;
+    margin-left: 1em;
+    border-left: 1px solid grey;
+}
 div.example, div.vb {
     padding: 1em 2em;
     margin: 1em 0px 2em 0px;;

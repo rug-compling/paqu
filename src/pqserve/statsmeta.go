@@ -91,7 +91,12 @@ window.parent._fn.startedmeta();
 
 	// DEBUG: HTML-uitvoer van de query
 	if !download {
-		fmt.Fprint(&buf, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
+		fmt.Fprintf(&buf, `
+<div style="font-family:monospace">%s</div>
+<p>
+<a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabellen</a>
+<p>
+`, html.EscapeString(query))
 		updateText(q, buf.String())
 		buf.Reset()
 	}
@@ -115,7 +120,7 @@ window.parent._fn.startedmeta();
 				if run == 0 {
 					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(meta.name)+"</b><table><tr><td>per item:<table class=\"right\">")
 				} else {
-					fmt.Fprintln(&buf, "<td>per zin:<table class=\"right\">")
+					fmt.Fprintln(&buf, "<td class=\"next\">per zin:<table class=\"right\">")
 				}
 			}
 			select {
@@ -280,5 +285,41 @@ func completedmeta(q *Context, download bool) {
 	fmt.Fprintf(q.w, `<script type="text/javascript">
 window.parent._fn.completedmeta();
 </script>
+`)
+}
+
+func metahelp(q *Context) {
+	fmt.Fprint(q.w, `
+<div class="submenu a9999" id="helpmeta">
+<div class="corpushelp">
+
+In de tabel <em>per zin</em> staan tussen de kolommen met aantallen en met de metadata-waardes nog twee kolommen.
+<p>
+Kolom 2: genormaliseerd percentage
+<p>
+Kolom 3: -log<sub>2</sub> van de fractie
+<p>
+<b>Kolom 2: genormaliseerd percentage</b>
+<p>
+Deze kolom geeft voor elke metadata-waarde het percentage van het aantal van alle metadata-waardes,
+genormaliseerd voor het verwachte percentage op basis van verhoudingen van metadata-waardes in alle zinnen.
+<p>
+Stel dat je twee waardes hebt in de data, <em>man</em> en <em>vrouw</em>. Wanneer de genormaliseerde percentage 50%/50% zijn wil dat niet zeggen
+dat je van voor beide waardes hetzelfde aantal zinnen hebt gevonden, maar dat de verhouding tussen <em>man</em> en <em>vrouw</em>
+in de gevonden zinnen gelijk is aan de verhouding in alle zinnen. Wanneer de ene waarde een groter percentage geeft dan een andere,
+betekent dat dat de eerste waarde verhoudingsgewijs vaker wordt gevonden. Dat slaat los van de absolute aantallen van de gevonden zinnen.
+<p>
+TODO: Formule?
+<p>
+<b>Kolom 3: -log<sub>2</sub> van de fractie</b>
+<p>
+De fractie is het aantal gevonden zinnen met de metadata-waarde, gedeeld door het totaal aantal zinnen dat deze waarde heeft.
+<p>
+De derde kolom geeft de -log<sub>2</sub> van deze fractie.
+<p>
+Een waarde van 0 wil zeggen dat alle zinnen waarin de waarde voorkomt voldoen aan je zoekopdracht.
+Een waarde van 1 staat voor de helft van al die zinnen, de waarde 2 voor een kwart, etc.
+</div>
+</div>
 `)
 }
