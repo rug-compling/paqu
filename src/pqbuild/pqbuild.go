@@ -738,10 +738,8 @@ Opties:
 			id    int          NOT NULL DEFAULT 0,
 			idx   int          NOT NULL DEFAULT 0,
 			text  varchar(260) NOT NULL DEFAULT 0,
-			nall  int          NOT NULL DEFAULT 0,
-			ntrip int          NOT NULL DEFAULT 0,
-			rall  float        NOT NULL DEFAULT 0.0,
-			rtrip float        NOT NULL DEFAULT 0.0)
+			n     int          NOT NULL DEFAULT 0,
+			r     float        NOT NULL DEFAULT 0.0)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 	util.CheckErr(err)
@@ -963,8 +961,8 @@ Opties:
 
 	fmt.Println("Telling van ranges ...")
 	for _, meta := range metas {
-		sum1 := 0
-		sums1 := make(map[int]int)
+		sum := 0
+		sums := make(map[int]int)
 		rows, err := db.Query(fmt.Sprintf(
 			"SELECT COUNT(`idx`),`idx` FROM `%s_c_%s_meta` WHERE `id` = %d GROUP BY `idx`",
 			Cfg.Prefix, prefix,
@@ -973,39 +971,17 @@ Opties:
 		for rows.Next() {
 			var c, i int
 			util.CheckErr(rows.Scan(&c, &i))
-			sum1 += c
-			sums1[i] = c
+			sum += c
+			sums[i] = c
 		}
 		util.CheckErr(rows.Err())
 
-		sum2 := 0
-		sums2 := make(map[int]int)
-		qu := fmt.Sprintf(
-			"SELECT DISTINCT `arch`,`file`,`idx` FROM `%s_c_%s_deprel` JOIN `%s_c_%s_meta` USING(`arch`,`file`) WHERE `id` = %d",
-			Cfg.Prefix, prefix,
-			Cfg.Prefix, prefix,
-			metai[meta])
-		qu = fmt.Sprintf(
-			"SELECT COUNT(`a`.`idx`), `a`.`idx` FROM ( %s ) `a` GROUP BY 2",
-			qu)
-		rows, err = db.Query(qu)
-		util.CheckErr(err)
-		for rows.Next() {
-			var c, i int
-			util.CheckErr(rows.Scan(&c, &i))
-			sum2 += c
-			sums2[i] = c
-		}
-		util.CheckErr(rows.Err())
-
-		for s := range sums1 {
+		for s := range sums {
 			_, err = db.Exec(fmt.Sprintf(
-				"UPDATE `%s_c_%s_mval` SET `nall` = %d, `rall` = %g, `ntrip` = %d, `rtrip` = %g WHERE `id` = %d AND `idx` = %d",
+				"UPDATE `%s_c_%s_mval` SET `n` = %d, `r` = %g WHERE `id` = %d AND `idx` = %d",
 				Cfg.Prefix, prefix,
-				sums1[s],
-				float64(sums1[s])/float64(sum1),
-				sums2[s],
-				float64(sums2[s])/float64(sum2),
+				sums[s],
+				float64(sums[s])/float64(sum),
 				metai[meta], s))
 			util.CheckErr(err)
 		}

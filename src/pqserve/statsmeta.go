@@ -150,7 +150,7 @@ window.parent._fn.startedmeta();
 					order)
 			} else {
 				qu = fmt.Sprintf(
-					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`ntrip`,`rtrip` "+
+					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`n`,`r` "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
@@ -161,7 +161,7 @@ window.parent._fn.startedmeta();
 					meta.id,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`ntrip`,`a`.`rtrip` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
+					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`n`,`a`.`r` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
 					qu,
 					order)
 			}
