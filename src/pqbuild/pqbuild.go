@@ -302,7 +302,10 @@ Opties:
 		util.CheckErr(db.Close())
 	}()
 
+	//
 	// kijk of de database al bestaat
+	//
+
 	rows, err := db.Query("SELECT `begin` FROM `" + Cfg.Prefix + "_c_" + prefix + "_deprel` LIMIT 0, 1;")
 	if err == nil && rows.Next() {
 		rows.Close()
@@ -482,9 +485,10 @@ Opties:
 		keyTags[tag] = true
 	}
 
-	/*
-		Bestandnamen van stdin inlezen en verwerken.
-	*/
+	//
+	// Bestandnamen van stdin inlezen en verwerken.
+	//
+
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		filename := strings.TrimSpace(scanner.Text())
@@ -607,7 +611,10 @@ Opties:
 
 	showmemstats()
 
+	//
 	// tabel <prefix>_word aanmaken
+	//
+
 	_, err = db.Exec(fmt.Sprintf(
 		"DROP TABLE IF EXISTS `%s_c_%s_word`;",
 		Cfg.Prefix,
@@ -930,7 +937,7 @@ Opties:
 				a, f))
 			util.CheckErr(err)
 		}
-		util.CheckErr(err)
+		util.CheckErr(rows.Err())
 
 		for ix := range idx {
 			_, err = db.Exec(fmt.Sprintf(
@@ -1004,7 +1011,9 @@ Opties:
 		}
 	}
 
+	//
 	// zet info over corpus in de database
+	//
 
 	lines := 0
 	rows, err = db.Query("SELECT COUNT(*) FROM " + Cfg.Prefix + "_c_" + prefix + "_sent")
