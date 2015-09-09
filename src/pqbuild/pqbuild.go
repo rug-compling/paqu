@@ -1648,7 +1648,7 @@ func sizes() {
 	var d, i, total int
 	var t string
 	rows, err := db.Query("SELECT TABLE_NAME, DATA_LENGTH, INDEX_LENGTH FROM `information_schema`.`TABLES` WHERE TABLE_NAME LIKE '" +
-		Cfg.Prefix + "_c_" + prefix + "_%' ORDER BY 1;")
+		Cfg.Prefix + "\\_c\\_" + prefix + "\\_%' ORDER BY 1;")
 	util.CheckErr(err)
 	fmt.Println()
 	for rows.Next() {
