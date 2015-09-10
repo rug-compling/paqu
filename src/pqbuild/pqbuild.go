@@ -197,7 +197,7 @@ var (
 
 	Cfg Config
 
-	utfRE = regexp.MustCompile("[^\001-\uFFFF]")
+	utfRE = regexp.MustCompile("&#[0-9]+;|[^\001-\uFFFF]")
 
 	attributes = make(map[string]bool)
 
@@ -1027,6 +1027,16 @@ Opties:
 //. Verwerking
 
 func utfFunc(b []byte) []byte {
+	if b[0] == '&' {
+		i, err := strconv.Atoi(string(b[2 : len(b)-1]))
+		if err != nil || (err == nil && i < 65536) {
+			return b
+		}
+		bb := []byte("&amp;")
+		bb = append(bb, b[1:]...)
+		return bb
+	}
+
 	u, _ := utf8.DecodeRune(b)
 	return []byte(fmt.Sprintf("&amp;#%d;", u))
 }
