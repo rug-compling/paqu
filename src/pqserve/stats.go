@@ -273,6 +273,7 @@ func statsrel(q *Context) {
 			fields = append(fields, new(string))
 		}
 	}
+	nattr := ncols
 
 	for _, meta := range q.r.Form["cmeta"] {
 		cols = append(cols, "meta:"+meta)
@@ -401,33 +402,36 @@ func statsrel(q *Context) {
 			if !download {
 				var a1, a2 string
 				if i == 0 && n <= WRDMAX {
-					for j := len(cols) - 1; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
-						if sp, ok := fields[j].(*string); ok {
-							s := *sp
-							switch cols[j] {
-							case "word":
-								qword = urlencode("=" + unHigh(s))
-							case "lemma":
-								qword = urlencode("+" + unHigh(s))
-							case "postag":
-								qpostag = urlencode(s)
-							case "rel":
-								qrel = urlencode(s)
-							case "hword":
-								qhword = urlencode("=" + unHigh(s))
-							case "hlemma":
-								qhword = urlencode("+" + unHigh(s))
-							case "hpostag":
-								qhpostag = urlencode(s)
-								if qhpostag == "" {
-									qhpostag = "--LEEG--"
+					if nattr > 0 {
+						// attributen in kolom 1 t/m kolom nattr
+						for j := nattr; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
+							if sp, ok := fields[j].(*string); ok {
+								s := *sp
+								switch cols[j] {
+								case "word":
+									qword = urlencode("=" + unHigh(s))
+								case "lemma":
+									qword = urlencode("+" + unHigh(s))
+								case "postag":
+									qpostag = urlencode(s)
+								case "rel":
+									qrel = urlencode(s)
+								case "hword":
+									qhword = urlencode("=" + unHigh(s))
+								case "hlemma":
+									qhword = urlencode("+" + unHigh(s))
+								case "hpostag":
+									qhpostag = urlencode(s)
+									if qhpostag == "" {
+										qhpostag = "--LEEG--"
+									}
 								}
 							}
 						}
+						a1 = fmt.Sprintf("<a href=\".?db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s\">",
+							qdb, qword, qpostag, qrel, qhword, qhpostag)
+						a2 = "</a>"
 					}
-					a1 = fmt.Sprintf("<a href=\".?db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s\">",
-						qdb, qword, qpostag, qrel, qhword, qhpostag)
-					a2 = "</a>"
 				}
 				var s string
 				var c string
