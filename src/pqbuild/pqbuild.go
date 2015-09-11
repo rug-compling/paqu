@@ -15,6 +15,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -921,28 +922,24 @@ Opties:
 		util.CheckErr(err)
 
 		// zinnen waarvoor geen metadata is, die toevoegen
-		empty := 2147483647 // grootste waarde van INT in MySQL
-		for _, ok := idx[empty]; ok && empty > -2147483648; _, ok = idx[empty] {
-			empty--
-		}
 		_, err = db.Exec(fmt.Sprintf(
 			"INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`idx`)"+
-				"SELECT DISTINCT %d, `arch`, `file`, %d FROM `%s_c_%s_sent` `s` WHERE NOT EXISTS ( "+
+				"SELECT DISTINCT %d, `arch`, `file`, 2147483647 FROM `%s_c_%s_sent` `s` WHERE NOT EXISTS ( "+
 				"SELECT `arch`, `file` FROM `%s_c_%s_meta` `m` WHERE `s`.`arch`=`m`.`arch` AND `s`.`file`=`m`.`file` AND `id`=%d )",
 			Cfg.Prefix, prefix,
-			metai[meta], empty, Cfg.Prefix, prefix,
+			metai[meta], Cfg.Prefix, prefix,
 			Cfg.Prefix, prefix, metai[meta]))
 		util.CheckErr(err)
 		_, err = db.Exec("COMMIT;")
 		util.CheckErr(err)
 		// kijk of er echt metadata is toegevoegd
 		rows, err = db.Query(fmt.Sprintf(
-			"SELECT DISTINCT 1 FROM `%s_c_%s_meta` WHERE `id`=%d AND `idx`=%d",
+			"SELECT DISTINCT 1 FROM `%s_c_%s_meta` WHERE `id`=%d AND `idx`=2147483647",
 			Cfg.Prefix, prefix,
-			metai[meta], empty))
+			metai[meta]))
 		util.CheckErr(err)
 		for rows.Next() {
-			idx[empty] = ""
+			idx[2147483647] = ""
 		}
 		util.CheckErr(rows.Err())
 
@@ -1104,16 +1101,26 @@ func do_data(archname, filename string, data []byte) {
 		dateval := "1000-01-01 00:00:00"
 		if m.Type == "int" {
 			intval, err = strconv.Atoi(m.Value)
+			// 2147483647 is gereserveerd voor intern gebruik
+			if intval < -2147483648 || intval > 2147483646 {
+				util.CheckErr(fmt.Errorf("Integer niet in bereik -2147483648 - 2147483646: %d", intval))
+			}
 			util.CheckErr(err)
 		} else if m.Type == "float" {
 			floatval, err = strconv.ParseFloat(m.Value, 64)
+			if floatval < -math.MaxFloat32 || floatval > math.MaxFloat32 {
+				util.CheckErr(fmt.Errorf("Float niet in bereik %g - %g: %g", -math.MaxFloat32, math.MaxFloat32, floatval))
+			}
+			if floatval > -math.SmallestNonzeroFloat32 && floatval < math.SmallestNonzeroFloat32 && floatval != 0 {
+				util.CheckErr(fmt.Errorf("Float te klein: %g", floatval))
+			}
 			util.CheckErr(err)
 		} else if m.Type == "date" {
 			t, err := time.Parse("2006-01-02", m.Value)
 			util.CheckErr(err)
 			year := t.Year()
 			if year < 1000 || year > 9999 {
-				util.CheckErr(fmt.Errorf("Jaartal niet in bereik 1000-9999: %d", year))
+				util.CheckErr(fmt.Errorf("Jaartal niet in bereik 1000 - 9999: %d", year))
 			}
 			dateval = fmt.Sprintf("%04d-%02d-%02d 00:00:00", year, t.Month(), t.Day())
 		} else if m.Type == "datetime" {
