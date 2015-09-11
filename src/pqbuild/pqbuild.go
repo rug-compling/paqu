@@ -547,7 +547,8 @@ Opties:
 	}
 	db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `attr` = %q WHERE `id` = %q", Cfg.Prefix, strings.Join(attrs, " "), prefix))
 
-	db.Exec("COMMIT;")
+	_, err = db.Exec("COMMIT;")
+	util.CheckErr(err)
 
 	fmt.Println("Tijd:", time.Now().Sub(now))
 
@@ -711,7 +712,8 @@ Opties:
 
 	// stuur laatste data uit buffer naar de database
 	buf_flush(WORD)
-	db.Exec("COMMIT;")
+	_, err = db.Exec("COMMIT;")
+	util.CheckErr(err)
 
 	fmt.Println("Aanmaken index op " + Cfg.Prefix + "_c_" + prefix + "_word ...")
 	_, err = db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_word
@@ -915,25 +917,32 @@ Opties:
 			}
 			util.CheckErr(rows.Err())
 		}
+		_, err = db.Exec("COMMIT;")
+		util.CheckErr(err)
 
 		// zinnen waarvoor geen metadata is, die toevoegen
-		rows, err = db.Query(fmt.Sprintf(
-			"SELECT DISTINCT `arch`, `file` FROM `%s_c_%s_sent` `s` WHERE NOT EXISTS ( "+
+		empty := 2147483647 // grootste waarde van INT in MySQL
+		for _, ok := idx[empty]; ok && empty > -2147483648; _, ok = idx[empty] {
+			empty--
+		}
+		_, err = db.Exec(fmt.Sprintf(
+			"INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`idx`)"+
+				"SELECT DISTINCT %d, `arch`, `file`, %d FROM `%s_c_%s_sent` `s` WHERE NOT EXISTS ( "+
 				"SELECT `arch`, `file` FROM `%s_c_%s_meta` `m` WHERE `s`.`arch`=`m`.`arch` AND `s`.`file`=`m`.`file` AND `id`=%d )",
 			Cfg.Prefix, prefix,
+			metai[meta], empty, Cfg.Prefix, prefix,
+			Cfg.Prefix, prefix, metai[meta]))
+		util.CheckErr(err)
+		_, err = db.Exec("COMMIT;")
+		util.CheckErr(err)
+		// kijk of er echt metadata is toegevoegd
+		rows, err = db.Query(fmt.Sprintf(
+			"SELECT DISTINCT 1 FROM `%s_c_%s_meta` WHERE `id`=%d AND `idx`=%d",
 			Cfg.Prefix, prefix,
-			metai[meta]))
+			metai[meta], empty))
 		util.CheckErr(err)
 		for rows.Next() {
-			idx[-7654321] = ""
-			var a, f int
-			util.CheckErr(rows.Scan(&a, &f))
-			_, err := db.Exec(fmt.Sprintf(
-				"INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`idx`) VALUES (%d,%d,%d,-7654321)",
-				Cfg.Prefix, prefix,
-				metai[meta],
-				a, f))
-			util.CheckErr(err)
+			idx[empty] = ""
 		}
 		util.CheckErr(rows.Err())
 
@@ -946,6 +955,8 @@ Opties:
 				idx[ix]))
 			util.CheckErr(err)
 		}
+		_, err = db.Exec("COMMIT;")
+		util.CheckErr(err)
 	}
 
 	fmt.Println("Aanmaken indexen op " + Cfg.Prefix + "_c_" + prefix + "_mval ...")
@@ -985,6 +996,8 @@ Opties:
 				metai[meta], s))
 			util.CheckErr(err)
 		}
+		_, err = db.Exec("COMMIT;")
+		util.CheckErr(err)
 	}
 
 	//
@@ -1012,6 +1025,8 @@ Opties:
 		user = "all"
 	}
 	_, err = db.Exec(fmt.Sprintf("INSERT `%s_corpora` (`user`, `prefix`) VALUES (%q, %q);", Cfg.Prefix, user, prefix))
+	util.CheckErr(err)
+	_, err = db.Exec("COMMIT;")
 	util.CheckErr(err)
 
 	//fmt.Println("Bijwerken menu's voor postag, rel en hpostag ...")
