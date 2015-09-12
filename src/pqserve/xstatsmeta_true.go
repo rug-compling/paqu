@@ -60,6 +60,9 @@ function f(s) {
 window.parent._fn.startedmeta();
 </script>
 `)
+		if ff, ok := q.w.(http.Flusher); ok {
+			ff.Flush()
+		}
 	}
 
 	prefix := getprefix(q)
