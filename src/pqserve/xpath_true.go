@@ -455,27 +455,45 @@ $('#loading span').html('%.1f%%');
 			html.EscapeString(prefix))
 	}
 
-	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small>")
+	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small><hr>")
 
 	if curno == 0 {
 		html_footer(q)
 		return
 	}
 
+	var metas []MetaType
+	hasmeta := hasMeta(q, prefix)
+	if hasmeta {
+		metas = getMeta(q, prefix)
+	}
+
+	if hasmeta {
+		metahelp(q)
+		fmt.Fprintf(q.w, `<p>
+            <div id="statsmeta">
+            <div id="innermeta">
+            <form action="xstatsmeta" target="sframemeta">
+            <input type="hidden" name="xpath" value="%s">
+            <input type="hidden" name="db" value="%s">
+            <input type="submit" value="tellingen &mdash; metadata">
+            </form>
+            </div>
+            <img src="busy.gif" id="busymeta" class="hide" alt="aan het werk...">
+            </div>
+            <iframe src="leeg.html" name="sframemeta" class="hide"></iframe>`,
+			html.EscapeString(query),
+			html.EscapeString(prefix))
+	}
+
 	// Links naar statistieken
-	fmt.Fprintf(q.w, `<hr><p>
+	fmt.Fprintf(q.w, `<p>
 		<div id="xstats">
 		<form action="xpathstats" target="xframe" name="xstatsform" onsubmit="javascript:return xstatftest()">
 		<input type="hidden" name="xpath" value="%s">
 		<input type="hidden" name="db" value="%s">
 		Selecteer &eacute;&eacute;n tot drie attributen:<br>
 `, html.EscapeString(query), html.EscapeString(prefix))
-
-	var metas []MetaType
-	hasmeta := hasMeta(q, prefix)
-	if hasmeta {
-		metas = getMeta(q, prefix)
-	}
 
 	for i := 1; i <= 3; i++ {
 
@@ -499,7 +517,7 @@ $('#loading span').html('%.1f%%');
 
 	fmt.Fprint(q.w, `
 		<p>
-		<input type="submit" value="tellingen">
+		<input type="submit" value="tellingen van combinaties">
 		</form>
 		<p>
         <iframe src="leeg.html" name="xframe" class="hide"></iframe>
@@ -517,6 +535,25 @@ func html_xpath_header(q *Context) {
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
+
+  var metavisible = false;
+  function metahelp() {
+    var e = $("#helpmeta");
+    e.show();
+    e.css("zIndex", 9999);
+    metavisible = true;
+    return false;
+  }
+
+  $(document).mouseup(
+    function(e) {
+      if (metavisible) {
+        var e = $("#helpmeta");
+        e.hide();
+        e.css("zIndex", 1);
+        metavisible = false;
+      }
+    });
 
   function formclear(f) {
     f.xpath.value = "";
@@ -540,10 +577,22 @@ func html_xpath_header(q *Context) {
     return "";
   }
 
+  var resultmeta;
+  var busymeta;
   var result;
   var at1, at2, at3;
   var xquery;
   window._fn = {
+    updatemeta: function(data) {
+      resultmeta.append(data);
+    },
+    startedmeta: function() {
+      resultmeta.html('');
+      busymeta.removeClass('hide');
+    },
+    completedmeta: function() {
+      busymeta.addClass('hide');
+    },
     update: function(data) {
       result.html(data);
     },
@@ -704,6 +753,8 @@ func html_xpath_header(q *Context) {
 
   $(document).ready(function() {
     result = $('#result');
+    resultmeta = $('#innermeta');
+    busymeta = $('#busymeta');
     try {
       var f = document.forms["xstatsform"];
       at1 = f["attr1"];

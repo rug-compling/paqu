@@ -1107,7 +1107,7 @@ func do_data(archname, filename string, data []byte) {
 			}
 			util.CheckErr(err)
 		} else if m.Type == "float" {
-			floatval, err = strconv.ParseFloat(m.Value, 64)
+			floatval, err = strconv.ParseFloat(m.Value, 32) // 32 is dezelfde precisie als gebruikt door MySQL
 			if floatval < -math.MaxFloat32 || floatval > math.MaxFloat32 {
 				util.CheckErr(fmt.Errorf("Float niet in bereik %g - %g: %g", -math.MaxFloat32, math.MaxFloat32, floatval))
 			}
@@ -1591,7 +1591,7 @@ func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval f
 		buf_has_data[META] = true
 		fmt.Fprintf(&buffer[META], "INSERT `%s_c_%s_meta` (`id`,`arch`,`file`,`tval`,`ival`,`fval`,`dval`) VALUES", Cfg.Prefix, prefix)
 	}
-	fmt.Fprintf(&buffer[META], "%s\n(%d,%d,%d,%q,%d,%g,%q)", komma, id, arch, file, txt, intval, floatval, dateval)
+	fmt.Fprintf(&buffer[META], "%s\n(%d,%d,%d,%q,%d,%g,%q)", komma, id, arch, file, txt, intval, float32(floatval), dateval)
 	if buffer[META].Len() > 49500 {
 		buf_flush(META)
 	}

@@ -150,6 +150,7 @@ func main() {
 
 	handleFunc("xpath", xpath)
 	handleFunc("xpathcheck", xpathcheck)
+	handleFunc("xstatsmeta", xstatsmeta)
 	handleFunc("xpathstats", xpathstats)
 	handleFunc("savemacros", savemacros)
 	handleFunc("downloadmacros", downloadmacros)

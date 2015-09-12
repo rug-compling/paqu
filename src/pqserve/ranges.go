@@ -40,40 +40,52 @@ type irange struct {
 }
 
 func newDrange(min, max time.Time, count int, hasTime bool) *drange {
-	dr := drange{
-		s: make([]string, 0),
-	}
-
-	/*
-		if count < 21 && !hasTime {
-			dr.indexed = false
-			dr.r = dr_day
-			return &dr
-		}
-	*/
-
-	dr.indexed = true
-
 	// tijdzone strippen
 	min = time.Date(min.Year(), min.Month(), min.Day(), min.Hour(), min.Minute(), min.Second(), 0, time.UTC)
 	max = time.Date(max.Year(), max.Month(), max.Day(), max.Hour(), max.Minute(), max.Second(), 0, time.UTC)
 
+	/*
+		if count < 21 && !hasTime {
+			return oldDrange(min, max, size, dr_day, false)
+		}
+	*/
+
+	var r int
 	if max.Year()-min.Year() > 300 /* 300 jaar */ {
-		dr.r = dr_cent
+		r = dr_cent
 	} else {
 		dur := max.Sub(min)
 		if hasTime && dur < time.Hour*24*4 /* 4 dagen */ {
-			dr.r = dr_hour
+			r = dr_hour
 		} else if dur < time.Hour*24*50 /* 50 dagen */ {
-			dr.r = dr_day
+			r = dr_day
 		} else if dur < time.Hour*24*365*3 /* 3 jaar */ {
-			dr.r = dr_month
+			r = dr_month
 		} else if dur < time.Hour*24*365*30 /* 30 jaar */ {
-			dr.r = dr_year
+			r = dr_year
 		} else {
-			dr.r = dr_dec
+			r = dr_dec
 		}
 	}
+	return oldDrange(min, max, r, true)
+}
+
+func oldDrange(min, max time.Time, dtype int, indexed bool) *drange {
+	// tijdzone strippen
+	min = time.Date(min.Year(), min.Month(), min.Day(), min.Hour(), min.Minute(), min.Second(), 0, time.UTC)
+	max = time.Date(max.Year(), max.Month(), max.Day(), max.Hour(), max.Minute(), max.Second(), 0, time.UTC)
+
+	dr := drange{
+		min:     min,
+		max:     max,
+		r:       dtype,
+		s:       make([]string, 0),
+		indexed: indexed,
+	}
+	if !indexed {
+		return &dr
+	}
+
 	switch dr.r {
 	case dr_hour:
 		dr.min = time.Date(min.Year(), min.Month(), min.Day(), 0, 0, 0, 0, time.UTC)
@@ -129,13 +141,26 @@ func newDrange(min, max time.Time, count int, hasTime bool) *drange {
 }
 
 func newFrange(min, max float64) *frange {
+	step := math.Pow(10, math.Floor(math.Log10(float64(max-min))-.5)) / 5
+	min = step * math.Floor(min/step)
+	size := 0
+	for i, f := 0, min; f <= max; i++ {
+		f = min + float64(i)*step
+		size++
+	}
+	size++
+	return oldFrange(min, step, size)
+}
+
+func oldFrange(fmin, fstep float64, size int) *frange {
 	fr := frange{
-		step: math.Pow(10, math.Floor(math.Log10(float64(max-min))-.5)) / 5,
+		min:  fmin,
+		step: fstep,
 		s:    make([]string, 0),
 	}
-	fr.min = fr.step * math.Floor(min/fr.step)
-	for i, f := 0, fr.min; f <= max; i++ {
-		f = fr.min + float64(i)*fr.step
+	size--
+	for i := 0; i < size; i++ {
+		f := fr.min + float64(i)*fr.step
 		fr.s = append(fr.s, fmt.Sprintf("%g – %g", float32(f), float32(f+fr.step)))
 	}
 	fr.s = append(fr.s, fr.s[len(fr.s)-1])
@@ -143,42 +168,58 @@ func newFrange(min, max float64) *frange {
 }
 
 func newIrange(min, max, count int) *irange {
-	ir := irange{
-		min:  min,
-		step: int(math.Pow(10, math.Floor(math.Log10(float64(max-min))-.5))),
-		s:    make([]string, 0),
+	step := int(math.Pow(10, math.Floor(math.Log10(float64(max-min))-.5)))
+	if count <= 20 || step < 1 {
+		step = 1
 	}
-	if count <= 20 || ir.step < 1 {
-		ir.step = 1
+	if step == 1 && max-min > 1000 {
+		return oldIrange(min, step, 0, false)
 	}
-	if ir.step == 1 && max-min > 1000 {
-		return &ir
-	}
-	ir.indexed = true
-	if ir.step >= 100 {
-		ir.step /= 5
-	} else if ir.step == 10 {
-		ir.step /= 2
+
+	if step >= 100 {
+		step /= 5
+	} else if step == 10 {
+		step /= 2
 	}
 	if min >= 0 {
-		ir.min = ir.step * (min / ir.step)
+		min = step * (min / step)
 	} else {
-		ir.min = ir.step * (min/ir.step - 1)
+		min = step * (min/step - 1)
 	}
+	size := 0
+	for i := min; i <= max; i += step {
+		size++
+	}
+	return oldIrange(min, step, size, true)
+}
+
+func oldIrange(imin, istep, size int, indexed bool) *irange {
+	ir := irange{
+		min:     imin,
+		step:    istep,
+		indexed: indexed,
+		s:       make([]string, 0),
+	}
+	if !indexed {
+		return &ir
+	}
+
 	ln := len(fmt.Sprint(ir.min))
-	if l := len(fmt.Sprint(max)); l > ln {
+	if l := len(fmt.Sprint(ir.min + istep*(size-1))); l > ln {
 		ln = l
 	}
 	f := fmt.Sprintf("%%%dd", ln)
 	if ir.step > 1 {
 		f = f + " – " + f
 	}
-	for i := ir.min; i <= max; i += ir.step {
+	iv := ir.min
+	for i := 0; i < size; i++ {
 		if ir.step == 1 {
-			ir.s = append(ir.s, fmt.Sprintf(f, i))
+			ir.s = append(ir.s, fmt.Sprintf(f, iv))
 		} else {
-			ir.s = append(ir.s, fmt.Sprintf(f, i, i+ir.step-1))
+			ir.s = append(ir.s, fmt.Sprintf(f, iv, iv+ir.step-1))
 		}
+		iv += ir.step
 	}
 
 	return &ir
@@ -250,7 +291,7 @@ func (dr *drange) value(val time.Time) (string, int) {
 func (fr *frange) value(val float64) (string, int) {
 	i := int((val - fr.min) / fr.step)
 	if i < 0 || i >= len(fr.s) {
-		return "UNDEF", -1
+		return "UNDEF", 2147483647
 	}
 	return fr.s[i], i
 }
