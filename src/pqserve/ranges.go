@@ -148,8 +148,7 @@ func newFrange(min, max float64) *frange {
 		f = min + float64(i)*step
 		size++
 	}
-	size++
-	return oldFrange(min, step, size)
+	return oldFrange(min, step, size+1)
 }
 
 func oldFrange(fmin, fstep float64, size int) *frange {
@@ -158,12 +157,10 @@ func oldFrange(fmin, fstep float64, size int) *frange {
 		step: fstep,
 		s:    make([]string, 0),
 	}
-	size--
 	for i := 0; i < size; i++ {
 		f := fr.min + float64(i)*fr.step
 		fr.s = append(fr.s, fmt.Sprintf("%g – %g", float32(f), float32(f+fr.step)))
 	}
-	fr.s = append(fr.s, fr.s[len(fr.s)-1])
 	return &fr
 }
 
