@@ -165,7 +165,7 @@ window.parent._fn.started();
 			if download {
 				fmt.Fprintf(q.w, "%d\t%s\n", j, s)
 			} else {
-				fmt.Fprint(&buf, p, j, "&times;&nbsp;", html.EscapeString(s))
+				fmt.Fprint(&buf, p, iformat(j), "&times;&nbsp;", html.EscapeString(s))
 				p = ", "
 				count++
 			}
@@ -390,7 +390,11 @@ func statsrel(q *Context) {
 			case *string:
 				value = unHigh(*v)
 			case *int:
-				value = fmt.Sprint(*v)
+				if download {
+					value = fmt.Sprint(*v)
+				} else {
+					value = fmt.Sprint(iformat(*v))
+				}
 			}
 			if !download && n > WRDMAX {
 				if i == 0 {

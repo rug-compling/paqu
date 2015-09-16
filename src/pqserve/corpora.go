@@ -129,7 +129,7 @@ function formtest() {
 corpora = [`)
 		p := ""
 		for _, corpus := range corpora {
-			fmt.Fprintf(q.w, "%s\n{\"id\": \"%s\", \"title\": %q, \"lines\": %d}", p, corpus.id, corpus.description, corpus.nline)
+			fmt.Fprintf(q.w, "%s\n{\"id\": \"%s\", \"title\": %q, \"lines\": %q}", p, corpus.id, corpus.description, iformat(corpus.nline))
 			p = ","
 		}
 		fmt.Fprint(q.w, `];

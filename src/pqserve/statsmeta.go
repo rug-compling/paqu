@@ -65,6 +65,11 @@ func statsmeta(q *Context) {
 
 	// BEGIN UITVOER
 
+	pow10 := math.Pow10(int(math.Log10(float64(q.lines[prefix])) + .5))
+	if pow10 < 10 {
+		pow10 = 10
+	}
+
 	if download {
 		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
@@ -96,7 +101,9 @@ window.parent._fn.startedmeta();
 <p>
 <a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabellen</a>
 <p>
-`, html.EscapeString(query))
+<em>n</em> = %s
+<p>
+`, html.EscapeString(query), iformat(int(pow10)))
 		updateText(q, buf.String())
 		buf.Reset()
 	}
@@ -210,11 +217,8 @@ window.parent._fn.startedmeta();
 				}
 				if download {
 					if run == 1 {
-						v := 0.0
-						if line.i != line.n {
-							v = -math.Log2(float64(line.i) / float64(line.n))
-						}
-						fmt.Fprintf(q.w, "%d\t%.2f%%\t%.2f\t%s\n", line.i, float32(p), v, line.s)
+						v := int(.5 + pow10*float64(line.i)/float64(line.n))
+						fmt.Fprintf(q.w, "%d\t%.2f%%\t%d\t%s\n", line.i, float32(p), v, line.s)
 					} else {
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
 					}
@@ -231,13 +235,10 @@ window.parent._fn.startedmeta();
 						}
 						count++
 					}
-					fmt.Fprintln(&buf, "<tr><td>", line.i)
+					fmt.Fprintln(&buf, "<tr><td>", iformat(line.i))
 					if run == 1 {
-						v := 0.0
-						if line.i != line.n {
-							v = -math.Log2(float64(line.i) / float64(line.n))
-						}
-						fmt.Fprintf(&buf, "<td>%.2f%%<td>%.2f", float32(p), v)
+						v := int(.5 + pow10*float64(line.i)/float64(line.n))
+						fmt.Fprintf(&buf, "<td>%.2f%%<td>%s", float32(p), iformat(v))
 					}
 					if line.s == "" {
 						line.s = "(leeg)"
@@ -297,7 +298,7 @@ In de tabel <em>per zin</em> staan tussen de kolommen met aantallen en met de me
 <p>
 Kolom 2: genormaliseerd percentage
 <p>
-Kolom 3: -log<sub>2</sub> van de fractie
+Kolom 3: <em>n</em> keer de fractie
 <p>
 <b>Kolom 2: genormaliseerd percentage</b>
 <p>
@@ -311,14 +312,14 @@ betekent dat dat de eerste waarde verhoudingsgewijs vaker wordt gevonden. Dat sl
 <p>
 TODO: Formule?
 <p>
-<b>Kolom 3: -log<sub>2</sub> van de fractie</b>
+<b>Kolom 3: <em>n</em> keer de fractie</b>
 <p>
 De fractie is het aantal gevonden zinnen met de metadata-waarde, gedeeld door het totaal aantal zinnen dat deze waarde heeft.
 <p>
-De derde kolom geeft de -log<sub>2</sub> van deze fractie.
+De derde kolom geeft deze fractie vermenigvuldigd met <em>n</em>. De waarde van <em>n</em> is afankelijk van de grootte van het corpus,
+en staat boven de tabellen vermeld.
 <p>
-Een waarde van 0 wil zeggen dat alle zinnen waarin de waarde voorkomt voldoen aan je zoekopdracht.
-Een waarde van 1 staat voor de helft van al die zinnen, de waarde 2 voor een kwart, etc.
+Een waarde gelijk aan <em>n</em> wil zeggen dat alle zinnen waarin de waarde voorkomt voldoen aan je zoekopdracht.
 </div>
 </div>
 `)

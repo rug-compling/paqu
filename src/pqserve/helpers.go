@@ -174,7 +174,8 @@ func iformat(i int) string {
 	s1 := fmt.Sprint(i)
 	s2 := ""
 	for n := len(s1); n > 3; n = len(s1) {
-		s2 = "." + s1[n-3:n] + s2
+		// U+202F = NARROW NO-BREAK SPACE
+		s2 = "\u202F" + s1[n-3:n] + s2
 		s1 = s1[0 : n-3]
 	}
 	return s1 + s2

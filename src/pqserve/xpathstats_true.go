@@ -656,7 +656,7 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 		if download {
 			fmt.Fprintf(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
 		} else {
-			fmt.Fprintf(&buf, "<tr%s><td class=\"right\">%d<td class=\"right\">%.1f%%\n", o, a.n, float64(a.n)/float64(count)*100)
+			fmt.Fprintf(&buf, "<tr%s><td class=\"right\">%s<td class=\"right\">%.1f%%\n", o, iformat(a.n), float64(a.n)/float64(count)*100)
 		}
 		v := strings.Split(a.a, "\t")
 		for i := 0; i < nAttr; i++ {

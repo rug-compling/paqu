@@ -32,6 +32,7 @@ type MetaItems1 []*MetaItem
 
 func xstatsmeta(q *Context) {
 	now := time.Now()
+	now2 := time.Now()
 
 	download := false
 	if first(q.r, "d") != "" {
@@ -53,11 +54,18 @@ func xstatsmeta(q *Context) {
 function f(s) {
     window.parent._fn.updatemeta(s);
 }
+function f1(s) {
+    window.parent._fn.updatemetatop(s);
+}
+function c(i, j) {
+    window.parent._fn.countmeta(i, j);
+}
 //--></script>
 </head>
 <body">
 <script type="text/javascript">
 window.parent._fn.startedmeta();
+c("0", "0");
 </script>
 `)
 		if ff, ok := q.w.(http.Flusher); ok {
@@ -244,7 +252,12 @@ window.parent._fn.startedmeta();
 
 	seen := make(map[string]bool)
 
+	counter := 0
 	for _, dactfile := range dactfiles {
+		if !download && time.Now().Sub(now2) > 2*time.Second {
+			updateCount(q, counter, len(seen))
+			now2 = time.Now()
+		}
 		select {
 		case <-chClose:
 			logerr(errConnectionClosed)
@@ -285,6 +298,10 @@ window.parent._fn.startedmeta();
 		filename := ""
 	NEXTDOC:
 		for docs.Next() {
+			if !download && time.Now().Sub(now2) > 2*time.Second {
+				updateCount(q, counter, len(seen))
+				now2 = time.Now()
+			}
 			matches := 0
 			if len(queryparts) == 1 {
 				matches = 1
@@ -326,6 +343,8 @@ window.parent._fn.startedmeta();
 			if matches == 0 {
 				continue
 			}
+
+			counter += matches
 
 			alpino := Alpino_ds_meta{}
 			err := xml.Unmarshal([]byte(docs.Content()), &alpino)
@@ -394,8 +413,16 @@ window.parent._fn.startedmeta();
 		default:
 		}
 	}
+	if !download {
+		updateCount(q, counter, len(seen))
+	}
 
 	var buf bytes.Buffer
+
+	pow10 := math.Pow10(int(math.Log10(float64(q.lines[prefix])) + .5))
+	if pow10 < 10 {
+		pow10 = 10
+	}
 
 	if !download {
 		fmt.Fprintf(&buf, `
@@ -403,8 +430,10 @@ window.parent._fn.startedmeta();
 <p>
 <a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabellen</a>
 <p>
-`, html.EscapeString(query))
-		updateText(q, buf.String())
+<em>n</em> = %s
+<p>
+`, html.EscapeString(query), iformat(int(pow10)))
+		updateTextTop(q, buf.String())
 		buf.Reset()
 	}
 
@@ -493,10 +522,7 @@ window.parent._fn.startedmeta();
 				}
 				if download {
 					if run == 1 {
-						v := 0.0
-						if line.i != line.n {
-							v = -math.Log2(float64(line.i) / float64(line.n))
-						}
+						v := int(.5 + pow10*float64(line.i)/float64(line.n))
 						fmt.Fprintf(q.w, "%d\t%.2f%%\t%.2f\t%s\n", line.i, float32(p), v, line.s)
 					} else {
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
@@ -514,13 +540,10 @@ window.parent._fn.startedmeta();
 						}
 						count++
 					}
-					fmt.Fprintln(&buf, "<tr><td>", line.i)
+					fmt.Fprintln(&buf, "<tr><td>", iformat(line.i))
 					if run == 1 {
-						v := 0.0
-						if line.i != line.n {
-							v = -math.Log2(float64(line.i) / float64(line.n))
-						}
-						fmt.Fprintf(&buf, "<td>%.2f%%<td>%.2f", float32(p), v)
+						v := int(.5 + pow10*float64(line.i)/float64(line.n))
+						fmt.Fprintf(&buf, "<td>%.2f%%<td>%s", float32(p), iformat(v))
 					}
 					if line.s == "" {
 						line.s = "(leeg)"
@@ -604,4 +627,24 @@ func (s MetaItems1) Less(i, j int) bool {
 		return s[i].count[1] > s[j].count[1]
 	}
 	return s[i].idx < s[j].idx
+}
+
+func updateCount(q *Context, i, j int) {
+	fmt.Fprintf(q.w, `<script type="text/javascript">
+c(%q,%q);
+</script>
+`, iformat(i), iformat(j))
+	if ff, ok := q.w.(http.Flusher); ok {
+		ff.Flush()
+	}
+}
+
+func updateTextTop(q *Context, s string) {
+	fmt.Fprintf(q.w, `<script type="text/javascript">
+f1(%q);
+</script>
+`, s)
+	if ff, ok := q.w.(http.Flusher); ok {
+		ff.Flush()
+	}
 }

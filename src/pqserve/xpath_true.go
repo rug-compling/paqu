@@ -238,7 +238,7 @@ func xpath(q *Context) {
 
 	fmt.Fprintf(q.w, "<ol start=\"%d\" id=\"ol\" class=\"xpath\">\n</ol>\n", offset+1)
 
-	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\" alt=\"[bezig]\"> <span></span></div>")
+	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\" alt=\"[bezig]\"> <span id></span></div>")
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
@@ -472,6 +472,13 @@ $('#loading span').html('%.1f%%');
 		metahelp(q)
 		fmt.Fprintf(q.w, `<p>
             <div id="statsmeta">
+            <div id="innermetatop"></div>
+            <div id="metacount" class="hide">
+            <table>
+            <tr><td>items:<td class="right" id="metacount1">
+            <tr><td>zinnen:<td class="right" id="metacount2">
+            </table>
+            </div>
             <div id="innermeta">
             <form action="xstatsmeta" target="sframemeta">
             <input type="hidden" name="xpath" value="%s">
@@ -479,7 +486,7 @@ $('#loading span').html('%.1f%%');
             <input type="submit" value="tellingen &mdash; metadata">
             </form>
             </div>
-            <img src="busy.gif" id="busymeta" class="hide" alt="aan het werk...">
+            <img src="busy.gif" id="busymeta" class="hide" alt="aan het werk..." style="margin-top:1em">
             </div>
             <iframe src="leeg.html" name="sframemeta" class="hide"></iframe>`,
 			html.EscapeString(query),
@@ -577,8 +584,12 @@ func html_xpath_header(q *Context) {
     return "";
   }
 
+  var resultmetatop;
   var resultmeta;
   var busymeta;
+  var metacount;
+  var metacount1;
+  var metacount2;
   var result;
   var at1, at2, at3;
   var xquery;
@@ -586,9 +597,17 @@ func html_xpath_header(q *Context) {
     updatemeta: function(data) {
       resultmeta.append(data);
     },
+    updatemetatop: function(data) {
+      resultmetatop.append(data);
+    },
+    countmeta: function(i, j) {
+      metacount1.html(i);
+      metacount2.html(j);
+    },
     startedmeta: function() {
       resultmeta.html('');
       busymeta.removeClass('hide');
+      metacount.removeClass('hide');
     },
     completedmeta: function() {
       busymeta.addClass('hide');
@@ -754,7 +773,11 @@ func html_xpath_header(q *Context) {
   $(document).ready(function() {
     result = $('#result');
     resultmeta = $('#innermeta');
+    resultmetatop = $('#innermetatop');
     busymeta = $('#busymeta');
+    metacount = $('#metacount');
+    metacount1 = $('#metacount1');
+    metacount2 = $('#metacount2');
     try {
       var f = document.forms["xstatsform"];
       at1 = f["attr1"];
