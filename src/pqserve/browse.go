@@ -11,12 +11,14 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ZinArchFile struct {
 	zin  string
 	arch int
 	file int
+	lbl  string
 }
 
 // TAB: browse (zinnen)
@@ -151,8 +153,7 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 		zinnen = append(zinnen, ZinArchFile{zin: sent, arch: arch, file: file})
 	}
 
-	fmt.Fprintln(q.w, "<p>\n<dl>")
-	for _, zin := range zinnen {
+	for i, zin := range zinnen {
 		rows, err := q.db.Query(
 			fmt.Sprintf(
 				"SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, id, zin.file, zin.arch))
@@ -160,10 +161,52 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 			var lbl string
 			rows.Scan(&lbl)
 			rows.Close()
+			zinnen[i].lbl = lbl
+		} else {
+			doErr(q, fmt.Errorf("Database error"))
+		}
+	}
 
-			fmt.Fprintf(q.w, "<dt><a href=\"tree?db=%s&amp;arch=%d&amp;file=%d\">%s</a>\n<dd>%s\n",
-				id, zin.arch, zin.file,
-				html.EscapeString(lbl), html.EscapeString(zin.zin))
+	hasmeta := hasMeta(q, id)
+
+	fmt.Fprintln(q.w, "<p>\n<dl>")
+	for _, zin := range zinnen {
+		fmt.Fprintf(q.w, "<dt><a href=\"tree?db=%s&amp;arch=%d&amp;file=%d\">%s</a>\n<dd>%s\n",
+			id, zin.arch, zin.file,
+			html.EscapeString(zin.lbl),
+			html.EscapeString(zin.zin))
+		if !hasmeta {
+			continue
+		}
+		rows, err := q.db.Query(fmt.Sprintf(
+			"SELECT `type`,`name`,`tval`,`ival`,`fval`,`dval` FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) "+
+				"WHERE `file` = %d AND `arch` = %d ORDER BY `name`,`idx`",
+			Cfg.Prefix, id,
+			Cfg.Prefix, id,
+			zin.file, zin.arch))
+		if err == nil {
+			pre := "<p>"
+			for rows.Next() {
+				var v, mtype, name, tval string
+				var ival int
+				var fval float32
+				var dval time.Time
+				rows.Scan(&mtype, &name, &tval, &ival, &fval, &dval)
+				switch mtype {
+				case "TEXT":
+					v = tval
+				case "INT":
+					v = iformat(ival)
+				case "FLOAT":
+					v = fmt.Sprintf("%g", fval)
+				case "DATE":
+					v = printDate(dval, false)
+				case "DATETIME":
+					v = printDate(dval, true)
+				}
+				fmt.Fprintf(q.w, "%s&nbsp; %s: %s\n", pre, html.EscapeString(name), html.EscapeString(v))
+				pre = "<br>"
+			}
 		} else {
 			doErr(q, fmt.Errorf("Database error"))
 		}
