@@ -340,9 +340,7 @@ func home(q *Context) {
 		html.EscapeString(first(q.r, "hword")),
 		html.EscapeString(prefix))
 
-	hasmeta := hasMeta(q, prefix)
-
-	if hasmeta {
+	if q.hasmeta[prefix] {
 		metahelp(q)
 		fmt.Fprintf(q.w, `<p>
 		<div id="statsmeta">
@@ -405,7 +403,7 @@ func home(q *Context) {
 		html.EscapeString(first(q.r, "hword")),
 		html.EscapeString(prefix))
 
-	if hasmeta {
+	if q.hasmeta[prefix] {
 		for _, meta := range getMeta(q, prefix) {
 			fmt.Fprintf(q.w, "<input type=\"checkbox\" name=\"cmeta\" value=\"%s\">%s<br>\n", html.EscapeString(meta.name), html.EscapeString(meta.name))
 		}

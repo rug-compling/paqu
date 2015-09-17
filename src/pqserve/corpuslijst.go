@@ -22,6 +22,11 @@ func corpuslijst(q *Context) {
 		return
 	}
 
+	meta := false
+	if first(q.r, "meta") != "" {
+		meta = true
+	}
+
 	rows, err := q.db.Query(fmt.Sprintf(
 		"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner` "+
 			"FROM `%s_info` `i`, `%s_corpora` `c` "+
@@ -47,18 +52,24 @@ func corpuslijst(q *Context) {
 			logerr(err)
 			return
 		}
-		corpora = append(corpora, CorpusType{
-			id:    id,
-			title: title,
-			lines: lines,
-			owner: owner,
-		})
+		if !meta || q.hasmeta[id] {
+			corpora = append(corpora, CorpusType{
+				id:    id,
+				title: title,
+				lines: lines,
+				owner: owner,
+			})
+		}
 	}
 
 	writeHead(q, "Corpuslijst", 0)
 
 	if len(corpora) == 0 {
-		fmt.Fprint(q.w, "Niemand heeft corpora met je gedeeld")
+		if meta {
+			fmt.Fprint(q.w, "Niemand heeft corpora met metadata met je gedeeld")
+		} else {
+			fmt.Fprint(q.w, "Niemand heeft corpora met je gedeeld")
+		}
 		return
 	}
 
@@ -214,7 +225,14 @@ $(document).ready(redraw);
 
 //--></script>
 Hieronder zie je een lijst van corpora die door anderen met je zijn gedeeld.
+<p>`)
+	if meta {
+		fmt.Fprint(q.w, `
+Je ziet nu alleen corpora die <b>metadata</b> bevatten
 <p>
+`)
+	}
+	fmt.Fprint(q.w, `	
 Selecteer welke corpora je in het menu wilt zien.
 <p>
 <form action="javascript:void(0)" onsubmit="javascript:opslaan()">

@@ -463,12 +463,11 @@ $('#loading span').html('%.1f%%');
 	}
 
 	var metas []MetaType
-	hasmeta := hasMeta(q, prefix)
-	if hasmeta {
+	if q.hasmeta[prefix] {
 		metas = getMeta(q, prefix)
 	}
 
-	if hasmeta {
+	if q.hasmeta[prefix] {
 		metahelp(q)
 		fmt.Fprintf(q.w, `<p>
             <div id="statsmeta">
@@ -505,7 +504,7 @@ $('#loading span').html('%.1f%%');
 	for i := 1; i <= 3; i++ {
 
 		fmt.Fprintf(q.w, "<select name=\"attr%d\">\n<option value=\"\">--</option>\n", i)
-		if hasmeta {
+		if q.hasmeta[prefix] {
 			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; metadata &mdash;\">")
 			for _, m := range metas {
 				fmt.Fprintf(q.w, "<option value=\"::META::%s\">%s</option>\n", html.EscapeString(m.name), html.EscapeString(m.name))
@@ -516,7 +515,7 @@ $('#loading span').html('%.1f%%');
 		for _, s := range q.attrlist {
 			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
 		}
-		if hasmeta {
+		if q.hasmeta[prefix] {
 			fmt.Fprintln(q.w, "</optgroup>")
 		}
 		fmt.Fprintln(q.w, "</select>")

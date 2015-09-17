@@ -156,6 +156,8 @@ func main() {
 	handleFunc("downloadmacros", downloadmacros)
 	handleFunc("macroexpand", macroExpand)
 
+	handleFunc("metadata", metadata)
+
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)
 	handleFunc("share", share)

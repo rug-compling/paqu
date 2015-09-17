@@ -1008,12 +1008,16 @@ Opties:
 		util.CheckErr(rows.Scan(&lines))
 		rows.Close()
 	}
+	hasmeta := 0
+	if len(metas) > 0 {
+		hasmeta = 1
+	}
 	if db_updatestatus {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW() WHERE `id` = %q",
-			Cfg.Prefix, lines, prefix))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d WHERE `id` = %q",
+			Cfg.Prefix, lines, hasmeta, prefix))
 	} else {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW() WHERE `id` = %q",
-			Cfg.Prefix, lines, prefix))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW(), `hasmeta` = %d WHERE `id` = %q",
+			Cfg.Prefix, lines, hasmeta, prefix))
 	}
 	util.CheckErr(err)
 

@@ -71,7 +71,7 @@ func corpora(q *Context) {
 		})
 	}
 
-	writeHead(q, "Corpora", 3)
+	writeHead(q, "Corpora", 4)
 	fmt.Fprintln(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--

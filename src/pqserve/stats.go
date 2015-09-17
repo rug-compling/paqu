@@ -242,9 +242,8 @@ func statsrel(q *Context) {
 		return
 	}
 
-	hasmeta := hasMeta(q, prefix)
 	var metas []MetaType
-	if hasmeta {
+	if q.hasmeta[prefix] {
 		metas = getMeta(q, prefix)
 	}
 	metai := make(map[string]int)

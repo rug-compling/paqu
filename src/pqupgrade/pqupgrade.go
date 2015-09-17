@@ -50,6 +50,20 @@ func main() {
 	////////////////////////////////////////////////////////////////
 
 	// tabel <prefix>_info
+	// veld `hasmeta` toevoegen
+
+	rows, err = db.Query("SELECT `hasmeta` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+	if err == nil {
+		rows.Close()
+	} else {
+		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `hasmeta` BOOLEAN NOT NULL DEFAULT '0'")
+		util.CheckErr(err)
+		changed = true
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// tabel <prefix>_info
 	// optie "QUEUING" toevoegen aan veld `status`, en default maken
 
 	ok := false

@@ -80,6 +80,7 @@ Syntax: %s [-w]
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
 		attr        text         NOT NULL,
         protected   boolean      NOT NULL DEFAULT 0,
+        hasmeta     boolean      NOT NULL DEFAULT 0,
 		UNIQUE INDEX (id),
 		INDEX (description),
 		INDEX (owner),

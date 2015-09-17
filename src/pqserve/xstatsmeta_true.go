@@ -172,7 +172,7 @@ c("0", "0");
 		return
 	}
 
-	if !hasMeta(q, prefix) {
+	if !q.hasmeta[prefix] {
 		if download {
 			fmt.Fprintln(q.w, "Geen metadata voor dit corpus")
 		} else {

@@ -104,16 +104,19 @@ func writeHead(q *Context, title string, tab int) {
 		}
 	}
 
-	var t [5]string
+	var t [6]string
 	t[tab] = " class=\"selected\""
 	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\""+t[1]+">Zoeken</a>")
 	if has_dbxml {
 		fmt.Fprintln(q.w, "<a href=\"xpath\""+t[2]+">XPath</a>")
 	}
-	if q.auth {
-		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[3]+">Corpora</a>")
+	if len(q.hasmeta) > 0 {
+		fmt.Fprintln(q.w, "<a href=\"metadata\""+t[3]+">Metadata</a>")
 	}
-	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[4]+">Info</a>\n</div>\n")
+	if q.auth {
+		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[4]+">Corpora</a>")
+	}
+	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[5]+">Info</a>\n</div>\n")
 }
 
 func writeHtml(q *Context, title, msg string) {
@@ -340,18 +343,6 @@ var reTijd = regexp.MustCompile(`\.[0-9]+([a-z]+)$`)
 
 func tijd(t time.Duration) string {
 	return reTijd.ReplaceAllString(t.String(), "$1")
-}
-
-func hasMeta(q *Context, prefix string) bool {
-	rows, err := q.db.Query(fmt.Sprintf("SELECT COUNT(*) FROM `%s_c_%s_midx`", Cfg.Prefix, prefix))
-	if err != nil {
-		return false
-	}
-	var n int
-	for rows.Next() {
-		rows.Scan(&n)
-	}
-	return n > 0
 }
 
 func getMeta(q *Context, prefix string) []MetaType {
