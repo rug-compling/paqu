@@ -408,7 +408,7 @@ Opties:
 	// oude tabellen weggooien
 	if !db_exists || db_overwrite {
 		_, err := db.Exec(fmt.Sprintf(
-			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_meta`, `%s_c_%s_midx`; ",
+			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_meta`, `%s_c_%s_midx`;",
 			Cfg.Prefix,
 			prefix,
 			Cfg.Prefix,
@@ -1011,6 +1011,17 @@ Opties:
 	hasmeta := 0
 	if len(metas) > 0 {
 		hasmeta = 1
+	} else {
+		db.Exec(fmt.Sprintf(
+			"DROP TABLE IF EXISTS `%s_c_%s_meta`, `%s_c_%s_midx`, `%s_c_%s_minf`, `%s_c_%s_mval`;",
+			Cfg.Prefix,
+			prefix,
+			Cfg.Prefix,
+			prefix,
+			Cfg.Prefix,
+			prefix,
+			Cfg.Prefix,
+			prefix))
 	}
 	if db_updatestatus {
 		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d WHERE `id` = %q",
@@ -1027,6 +1038,7 @@ Opties:
 	}
 	_, err = db.Exec(fmt.Sprintf("INSERT `%s_corpora` (`user`, `prefix`) VALUES (%q, %q);", Cfg.Prefix, user, prefix))
 	util.CheckErr(err)
+
 	_, err = db.Exec("COMMIT;")
 	util.CheckErr(err)
 
