@@ -4,16 +4,10 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"strings"
 )
 
 // TAB: metadata
 func metadata(q *Context) {
-
-	if first(q.r, "d") != "" {
-		metadownload(q)
-		return
-	}
 
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
@@ -92,18 +86,16 @@ corpus: <select name="db">
 			return
 		}
 	}
-	fmt.Fprintf(q.w,
-		"<a href=\"metadata?%s&amp;d=1\">download</a><p>\n",
-		strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
+	fmt.Fprintf(q.w, "<a href=\"metadl?db=%s\">download</a><p><hr><p>\n", prefix)
 
 	fmt.Fprintln(q.w, `<p><b>In ontwikkeling</b>`)
 
 	html_footer(q)
 }
 
-func metadownload(q *Context) {
+func metadl(q *Context) {
 
-	prefix := getprefix(q)
+	prefix := first(q.r, "db")
 	if !q.hasmeta[prefix] {
 		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
 		return
