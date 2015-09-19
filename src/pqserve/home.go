@@ -369,7 +369,7 @@ func home(q *Context) {
 
 	fmt.Fprintf(q.w, `<p>
 		<div id="statsrel">
-		<form action="javascript:$.fn.statsrel()" name="statsrelform" onsubmit="javascript:return statftest()">
+		<form action="javascript:$.fn.statsrel()" name="statsrelform" id="statsrelform">
 		<input type="hidden" name="word" value="%s">
 		<input type="hidden" name="postag" value="%s">
 		<input type="hidden" name="rel" value="%s">
@@ -412,12 +412,34 @@ func home(q *Context) {
 	fmt.Fprint(q.w, `
         </table>
 		<p>
-		<input type="submit" value="tellingen van combinaties">
+		<input type="submit" id="statsrelsubmit" value="tellingen van combinaties">
 		</form>
 		<p>
 		<div id="statresults">
 		</div>
 		</div>
+<script type="text/javascript"><!--
+  $('#statsrelsubmit').prop('disabled', true);
+  $('#statsrelform input').on('change', function (e) {
+    var f = document.forms["statsrelform"];
+    var n = 0;
+    if (f.cword.checked   ) { n++; }
+    if (f.clemma.checked  ) { n++; }
+    if (f.cpostag.checked ) { n++; }
+    if (f.crel.checked    ) { n++; }
+    if (f.chword.checked  ) { n++; }
+    if (f.chlemma.checked ) { n++; }
+    if (f.chpostag.checked) { n++; }
+    for (i = 0; i < f.cmeta.length; i++) {
+       if (f.cmeta[i].checked) { n++; }
+    }
+    if (n <  2) {
+      $('#statsrelsubmit').prop('disabled', true);
+    } else {
+      $('#statsrelsubmit').prop('disabled', false);
+    }
+  });
+//--></script>
 `)
 }
 
@@ -526,26 +548,6 @@ func html_header(q *Context) {
       .always(function() {
         lastcall = null;
       });
-  }
-
-  function statftest() {
-    var f = document.forms["statsrelform"];
-    var n = 0;
-    if (f.cword.checked   ) { n++; }
-    if (f.clemma.checked  ) { n++; }
-    if (f.cpostag.checked ) { n++; }
-    if (f.crel.checked    ) { n++; }
-    if (f.chword.checked  ) { n++; }
-    if (f.chlemma.checked ) { n++; }
-    if (f.chpostag.checked) { n++; }
-    for (i = 0; i < f.cmeta.length; i++) {
-       if (f.cmeta[i].checked) { n++; }
-    }
-    if (n < 2) {
-      alert("Selecteer minimaal twee elementen");
-      return false;
-    }
-    return true;
   }
 
   $(document).ready(function() {
