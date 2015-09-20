@@ -4,6 +4,7 @@ import (
 	"github.com/pebbe/util"
 
 	"fmt"
+	"html"
 	"os"
 	"path"
 	"runtime"
@@ -26,6 +27,22 @@ func logerr(err error) bool {
 		msg = err.Error()
 	}
 	chLog <- msg
+	return true
+}
+
+func logerrfrag(q *Context, err error) bool {
+	if err == nil {
+		return false
+	}
+	var msg string
+	_, filename, lineno, ok := runtime.Caller(1)
+	if ok {
+		msg = fmt.Sprintf("%v:%v: %v", path.Base(filename), lineno, err.Error())
+	} else {
+		msg = err.Error()
+	}
+	chLog <- msg
+	fmt.Fprintf(q.w, "<div class=\"warning\">%s</div>\n", html.EscapeString(err.Error()))
 	return true
 }
 

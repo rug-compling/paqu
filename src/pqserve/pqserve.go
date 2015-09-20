@@ -158,6 +158,7 @@ func main() {
 
 	handleFunc("metadata", metadata)
 	handleFunc("metadl", metadl)
+	handleFunc("meta2", meta2)
 
 	handleFunc("corpora", corpora)
 	handleFunc("submitcorpus", submitCorpus)
