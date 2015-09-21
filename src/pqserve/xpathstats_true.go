@@ -208,7 +208,7 @@ function f(s) {
 			}
 			if t == "INT" {
 				rows, err := q.db.Query(fmt.Sprintf(
-					"SELECT MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+					"SELECT MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q AND `idx` != 2147483647",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					name))
@@ -226,7 +226,7 @@ function f(s) {
 				}
 			} else if t == "FLOAT" {
 				rows, err := q.db.Query(fmt.Sprintf(
-					"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+					"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q AND `idx` != 2147483647",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					name))
@@ -244,7 +244,7 @@ function f(s) {
 				}
 			} else if t == "DATE" || t == "DATETIME" {
 				rows, err := q.db.Query(fmt.Sprintf(
-					"SELECT MIN(`dval`), MAX(`dval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q",
+					"SELECT MIN(`dval`), MAX(`dval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q AND `idx` != 2147483647",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					name))
