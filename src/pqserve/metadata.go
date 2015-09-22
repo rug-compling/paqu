@@ -172,7 +172,7 @@ func meta2form(q *Context, prefix string, metas []MetaType) {
 <p>
 <div id="statsrel">
 <form action="javascript:$.fn.meta2()" name="meta2form" id="meta2form">
-Selecteer twee elementen om ze te koppelen:
+Selecteer een of twee elementen om ze te koppelen:
 <p>
 `)
 	for i, meta := range metas {
@@ -197,7 +197,7 @@ Selecteer twee elementen om ze te koppelen:
     for (i = 0; i < f.cmeta.length; i++) {
        if (f.cmeta[i].checked) { n++; }
     }
-    if (n ==  2) {
+    if (n == 1 || n == 2) {
       $('#meta2submit').prop('disabled', false);
     } else {
       $('#meta2submit').prop('disabled', true);
@@ -226,14 +226,19 @@ func meta2(q *Context) {
 		return
 	}
 
-	if len(q.r.Form["cmeta"]) != 2 {
-		http.Error(q.w, "Missing options", http.StatusPreconditionFailed)
+	if l := len(q.r.Form["cmeta"]); l < 1 || l > 2 {
+		http.Error(q.w, "Wrong number of options", http.StatusPreconditionFailed)
 		return
 	}
 
 	var mi [2]int
 	mi[0], _ = strconv.Atoi(q.r.Form["cmeta"][0])
-	mi[1], _ = strconv.Atoi(q.r.Form["cmeta"][1])
+	if len(q.r.Form["cmeta"]) == 1 {
+		mi[1] = mi[0]
+	} else {
+		mi[1], _ = strconv.Atoi(q.r.Form["cmeta"][1])
+	}
+	one := mi[0] == mi[1]
 	var ok [2]bool
 	var met [2]MetaType
 	metas := getMeta(q, prefix)
@@ -241,7 +246,8 @@ func meta2(q *Context) {
 		if meta.id == mi[0] {
 			met[0] = meta
 			ok[0] = true
-		} else if meta.id == mi[1] {
+		}
+		if meta.id == mi[1] {
 			met[1] = meta
 			ok[1] = true
 		}
@@ -278,13 +284,18 @@ func meta2(q *Context) {
 	}
 	count := make(map[[2]int]int)
 
+	excl := ""
+	if one {
+		excl = "AND `a`.`idx` != `b`.`idx`"
+	}
 	rows, err := q.db.Query(fmt.Sprintf(
 		"SELECT COUNT(*), `a`.`idx`, `b`.`idx` FROM `%s_c_%s_meta` `a` JOIN `%s_c_%s_meta` `b` "+
-			"USING (`arch`,`file`) WHERE `a`.`id` = %d AND `b`.`id` = %d GROUP BY `a`.`idx`, `b`.`idx`",
+			"USING (`arch`,`file`) WHERE `a`.`id` = %d AND `b`.`id` = %d %s GROUP BY `a`.`idx`, `b`.`idx`",
 		Cfg.Prefix, prefix,
 		Cfg.Prefix, prefix,
 		met[0].id,
-		met[1].id))
+		met[1].id,
+		excl))
 	if logerrfrag(q, err) {
 		return
 	}
@@ -352,7 +363,7 @@ func meta2(q *Context) {
 			if download {
 				fmt.Fprint(q.w, "\t", count[[2]int{keys[0][j].i, k.i}])
 			} else {
-				fmt.Fprintf(q.w, "<td class=\"right\">%s\n", iformat(count[[2]int{keys[0][j].i, k.i}]))
+				fmt.Fprintf(q.w, "<td class=\"right\">%s\n", iformat0(count[[2]int{keys[0][j].i, k.i}]))
 			}
 		}
 		if download {

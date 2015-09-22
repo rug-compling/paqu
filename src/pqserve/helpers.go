@@ -184,6 +184,13 @@ func iformat(i int) string {
 	return s1 + s2
 }
 
+func iformat0(i int) string {
+	if i == 0 {
+		return ""
+	}
+	return iformat(i)
+}
+
 func shell(format string, a ...interface{}) *exec.Cmd {
 	cmd := exec.Command(Cfg.Sh, "-c", fmt.Sprintf(format, a...))
 	cmd.Env = []string{
