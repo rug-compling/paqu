@@ -151,6 +151,7 @@ type MetaType struct {
 	id    int
 	name  string
 	mtype string
+	value string
 }
 
 type ProcessMap map[string]*Process

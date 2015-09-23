@@ -354,17 +354,47 @@ func tijd(t time.Duration) string {
 
 func getMeta(q *Context, prefix string) []MetaType {
 	result := make([]MetaType, 0)
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `id`,`name`,`type` FROM `%s_c_%s_midx` ORDER BY 2", Cfg.Prefix, prefix))
-	if err != nil {
+	rows, err := q.db.Query(fmt.Sprintf(
+		"SELECT `id`,`name`,`type`,`indexed`,`dtype`,`istep` FROM `%s_c_%s_midx` LEFT JOIN `%s_c_%s_minf` USING (`id`) ORDER BY 2",
+		Cfg.Prefix, prefix,
+		Cfg.Prefix, prefix))
+	if logerr(err) {
 		return result
 	}
 	var i int
 	var n, t string
+	var indexed sql.NullBool
+	var dtype, istep sql.NullInt64
 	for rows.Next() {
-		err := rows.Scan(&i, &n, &t)
-		if err == nil {
-			result = append(result, MetaType{i, n, t})
+		if logerr(rows.Scan(&i, &n, &t, &indexed, &dtype, &istep)) {
+			continue
 		}
+		v := "interval"
+		switch t {
+		case "TEXT":
+			v = "waarde"
+		case "INT":
+			if !indexed.Bool || istep.Int64 < 2 {
+				v = "waarde"
+			}
+		case "DATE", "DATETIME":
+			switch int(dtype.Int64) {
+			case dr_hour:
+				v = "datum + uur"
+			case dr_day:
+				v = "datum"
+			case dr_month:
+				v = "maand"
+			case dr_year:
+				v = "jaar"
+			case dr_dec:
+				v = "decennium"
+			case dr_cent:
+				v = "eeuw"
+			}
+		}
+		result = append(result, MetaType{i, n, t, v})
 	}
+	logerr(rows.Err())
 	return result
 }

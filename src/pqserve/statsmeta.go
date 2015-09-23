@@ -100,11 +100,11 @@ window.parent._fn.startedmeta();
 <p>
 <a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabellen</a>
 <p>
-<em>n</em> = %s
-<p>
-`, html.EscapeString(query), iformat(int(pow10)))
+`, html.EscapeString(query))
 		updateText(q, buf.String())
 		buf.Reset()
+	} else {
+		fmt.Fprintln(q.w, "# n =", int(pow10))
 	}
 
 	// Tellingen van onderdelen
@@ -124,8 +124,10 @@ window.parent._fn.startedmeta();
 			} else {
 				if run == 0 {
 					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(meta.name)+"</b><table><tr><td>per item:<table class=\"right\">")
+					fmt.Fprintln(&buf, "<tr><td><em>aantal</em><td><em>"+meta.value+"</em>")
 				} else {
 					fmt.Fprintln(&buf, "<td class=\"next\">per zin:<table class=\"right\">")
+					fmt.Fprintf(&buf, "<tr><td><em>aantal</em><td><em>per&nbsp;%s</em><td><em>%s</em>", iformat(int(pow10)), meta.value)
 				}
 			}
 			select {
