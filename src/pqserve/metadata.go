@@ -5,6 +5,7 @@ import (
 	"html"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type StructIS struct {
@@ -48,7 +49,7 @@ corpus: <select name="db">
 
 	metas := getMeta(q, prefix)
 	for _, meta := range metas {
-		fmt.Fprintf(q.w, "<b>%s</b><p>\n", html.EscapeString(meta.name))
+		fmt.Fprintf(q.w, "<b>%s</b> (%s)<p>\n", html.EscapeString(meta.name), strings.ToLower(meta.mtype))
 		o := `idx`
 		align := "right"
 		limit := ""
@@ -212,14 +213,6 @@ func meta2(q *Context) {
 
 	download := first(q.r, "d") != ""
 
-	if download {
-		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		q.w.Header().Set("Content-Disposition", "attachment; filename=metadata.txt")
-	} else {
-		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	}
-	cache(q)
-
 	prefix := first(q.r, "db")
 	if !q.hasmeta[prefix] {
 		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
@@ -254,6 +247,19 @@ func meta2(q *Context) {
 	}
 	if !(ok[0] && ok[1]) {
 		http.Error(q.w, "Invalid options", http.StatusPreconditionFailed)
+		return
+	}
+
+	if download {
+		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		q.w.Header().Set("Content-Disposition", "attachment; filename=metadata.txt")
+	} else {
+		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	}
+	cache(q)
+
+	if one && met[0].mtype != "TEXT" {
+		fmt.Fprintln(q.w, "<div class=\"warning\">Alleen metadata van type 'text' kan met zichzelf vergeleken worden</div>")
 		return
 	}
 
