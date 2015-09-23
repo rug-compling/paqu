@@ -741,8 +741,7 @@ Opties:
 			id    int          NOT NULL DEFAULT 0,
 			idx   int          NOT NULL DEFAULT 0,
 			text  varchar(260) NOT NULL DEFAULT 0,
-			n     int          NOT NULL DEFAULT 0,
-			r     float        NOT NULL DEFAULT 0.0)
+			n     int          NOT NULL DEFAULT 0)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 	util.CheckErr(err)
@@ -969,7 +968,6 @@ Opties:
 
 	fmt.Println("Telling van ranges ...")
 	for _, meta := range metas {
-		sum := 0
 		sums := make(map[int]int)
 		rows, err := db.Query(fmt.Sprintf(
 			"SELECT COUNT(`idx`),`idx` FROM `%s_c_%s_meta` WHERE `id` = %d GROUP BY `idx`",
@@ -979,17 +977,15 @@ Opties:
 		for rows.Next() {
 			var c, i int
 			util.CheckErr(rows.Scan(&c, &i))
-			sum += c
 			sums[i] = c
 		}
 		util.CheckErr(rows.Err())
 
 		for s := range sums {
 			_, err = db.Exec(fmt.Sprintf(
-				"UPDATE `%s_c_%s_mval` SET `n` = %d, `r` = %g WHERE `id` = %d AND `idx` = %d",
+				"UPDATE `%s_c_%s_mval` SET `n` = %d WHERE `id` = %d AND `idx` = %d",
 				Cfg.Prefix, prefix,
 				sums[s],
-				float64(sums[s])/float64(sum),
 				metai[meta], s))
 			util.CheckErr(err)
 		}

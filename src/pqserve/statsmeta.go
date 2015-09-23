@@ -13,7 +13,6 @@ import (
 type Statline struct {
 	s string
 	i int
-	r float64
 	n int
 }
 
@@ -116,7 +115,6 @@ window.parent._fn.startedmeta();
 		for run := 0; run < 2; run++ {
 			lines := make([]Statline, 0)
 			var count int
-			var sum = 0.0
 			if download {
 				if run == 0 {
 					fmt.Fprintln(q.w, "# "+meta.name+" per item\t")
@@ -143,7 +141,7 @@ window.parent._fn.startedmeta();
 			}
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`text`), `text`, 0, 0 "+
+					"SELECT COUNT(`text`), `text`, 0 "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
@@ -157,7 +155,7 @@ window.parent._fn.startedmeta();
 					order)
 			} else {
 				qu = fmt.Sprintf(
-					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`n`,`r` "+
+					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`n` "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
@@ -168,7 +166,7 @@ window.parent._fn.startedmeta();
 					meta.id,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`n`,`a`.`r` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
+					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`n` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
 					qu,
 					order)
 			}
@@ -189,8 +187,7 @@ window.parent._fn.startedmeta();
 				}
 				var cnt, n int
 				var text string
-				var r float64
-				err := rows.Scan(&cnt, &text, &n, &r)
+				err := rows.Scan(&cnt, &text, &n)
 				if err != nil {
 					updateError(q, err, !download)
 					completedmeta(q, download)
@@ -199,9 +196,8 @@ window.parent._fn.startedmeta();
 				}
 				if len(lines) < METAMAX || download {
 					text = unHigh(text)
-					lines = append(lines, Statline{text, cnt, float64(cnt) / r, n})
+					lines = append(lines, Statline{text, cnt, n})
 				}
-				sum += float64(cnt) / r
 			}
 			err = rows.Err()
 			if err != nil {
@@ -211,14 +207,10 @@ window.parent._fn.startedmeta();
 				return
 			}
 			for _, line := range lines {
-				var p float64
-				if run == 1 {
-					p = float64(line.r) / sum * 100.0
-				}
 				if download {
 					if run == 1 {
 						v := int(.5 + pow10*float64(line.i)/float64(line.n))
-						fmt.Fprintf(q.w, "%d\t%.2f%%\t%d\t%s\n", line.i, float32(p), v, line.s)
+						fmt.Fprintf(q.w, "%d\t%d\t%s\n", line.i, v, line.s)
 					} else {
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
 					}
@@ -238,7 +230,7 @@ window.parent._fn.startedmeta();
 					fmt.Fprintln(&buf, "<tr><td>", iformat(line.i))
 					if run == 1 {
 						v := int(.5 + pow10*float64(line.i)/float64(line.n))
-						fmt.Fprintf(&buf, "<td>%.2f%%<td>%s", float32(p), iformat(v))
+						fmt.Fprintf(&buf, "<td>%s", iformat(v))
 					}
 					if line.s == "" {
 						line.s = "(leeg)"
@@ -294,29 +286,13 @@ func metahelp(q *Context) {
 <div class="submenu a9999" id="helpmeta">
 <div class="corpushelp">
 
-In de tabel <em>per zin</em> staan tussen de kolommen met aantallen en met de metadata-waardes nog twee kolommen.
+In de tabel <em>per zin</em> staan tussen de kolommen met aantallen en met de metadata-waardes nog een kolom.
 <p>
-Kolom 2: genormaliseerd percentage
-<p>
-Kolom 3: <em>n</em> keer de fractie
-<p>
-<b>Kolom 2: genormaliseerd percentage</b>
-<p>
-Deze kolom geeft voor elke metadata-waarde het percentage van het aantal van alle metadata-waardes,
-genormaliseerd voor het verwachte percentage op basis van verhoudingen van metadata-waardes in alle zinnen.
-<p>
-Stel dat je twee waardes hebt in de data, <em>man</em> en <em>vrouw</em>. Wanneer de genormaliseerde percentage 50%/50% zijn wil dat niet zeggen
-dat je van voor beide waardes hetzelfde aantal zinnen hebt gevonden, maar dat de verhouding tussen <em>man</em> en <em>vrouw</em>
-in de gevonden zinnen gelijk is aan de verhouding in alle zinnen. Wanneer de ene waarde een groter percentage geeft dan een andere,
-betekent dat dat de eerste waarde verhoudingsgewijs vaker wordt gevonden. Dat slaat los van de absolute aantallen van de gevonden zinnen.
-<p>
-TODO: Formule?
-<p>
-<b>Kolom 3: <em>n</em> keer de fractie</b>
+<b>Kolom 2: <em>n</em> keer de fractie</b>
 <p>
 De fractie is het aantal gevonden zinnen met de metadata-waarde, gedeeld door het totaal aantal zinnen dat deze waarde heeft.
 <p>
-De derde kolom geeft deze fractie vermenigvuldigd met <em>n</em>. De waarde van <em>n</em> is afankelijk van de grootte van het corpus,
+De Tweede kolom geeft deze fractie vermenigvuldigd met <em>n</em>. De waarde van <em>n</em> is afankelijk van de grootte van het corpus,
 en staat boven de tabellen vermeld.
 <p>
 Een waarde gelijk aan <em>n</em> wil zeggen dat alle zinnen waarin de waarde voorkomt voldoen aan je zoekopdracht.

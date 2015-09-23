@@ -447,7 +447,7 @@ c("0", "0");
 			})
 		}
 		rows, err := q.db.Query(fmt.Sprintf(
-			"SELECT `idx`, `n`,`r` FROM `%s_c_%s_mval` WHERE `id`=%d",
+			"SELECT `idx`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d",
 			Cfg.Prefix, prefix, metai[meta.name]))
 		if err != nil {
 			updateError(q, err, !download)
@@ -455,18 +455,15 @@ c("0", "0");
 			return
 		}
 		nn := make(map[int]int)
-		rr := make(map[int]float64)
 		for rows.Next() {
 			var idx, n int
-			var r float64
-			err := rows.Scan(&idx, &n, &r)
+			err := rows.Scan(&idx, &n)
 			if err != nil {
 				updateError(q, err, !download)
 				logerr(err)
 				return
 			}
 			nn[idx] = n
-			rr[idx] = r
 		}
 		err = rows.Err()
 		if err != nil {
@@ -489,7 +486,6 @@ c("0", "0");
 
 			lines := make([]Statline, 0)
 			var count int
-			var sum = 0.0
 
 			if download {
 				if run == 0 {
@@ -512,18 +508,13 @@ c("0", "0");
 			}
 
 			for _, item := range items {
-				lines = append(lines, Statline{item.text, item.count[run], float64(item.count[run]) / rr[item.idx], nn[item.idx]})
-				sum += float64(item.count[run]) / rr[item.idx]
+				lines = append(lines, Statline{item.text, item.count[run], nn[item.idx]})
 			}
 			for _, line := range lines {
-				var p float64
-				if run == 1 {
-					p = float64(line.r) / sum * 100.0
-				}
 				if download {
 					if run == 1 {
 						v := int(.5 + pow10*float64(line.i)/float64(line.n))
-						fmt.Fprintf(q.w, "%d\t%.2f%%\t%.2f\t%s\n", line.i, float32(p), v, line.s)
+						fmt.Fprintf(q.w, "%d\t%d\t%s\n", line.i, v, line.s)
 					} else {
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
 					}
@@ -543,7 +534,7 @@ c("0", "0");
 					fmt.Fprintln(&buf, "<tr><td>", iformat(line.i))
 					if run == 1 {
 						v := int(.5 + pow10*float64(line.i)/float64(line.n))
-						fmt.Fprintf(&buf, "<td>%.2f%%<td>%s", float32(p), iformat(v))
+						fmt.Fprintf(&buf, "<td>%s", iformat(v))
 					}
 					if line.s == "" {
 						line.s = "(leeg)"
