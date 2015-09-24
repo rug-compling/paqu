@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -314,6 +315,7 @@ func savez2(q *Context) {
 			}
 			if len(corpora) > 1 {
 				newfile = prefix + "/" + newfile
+				data = xmlSetSource(data, prefix)
 			}
 
 			f, err := z.Create(newfile)
@@ -462,4 +464,27 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 		}
 	}
 	return len(strings.Join(a1[:i], "/")) + 1, true
+}
+
+var (
+	reMetaSrcRemove  = regexp.MustCompile(`[ \t]*(<\s*metadata\s*/\s*>|<\s*meta\s[^>]*name\s*=\s*['"]paqu\.source['"][^>]*>)\s*`)
+	reMetaScrInsert1 = regexp.MustCompile(`[ \t]*<\s*/\s*metadata\s*>`)
+	reMetaScrInsert2 = regexp.MustCompile(`[ \t]*<\s*node`)
+)
+
+func xmlSetSource(data []byte, prefix string) []byte {
+	s := string(reMetaSrcRemove.ReplaceAll(data, []byte{}))
+	loc := reMetaScrInsert1.FindStringIndex(s)
+	if loc != nil {
+		return []byte(
+			fmt.Sprintf("%s<meta type=\"text\" name=\"paqu.source\" value=\"%s\"/>\n%s",
+				s[:loc[0]], prefix, s[loc[0]:]))
+	}
+	loc = reMetaScrInsert2.FindStringIndex(s)
+	if loc != nil {
+		return []byte(
+			fmt.Sprintf("%s<metadata>\n<meta type=\"text\" name=\"paqu.source\" value=\"%s\"/>\n</metadata>\n%s",
+				s[:loc[0]], prefix, s[loc[0]:]))
+	}
+	return data
 }

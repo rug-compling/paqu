@@ -313,6 +313,7 @@ func xsavez2(q *Context) {
 				}
 				if len(corpora) > 1 {
 					newfile = prefix + "/" + newfile
+					data = xmlSetSource(data, prefix)
 				}
 				f, err := z.Create(newfile)
 				if hErr(q, err) {

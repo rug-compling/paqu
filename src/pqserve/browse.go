@@ -177,7 +177,7 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 			continue
 		}
 		rows, err := q.db.Query(fmt.Sprintf(
-			"SELECT `type`,`name`,`tval`,`ival`,`fval`,`dval` FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) "+
+			"SELECT `idx`,`type`,`name`,`tval`,`ival`,`fval`,`dval` FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) "+
 				"WHERE `file` = %d AND `arch` = %d ORDER BY `name`,`idx`",
 			Cfg.Prefix, id,
 			Cfg.Prefix, id,
@@ -186,10 +186,13 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 			pre := "<p>"
 			for rows.Next() {
 				var v, mtype, name, tval string
-				var ival int
+				var idx, ival int
 				var fval float32
 				var dval time.Time
-				rows.Scan(&mtype, &name, &tval, &ival, &fval, &dval)
+				rows.Scan(&idx, &mtype, &name, &tval, &ival, &fval, &dval)
+				if idx == 2147483647 {
+					continue
+				}
 				switch mtype {
 				case "TEXT":
 					v = tval
