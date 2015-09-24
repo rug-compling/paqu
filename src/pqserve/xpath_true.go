@@ -60,6 +60,8 @@ var (
 		"item":                 true,
 		"le":                   true,
 		"lt":                   true,
+		"meta":                 true,
+		"metadata":             true,
 		"mod":                  true,
 		"ne":                   true,
 		"node":                 true,
@@ -124,9 +126,13 @@ PARTLOOP:
 				if keyTags[s[1:]] || q.attrmap[s[1:]] {
 					continue
 				}
+				if s == "@type" || s == "@name" || s == "@value" {
+					continue
+				}
 				lvl = 1
 				continue PARTLOOP
 			}
+
 			if strings.HasSuffix(s, "(") {
 				continue
 			}
@@ -866,8 +872,8 @@ corpus: <select name="db">
        </div>
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
-var begin = ['//node', '/alpino_ds/node'];
-var other = ['/node'`)
+var begin = ['//node', '/alpino_ds/node', '//meta[@name="" and @value=""]'];
+var other = ['/node', '/meta[@name="" and @value=""]'`)
 	for _, a := range q.attrlist {
 		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
 	}
