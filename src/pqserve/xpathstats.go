@@ -8,63 +8,68 @@ import (
 )
 
 type FullNode struct {
-	Aform       string `xml:"aform,attr"`
-	Begin       int    `xml:"begin,attr"`
-	Buiging     string `xml:"buiging,attr"`
-	Case        string `xml:"case,attr"`
-	Cat         string `xml:"cat,attr"`
-	Comparative string `xml:"comparative,attr"`
-	Conjtype    string `xml:"conjtype,attr"`
-	Def         string `xml:"def,attr"`
-	Dial        string `xml:"dial,attr"`
-	End         int    `xml:"end,attr"`
-	Frame       string `xml:"frame,attr"`
-	Gen         string `xml:"gen,attr"`
-	Genus       string `xml:"genus,attr"`
-	Getal       string `xml:"getal,attr"`
-	GetalN      string `xml:"getal-n,attr"`
-	Graad       string `xml:"graad,attr"`
-	Id          string `xml:"id,attr"`
-	Index       string `xml:"index,attr"`
-	Infl        string `xml:"infl,attr"`
-	Lcat        string `xml:"lcat,attr"`
-	Lemma       string `xml:"lemma,attr"`
-	Lwtype      string `xml:"lwtype,attr"`
-	MwuRoot     string `xml:"mwu_root,attr"`
-	MwuSense    string `xml:"mwu_sense,attr"`
-	Naamval     string `xml:"naamval,attr"`
-	Neclass     string `xml:"neclass,attr"`
-	Npagr       string `xml:"npagr,attr"`
-	Ntype       string `xml:"ntype,attr"`
-	Num         string `xml:"num,attr"`
-	Numtype     string `xml:"numtype,attr"`
-	Pb          string `xml:"pb,attr"`
-	Pdtype      string `xml:"pdtype,attr"`
-	Per         string `xml:"per,attr"`
-	Persoon     string `xml:"persoon,attr"`
-	Pos         string `xml:"pos,attr"`
-	Positie     string `xml:"positie,attr"`
-	Postag      string `xml:"postag,attr"`
-	Pt          string `xml:"pt,attr"`
-	Pvagr       string `xml:"pvagr,attr"`
-	Pvtijd      string `xml:"pvtijd,attr"`
-	Refl        string `xml:"refl,attr"`
-	Rel         string `xml:"rel,attr"`
-	Root        string `xml:"root,attr"`
-	Sc          string `xml:"sc,attr"`
-	Sense       string `xml:"sense,attr"`
-	Special     string `xml:"special,attr"`
-	Spectype    string `xml:"spectype,attr"`
-	Status      string `xml:"status,attr"`
-	Tense       string `xml:"tense,attr"`
-	Vform       string `xml:"vform,attr"`
-	Vwtype      string `xml:"vwtype,attr"`
-	Vztype      string `xml:"vztype,attr"`
-	Wh          string `xml:"wh,attr"`
-	Wk          string `xml:"wk,attr"`
-	Word        string `xml:"word,attr"`
-	Wvorm       string `xml:"wvorm,attr"`
-	other       map[string]string
+	Aform        string `xml:"aform,attr"`
+	Begin        int    `xml:"begin,attr"`
+	Buiging      string `xml:"buiging,attr"`
+	Case         string `xml:"case,attr"`
+	Cat          string `xml:"cat,attr"`
+	Comparative  string `xml:"comparative,attr"`
+	Conjtype     string `xml:"conjtype,attr"`
+	Def          string `xml:"def,attr"`
+	Dial         string `xml:"dial,attr"`
+	End          int    `xml:"end,attr"`
+	Frame        string `xml:"frame,attr"`
+	Gen          string `xml:"gen,attr"`
+	Genus        string `xml:"genus,attr"`
+	Getal        string `xml:"getal,attr"`
+	GetalN       string `xml:"getal-n,attr"`
+	Graad        string `xml:"graad,attr"`
+	Id           string `xml:"id,attr"`
+	Iets         string `xml:"iets,attr"`
+	Index        string `xml:"index,attr"`
+	Infl         string `xml:"infl,attr"`
+	Lcat         string `xml:"lcat,attr"`
+	Lemma        string `xml:"lemma,attr"`
+	Lwtype       string `xml:"lwtype,attr"`
+	MwuRoot      string `xml:"mwu_root,attr"`
+	MwuSense     string `xml:"mwu_sense,attr"`
+	Naamval      string `xml:"naamval,attr"`
+	Neclass      string `xml:"neclass,attr"`
+	Npagr        string `xml:"npagr,attr"`
+	Ntype        string `xml:"ntype,attr"`
+	Num          string `xml:"num,attr"`
+	Numtype      string `xml:"numtype,attr"`
+	Pb           string `xml:"pb,attr"`
+	Pdtype       string `xml:"pdtype,attr"`
+	Per          string `xml:"per,attr"`
+	Personalized string `xml:"personalized,attr"`
+	Persoon      string `xml:"persoon,attr"`
+	Pos          string `xml:"pos,attr"`
+	Positie      string `xml:"positie,attr"`
+	Postag       string `xml:"postag,attr"`
+	Pron         string `xml:"pron,attr"`
+	Pt           string `xml:"pt,attr"`
+	Pvagr        string `xml:"pvagr,attr"`
+	Pvtijd       string `xml:"pvtijd,attr"`
+	Refl         string `xml:"refl,attr"`
+	Rel          string `xml:"rel,attr"`
+	Rnum         string `xml:"rnum,attr"`
+	Root         string `xml:"root,attr"`
+	Sc           string `xml:"sc,attr"`
+	Sense        string `xml:"sense,attr"`
+	Special      string `xml:"special,attr"`
+	Spectype     string `xml:"spectype,attr"`
+	Status       string `xml:"status,attr"`
+	Stype        string `xml:"stype,attr"`
+	Tense        string `xml:"tense,attr"`
+	Vform        string `xml:"vform,attr"`
+	Vwtype       string `xml:"vwtype,attr"`
+	Vztype       string `xml:"vztype,attr"`
+	Wh           string `xml:"wh,attr"`
+	Wk           string `xml:"wk,attr"`
+	Word         string `xml:"word,attr"`
+	Wvorm        string `xml:"wvorm,attr"`
+	other        map[string]string
 }
 
 var NodeTags = []string{
@@ -85,6 +90,7 @@ var NodeTags = []string{
 	"getal-n",
 	"graad",
 	"id",
+	"iets",
 	"index",
 	"infl",
 	"lcat",
@@ -101,21 +107,25 @@ var NodeTags = []string{
 	"pb",
 	"pdtype",
 	"per",
+	"personalized",
 	"persoon",
 	"pos",
 	"positie",
 	"postag",
+	"pron",
 	"pt",
 	"pvagr",
 	"pvtijd",
 	"refl",
 	"rel",
+	"rnum",
 	"root",
 	"sc",
 	"sense",
 	"special",
 	"spectype",
 	"status",
+	"stype",
 	"tense",
 	"vform",
 	"vwtype",
@@ -162,6 +172,8 @@ func getAttr(attr string, n *FullNode) string {
 		return n.Graad
 	case "id":
 		return n.Id
+	case "iets":
+		return n.Iets
 	case "index":
 		return n.Index
 	case "infl":
@@ -194,6 +206,8 @@ func getAttr(attr string, n *FullNode) string {
 		return n.Pdtype
 	case "per":
 		return n.Per
+	case "personalized":
+		return n.Personalized
 	case "persoon":
 		return n.Persoon
 	case "pos":
@@ -202,6 +216,8 @@ func getAttr(attr string, n *FullNode) string {
 		return n.Positie
 	case "postag":
 		return n.Postag
+	case "pron":
+		return n.Pron
 	case "pt":
 		return n.Pt
 	case "pvagr":
@@ -212,6 +228,8 @@ func getAttr(attr string, n *FullNode) string {
 		return n.Refl
 	case "rel":
 		return n.Rel
+	case "rnum":
+		return n.Rnum
 	case "root":
 		return n.Root
 	case "sc":
@@ -224,6 +242,8 @@ func getAttr(attr string, n *FullNode) string {
 		return n.Spectype
 	case "status":
 		return n.Status
+	case "stype":
+		return n.Stype
 	case "tense":
 		return n.Tense
 	case "vform":
