@@ -310,7 +310,7 @@ c("0", "0");
 				if name == filename {
 					continue
 				}
-				filename = docs.Name()
+				filename = name
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", filename)
 				for i := 1; i < len(queryparts)-1; i++ {
 					docs2, err := db.Query(doctxt + queryparts[i])
@@ -434,7 +434,7 @@ c("0", "0");
 		updateTextTop(q, buf.String())
 		buf.Reset()
 	} else {
-		fmt.Fprintln(q.w, "# n =", int(pow10))
+		fmt.Fprintf(q.w, "# items: %d\n# zinnen: %d\n# n = %d\n", counter, len(seen), int(pow10))
 	}
 
 	for _, meta := range metas {
