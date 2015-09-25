@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/xml"
 	"fmt"
 	"html"
 	"net/http"
@@ -69,7 +68,6 @@ type FullNode struct {
 	Wk           string `xml:"wk,attr"`
 	Word         string `xml:"word,attr"`
 	Wvorm        string `xml:"wvorm,attr"`
-	other        map[string]string
 }
 
 var NodeTags = []string{
@@ -261,24 +259,7 @@ func getAttr(attr string, n *FullNode) string {
 	case "wvorm":
 		return n.Wvorm
 	}
-	if n.other != nil {
-		return n.other[attr]
-	}
 	return ""
-}
-
-type NodeTT Node
-
-func (x *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	for _, attr := range start.Attr {
-		if n := attr.Name.Local; !keyTags[n] {
-			if x.other == nil {
-				x.other = make(map[string]string)
-			}
-			x.other[n] = attr.Value
-		}
-	}
-	return d.DecodeElement((*NodeTT)(x), &start)
 }
 
 func updateText(q *Context, s string) {

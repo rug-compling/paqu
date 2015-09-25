@@ -87,6 +87,19 @@ func main() {
 
 	////////////////////////////////////////////////////////////////
 
+	// tabel <prefix>_info
+	// veld `attr` verwijderen
+
+	rows, err = db.Query("SELECT `attr` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+	if err == nil {
+		rows.Close()
+		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` DROP `attr`")
+		util.CheckErr(err)
+		changed = true
+	}
+
+	////////////////////////////////////////////////////////////////
+
 	if changed {
 		fmt.Println("Database is aangepast")
 	} else {

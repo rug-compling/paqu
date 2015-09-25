@@ -8,7 +8,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path"
-	"sort"
 	"strings"
 )
 
@@ -34,8 +33,6 @@ type Context struct {
 	shared     map[string]string
 	params     map[string]string
 	form       *multipart.Form
-	attrlist   []string
-	attrmap    map[string]bool
 }
 
 // Wrap handler in minimale context, net genoeg voor afhandelen statische pagina's
@@ -80,7 +77,6 @@ func handleFunc(url string, handler func(*Context)) {
 				lines:      make(map[string]int),
 				shared:     make(map[string]string),
 				params:     make(map[string]string),
-				attrmap:    make(map[string]bool),
 			}
 
 			// Maak verbinding met database
@@ -160,7 +156,7 @@ func handleFunc(url string, handler func(*Context)) {
 				o = "7, 2"
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`attr`, `i`.`protected`, `i`.`hasmeta` "+
+				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -173,10 +169,10 @@ func handleFunc(url string, handler func(*Context)) {
 				logerr(err)
 				return
 			}
-			var id, desc, owner, shared, params, group, attlist string
+			var id, desc, owner, shared, params, group string
 			var zinnen, protected, hasmeta int
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &params, &group, &attlist, &protected, &hasmeta)
+				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &params, &group, &protected, &hasmeta)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -207,18 +203,7 @@ func handleFunc(url string, handler func(*Context)) {
 				if q.auth && owner == q.user {
 					q.myprefixes[id] = true
 				}
-				if q.prefixes[id] {
-					for _, a := range strings.Fields(attlist) {
-						q.attrmap[a] = true
-					}
-				}
 			}
-			q.attrlist = make([]string, len(NodeTags), len(NodeTags)+len(q.attrmap))
-			copy(q.attrlist, NodeTags)
-			for a := range q.attrmap {
-				q.attrlist = append(q.attrlist, a)
-			}
-			sort.Strings(q.attrlist)
 
 			// Verwerk input
 			switch r.Method {

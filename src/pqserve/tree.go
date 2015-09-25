@@ -518,7 +518,7 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 	// attributen
 	var tooltip bytes.Buffer
 	tooltip.WriteString("<table class=\"attr\">")
-	for _, attr := range q.attrlist {
+	for _, attr := range NodeTags {
 		if value := getAttr(attr, &node.FullNode); value != "" {
 			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", html.EscapeString(attr), html.EscapeString(value)))
 		}

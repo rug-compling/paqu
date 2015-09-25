@@ -78,7 +78,6 @@ Syntax: %s [-w]
 		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
-		attr        text         NOT NULL,
         protected   boolean      NOT NULL DEFAULT 0,
         hasmeta     boolean      NOT NULL DEFAULT 0,
 		UNIQUE INDEX (id),

@@ -123,7 +123,7 @@ PARTLOOP:
 				continue
 			}
 			if s[0] == '@' {
-				if keyTags[s[1:]] || q.attrmap[s[1:]] {
+				if keyTags[s[1:]] {
 					continue
 				}
 				if s == "@type" || s == "@name" || s == "@value" {
@@ -518,7 +518,7 @@ $('#loading span').html('%.1f%%');
 			fmt.Fprintln(q.w, "</optgroup>")
 			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; attributen &mdash;\">")
 		}
-		for _, s := range q.attrlist {
+		for _, s := range NodeTags {
 			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
 		}
 		if q.hasmeta[prefix] {
@@ -874,7 +874,7 @@ corpus: <select name="db">
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node', '//meta[@name="" and @value=""]'];
 var other = ['/node', '/meta[@name="" and @value=""]'`)
-	for _, a := range q.attrlist {
+	for _, a := range NodeTags {
 		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
 	}
 	fmt.Fprint(q.w, `];
