@@ -541,7 +541,7 @@ c("0", "0");
 				if count == METAMAX && meta.mtype == "TEXT" {
 					fmt.Fprint(&buf, "<tr><td>")
 					if run == 1 {
-						fmt.Fprint(&buf, "<td>...<td>...")
+						fmt.Fprint(&buf, "<td>...")
 					}
 					if meta.mtype == "TEXT" {
 						fmt.Fprint(&buf, "<td class=\"left\">...")
