@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
+	"errors"
 	"fmt"
 	"html"
 	"math"
@@ -18,55 +20,22 @@ type Statline struct {
 
 func statsmeta(q *Context) {
 
-	var buf bytes.Buffer
-
-	var chClose <-chan bool
-	if f, ok := q.w.(http.CloseNotifier); ok {
-		chClose = f.CloseNotify()
-	} else {
-		chClose = make(<-chan bool)
-	}
+	var errval error
+	var download bool
+	defer func() {
+		if errval != nil {
+			updateError(q, errval, !download)
+		}
+		completedmeta(q, download)
+		if !download {
+			fmt.Fprintln(q.w, "</body>\n</html>")
+		}
+	}()
 
 	now := time.Now()
 
-	download := false
 	if first(q.r, "d") != "" {
 		download = true
-	}
-
-	option := make(map[string]string)
-	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword"} {
-		option[t] = first(q.r, t)
-	}
-	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" && option["hpostag"] == "" && option["hword"] == "" {
-		http.Error(q.w, "Query ontbreekt", http.StatusPreconditionFailed)
-		return
-	}
-
-	prefix := first(q.r, "db")
-	if prefix == "" {
-		http.Error(q.w, "Geen corpus opgegeven", http.StatusPreconditionFailed)
-		return
-	}
-	if !q.prefixes[prefix] {
-		http.Error(q.w, "Ongeldig corpus", http.StatusPreconditionFailed)
-		return
-	}
-
-	metas := getMeta(q, prefix)
-
-	query, err := makeQuery(q, prefix, "", chClose)
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
-		return
-	}
-
-	// BEGIN UITVOER
-
-	pow10 := math.Pow10(int(math.Log10(float64(q.lines[prefix])) + .5))
-	if pow10 < 10 {
-		pow10 = 10
 	}
 
 	if download {
@@ -92,6 +61,47 @@ window.parent._fn.startedmeta();
 </script>
 `)
 	}
+
+	option := make(map[string]string)
+	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword"} {
+		option[t] = first(q.r, t)
+	}
+	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" && option["hpostag"] == "" && option["hword"] == "" {
+		updateError(q, errors.New("Query ontbreekt"), !download)
+		return
+	}
+
+	prefix := first(q.r, "db")
+	if prefix == "" {
+		updateError(q, errors.New("Geen corpus opgegeven"), !download)
+		return
+	}
+	if !q.prefixes[prefix] {
+		updateError(q, errors.New("Ongeldig corpus"), !download)
+		return
+	}
+
+	metas := getMeta(q, prefix)
+
+	var chClose <-chan bool
+	if f, ok := q.w.(http.CloseNotifier); ok {
+		chClose = f.CloseNotify()
+	} else {
+		chClose = make(<-chan bool)
+	}
+
+	var query string
+	query, errval = makeQuery(q, prefix, "", chClose)
+	if logerr(errval) {
+		return
+	}
+
+	pow10 := math.Pow10(int(math.Log10(float64(q.lines[prefix])) + .5))
+	if pow10 < 10 {
+		pow10 = 10
+	}
+
+	var buf bytes.Buffer
 
 	// DEBUG: HTML-uitvoer van de query
 	if !download {
@@ -172,11 +182,9 @@ window.parent._fn.startedmeta();
 					qu,
 					order)
 			}
-			rows, err := timeoutQuery(q, chClose, qu)
-			if err != nil {
-				updateError(q, err, !download)
-				completedmeta(q, download)
-				logerr(err)
+			var rows *sql.Rows
+			rows, errval = timeoutQuery(q, chClose, qu)
+			if logerr(errval) {
 				return
 			}
 			for rows.Next() {
@@ -189,11 +197,9 @@ window.parent._fn.startedmeta();
 				}
 				var cnt, n int
 				var text string
-				err := rows.Scan(&cnt, &text, &n)
-				if err != nil {
-					updateError(q, err, !download)
-					completedmeta(q, download)
-					logerr(err)
+				errval = rows.Scan(&cnt, &text, &n)
+				if logerr(errval) {
+					rows.Close()
 					return
 				}
 				if len(lines) < METAMAX || download {
@@ -201,11 +207,8 @@ window.parent._fn.startedmeta();
 					lines = append(lines, Statline{text, cnt, n})
 				}
 			}
-			err = rows.Err()
-			if err != nil {
-				updateError(q, err, !download)
-				completedmeta(q, download)
-				logerr(err)
+			errval = rows.Err()
+			if logerr(errval) {
 				return
 			}
 			for _, line := range lines {
@@ -269,7 +272,7 @@ window.parent._fn.startedmeta();
 			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 		updateText(q, buf.String())
-		completedmeta(q, download)
+		buf.Reset()
 	}
 }
 

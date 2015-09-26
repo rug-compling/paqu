@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/dbxml"
 
 	"bytes"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -31,10 +32,35 @@ type MetaItems0 []*MetaItem
 type MetaItems1 []*MetaItem
 
 func xstatsmeta(q *Context) {
+
+	var errval error
+	var download bool
+	var db *dbxml.Db
+	var docs, docs2 *dbxml.Docs
+	defer func() {
+		if docs2 != nil {
+			docs2.Close()
+		}
+		if docs != nil {
+			docs.Close()
+		}
+		if db != nil {
+			db.Close()
+		}
+		if errval != nil {
+			updateError(q, errval, !download)
+		}
+		completedmeta(q, download)
+		if !download {
+			fmt.Fprintln(q.w, "</body>\n</html>")
+		}
+	}()
+
+	var rows *sql.Rows
+
 	now := time.Now()
 	now2 := time.Now()
 
-	download := false
 	if first(q.r, "d") != "" {
 		download = true
 	}
@@ -79,16 +105,8 @@ c("0", "0");
 			fmt.Fprintf(q.w, "Invalid corpus: "+prefix)
 		} else {
 			updateText(q, "Invalid corpus: "+html.EscapeString(prefix))
-			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
-	}
-
-	var chClose <-chan bool
-	if f, ok := q.w.(http.CloseNotifier); ok {
-		chClose = f.CloseNotify()
-	} else {
-		chClose = make(<-chan bool)
 	}
 
 	query := first(q.r, "xpath")
@@ -98,7 +116,6 @@ c("0", "0");
 			fmt.Fprintln(q.w, "Query ontbreekt")
 		} else {
 			updateText(q, "Query ontbreekt")
-			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
 	}
@@ -112,23 +129,19 @@ c("0", "0");
 
 	var owner string
 	var nlines uint64
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
-	if err != nil {
-		updateError(q, err, !download)
-		logerr(err)
+	rows, errval = q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	if logerr(errval) {
 		return
 	}
 	for rows.Next() {
-		if err := rows.Scan(&owner, &nlines); err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		errval = rows.Scan(&owner, &nlines)
+		if logerr(errval) {
 			rows.Close()
 			return
 		}
 	}
-	if err := rows.Err(); err != nil {
-		updateError(q, err, !download)
-		logerr(err)
+	errval = rows.Err()
+	if logerr(errval) {
 		return
 	}
 
@@ -136,18 +149,14 @@ c("0", "0");
 	if strings.Contains(owner, "@") {
 		dactfiles = append(dactfiles, path.Join(paqudir, "data", prefix, "data.dact"))
 	} else {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
-		if err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+		if logerr(errval) {
 			return
 		}
 		for rows.Next() {
 			var s string
-			err := rows.Scan(&s)
-			if err != nil {
-				updateError(q, err, !download)
-				logerr(err)
+			errval = rows.Scan(&s)
+			if logerr(errval) {
 				rows.Close()
 				return
 			}
@@ -155,9 +164,8 @@ c("0", "0");
 				dactfiles = append(dactfiles, s)
 			}
 		}
-		if err := rows.Err(); err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		errval = rows.Err()
+		if logerr(errval) {
 			return
 		}
 	}
@@ -167,7 +175,6 @@ c("0", "0");
 			fmt.Fprintln(q.w, "Er zijn geen dact-bestanden voor dit corpus")
 		} else {
 			updateText(q, "Er zijn geen dact-bestanden voor dit corpus")
-			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
 	}
@@ -177,7 +184,6 @@ c("0", "0");
 			fmt.Fprintln(q.w, "Geen metadata voor dit corpus")
 		} else {
 			updateText(q, "Geen metadata voor dit corpus")
-			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
 	}
@@ -193,29 +199,24 @@ c("0", "0");
 		metai[m.name] = m.id
 		if m.mtype == "TEXT" {
 			tranges[m.name] = make(map[string]int)
-			rows, err := q.db.Query(fmt.Sprintf(
+			rows, errval = q.db.Query(fmt.Sprintf(
 				"SELECT `idx`,`text` FROM `%s_c_%s_mval` WHERE `id` = %d",
 				Cfg.Prefix, prefix, m.id))
-			if err != nil {
-				updateError(q, err, !download)
-				logerr(err)
+			if logerr(errval) {
 				return
 			}
 			for rows.Next() {
 				var t string
 				var i int
-				err := rows.Scan(&i, &t)
-				if err != nil {
-					updateError(q, err, !download)
-					logerr(err)
+				errval = rows.Scan(&i, &t)
+				if logerr(errval) {
+					rows.Close()
 					return
 				}
 				tranges[m.name][t] = i
 			}
-			err = rows.Err()
-			if err != nil {
-				updateError(q, err, !download)
-				logerr(err)
+			errval = rows.Err()
+			if logerr(errval) {
 				return
 			}
 			continue
@@ -227,10 +228,8 @@ c("0", "0");
 		row := q.db.QueryRow(fmt.Sprintf(
 			"SELECT `indexed`, `size`, `dmin`, `dmax`, `dtype`, `fmin`, `fstep`, `imin`, `istep` FROM `%s_c_%s_minf` WHERE `id` = %d",
 			Cfg.Prefix, prefix, m.id))
-		err := row.Scan(&indexed, &size, &dmin, &dmax, &dtype, &fmin, &fstep, &imin, &istep)
-		if err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		errval = row.Scan(&indexed, &size, &dmin, &dmax, &dtype, &fmin, &fstep, &imin, &istep)
+		if logerr(errval) {
 			return
 		}
 		switch m.mtype {
@@ -241,7 +240,7 @@ c("0", "0");
 		case "DATE", "DATETIME":
 			dranges[m.name] = oldDrange(dmin, dmax, dtype, indexed)
 		}
-	}
+	} // for _, m := range metas
 
 	queryparts := strings.Split(query, "+|+")
 
@@ -251,6 +250,13 @@ c("0", "0");
 	}
 
 	seen := make(map[string]bool)
+
+	var chClose <-chan bool
+	if f, ok := q.w.(http.CloseNotifier); ok {
+		chClose = f.CloseNotify()
+	} else {
+		chClose = make(<-chan bool)
+	}
 
 	counter := 0
 	for _, dactfile := range dactfiles {
@@ -264,17 +270,14 @@ c("0", "0");
 			return
 		default:
 		}
-		db, err := dbxml.Open(dactfile)
-		if err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		db, errval = dbxml.Open(dactfile)
+		if logerr(errval) {
 			return
 		}
 
-		qu, err := db.Prepare(queryparts[0])
-		if err != nil {
-			updateError(q, err, !download)
-			db.Close()
+		var qu *dbxml.Query
+		qu, errval = db.Prepare(queryparts[0])
+		if logerr(errval) {
 			return
 		}
 		done := make(chan bool, 1)
@@ -289,10 +292,8 @@ c("0", "0");
 			}
 		}()
 
-		docs, err := qu.Run()
-		if err != nil {
-			updateError(q, err, !download)
-			db.Close()
+		docs, errval = qu.Run()
+		if logerr(errval) {
 			return
 		}
 		filename := ""
@@ -313,31 +314,26 @@ c("0", "0");
 				filename = name
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", filename)
 				for i := 1; i < len(queryparts)-1; i++ {
-					docs2, err := db.Query(doctxt + queryparts[i])
-					if err != nil {
-						updateError(q, err, !download)
-						logerr(err)
-						docs.Close()
-						db.Close()
+					docs2, errval = db.Query(doctxt + queryparts[i])
+					if logerr(errval) {
 						return
 					}
 					if !docs2.Next() {
+						docs2 = nil
 						continue NEXTDOC
 					}
 					docs2.Close()
+					docs2 = nil
 				}
 
-				docs2, err := db.Query(doctxt + queryparts[len(queryparts)-1])
-				if err != nil {
-					updateError(q, err, !download)
-					logerr(err)
-					docs.Close()
-					db.Close()
+				docs2, errval = db.Query(doctxt + queryparts[len(queryparts)-1])
+				if logerr(errval) {
 					return
 				}
 				for docs2.Next() {
 					matches++
 				}
+				docs2 = nil
 			}
 
 			if matches == 0 {
@@ -347,12 +343,8 @@ c("0", "0");
 			counter += matches
 
 			alpino := Alpino_ds_meta{}
-			err := xml.Unmarshal([]byte(docs.Content()), &alpino)
-			if err != nil {
-				updateError(q, err, !download)
-				logerr(err)
-				docs.Close()
-				db.Close()
+			errval = xml.Unmarshal([]byte(docs.Content()), &alpino)
+			if logerr(errval) {
 				return
 			}
 
@@ -401,18 +393,21 @@ c("0", "0");
 				}
 			}
 
-		}
-		if err := docs.Error(); err != nil {
-			logerr(err)
+		} // for docs.Next()
+		errval = docs.Error()
+		docs = nil
+		if logerr(errval) {
+			return
 		}
 		db.Close()
+		db = nil
 		done <- true
 		select {
 		case <-interrupted:
 			return
 		default:
 		}
-	}
+	} // for _, dactfile := range dactfiles
 	if !download {
 		updateCount(q, counter, len(seen))
 	}
@@ -446,29 +441,24 @@ c("0", "0");
 				count: [2]int{telling[meta.name][name][1], telling[meta.name][name][2]},
 			})
 		}
-		rows, err := q.db.Query(fmt.Sprintf(
+		rows, errval = q.db.Query(fmt.Sprintf(
 			"SELECT `idx`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d",
 			Cfg.Prefix, prefix, metai[meta.name]))
-		if err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		if logerr(errval) {
 			return
 		}
 		nn := make(map[int]int)
 		for rows.Next() {
 			var idx, n int
-			err := rows.Scan(&idx, &n)
-			if err != nil {
-				updateError(q, err, !download)
-				logerr(err)
+			errval = rows.Scan(&idx, &n)
+			if logerr(errval) {
+				rows.Close()
 				return
 			}
 			nn[idx] = n
 		}
-		err = rows.Err()
-		if err != nil {
-			updateError(q, err, !download)
-			logerr(err)
+		errval = rows.Err()
+		if logerr(errval) {
 			return
 		}
 
@@ -546,7 +536,7 @@ c("0", "0");
 				if count == METAMAX && meta.mtype == "TEXT" {
 					break
 				}
-			}
+			} // for _, line := range lines
 			if !download {
 				if count == METAMAX && meta.mtype == "TEXT" {
 					fmt.Fprint(&buf, "<tr><td>")
@@ -566,8 +556,8 @@ c("0", "0");
 					buf.Reset()
 				}
 			}
-		}
-	}
+		} // for run := 0; run < 2; run++
+	} // for _, meta := range metas
 
 	if !download {
 		fmt.Fprintf(&buf,
@@ -575,7 +565,7 @@ c("0", "0");
 			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 		updateText(q, buf.String())
-		completedmeta(q, download)
+		buf.Reset()
 	}
 
 }
