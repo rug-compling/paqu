@@ -62,19 +62,20 @@ http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/down
 
 Let op dat je de software met XML in de naam downloadt.
 
-LET OP: Versie 6.0.17 heeft een ernstige bug waardoor de zoekresultaten
-met XPATH vaak verre van compleet zijn. Je kunt versie 2.5.16 hier
-downloaden: https://github.com/rug-compling/dbxml
-
+LET OP: Versies 6.0.17 en 6.0.18 hebben een ernstige bug waardoor de
+zoekresultaten met XPATH vaak verre van compleet zijn. (Versie 6.0.18 is
+op moment van schrijven de meest actuele versie.)
+Je kunt versie 2.5.16 hier downloaden: https://github.com/rug-compling/dbxml
 
 ### Go ###
 
 De meeste programma's zijn geschreven in de programmeertaal Go. Je hebt
-dus de Go-compiler nodig. Op Debian is Go beschikbaar in het pakket
-`golang`, maar die versie is bij schrijven (juli 2014) te oud.
+dus de Go-compiler nodig. In Debian 8 "jessie" is Go beschikbaar in het pakket
+`golang`. De versie van Go in Debian 7 "wheezy" is te oud, maar je zou
+wel de versie uit "wheezy-backports" kunnen gebruiken.
 
-Je hebt minimaal versie 1.2 nodig. Geef het commando `go version` om dit
-te controleren.
+Je hebt minimaal Go versie 1.2 nodig. Geef het commando `go version` om
+dit te controleren.
 
 Je kunt Go downloaden van http://golang.org/
 
