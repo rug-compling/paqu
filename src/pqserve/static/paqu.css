@@ -235,6 +235,7 @@ tr.last td.error {
     border-bottom: 1px solid lightgrey;
 }
 
+div.error,
 div.warning {
     margin: 2em 0px;
     padding: 1em 4em;

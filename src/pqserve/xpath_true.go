@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/dbxml"
 
 	"bytes"
+	"database/sql"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -156,6 +157,26 @@ func xpath(q *Context) {
 		return
 	}
 
+	var errval error
+	var db *dbxml.Db
+	var docs *dbxml.Docs
+	var loading bool
+	defer func() {
+		if docs != nil {
+			docs.Close()
+		}
+		if db != nil {
+			db.Close()
+		}
+		if loading {
+			clearLoading(q.w)
+		}
+		if errval != nil {
+			fmt.Fprintf(q.w, "<div class=\"error\">FOUT: %s</div>\n", html.EscapeString(errval.Error()))
+		}
+		html_footer(q)
+	}()
+
 	// HTML-uitvoer van begin van de pagina
 	writeHead(q, "", 2)
 	html_xpath_header(q)
@@ -167,7 +188,6 @@ func xpath(q *Context) {
 	// Als er geen query is gedefinieerd, HTML-uitvoer van korte helptekst, pagina-einde, en exit
 	if !has_query {
 		html_xpath_uitleg(q)
-		html_footer(q)
 		return
 	}
 
@@ -178,8 +198,8 @@ func xpath(q *Context) {
 		chClose = make(<-chan bool)
 	}
 
-	_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `active` = NOW() WHERE `id` = %q", Cfg.Prefix, prefix))
-	if doErr(q, err) {
+	_, errval = q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `active` = NOW() WHERE `id` = %q", Cfg.Prefix, prefix))
+	if logerr(errval) {
 		return
 	}
 
@@ -198,17 +218,20 @@ func xpath(q *Context) {
 
 	var owner string
 	var nlines uint64
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
-	if doErr(q, err) {
+	var rows *sql.Rows
+	rows, errval = q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	if logerr(errval) {
 		return
 	}
 	for rows.Next() {
-		if doErr(q, rows.Scan(&owner, &nlines)) {
+		errval = rows.Scan(&owner, &nlines)
+		if logerr(errval) {
 			rows.Close()
 			return
 		}
 	}
-	if doErr(q, rows.Err()) {
+	errval = rows.Err()
+	if logerr(errval) {
 		return
 	}
 
@@ -218,13 +241,14 @@ func xpath(q *Context) {
 		dactfiles = append(dactfiles, path.Join(paqudir, "data", prefix, "data.dact"))
 	} else {
 		global = true
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
-		if doErr(q, err) {
+		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+		if logerr(errval) {
 			return
 		}
 		for rows.Next() {
 			var s string
-			if doErr(q, rows.Scan(&s)) {
+			errval = rows.Scan(&s)
+			if logerr(errval) {
 				rows.Close()
 				return
 			}
@@ -232,7 +256,8 @@ func xpath(q *Context) {
 				dactfiles = append(dactfiles, s)
 			}
 		}
-		if doErr(q, rows.Err()) {
+		errval = rows.Err()
+		if logerr(errval) {
 			return
 		}
 	}
@@ -248,6 +273,7 @@ func xpath(q *Context) {
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
+	loading = true
 
 	found := false
 	curno := 0
@@ -267,7 +293,6 @@ func xpath(q *Context) {
 	queryparts := strings.Split(fullquery, "+|+")
 
 	var seen uint64
-	var okdocs = true
 	for _, dactfile := range dactfiles {
 		select {
 		case <-chClose:
@@ -286,23 +311,19 @@ $('#loading span').html('%.1f%%');
 			}
 		}
 
-		err := bugtest(dactfile, queryparts[0])
-		if doErr(q, err) {
-			clearLoading(q.w)
+		errval = bugtest(dactfile, queryparts[0])
+		if errval != nil {
 			return
 		}
 
-		db, err := dbxml.Open(dactfile)
-		if doErr(q, err) {
-			clearLoading(q.w)
+		db, errval = dbxml.Open(dactfile)
+		if logerr(errval) {
 			return
 		}
 
-		qu, err := db.Prepare(queryparts[0])
-		if err != nil {
-			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
-			db.Close()
-			clearLoading(q.w)
+		var qu *dbxml.Query
+		qu, errval = db.Prepare(queryparts[0])
+		if logerr(errval) {
 			return
 		}
 		done := make(chan bool, 1)
@@ -317,12 +338,9 @@ $('#loading span').html('%.1f%%');
 			}
 		}()
 
-		docs, err := qu.Run()
-		if err != nil {
-			fmt.Fprintln(q.w, html.EscapeString(err.Error()))
-			db.Close()
+		docs, errval = qu.Run()
+		if logerr(errval) {
 			done <- true
-			clearLoading(q.w)
 			return
 		}
 		filename = ""
@@ -356,14 +374,11 @@ $('#loading span').html('%.1f%%');
 			} else if newdoc {
 				newdoc = false
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", name)
+				var docs2 *dbxml.Docs
 				for i := 1; i < len(queryparts)-1; i++ {
-					docs2, err := db.Query(doctxt + queryparts[i])
-					if err != nil {
-						fmt.Fprintln(q.w, html.EscapeString(err.Error()))
-						docs.Close()
-						db.Close()
+					docs2, errval = db.Query(doctxt + queryparts[i])
+					if logerr(errval) {
 						done <- true
-						clearLoading(q.w)
 						return
 					}
 					if !docs2.Next() {
@@ -371,13 +386,9 @@ $('#loading span').html('%.1f%%');
 					}
 					docs2.Close()
 				}
-				docs2, err := db.Query(doctxt + queryparts[len(queryparts)-1])
-				if err != nil {
-					fmt.Fprintln(q.w, html.EscapeString(err.Error()))
-					docs.Close()
-					db.Close()
+				docs2, errval = db.Query(doctxt + queryparts[len(queryparts)-1])
+				if logerr(errval) {
 					done <- true
-					clearLoading(q.w)
 					return
 				}
 				found = false
@@ -397,16 +408,18 @@ $('#loading span').html('%.1f%%');
 					}
 				}
 			}
-		}
-		if err := docs.Error(); err != nil {
-			logerr(err)
-			fmt.Fprint(q.w, html.EscapeString(err.Error()))
-			okdocs = false
+		} // for docs.Next()
+		errval = docs.Error()
+		docs = nil
+		if logerr(errval) {
+			done <- true
+			return
 		}
 		if n, err := db.Size(); err == nil {
 			seen += n
 		}
 		db.Close()
+		db = nil
 		done <- true
 		select {
 		case <-interrupted:
@@ -422,14 +435,12 @@ $('#loading span').html('%.1f%%');
 		if curno > offset+ZINMAX*2 {
 			break
 		}
-		if !okdocs {
-			break
-		}
-	}
+	} // for _, dactfile := range dactfiles
 
 	clearLoading(q.w)
+	loading = false
 
-	if okdocs && curno == 0 {
+	if curno == 0 {
 		fmt.Fprintf(q.w, "geen match gevonden")
 	}
 
@@ -449,7 +460,7 @@ $('#loading span').html('%.1f%%');
 		}
 	}
 
-	if q.auth && !(okdocs && curno == 0) {
+	if q.auth && curno > 0 {
 		fmt.Fprintf(q.w, `<p>
 <form action="xsavez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="xpath" value="%s">
@@ -461,12 +472,13 @@ $('#loading span').html('%.1f%%');
 			html.EscapeString(prefix))
 	}
 
-	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small><hr>")
+	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small>")
 
 	if curno == 0 {
-		html_footer(q)
 		return
 	}
+
+	fmt.Fprintln(q.w, "<hr>")
 
 	var metas []MetaType
 	if q.hasmeta[prefix] {
@@ -536,8 +548,6 @@ $('#loading span').html('%.1f%%');
         <div id="result"></div>
 		</div>
 `)
-
-	html_footer(q)
 
 }
 
