@@ -291,16 +291,45 @@ func metahelp(q *Context) {
 <div class="submenu a9999" id="helpmeta">
 <div class="corpushelp">
 
-In de tabel <em>per zin</em> staan tussen de kolommen met aantallen en met de metadata-waardes nog een kolom.
+De tabellen bestaan uit twee delen. Het linkerdeel,
+<em>per item</em>, geeft het aantal matches per metadata-waarde. Dit
+is het totaal aantal matches in het corpus, en dat
+kan soms hoger zijn dan het aantal matchende zinnen
+omdat er soms binnen één zin twee of meer matches zijn.
 <p>
-<b>Kolom 2: <em>n</em> keer de fractie</b>
+De rechterdeel, <em>per zin</em>, geeft het aantal zinnen waarin een
+match gevonden is. Dit aantal staat in de eerste kolom.
+De tweede kolom binnen de tabel <em>per zin</em> geeft aan wat
+de relatieve frequentie is voor deze metadata-waarde.
+Dit is het aantal hits per <em>n</em> zinnen waarbij <em>n</em>
+bijvoorbeeld 10&#8239;000 of 100&#8239;000 is (afhankelijk van de
+grootte van het corpus).
 <p>
-De fractie is het aantal gevonden zinnen met de metadata-waarde, gedeeld door het totaal aantal zinnen dat deze waarde heeft.
+Voorbeeld, sekse per zin:
 <p>
-De Tweede kolom geeft deze fractie vermenigvuldigd met <em>n</em>. De waarde van <em>n</em> is afankelijk van de grootte van het corpus,
-en staat boven de tabellen vermeld.
+<table class="right">
+<tr><td><em>aantal</em><td><em>per&nbsp;10&#8239;000</em><td><em>waarde</em>
+<tr><td>36<td>40<td class="left"> female
+<tr><td>30<td>50<td class="left"> male
+</table>
 <p>
-Een waarde gelijk aan <em>n</em> wil zeggen dat alle zinnen waarin de waarde voorkomt voldoen aan je zoekopdracht.
+In dit voorbeeld zijn er meer zinnen die matchen voor
+vrouwelijke sprekers, dan voor mannelijke sprekers.
+<p>
+Stel dat in het complete corpus meer zinnen van vrouwelijke sprekers zijn opgenomen, dan van mannen:
+<p>
+<table class="right">
+<tr><td><em>totaal</em><td><em>waarde</em>
+<tr><td>9&#8239;000<td class="left"> female
+<tr><td>6&#8239;000<td class="left"> male
+</table>
+<p>
+Alleen al op basis hiervan zou je meer matches van vrouwen dan van mannen verwachten. De tweede kolom compenseert hiervoor.
+De telling van matches genormaliseerd over tienduizend zinnen geeft voor
+vrouwen 36 / 9&#8239;000 &times; 10&#8239;000 = 40, en voor mannen 30 / 6&#8239;000 &times; 10&#8239;000 = 50.
+<p>
+Dus, <em>absoluut</em> zijn er meer treffers voor vrouwen, maar <em>relatief</em> zijn er meer treffers voor mannen.
+
 </div>
 </div>
 `)
