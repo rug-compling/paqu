@@ -1203,9 +1203,14 @@ func bugtest(filename, xpath string) error {
 	if err != nil {
 		return err
 	}
-	s := strings.TrimSpace(string(b))
+	s := strings.TrimSpace(strings.Replace(string(b), "\n", " ", -1))
 	if s == "OK" {
 		return nil
 	}
-	return errors.New(s)
+	e := errors.New(s)
+	if !strings.HasPrefix(s, "Error: syntax error") {
+		logerr(errors.New("BUGTEST: " + strings.Replace(xpath, "\n", " ", -1)))
+		logerr(e)
+	}
+	return e
 }
