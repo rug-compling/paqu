@@ -122,7 +122,31 @@ window.parent._fn.startedmeta();
 
 		// telling van metadata in matchende zinnen
 
+		values := make([]StructIS, 0)
+		rows, errval := q.db.Query(fmt.Sprintf(
+			"SELECT `idx`,`text` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY `idx`",
+			Cfg.Prefix, prefix,
+			meta.id))
+		if logerr(errval) {
+			return
+		}
+		for rows.Next() {
+			var i int
+			var s string
+			errval = rows.Scan(&i, &s)
+			if logerr(errval) {
+				rows.Close()
+				return
+			}
+			values = append(values, StructIS{i, s})
+		}
+		errval = rows.Err()
+		if logerr(errval) {
+			return
+		}
+
 		for run := 0; run < 2; run++ {
+			seen := make(map[int]*Statline)
 			lines := make([]Statline, 0)
 			var count int
 			if download {
@@ -153,7 +177,7 @@ window.parent._fn.startedmeta();
 			}
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`text`), `text`, 0 "+
+					"SELECT COUNT(`text`), `idx`, `text`, 0 "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
 						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
@@ -178,7 +202,7 @@ window.parent._fn.startedmeta();
 					meta.id,
 					query)
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`a`.`text`), `a`.`text`,`a`.`n` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
+					"SELECT COUNT(`a`.`text`), `a`.`idx`, `a`.`text`,`a`.`n` FROM ( %s ) `a` GROUP BY `a`.`idx` ORDER BY %s `a`.`idx`",
 					qu,
 					order)
 			}
@@ -195,21 +219,42 @@ window.parent._fn.startedmeta();
 					return
 				default:
 				}
-				var cnt, n int
+				var idx, cnt, n int
 				var text string
-				errval = rows.Scan(&cnt, &text, &n)
+				errval = rows.Scan(&cnt, &idx, &text, &n)
 				if logerr(errval) {
 					rows.Close()
 					return
 				}
-				if len(lines) < METAMAX || download {
+				if len(lines) < METAMAX || download || meta.mtype != "TEXT" {
 					text = unHigh(text)
 					lines = append(lines, Statline{text, cnt, n})
+					seen[idx] = &lines[len(lines)-1]
 				}
 			}
 			errval = rows.Err()
 			if logerr(errval) {
 				return
+			}
+			if download || (meta.mtype != "TEXT" && len(seen)*NEEDALL > len(values)) {
+				// ontbrekende waardes (count==0) toevoegen
+				if meta.mtype == "TEXT" {
+					for _, v := range values {
+						if _, ok := seen[v.i]; !ok {
+							lines = append(lines, Statline{v.s, 0, 1})
+						}
+					}
+				} else {
+					lines2 := make([]Statline, len(values))
+					for i, v := range values {
+						if s, ok := seen[v.i]; ok {
+							lines2[i] = *s
+						} else {
+							lines2[i] = Statline{v.s, 0, 1}
+						}
+					}
+					lines = lines2
+				}
 			}
 			for _, line := range lines {
 				if download {
