@@ -442,20 +442,23 @@ c("0", "0");
 			})
 		}
 		rows, errval = q.db.Query(fmt.Sprintf(
-			"SELECT `idx`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d",
+			"SELECT `idx`, `text`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY `idx`",
 			Cfg.Prefix, prefix, metai[meta.name]))
 		if logerr(errval) {
 			return
 		}
 		nn := make(map[int]int)
+		values := make([]StructIS, 0)
 		for rows.Next() {
 			var idx, n int
-			errval = rows.Scan(&idx, &n)
+			var txt string
+			errval = rows.Scan(&idx, &txt, &n)
 			if logerr(errval) {
 				rows.Close()
 				return
 			}
 			nn[idx] = n
+			values = append(values, StructIS{idx, txt})
 		}
 		errval = rows.Err()
 		if logerr(errval) {
@@ -499,8 +502,30 @@ c("0", "0");
 			default:
 			}
 
+			seen := make(map[int]*Statline)
 			for _, item := range items {
 				lines = append(lines, Statline{item.text, item.count[run], nn[item.idx]})
+				seen[item.idx] = &lines[len(lines)-1]
+			}
+			if download || (meta.mtype != "TEXT" && len(seen)*NEEDALL > len(values)) {
+				// ontbrekende waardes (count==0) toevoegen
+				if meta.mtype == "TEXT" {
+					for _, v := range values {
+						if _, ok := seen[v.i]; !ok {
+							lines = append(lines, Statline{v.s, 0, 1})
+						}
+					}
+				} else {
+					lines2 := make([]Statline, len(values))
+					for i, v := range values {
+						if s, ok := seen[v.i]; ok {
+							lines2[i] = *s
+						} else {
+							lines2[i] = Statline{v.s, 0, 1}
+						}
+					}
+					lines = lines2
+				}
 			}
 			for _, line := range lines {
 				if download {
