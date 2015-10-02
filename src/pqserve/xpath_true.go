@@ -269,7 +269,7 @@ func xpath(q *Context) {
 
 	fmt.Fprintf(q.w, "<ol start=\"%d\" id=\"ol\" class=\"xpath\">\n</ol>\n", offset+1)
 
-	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\" alt=\"[bezig]\"> <span id></span></div>")
+	fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\" alt=\"[bezig]\"> <span></span></div>")
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
