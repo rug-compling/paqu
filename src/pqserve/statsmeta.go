@@ -13,9 +13,10 @@ import (
 )
 
 type Statline struct {
-	s string
-	i int
-	n int
+	s   string
+	i   int
+	n   int
+	idx int
 }
 
 func statsmeta(q *Context) {
@@ -228,7 +229,7 @@ window.parent._fn.startedmeta();
 				}
 				if len(lines) < METAMAX || download || meta.mtype != "TEXT" {
 					text = unHigh(text)
-					lines = append(lines, Statline{text, cnt, n})
+					lines = append(lines, Statline{text, cnt, n, idx})
 					seen[idx] = &lines[len(lines)-1]
 				}
 			}
@@ -241,7 +242,7 @@ window.parent._fn.startedmeta();
 				if meta.mtype == "TEXT" {
 					for _, v := range values {
 						if _, ok := seen[v.i]; !ok {
-							lines = append(lines, Statline{v.s, 0, 1})
+							lines = append(lines, Statline{v.s, 0, 1, v.i})
 						}
 					}
 				} else {
@@ -250,7 +251,7 @@ window.parent._fn.startedmeta();
 						if s, ok := seen[v.i]; ok {
 							lines2[i] = *s
 						} else {
-							lines2[i] = Statline{v.s, 0, 1}
+							lines2[i] = Statline{v.s, 0, 1, v.i}
 						}
 					}
 					lines = lines2

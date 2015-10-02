@@ -77,6 +77,18 @@ func xstatsmeta(q *Context) {
 <head>
 <title></title>
 <script type="text/javascript"><!--
+function setvalue(n) {
+    window.parent._fn.setmetaval(n);
+}
+function setmetavars(idx, lbl, fl, max) {
+    window.parent._fn.setmetavars(idx, lbl, fl, max);
+}
+function setmetalines(idx, a, b) {
+    window.parent._fn.setmetalines(idx, a, b);
+}
+function makemetatable(idx) {
+    window.parent._fn.makemetatable(idx);
+}
 function f(s) {
     window.parent._fn.updatemeta(s);
 }
@@ -428,11 +440,15 @@ c("0", "0");
 `, html.EscapeString(query))
 		updateTextTop(q, buf.String())
 		buf.Reset()
+		fmt.Fprintf(q.w, `<script type="text/javascript">
+setvalue(%d);
+</script>
+`, int(pow10))
 	} else {
 		fmt.Fprintf(q.w, "# items: %d\n# zinnen: %d\n# n = %d\n", counter, len(seen), int(pow10))
 	}
 
-	for _, meta := range metas {
+	for number, meta := range metas {
 		items := make([]*MetaItem, 0, len(telling[meta.name]))
 		for name := range telling[meta.name] {
 			items = append(items, &MetaItem{
@@ -465,10 +481,41 @@ c("0", "0");
 			return
 		}
 
+		if !download {
+			fmt.Fprintf(&buf, `
+<p>
+<b>%s</b>
+<table>
+  <tr>
+   <td>per item:
+     <table class="right" id="meta%da">
+     </table>
+   <td class="next">per zin:
+     <table class="right" id="meta%db">
+     </table>
+</table>
+`, html.EscapeString(meta.name), number, number)
+			updateText(q, buf.String())
+			buf.Reset()
+
+			fl := "right"
+			max := 99999
+			if meta.mtype == "TEXT" {
+				fl = "left"
+				max = METAMAX
+			}
+			fmt.Fprintf(q.w, `<script type="text/javascript">
+setmetavars(%d,"%s","%s",%d);
+setmetalines(%d`, number, meta.value, fl, max, number)
+		}
+
 		if metat[meta.name] != "TEXT" {
 			sort.Sort(MetaItems(items))
 		}
 		for run := 0; run < 2; run++ {
+			if !download {
+				fmt.Fprint(q.w, ",[")
+			}
 			if metat[meta.name] == "TEXT" {
 				if run == 0 {
 					sort.Sort(MetaItems0(items))
@@ -486,14 +533,6 @@ c("0", "0");
 				} else {
 					fmt.Fprintln(q.w, "# "+meta.name+" per zin\t")
 				}
-			} else {
-				if run == 0 {
-					fmt.Fprintln(&buf, "<p><b>"+html.EscapeString(meta.name)+"</b><table><tr><td>per item:<table class=\"right\">")
-					fmt.Fprintln(&buf, "<tr><td><em>aantal</em><td><em>"+meta.value+"</em>")
-				} else {
-					fmt.Fprintln(&buf, "<td class=\"next\">per zin:<table class=\"right\">")
-					fmt.Fprintf(&buf, "<tr><td><em>aantal</em><td><em>per&nbsp;%s</em><td><em>%s</em>", iformat(int(pow10)), meta.value)
-				}
 			}
 			select {
 			case <-chClose:
@@ -504,7 +543,7 @@ c("0", "0");
 
 			seen := make(map[int]*Statline)
 			for _, item := range items {
-				lines = append(lines, Statline{item.text, item.count[run], nn[item.idx]})
+				lines = append(lines, Statline{item.text, item.count[run], nn[item.idx], item.idx})
 				seen[item.idx] = &lines[len(lines)-1]
 			}
 			if download || (meta.mtype != "TEXT" && len(seen)*NEEDALL > len(values)) {
@@ -512,7 +551,7 @@ c("0", "0");
 				if meta.mtype == "TEXT" {
 					for _, v := range values {
 						if _, ok := seen[v.i]; !ok {
-							lines = append(lines, Statline{v.s, 0, 1})
+							lines = append(lines, Statline{v.s, 0, 1, v.i})
 						}
 					}
 				} else {
@@ -521,12 +560,13 @@ c("0", "0");
 						if s, ok := seen[v.i]; ok {
 							lines2[i] = *s
 						} else {
-							lines2[i] = Statline{v.s, 0, 1}
+							lines2[i] = Statline{v.s, 0, 1, v.i}
 						}
 					}
 					lines = lines2
 				}
 			}
+			p := "\n"
 			for _, line := range lines {
 				if download {
 					if run == 1 {
@@ -536,52 +576,30 @@ c("0", "0");
 						fmt.Fprintf(q.w, "%d\t%s\n", line.i, line.s)
 					}
 				} else {
-					td := "<td>"
-					if line.s == "" {
-						td = `<td class="nil">`
-					}
-					if meta.mtype == "TEXT" {
-						if line.s == "" {
-							td = `<td class="left nil">`
-						} else {
-							td = `<td class="left">`
-						}
-						count++
-					}
-					fmt.Fprintln(&buf, "<tr><td>", iformat(line.i))
+					fmt.Fprintf(q.w, "%s[%d,", p, line.i)
+					p = ",\n"
 					if run == 1 {
 						v := int(.5 + pow10*float64(line.i)/float64(line.n))
-						fmt.Fprintf(&buf, "<td>%s", iformat(v))
+						fmt.Fprintf(q.w, "%d,", v)
 					}
-					if line.s == "" {
-						line.s = "(leeg)"
+					fmt.Fprintf(q.w, "%d,\"%s\"]", line.idx, line.s)
+					count++
+					if count >= METAMAX && meta.mtype == "TEXT" && line.i == 0 {
+						break
 					}
-					fmt.Fprintln(&buf, td, html.EscapeString(line.s))
-				}
-				if count == METAMAX && meta.mtype == "TEXT" {
-					break
 				}
 			} // for _, line := range lines
 			if !download {
-				if count == METAMAX && meta.mtype == "TEXT" {
-					fmt.Fprint(&buf, "<tr><td>")
-					if run == 1 {
-						fmt.Fprint(&buf, "<td>...")
-					}
-					if meta.mtype == "TEXT" {
-						fmt.Fprint(&buf, "<td class=\"left\">...")
-					} else {
-						fmt.Fprint(&buf, "<td>...")
-					}
-				}
-				fmt.Fprintln(&buf, "</table>")
-				if run == 1 {
-					fmt.Fprintln(&buf, "</table>")
-					updateText(q, buf.String())
-					buf.Reset()
-				}
+				fmt.Fprintln(q.w, "]")
 			}
 		} // for run := 0; run < 2; run++
+
+		if !download {
+			fmt.Fprintf(q.w, `);
+			   makemetatable(%d);
+			   //--></script>
+			   `, number)
+		}
 	} // for _, meta := range metas
 
 	if !download {

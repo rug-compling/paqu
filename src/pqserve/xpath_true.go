@@ -558,6 +558,87 @@ func html_xpath_header(q *Context) {
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
 
+  function ival(i) {
+      var s1 = "".concat(i);
+      var s2 = "";
+      for (var n = s1.length; n > 3; n = s1.length) {
+         s2 = "&#8239;".concat(s1.substr(n-3, n), s2);
+         s1 = s1.substr(0, n-3);
+      }
+      return s1.concat(s2);
+  }
+
+  function sortMeta(tbl, colno) {
+      var n = tbl[0].length - 2;
+      if (colno == n) {
+        tbl.sort(function(a, b) {return (a[n] - b[n]);});
+      } else {
+        tbl.sort(function(a, b) {
+          var c = b[colno] - a[colno];
+          if (c == 0) {
+             return (a[n] - b[n]);
+          }
+          return c;
+        });
+      }
+      return tbl;
+  }
+
+  function fillMeta(idx) {
+    var ida = "#meta" + idx + "a";
+    var idb = "#meta" + idx + "b";
+    var fl = metavars[idx].fl;
+    var lbl = metavars[idx].lbl;
+    var max = metavars[idx].max;
+    var da = metavars[idx].a;
+    var db = metavars[idx].b;
+    var a = $(ida);
+    var b = $(idb);
+    a.html('<tr><td class="link a"><em>aantal</em><td class="link b '+fl+'"><em>'+lbl+'</em>\n');
+    b.html('<tr><td class="link a"><em>aantal</em><td class="link b"><em>per&nbsp;'+ival(metadn)+'</em><td class="link c '+fl+'"><em>'+lbl+'</em>\n');
+    for (i in da) {
+       if (i > max) {
+         a.append('<tr><td><td class="' + fl + '">...\n');
+         b.append('<tr><td><td>...<td class="' + fl + '">...\n');
+         break;
+       }
+       var cl = '';
+       var v = da[i][2];
+       if (da[i][1] == 2147483647) {
+         cl = ' nil';
+         v = '(leeg)';
+       }
+       a.append('<tr><td>' + ival(da[i][0]) + '<td class="' + fl + cl + '">' + v + '\n');
+       cl = '';
+       v = db[i][3];
+       if (db[i][2] == 2147483647) {
+         cl = ' nil';
+         v = '(leeg)';
+       }
+       b.append('<tr><td>' + ival(db[i][0]) + '<td>' + ival(db[i][1]) + '<td class="' + fl + cl + '">' + v + '\n');
+    }
+    $(ida + ' td.a').on('click', function() {
+         metavars[idx].a = sortMeta(da, 0);
+         fillMeta(idx);
+      });
+    $(ida + ' td.b').on('click', function() {
+         metavars[idx].a = sortMeta(da, 1);
+         fillMeta(idx);
+      });
+    $(idb + ' td.a').on('click', function() {
+         metavars[idx].b = sortMeta(db, 0);
+         fillMeta(idx);
+      });
+    $(idb + ' td.b').on('click', function() {
+         metavars[idx].b = sortMeta(db, 1);
+         fillMeta(idx);
+      });
+    $(idb + ' td.c').on('click', function() {
+         metavars[idx].b = sortMeta(db, 2);
+         fillMeta(idx);
+      });
+  }
+
   var metavisible = false;
   function metahelp() {
     var e = $("#helpmeta");
@@ -608,7 +689,25 @@ func html_xpath_header(q *Context) {
   var result;
   var at1, at2, at3;
   var xquery;
+  var metadn = 0;
+  var metavars = [];
   window._fn = {
+    setmetaval: function(value) {
+      metadn = value;
+    },
+    setmetavars: function(idx, lbl, fl, max) {
+      metavars[idx] = {};
+      metavars[idx].lbl = lbl;
+      metavars[idx].fl = fl;
+      metavars[idx].max = max;
+    },
+    setmetalines: function(idx, a, b) {
+      metavars[idx].a = a;
+      metavars[idx].b = b;
+    },
+    makemetatable: function(idx) {
+      fillMeta(idx);
+    },
     updatemeta: function(data) {
       resultmeta.append(data);
     },

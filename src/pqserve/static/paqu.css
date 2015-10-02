@@ -79,6 +79,10 @@ td.next {
     margin-left: 1em;
     border-left: 1px solid grey;
 }
+td.link {
+    color: #0000c0;
+    cursor: pointer;
+}
 div.example, div.vb {
     padding: 1em 2em;
     margin: 1em 0px 2em 0px;;
