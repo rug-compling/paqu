@@ -165,11 +165,12 @@ function doTitle() {
     } else {
         field = "title";
     }
-    if (reverse) {
-        data.sort(function(a, b) {return a.lower < b.lower;});
-    } else {
-        data.sort(function(a, b) {return a.lower > b.lower;});
-    }
+    var rv = reverse ? -1 : 1;
+    data.sort(function(a, b) {
+      if (a.lower > b.lower) { return rv; }
+      if (a.lower < b.lower) { return -rv; }
+      return 0;
+    });
     redraw();
 }
 
@@ -179,21 +180,15 @@ function doLines() {
     } else {
         field = "lines";
     }
-    if (reverse) {
-        data.sort(function(a, b) {
-            if (a.lines == b.lines) {
-                return a.lower > b.lower;
-            }
-            return a.lines < b.lines;
-        });
-    } else {
-        data.sort(function(a, b) {
-            if (a.lines == b.lines) {
-                return a.lower > b.lower;
-            }
-            return a.lines > b.lines;
-        });
-    }
+    var rv = reverse ? -1 : 1;
+    data.sort(function(a, b) {
+      if (a.lines == b.lines) {
+        if (a.lower > b.lower) { return rv; }
+        if (a.lower < b.lower) { return -rv; }
+        return 0;
+      }
+      return rv * (a.lines - b.lines);
+    });
     redraw();
 }
 
@@ -203,21 +198,14 @@ function doOwner() {
     } else {
         field = "owner";
     }
-    if (reverse) {
-        data.sort(function(a, b) {
-            if (a.owner == b.owner) {
-                return a.lower > b.lower;
-            }
-            return a.owner < b.owner;
-        });
-    } else {
-        data.sort(function(a, b) {
-            if (a.owner == b.owner) {
-                return a.lower > b.lower;
-            }
-            return a.owner > b.owner;
-        });
-    }
+    var rv = reverse ? -1 : 1;
+    data.sort(function(a, b) {
+      if (a.owner > b.owner) { return rv; }
+      if (a.owner < b.owner) { return -rv; }
+      if (a.lower > b.lower) { return rv; }
+      if (a.lower < b.lower) { return -rv; }
+      return 0;
+    });
     redraw();
 }
 
