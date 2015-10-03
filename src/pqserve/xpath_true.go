@@ -592,10 +592,22 @@ func html_xpath_header(q *Context) {
     var max = metavars[idx].max;
     var da = metavars[idx].a;
     var db = metavars[idx].b;
+    var ac = metavars[idx].ac;
+    var bc = metavars[idx].bc;
+    var ac0 = "";
+    var ac1 = "";
+    var bc0 = "";
+    var bc1 = "";
+    var bc2 = "";
+    if (ac == 0) { ac0 = " em"; }
+    if (ac == 1) { ac1 = " em"; }
+    if (bc == 0) { bc0 = " em"; }
+    if (bc == 1) { bc1 = " em"; }
+    if (bc == 2) { bc2 = " em"; }
     var a = $(ida);
     var b = $(idb);
-    a.html('<tr><td class="link a"><em>aantal</em><td class="link b '+fl+'"><em>'+lbl+'</em>\n');
-    b.html('<tr><td class="link a"><em>aantal</em><td class="link b"><em>per&nbsp;'+ival(metadn)+'</em><td class="link c '+fl+'"><em>'+lbl+'</em>\n');
+    a.html('<tr><td class="link a'+ac0+'">aantal<td class="link b '+fl+ac1+'">'+lbl+'\n');
+    b.html('<tr><td class="link a'+bc0+'">aantal<td class="link b'+bc1+'">per&nbsp;'+ival(metadn)+'<td class="link c '+fl+bc2+'">'+lbl+'\n');
     for (i in da) {
        if (i > max) {
          a.append('<tr><td><td class="' + fl + '">...\n');
@@ -619,22 +631,27 @@ func html_xpath_header(q *Context) {
     }
     $(ida + ' td.a').on('click', function() {
          metavars[idx].a = sortMeta(da, 0);
+         metavars[idx].ac = 0;
          fillMeta(idx);
       });
     $(ida + ' td.b').on('click', function() {
          metavars[idx].a = sortMeta(da, 1);
+         metavars[idx].ac = 1;
          fillMeta(idx);
       });
     $(idb + ' td.a').on('click', function() {
          metavars[idx].b = sortMeta(db, 0);
+         metavars[idx].bc = 0;
          fillMeta(idx);
       });
     $(idb + ' td.b').on('click', function() {
          metavars[idx].b = sortMeta(db, 1);
+         metavars[idx].bc = 1;
          fillMeta(idx);
       });
     $(idb + ' td.c').on('click', function() {
          metavars[idx].b = sortMeta(db, 2);
+         metavars[idx].bc = 2;
          fillMeta(idx);
       });
   }
@@ -695,11 +712,13 @@ func html_xpath_header(q *Context) {
     setmetaval: function(value) {
       metadn = value;
     },
-    setmetavars: function(idx, lbl, fl, max) {
+    setmetavars: function(idx, lbl, fl, max, ac, bc) {
       metavars[idx] = {};
       metavars[idx].lbl = lbl;
       metavars[idx].fl = fl;
       metavars[idx].max = max;
+      metavars[idx].ac = ac;
+      metavars[idx].bc = bc;
     },
     setmetalines: function(idx, a, b) {
       metavars[idx].a = a;

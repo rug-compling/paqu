@@ -80,8 +80,8 @@ func xstatsmeta(q *Context) {
 function setvalue(n) {
     window.parent._fn.setmetaval(n);
 }
-function setmetavars(idx, lbl, fl, max) {
-    window.parent._fn.setmetavars(idx, lbl, fl, max);
+function setmetavars(idx, lbl, fl, max, ac, bc) {
+    window.parent._fn.setmetavars(idx, lbl, fl, max, ac, bc);
 }
 function setmetalines(idx, a, b) {
     window.parent._fn.setmetalines(idx, a, b);
@@ -500,13 +500,17 @@ setvalue(%d);
 
 			fl := "right"
 			max := 99999
+			ac := 1
+			bc := 2
 			if meta.mtype == "TEXT" {
 				fl = "left"
 				max = METAMAX
+				ac = 0
+				bc = 0
 			}
 			fmt.Fprintf(q.w, `<script type="text/javascript">
-setmetavars(%d,"%s","%s",%d);
-setmetalines(%d`, number, meta.value, fl, max, number)
+setmetavars(%d,"%s","%s",%d,%d,%d);
+setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 		}
 
 		if metat[meta.name] != "TEXT" {
@@ -525,7 +529,6 @@ setmetalines(%d`, number, meta.value, fl, max, number)
 			}
 
 			lines := make([]Statline, 0)
-			var count int
 
 			if download {
 				if run == 0 {
@@ -583,10 +586,6 @@ setmetalines(%d`, number, meta.value, fl, max, number)
 						fmt.Fprintf(q.w, "%d,", v)
 					}
 					fmt.Fprintf(q.w, "%d,\"%s\"]", line.idx, line.s)
-					count++
-					if count >= METAMAX && meta.mtype == "TEXT" && line.i == 0 {
-						break
-					}
 				}
 			} // for _, line := range lines
 			if !download {
@@ -600,7 +599,7 @@ setmetalines(%d`, number, meta.value, fl, max, number)
 			   //--></script>
 			   `, number)
 		}
-	} // for _, meta := range metas
+	} // for number, meta := range metas
 
 	if !download {
 		fmt.Fprintf(&buf,

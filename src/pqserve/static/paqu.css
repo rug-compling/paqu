@@ -408,3 +408,6 @@ img.left {
 br.both {
     clear: both;
 }
+.em {
+    font-style: italic;
+}
