@@ -81,7 +81,7 @@ corpus: <select name="db">
 				s = "(leeg)"
 				cnil = " nil"
 			} else {
-				s = html.EscapeString(s)
+				s = html.EscapeString(unHigh(s))
 			}
 			fmt.Fprintf(q.w, "<tr><td class=\"right\">%s<td class=\"%s%s\">%s\n", iformat(n), align, cnil, s)
 		}
@@ -135,7 +135,7 @@ func metadl(q *Context) {
 			if doErr(q, rows.Scan(&s, &n)) {
 				return
 			}
-			fmt.Fprintf(q.w, "%d\t%s\n", n, s)
+			fmt.Fprintf(q.w, "%d\t%s\n", n, unHigh(s))
 		}
 		if doErr(q, rows.Err()) {
 			return
@@ -278,7 +278,7 @@ func meta2(q *Context) {
 			if logerrfrag(q, rows.Scan(&ii, &s)) {
 				return
 			}
-			keys[i] = append(keys[i], StructIS{ii, s})
+			keys[i] = append(keys[i], StructIS{ii, unHigh(s)})
 		}
 		if logerrfrag(q, rows.Err()) {
 			return

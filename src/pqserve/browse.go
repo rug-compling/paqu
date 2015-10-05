@@ -193,9 +193,10 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 				if idx == 2147483647 {
 					continue
 				}
+				name = unHigh(name)
 				switch mtype {
 				case "TEXT":
-					v = tval
+					v = unHigh(tval)
 				case "INT":
 					v = iformat(ival)
 				case "FLOAT":

@@ -393,7 +393,7 @@ func getMeta(q *Context, prefix string) []MetaType {
 				v = "eeuw"
 			}
 		}
-		result = append(result, MetaType{i, n, t, v})
+		result = append(result, MetaType{i, unHigh(n), t, v})
 	}
 	logerr(rows.Err())
 	return result
