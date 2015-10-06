@@ -192,9 +192,9 @@ function f(s) {
 	var franges [3]*frange
 	var dranges [3]*drange
 	for i := 0; i < 3; i++ {
-		if strings.HasPrefix(attr[i], "::META::") {
+		if attr[i] != "" && attr[i][0] == ':' {
 			isMeta[i] = true
-			name := attr[i][8:]
+			name := attr[i][1:]
 			rows, err := q.db.Query(fmt.Sprintf("SELECT `type` FROM `%s_c_%s_midx` WHERE `name` = %q",
 				Cfg.Prefix, prefix, name))
 			if err != nil {
@@ -465,7 +465,7 @@ function f(s) {
 			}
 			for i := 0; i < 3; i++ {
 				if isMeta[i] {
-					name := attr[i][8:]
+					name := attr[i][1:]
 					for _, m := range alpino.Meta {
 						if m.Name == name {
 							if isInt[i] {
@@ -530,13 +530,13 @@ function f(s) {
 								db.Close()
 								return
 							}
-							if nAttr > 0 && !strings.HasPrefix(attr[0], "::META::") {
+							if nAttr > 0 && attr[0][0] != ':' {
 								at[0] = getFullAttr(attr[0], alp.Node0, alpino.Node0)
 							}
-							if nAttr > 1 && !strings.HasPrefix(attr[1], "::META::") {
+							if nAttr > 1 && attr[1][0] != ':' {
 								at[1] = getFullAttr(attr[1], alp.Node0, alpino.Node0)
 							}
-							if nAttr > 2 && !strings.HasPrefix(attr[2], "::META::") {
+							if nAttr > 2 && attr[2][0] != ':' {
 								at[2] = getFullAttr(attr[2], alp.Node0, alpino.Node0)
 							}
 							switch nAttr {
@@ -630,8 +630,8 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 	}
 	for i := 0; i < nAttr; i++ {
 		a := attr[i]
-		if strings.HasPrefix(a, "::META::") {
-			a = a[8:]
+		if a[0] == ':' {
+			a = a[1:]
 		}
 		if download {
 			fmt.Fprintf(q.w, "\t%s", a)

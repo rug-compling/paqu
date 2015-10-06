@@ -525,7 +525,7 @@ $('#loading span').html('%.1f%%');
 		if q.hasmeta[prefix] {
 			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; metadata &mdash;\">")
 			for _, m := range metas {
-				fmt.Fprintf(q.w, "<option value=\"::META::%s\">%s</option>\n", html.EscapeString(m.name), html.EscapeString(m.name))
+				fmt.Fprintf(q.w, "<option value=\":%s\">%s</option>\n", html.EscapeString(m.name), html.EscapeString(m.name))
 			}
 			fmt.Fprintln(q.w, "</optgroup>")
 			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; attributen &mdash;\">")
