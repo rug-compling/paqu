@@ -1316,6 +1316,8 @@ $('#loading').addClass('hide');
 `)
 }
 
+var reBugtest = regexp.MustCompile(`\[err:[A-Z]+[0-9]+\]`)
+
 func bugtest(filename, xpath string) error {
 	b, err := exec.Command(path.Dir(os.Args[0])+"/pqbugtest", filename, xpath).CombinedOutput()
 	if err != nil {
@@ -1326,7 +1328,7 @@ func bugtest(filename, xpath string) error {
 		return nil
 	}
 	e := errors.New(s)
-	if !strings.HasPrefix(s, "Error: syntax error") {
+	if !reBugtest.MatchString(s) {
 		logerr(errors.New("BUGTEST: " + strings.Replace(xpath, "\n", " ", -1)))
 		logerr(e)
 	}
