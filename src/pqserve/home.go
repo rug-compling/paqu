@@ -430,8 +430,10 @@ func home(q *Context) {
     if (f.chword.checked  ) { n++; }
     if (f.chlemma.checked ) { n++; }
     if (f.chpostag.checked) { n++; }
-    for (i = 0; i < f.cmeta.length; i++) {
-       if (f.cmeta[i].checked) { n++; }
+    if (typeof f.cmeta !== 'undefined' && f.cmeta !== null) {
+      for (i = 0; i < f.cmeta.length; i++) {
+         if (f.cmeta[i].checked) { n++; }
+      }
     }
     if (n <  2) {
       $('#statsrelsubmit').prop('disabled', true);
