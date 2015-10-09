@@ -79,6 +79,7 @@ td.next {
     margin-left: 1em;
     border-left: 1px solid grey;
 }
+th.link,
 td.link {
     color: #0000c0;
     cursor: pointer;
@@ -201,6 +202,9 @@ a.opties:hover
 
 table.breed th {
   text-align: left;
+}
+table.breed th.right {
+  text-align: right;
 }
 table.breed th, td {
   padding: 0px .5em;

@@ -5,9 +5,97 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
+
+type StatLine struct {
+	cols []StructIS
+	used bool
+}
+
+type StatSorter struct {
+	lines  []StatLine
+	labels []string
+	isInt  []bool
+	n      int
+}
+
+func (s *StatSorter) Len() int {
+	return len(s.lines)
+}
+
+func (s *StatSorter) Swap(i, j int) {
+	s.lines[i], s.lines[j] = s.lines[j], s.lines[i]
+}
+
+func (s *StatSorter) Less(i, j int) bool {
+	n := s.n
+	if n == 0 {
+		if s.lines[i].cols[0].i > s.lines[j].cols[0].i {
+			return true
+		}
+		if s.lines[i].cols[0].i < s.lines[j].cols[0].i {
+			return false
+		}
+	} else if s.isInt[n] {
+		if s.lines[i].cols[n].i < s.lines[j].cols[n].i {
+			return true
+		}
+		if s.lines[i].cols[n].i > s.lines[j].cols[n].i {
+			return false
+		}
+	} else {
+		// lege strings achteraan
+		if s.lines[i].cols[n].s == "" && s.lines[j].cols[n].s != "" {
+			return false
+		}
+		if s.lines[i].cols[n].s != "" && s.lines[j].cols[n].s == "" {
+			return true
+		}
+		if s.lines[i].cols[n].s < s.lines[j].cols[n].s {
+			return true
+		}
+		if s.lines[i].cols[n].s > s.lines[j].cols[n].s {
+			return false
+		}
+	}
+	for ii, isint := range s.isInt {
+		if ii == n {
+			continue
+		}
+		if ii == 0 {
+			if s.lines[i].cols[0].i > s.lines[j].cols[0].i {
+				return true
+			}
+			if s.lines[j].cols[0].i < s.lines[j].cols[0].i {
+				return false
+			}
+		} else if isint {
+			if s.lines[i].cols[ii].i < s.lines[j].cols[ii].i {
+				return true
+			}
+			if s.lines[i].cols[ii].i > s.lines[j].cols[ii].i {
+				return false
+			}
+		} else {
+			if s.lines[i].cols[ii].s == "" && s.lines[j].cols[ii].s != "" {
+				return false
+			}
+			if s.lines[i].cols[ii].s != "" && s.lines[j].cols[ii].s == "" {
+				return true
+			}
+			if s.lines[i].cols[ii].s < s.lines[j].cols[ii].s {
+				return true
+			}
+			if s.lines[i].cols[ii].s > s.lines[j].cols[ii].s {
+				return false
+			}
+		}
+	}
+	return false
+}
 
 func stats(q *Context) {
 
@@ -253,9 +341,10 @@ func statsrel(q *Context) {
 		metat[meta.name] = meta.mtype
 	}
 
-	qselect := "COUNT(*)"
+	qselect := make([]string, 0)
 	qfrom := fmt.Sprintf("`%s_c_%s_deprel` `a`", Cfg.Prefix, prefix)
 	qwhere := ""
+	qgo := make([]string, 0)
 	ncols := 0
 	fields := make([]interface{}, 0)
 	fields = append(fields, new(int))
@@ -265,7 +354,9 @@ func statsrel(q *Context) {
 	aligns[0] = "right"
 	for _, t := range []string{"word", "lemma", "postag", "rel", "hword", "hlemma", "hpostag"} {
 		if first(q.r, "c"+t) == "1" {
-			qselect += ",`a`.`" + t + "`"
+			f := "`a`.`" + t + "`"
+			qselect = append(qselect, f)
+			qgo = append(qgo, f)
 			ncols++
 			cols = append(cols, t)
 			aligns = append(aligns, "left")
@@ -275,20 +366,23 @@ func statsrel(q *Context) {
 	nattr := ncols
 
 	for _, meta := range q.r.Form["cmeta"] {
-		cols = append(cols, "meta:"+meta)
+		cols = append(cols, "meta:"+meta, "idx:"+meta)
 		if metat[meta] == "TEXT" {
 			aligns = append(aligns, "left")
 		} else {
 			aligns = append(aligns, "right")
 		}
-		ncols++
-		fields = append(fields, new(string))
+		ncols += 2
+		fields = append(fields, new(string), new(int))
 		table := fmt.Sprintf("m%d", metai[meta])
 		qfrom += fmt.Sprintf(" JOIN ( `%s_c_%s_meta` `%s`", Cfg.Prefix, prefix, table)
 		qfrom += fmt.Sprintf(" JOIN `%s_c_%s_mval` `%sv` USING(`id`,`idx`)", Cfg.Prefix, prefix, table)
 		qfrom += " ) USING(`arch`,`file`)"
 		qwhere += fmt.Sprintf(" AND `%s`.`id` = %d", table, metai[meta])
-		qselect += ", `" + table + "v`.`text`"
+		f := "`" + table + "v`.`text`"
+		fi := "`" + table + "v`.`idx`"
+		qselect = append(qselect, f, fi)
+		qgo = append(qgo, fi)
 	}
 
 	query, err := makeQuery(q, prefix, "a", chClose)
@@ -298,25 +392,9 @@ func statsrel(q *Context) {
 		return
 	}
 
-	qgroupby := ""
-	qorder := "1 DESC"
-	for i := 0; i < ncols; i++ {
-		n := fmt.Sprint(i + 2)
-		if i > 0 {
-			qgroupby += ","
-		}
-		qgroupby += n
-		qorder += "," + n
-	}
-	fullquery := fmt.Sprintf("SELECT %s FROM %s WHERE %s %s GROUP BY %s ORDER BY %s",
-		qselect, qfrom, query, qwhere, qgroupby, qorder)
-
-	qword := urlencode(first(q.r, "word"))
-	qpostag := urlencode(first(q.r, "postag"))
-	qrel := urlencode(first(q.r, "rel"))
-	qhword := urlencode(first(q.r, "hword"))
-	qhpostag := urlencode(first(q.r, "hpostag"))
-	qdb := urlencode(first(q.r, "db"))
+	qgos := strings.Join(qgo, ",")
+	fullquery := fmt.Sprintf("SELECT count(*),%s FROM %s WHERE %s %s GROUP BY %s ORDER BY 1 DESC, %s",
+		strings.Join(qselect, ","), qfrom, query, qwhere, qgos, qgos)
 
 	// BEGIN UITVOER
 
@@ -324,14 +402,9 @@ func statsrel(q *Context) {
 		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
 	} else {
-		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		q.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	}
 	cache(q)
-
-	// DEBUG: HTML-uitvoer van de query
-	if !download {
-		fmt.Fprint(q.w, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
-	}
 
 	select {
 	case <-chClose:
@@ -341,49 +414,108 @@ func statsrel(q *Context) {
 	}
 
 	if !download {
-		fullquery += fmt.Sprintf(" LIMIT %d", WRDMAX+1)
+		fullquery += fmt.Sprintf(" LIMIT %d", BIGLIMIT)
 	}
 
 	rows, err := timeoutQuery(q, chClose, fullquery)
 	if err != nil {
-		interneFoutRegel(q, err, !download)
+		if download {
+			interneFoutRegel(q, err, !download)
+		} else {
+			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		}
 		logerr(err)
 		return
 	}
 
-	if !download {
-		fmt.Fprintln(q.w, "<table class=\"breed\"><tr class=\"odd\">")
-		for _, c := range cols {
-			if strings.HasPrefix(c, "meta:") {
-				c = c[5:]
-			}
-			fmt.Fprintln(q.w, "<th>"+c)
-		}
-	} else {
+	if download {
 		fmt.Fprint(q.w, "aantal")
 		for _, c := range cols[1:] {
-			fmt.Fprint(q.w, "\t"+c)
+			if !strings.HasPrefix(c, "idx:") {
+				fmt.Fprint(q.w, "\t"+c)
+			}
 		}
 		fmt.Fprintln(q.w)
 	}
 
 	n := 0
+	var data *StatSorter
+	if !download {
+		data = &StatSorter{
+			lines:  make([]StatLine, 0),
+			labels: make([]string, 1),
+			isInt:  make([]bool, 1),
+		}
+		data.labels[0] = "aantal"
+		data.isInt[0] = true
+		for _, col := range cols[1:] {
+			if strings.HasPrefix(col, "idx:") {
+				continue
+			}
+			if strings.HasPrefix(col, "meta:") {
+				data.labels = append(data.labels, html.EscapeString(col[5:]))
+				data.isInt = append(data.isInt, true)
+			} else {
+				data.labels = append(data.labels, col)
+				data.isInt = append(data.isInt, false)
+			}
+		}
+	}
+
 	for rows.Next() {
 		n++
 		err := rows.Scan(fields...)
 		if err != nil {
-			interneFoutRegel(q, err, !download)
+			if download {
+				interneFoutRegel(q, err, !download)
+			} else {
+				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			}
 			logerr(err)
 			return
 		}
+
+		dataline := StatLine{cols: make([]StructIS, 0)}
+
+		var link string
 		if !download {
-			if n%2 == 0 {
-				fmt.Fprintln(q.w, "<tr class=\"odd\">")
-			} else {
-				fmt.Fprintln(q.w, "<tr>")
+			if nattr > 0 {
+				// attributen in kolom 1 t/m kolom nattr
+				var qword, qpostag, qrel, qhword, qhpostag string
+				for j := nattr; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
+					if sp, ok := fields[j].(*string); ok {
+						s := *sp
+						switch cols[j] {
+						case "word":
+							qword = urlencode("=" + unHigh(s))
+						case "lemma":
+							qword = urlencode("+" + unHigh(s))
+						case "postag":
+							qpostag = urlencode(s)
+						case "rel":
+							qrel = urlencode(s)
+						case "hword":
+							qhword = urlencode("=" + unHigh(s))
+						case "hlemma":
+							qhword = urlencode("+" + unHigh(s))
+						case "hpostag":
+							qhpostag = urlencode(s)
+							if qhpostag == "" {
+								qhpostag = "--LEEG--"
+							}
+						}
+					}
+				}
+				link = fmt.Sprintf(
+					"db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s",
+					urlencode(first(q.r, "db")), qword, qpostag, qrel, qhword, qhpostag)
 			}
 		}
+
 		for i, e := range fields {
+			if strings.HasPrefix(cols[i], "idx:") {
+				continue
+			}
 			var value string
 			switch v := e.(type) {
 			case *string:
@@ -395,66 +527,30 @@ func statsrel(q *Context) {
 					value = fmt.Sprint(iformat(*v))
 				}
 			}
-			if !download && n > WRDMAX {
-				if i == 0 {
-					value = " " // met spatie!
-				} else {
-					value = "..."
-				}
-			}
-			if !download {
-				var a1, a2 string
-				if i == 0 && n <= WRDMAX {
-					if nattr > 0 {
-						// attributen in kolom 1 t/m kolom nattr
-						for j := nattr; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
-							if sp, ok := fields[j].(*string); ok {
-								s := *sp
-								switch cols[j] {
-								case "word":
-									qword = urlencode("=" + unHigh(s))
-								case "lemma":
-									qword = urlencode("+" + unHigh(s))
-								case "postag":
-									qpostag = urlencode(s)
-								case "rel":
-									qrel = urlencode(s)
-								case "hword":
-									qhword = urlencode("=" + unHigh(s))
-								case "hlemma":
-									qhword = urlencode("+" + unHigh(s))
-								case "hpostag":
-									qhpostag = urlencode(s)
-									if qhpostag == "" {
-										qhpostag = "--LEEG--"
-									}
-								}
-							}
-						}
-						a1 = fmt.Sprintf("<a href=\".?db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s\">",
-							qdb, qword, qpostag, qrel, qhword, qhpostag)
-						a2 = "</a>"
-					}
-				}
-				var s string
-				var c string
-				if value == "" {
-					s = "(leeg)"
-					c = " nil"
-				} else {
-					s = html.EscapeString(value)
-				}
-				fmt.Fprintf(q.w, " <td class=\"%s%s\">%s%s%s\n", aligns[i], c, a1, s, a2)
-			} else {
+			if download {
 				var t string
 				if i != 0 {
 					t = "\t"
 				}
 				fmt.Fprintf(q.w, t+value)
+				continue
+			}
+
+			if strings.HasPrefix(cols[i], "meta:") {
+				dataline.cols = append(dataline.cols, StructIS{*fields[i+1].(*int), value})
+			} else {
+				var c int
+				if i == 0 {
+					value = link
+					c = *e.(*int)
+				}
+				dataline.cols = append(dataline.cols, StructIS{c, value})
 			}
 		}
 		if download {
 			fmt.Fprintln(q.w)
+		} else {
+			data.lines = append(data.lines, dataline)
 		}
 	}
 
@@ -462,14 +558,60 @@ func statsrel(q *Context) {
 		return
 	}
 
-	fmt.Fprintln(q.w, "</table>")
-
-	if !download {
-		fmt.Fprintf(q.w,
-			"<hr>tijd: %s\n<p>\n<a href=\"statsrel?%s&amp;d=1\">download</a>\n",
-			tijd(time.Now().Sub(now)),
-			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
+	if len(data.lines) > WRDMAX {
+		for i := 1; i < len(data.isInt); i++ {
+			data.n = i
+			sort.Sort(data)
+			for j := range data.lines {
+				if j == WRDMAX {
+					break
+				}
+				data.lines[j].used = true
+			}
+		}
+		data.n = 0
+		sort.Sort(data)
 	}
+
+	s := ""
+	fmt.Fprintf(q.w, "{\n\"toomany\": %v,\n\"aligns\": [", len(data.lines) == BIGLIMIT)
+	for _, a := range aligns {
+		fmt.Fprintf(q.w, "%s%q", s, a)
+		s = ","
+	}
+	s = ""
+	fmt.Fprint(q.w, "],\n\"labels\": [")
+	for _, lbl := range data.labels {
+		fmt.Fprintf(q.w, "%s%q", s, lbl)
+		s = ","
+	}
+	s = ""
+	fmt.Fprint(q.w, "],\n\"isint\": [")
+	for _, a := range data.isInt {
+		fmt.Fprintf(q.w, "%s%v", s, a)
+		s = ","
+	}
+	fmt.Fprintln(q.w, "],\n\"lines\": [")
+	var s1, s2 string
+	for i, line := range data.lines {
+		if i >= WRDMAX && !line.used {
+			continue
+		}
+		fmt.Fprintf(q.w, "%s[", s1)
+		s1 = ",\n"
+		s2 = ""
+		for _, col := range line.cols {
+			fmt.Fprintf(q.w, "%s[%q,%d]", s2, col.s, col.i)
+			s2 = ","
+		}
+		fmt.Fprint(q.w, "]")
+	}
+	fmt.Fprintln(q.w, "\n],")
+
+	fmt.Fprintf(q.w, "\"tijd\": %q,\n\"download\": %q,\n\"query\": %q\n}\n",
+		tijd(time.Now().Sub(now)),
+		strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1)+"&amp;d=1",
+		html.EscapeString(query))
 }
 
 func interneFoutRegel(q *Context, err error, is_html bool) {

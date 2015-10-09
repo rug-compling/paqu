@@ -650,7 +650,24 @@ func html_header(q *Context) {
       }
     });
 
+  var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+  };
+
+  function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return entityMap[s];
+    });
+  }
+
   var lastcall = null;
+  var statsreldata;
+  var statsrelcol = 0;
   $.fn.statsrel = function() {
     if (lastcall) {
       try {
@@ -661,13 +678,127 @@ func html_header(q *Context) {
     $("#statresults").html('<img src="busy.gif">');
     lastcall = $.ajax("statsrel?" + $(document.statsrelform).serialize())
       .done(function(data) {
-        $("#statresults").html(data);
+        statsreldata = data;
+        var e = $("#statresults");
+        e.html('<div style="font-family:monospace">' + data.query +
+          '</div><p><table class="breed"></table>');
+        if (data.toomany) {
+            e.append('<div class="warning">Te veel treffers. Bij het sorteren kunnen treffers met lagere aantallen ontbreken.</div>');
+        }
+        e.append('<hr>tijd: ' + data.tijd +
+          '<p><a href="statsrel?' + data.download + '">download</a>');
+        statsrelcol = 0;
+        fillstatsrel();
       }).fail(function(e) {
-        $("#statresults").html(e.responseText);
+        $("#statresults").html('<div class="error">Fout: ' + escapeHtml(e.responseText) + '</div>');
       })
       .always(function() {
         lastcall = null;
       });
+  }
+
+  function statrelset(c) {
+    statsreldata.lines.sort(function(a, b) {
+        if (c == 0) {
+            var r = b[0][1] - a[0][1];
+            if (r != 0) { return r; }
+        } else if (statsreldata.isint[c]) {
+            var r = a[c][1] - b[c][1];
+            if (r != 0) { return r; }
+        } else {
+            if (a[c][0] == "" && b[c][0] != "") {
+                return 1;
+            }
+            if (a[c][0] != "" && b[c][0] == "") {
+                return -1;
+            }
+            if (a[c][0] < b[c][0]) {
+                return -1;
+            }
+            if (a[c][0] > b[c][0]) {
+                return 1;
+            }
+        }
+        for (i in statsreldata.isint) {
+            if (i == c) { continue; }
+	        if (i == 0) {
+	            var r = b[0][1] - a[0][1];
+	            if (r != 0) { return r; }
+	        } else if (statsreldata.isint[i]) {
+	            var r = a[i][1] - b[i][1];
+	            if (r != 0) { return r; }
+	        } else {
+	            if (a[i][0] == "" && b[i][0] != "") {
+	                return 1;
+	            }
+	            if (a[i][0] != "" && b[i][0] == "") {
+	                return -1;
+	            }
+	            if (a[i][0] < b[i][0]) {
+	                return -1;
+	            }
+	            if (a[i][0] > b[i][0]) {
+	                return 1;
+	            }
+	        }
+        }
+        return 0;
+    });
+    statsrelcol = c;
+    fillstatsrel();
+  }
+
+  function statsrellink(i) {
+    $('#sr' + i).on('click', function() { statrelset(i); });
+  }
+
+  function fillstatsrel() {
+    var t = $("#statresults table");
+    var s = '<tr class="odd">';
+    for (i in statsreldata.aligns) {
+        var em = "";
+        if (i == statsrelcol) {
+            em = " em";
+        }
+        s += '<th class="' + statsreldata.aligns[i] + em + ' link" id="sr' + i + '">' + statsreldata.labels[i];
+    }
+    t.html(s);
+    for (i in statsreldata.aligns) {
+        statsrellink(i)
+    }
+    for (j in statsreldata.lines) {
+        if (j % 2 == 1) {
+            s = '<tr class="odd">';
+        } else {
+            s = '<tr>';
+        }
+        if (j > 250) {
+            s += '<td>';
+            for (i = 1; i < statsreldata.aligns.length; i++) {
+                s += '<td class="' + statsreldata.aligns[i] + '">...';
+            }
+            t.append(s);
+            break;
+        }
+        for (i in statsreldata.aligns) {
+            if (i == 0) {
+                s += '<td class="right">';
+                if (statsreldata.lines[j][i][0] == "") {
+                    s += statsreldata.lines[j][i][1];
+                } else {
+                    s += '<a href=".?' + statsreldata.lines[j][i][0] + '">' + statsreldata.lines[j][i][1] + '</a>';
+                }
+            } else {
+                s += '<td class="' + statsreldata.aligns[i];
+                if (statsreldata.lines[j][i][0] == "") {
+                    s += ' nil">(leeg)';
+                } else {
+                    s += '">' + escapeHtml(statsreldata.lines[j][i][0]);
+                }
+            }
+        }
+        t.append(s);
+    }
   }
 
   $(document).ready(function() {
