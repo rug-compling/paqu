@@ -708,6 +708,144 @@ func html_xpath_header(q *Context) {
   var xquery;
   var metadn = 0;
   var metavars = [];
+  var aligns;
+  var labels;
+  var isidx;
+  var data;
+  var curcol;
+
+  var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+  };
+
+  function ival(i) {
+      var s1 = "".concat(i);
+      var s2 = "";
+      for (var n = s1.length; n > 3; n = s1.length) {
+         s2 = "&#8239;".concat(s1.substr(n-3, n), s2);
+         s1 = s1.substr(0, n-3);
+      }
+      return s1.concat(s2);
+  }
+
+  function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return entityMap[s];
+    });
+  }
+
+  function resultset(c) {
+    data.lines.sort(function(a, b) {
+        if (c == 0) {
+            var r = b[0][1] - a[0][1];
+            if (r != 0) { return r; }
+        } else if (isidx[c]) {
+            var r = a[c][1] - b[c][1];
+            if (r != 0) { return r; }
+        } else {
+            if (a[c][0] == "" && b[c][0] != "") {
+                return 1;
+            }
+            if (a[c][0] != "" && b[c][0] == "") {
+                return -1;
+            }
+            if (a[c][0] < b[c][0]) {
+                return -1;
+            }
+            if (a[c][0] > b[c][0]) {
+                return 1;
+            }
+        }
+        for (i in isidx) {
+            if (i == c) { continue; }
+            if (i == 0) {
+                var r = b[0][1] - a[0][1];
+                if (r != 0) { return r; }
+            } else if (isidx[i]) {
+                var r = a[i][1] - b[i][1];
+                if (r != 0) { return r; }
+            } else {
+                if (a[i][0] == "" && b[i][0] != "") {
+                    return 1;
+                }
+                if (a[i][0] != "" && b[i][0] == "") {
+                    return -1;
+                }
+                if (a[i][0] < b[i][0]) {
+                    return -1;
+                }
+                if (a[i][0] > b[i][0]) {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    });
+    curcol = c;
+    fillresult();
+  }
+
+  function fillresult() {
+     if (data.toomany) {
+         result.prepend('<div class="warning">Onderbroken vanwege te veel combinaties</div>');
+         data.toomany = false;
+     }
+     $('#resultmatches').html(data.matches);
+     $('#resultcombis').html(data.combis);
+     $('#resulttijd').html(data.tijd);
+     if (data.final) {
+         $('#resultbusy').html('');
+     } else {
+         if (typeof data.perc !== 'undefined') {
+             $('#resultbusy').html('<img src="busy.gif" alt="aan het werk..."> ' + data.perc);
+         }
+     }
+     var t = $('#resultlines');
+     var em
+     if (curcol == 0) { em = ' em'; } else { em = ""; }
+     var s = '<tr class="odd"><th id="c0" class="link' + em + '">aantal<th>';
+     var i;
+     for (i = 1; i < aligns.length; i++) {
+         if (curcol == i) { em = ' em'; } else { em = ""; }
+         s += '<th id="c' + i + '" class="link ' + aligns[i] + em + '">' + labels[i];
+     }
+     t.html(s);
+     $('#c0').on('click', function() { resultset(0); });
+     $('#c1').on('click', function() { resultset(1); });
+     $('#c2').on('click', function() { resultset(2); });
+     $('#c3').on('click', function() { resultset(3); });
+     var odd;
+     for (i in data.lines) {
+         if (i % 2 == 1) { odd = ' class="odd"'; } else { odd = ""; }
+         if (i == 250) {
+             s = '<tr' + odd + '><td><td>';
+             for (j = 1; j < aligns.length; j++) {
+                 s += '<td class="' + aligns[j] + '">...';
+             }
+             t.append(s);
+             break;
+         }
+         s = '<tr' + odd + '><td class="right' + '">' + ival(data.lines[i][0][1]) + '<td class="right">' + data.lines[i][0][0];
+         for (j = 1; j < aligns.length; j++) {
+             var w = data.lines[i][j][0];
+             var cl = "";
+             if (w.substr(0, 2) == "  ") {
+                 cl = " multi";
+             } else if (w == "") {
+                 cl = " nil";
+                 w = "(leeg)";
+             }
+             s += '<td class="' + aligns[j] + cl + '">' + escapeHtml(w);
+         }
+         t.append(s);
+     }
+  }
+
   window._fn = {
     setmetaval: function(value) {
       metadn = value;
@@ -745,8 +883,33 @@ func html_xpath_header(q *Context) {
     completedmeta: function() {
       busymeta.addClass('hide');
     },
-    update: function(data) {
-      result.html(data);
+    init: function(o) {
+      curcol = 0;
+      aligns = o.aligns;
+      labels = o.labels;
+      isidx = o.isidx;
+      result.html(
+'<table>\n' +
+'<tr><td>Matches:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
+'<tr><td>Combinaties:<td class="right" id="resultcombis">0\n' +
+'<tr><td>Tijd:<td class="right" id="resulttijd">0s\n' +
+'</table>\n' +
+'<p>\n' +
+'<table class="breed" id="resultlines">\n' +
+'</table>\n' +
+'<hr><a href="xpathstats?' + o.download + '">download</a>\n');
+    },
+    update: function(o) {
+        data = o;
+        if (curcol == 0) {
+            fillresult();
+        } else {
+            resultset(curcol);
+        }
+    },
+    error: function(o) {
+        $('#resultbusy').html('');
+        result.prepend('<div class="error">Error: ' + o + '</div>');
     },
     update2: function(data) {
       if (data.err == "") {

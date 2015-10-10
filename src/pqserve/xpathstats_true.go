@@ -5,10 +5,10 @@ package main
 import (
 	"github.com/pebbe/dbxml"
 
-	"bytes"
 	"encoding/xml"
 	"fmt"
 	"html"
+	"math"
 	"net/http"
 	"path"
 	"sort"
@@ -35,6 +35,10 @@ type ValueItems []*ValueItem
 type Alpino_ds_full_node struct {
 	XMLName xml.Name  `xml:"alpino_ds"`
 	Node0   *FullNode `xml:"node"`
+}
+
+func (s StructIS) String() string {
+	return fmt.Sprintf("%12d%s", int64(s.i)-math.MinInt32, s.s)
 }
 
 func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
@@ -133,11 +137,16 @@ func xpathstats(q *Context) {
 function f(s) {
     window.parent._fn.update(s);
 }
+function e(s) {
+    window.parent._fn.error(s);
+}
+function init(s) {
+    window.parent._fn.init(s);
+}
 //--></script>
 </head>
 <body">
 `)
-		updateText(q, `<img src="busy.gif" alt="aan het werk...">`)
 	}
 
 	prefix := getprefix(q)
@@ -145,7 +154,7 @@ function f(s) {
 		if download {
 			fmt.Fprintf(q.w, "Invalid corpus: "+prefix)
 		} else {
-			updateText(q, "Invalid corpus: "+html.EscapeString(prefix))
+			updateJsonErr(q, "Invalid corpus: "+html.EscapeString(prefix))
 			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
@@ -170,7 +179,7 @@ function f(s) {
 		if download {
 			fmt.Fprintln(q.w, "Geen attribuut gekozen")
 		} else {
-			updateText(q, "Geen attribuut gekozen")
+			updateJsonErr(q, "Geen attribuut gekozen")
 			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
@@ -191,7 +200,10 @@ function f(s) {
 	var iranges [3]*irange
 	var franges [3]*frange
 	var dranges [3]*drange
+	var isidx [3]bool
+	var aligns [3]string
 	for i := 0; i < 3; i++ {
+		aligns[i] = "left"
 		if attr[i] != "" && attr[i][0] == ':' {
 			isMeta[i] = true
 			name := attr[i][1:]
@@ -222,6 +234,8 @@ function f(s) {
 					if rows.Scan(&min, &max, &count) == nil {
 						iranges[i] = newIrange(min, max, count)
 						isInt[i] = true
+						aligns[i] = "right"
+						isidx[i] = true
 					}
 				}
 			} else if t == "FLOAT" {
@@ -240,6 +254,8 @@ function f(s) {
 					if rows.Scan(&min, &max) == nil {
 						franges[i] = newFrange(min, max)
 						isFloat[i] = true
+						aligns[i] = "right"
+						isidx[i] = true
 					}
 				}
 			} else if t == "DATE" || t == "DATETIME" {
@@ -256,6 +272,8 @@ function f(s) {
 				var min, max time.Time
 				for rows.Next() {
 					if rows.Scan(&min, &max) == nil {
+						aligns[i] = "right"
+						isidx[i] = true
 						if t == "DATE" {
 							dranges[i] = newDrange(min, max, 0, false)
 							isDate[i] = true
@@ -275,7 +293,7 @@ function f(s) {
 		if download {
 			fmt.Fprintln(q.w, "Query ontbreekt")
 		} else {
-			updateText(q, "Query ontbreekt")
+			updateJsonErr(q, "Query ontbreekt")
 			fmt.Fprintln(q.w, "</body>\n</html>")
 		}
 		return
@@ -345,18 +363,45 @@ function f(s) {
 		return
 	}
 
+	if !download {
+		fmt.Fprintf(q.w, `<script type="text/javascript">
+init({
+"download": %q,
+"aligns": ["right"`,
+			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1)+"&amp;d=1")
+		for i := 0; i < nAttr; i++ {
+			fmt.Fprint(q.w, `,"`, aligns[i], `"`)
+		}
+		fmt.Fprint(q.w, "],\n\"labels\": [\"aantal\"")
+		for i := 0; i < nAttr; i++ {
+			a := attr[i]
+			if a[0] == ':' {
+				a = a[1:]
+			}
+			fmt.Fprint(q.w, `,"`, html.EscapeString(a), `"`)
+		}
+		fmt.Fprint(q.w, "],\n\"isidx\": [true")
+		for i := 0; i < nAttr; i++ {
+			fmt.Fprintf(q.w, ",%v", isidx[i])
+		}
+		fmt.Fprintln(q.w, "]});\n</script>")
+		if ff, ok := q.w.(http.Flusher); ok {
+			ff.Flush()
+		}
+	}
+
 	now := time.Now()
 	now2 := time.Now()
 
 	queryparts := strings.Split(query, "+|+")
 
-	sums := make(map[string]int)
+	sums := make(map[[3]StructIS]int)
 	count := 0
 	tooMany := false
 	var seen uint64
 	for _, dactfile := range dactfiles {
 		if !download && time.Now().Sub(now2) > 2*time.Second {
-			xpathout(q, sums, attr, count, tooMany, now, download, seen, nlines, false)
+			xpathout(q, sums, attr, isidx, count, tooMany, now, download, seen, nlines, false)
 			now2 = time.Now()
 		}
 		if tooMany {
@@ -403,7 +448,7 @@ function f(s) {
 	NEXTDOC:
 		for docs.Next() {
 			if !download && time.Now().Sub(now2) > 2*time.Second {
-				xpathout(q, sums, attr, count, tooMany, now, download, seen, nlines, false)
+				xpathout(q, sums, attr, isidx, count, tooMany, now, download, seen, nlines, false)
 				now2 = time.Now()
 			}
 
@@ -459,9 +504,9 @@ function f(s) {
 				return
 			}
 
-			var mm [3][]string
+			var mm [3][]StructIS
 			for i := 0; i < 3; i++ {
-				mm[i] = make([]string, 0, 4)
+				mm[i] = make([]StructIS, 0, 4)
 			}
 			for i := 0; i < 3; i++ {
 				if isMeta[i] {
@@ -471,37 +516,37 @@ function f(s) {
 							if isInt[i] {
 								v, err := strconv.Atoi(m.Value)
 								if err == nil {
-									vv, _ := iranges[i].value(v)
-									mm[i] = append(mm[i], vv)
+									vv, idx := iranges[i].value(v)
+									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
-									mm[i] = append(mm[i], err.Error())
+									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
 								}
 							} else if isFloat[i] {
 								v, err := strconv.ParseFloat(m.Value, 64)
 								if err == nil {
-									vv, _ := franges[i].value(v)
-									mm[i] = append(mm[i], vv)
+									vv, idx := franges[i].value(v)
+									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
-									mm[i] = append(mm[i], err.Error())
+									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
 								}
 							} else if isDate[i] {
 								v, err := time.Parse("2006-01-02", m.Value)
 								if err == nil {
-									vv, _ := dranges[i].value(v)
-									mm[i] = append(mm[i], vv)
+									vv, idx := dranges[i].value(v)
+									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
-									mm[i] = append(mm[i], err.Error())
+									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
 								}
 							} else if isDateTime[i] {
 								v, err := time.Parse("2006-01-02 15:04", m.Value)
 								if err == nil {
-									vv, _ := dranges[i].value(v)
-									mm[i] = append(mm[i], vv)
+									vv, idx := dranges[i].value(v)
+									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
-									mm[i] = append(mm[i], err.Error())
+									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
 								}
 							} else {
-								mm[i] = append(mm[i], m.Value)
+								mm[i] = append(mm[i], StructIS{0, m.Value})
 							}
 						}
 					}
@@ -509,11 +554,11 @@ function f(s) {
 			}
 			for i := 0; i < 3; i++ {
 				if len(mm[i]) == 0 {
-					mm[i] = append(mm[i], "")
+					mm[i] = append(mm[i], StructIS{2147483647, ""})
 				}
 			}
 
-			var at [3]string
+			var at [3]StructIS
 			for _, at[0] = range mm[0] {
 				for _, at[1] = range mm[1] {
 					for _, at[2] = range mm[2] {
@@ -531,22 +576,15 @@ function f(s) {
 								return
 							}
 							if nAttr > 0 && attr[0][0] != ':' {
-								at[0] = getFullAttr(attr[0], alp.Node0, alpino.Node0)
+								at[0] = StructIS{0, getFullAttr(attr[0], alp.Node0, alpino.Node0)}
 							}
 							if nAttr > 1 && attr[1][0] != ':' {
-								at[1] = getFullAttr(attr[1], alp.Node0, alpino.Node0)
+								at[1] = StructIS{0, getFullAttr(attr[1], alp.Node0, alpino.Node0)}
 							}
 							if nAttr > 2 && attr[2][0] != ':' {
-								at[2] = getFullAttr(attr[2], alp.Node0, alpino.Node0)
+								at[2] = StructIS{0, getFullAttr(attr[2], alp.Node0, alpino.Node0)}
 							}
-							switch nAttr {
-							case 1:
-								sums[at[0]]++
-							case 2:
-								sums[at[0]+"\t"+at[1]]++
-							case 3:
-								sums[at[0]+"\t"+at[1]+"\t"+at[2]]++
-							}
+							sums[at]++
 							count++
 							if len(sums) >= 100000 {
 								tooMany = true
@@ -572,7 +610,7 @@ function f(s) {
 		}
 	}
 
-	xpathout(q, sums, attr, count, tooMany, now, download, 0, 0, true)
+	xpathout(q, sums, attr, isidx, count, tooMany, now, download, 0, 0, true)
 
 	if !download {
 		fmt.Fprintln(q.w, "</body>\n</html>")
@@ -580,42 +618,7 @@ function f(s) {
 
 }
 
-func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
-
-	attrList := make([]*AttrItem, 0, len(sums))
-	for key, value := range sums {
-		attrList = append(attrList, &AttrItem{value, key})
-	}
-	sort.Sort(AttrItems(attrList))
-
-	var buf bytes.Buffer
-
-	if download {
-		if tooMany {
-			fmt.Fprintln(q.w, "# ONDERBROKEN VANWEGE TE VEEL COMBINATIES")
-		}
-		fmt.Fprintf(q.w, "# %d matches in %d combinaties\n", count, len(attrList))
-	} else {
-		if tooMany {
-			fmt.Fprintln(&buf, "<div class=\"warning\">Onderbroken vanwege te veel combinaties</div>")
-		}
-		f := ""
-		if !final {
-			f = `<img src="busy.gif" alt="aan het werk...">`
-			if seen > 0 {
-				f = fmt.Sprintf("%s %.1f%%", f, float64(seen)*100/float64(total))
-			}
-		}
-		fmt.Fprintf(&buf, `<table>
-<tr><td>Matches:<td class="right">%s<td rowspan="3">%s
-<tr><td>Combinaties:<td class="right">%s
-<tr><td>Tijd:<td class="right">%s
-</table>
-<p>
-`, iformat(count), f, iformat(len(attrList)), tijd(time.Now().Sub(now)),
-		)
-	}
-
+func xpathout(q *Context, sums map[[3]StructIS]int, attr []string, isidx [3]bool, count int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
 	nAttr := 0
 	for i := 0; i < 3; i++ {
 		if attr[i] != "" {
@@ -623,10 +626,64 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 		}
 	}
 
+	data := &StatSorter{
+		lines: make([]StatLine, 0),
+		isInt: make([]bool, 1+nAttr),
+	}
+	data.isInt[0] = true
+	for i := 0; i < nAttr; i++ {
+		data.isInt[i+1] = isidx[i]
+	}
+	for key, value := range sums {
+		is := make([]StructIS, nAttr+1)
+		is[0].i = value
+		is[0].s = fmt.Sprintf("%.1f%%", float64(value)/float64(count)*100)
+		for i := 0; i < nAttr; i++ {
+			is[i+1] = key[i]
+		}
+		data.lines = append(data.lines, StatLine{cols: is})
+	}
+	if len(data.lines) > WRDMAX {
+		for i := 1; i < len(data.isInt); i++ {
+			data.n = i
+			sort.Sort(data)
+			for j := range data.lines {
+				if j == WRDMAX {
+					break
+				}
+				data.lines[j].used = true
+			}
+		}
+	}
+	data.n = 0
+	sort.Sort(data)
+
+	if download {
+		if tooMany {
+			fmt.Fprintln(q.w, "# ONDERBROKEN VANWEGE TE VEEL COMBINATIES")
+		}
+		fmt.Fprintf(q.w, "# %d matches in %d combinaties\n", count, len(data.lines))
+	} else {
+		fmt.Fprintf(q.w, `<script type="text/javascript">
+f({
+"toomany": %v,
+"final": %v,
+"matches": "%s",
+"combis": "%s",
+"tijd": "%s",
+`,
+			tooMany,
+			final,
+			iformat(count),
+			iformat(len(data.lines)),
+			tijd(time.Now().Sub(now)))
+		if seen > 0 {
+			fmt.Fprintf(q.w, "\"perc\": \"%.1f%%\",\n", float64(seen)*100/float64(total))
+		}
+	}
+
 	if download {
 		fmt.Fprint(q.w, "aantal\tperc.")
-	} else {
-		fmt.Fprint(&buf, "<table class=\"breed\">\n<tr class=\"odd\"><th><th>")
 	}
 	for i := 0; i < nAttr; i++ {
 		a := attr[i]
@@ -635,48 +692,38 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 		}
 		if download {
 			fmt.Fprintf(q.w, "\t%s", a)
-		} else {
-			fmt.Fprintf(&buf, "<th>%s", html.EscapeString(a))
 		}
 	}
-	fmt.Fprintln(q.w)
+	if download {
+		fmt.Fprintln(q.w)
+	} else {
+		fmt.Fprint(q.w, "\"lines\": [")
+	}
 
-	for n, a := range attrList {
-		o := ""
-		if n%2 == 1 {
-			o = " class=\"odd\""
+	p1 := ""
+	for n, a := range data.lines {
+		if !download && n >= WRDMAX && !a.used {
+			continue
 		}
-		if !download && n == WRDMAX {
-			fmt.Fprintf(&buf, "<tr%s><td class=\"right\">...<td class=\"right\">...\n", o)
-			for i := 0; i < nAttr; i++ {
-				fmt.Fprintln(&buf, "<td class=\"nil\">...")
-			}
-			break
+		if !download {
+			fmt.Fprintf(q.w, "%s\n[", p1)
 		}
-		if download {
-			fmt.Fprintf(q.w, "%d\t%.1f%%", a.n, float64(a.n)/float64(count)*100)
-		} else {
-			fmt.Fprintf(&buf, "<tr%s><td class=\"right\">%s<td class=\"right\">%.1f%%\n", o, iformat(a.n), float64(a.n)/float64(count)*100)
-		}
-		v := strings.Split(a.a, "\t")
-		for i := 0; i < nAttr; i++ {
-			if strings.TrimSpace(v[i]) == "" {
-				if download {
-					fmt.Fprintf(q.w, "\tNIL")
+		p1 = ","
+		p2 := ""
+		for m, c := range a.cols {
+			if download {
+				if m == 0 {
+					fmt.Fprintf(q.w, "%d\t%s", c.i, c.s)
 				} else {
-					fmt.Fprintln(&buf, "<td class=\"nil\">(leeg)")
+					fmt.Fprintf(q.w, "\t%s", c.s)
 				}
 			} else {
-				if download {
-					fmt.Fprintf(q.w, "\t%s", strings.TrimSpace(v[i]))
-				} else {
-					if strings.HasPrefix(v[i], "  ") {
-						fmt.Fprintf(&buf, "<td class=\"multi\">%s\n", html.EscapeString(strings.TrimSpace(v[i])))
-					} else {
-						fmt.Fprintf(&buf, "<td>%s\n", html.EscapeString(v[i]))
-					}
-				}
+				fmt.Fprintf(q.w, "%s[%q,%d]", p2, c.s, c.i)
+				p2 = ","
 			}
+		}
+		if !download {
+			fmt.Fprint(q.w, "]")
 		}
 		if download {
 			fmt.Fprintln(q.w)
@@ -684,10 +731,20 @@ func xpathout(q *Context, sums map[string]int, attr []string, count int, tooMany
 	}
 
 	if !download {
-		fmt.Fprintf(&buf,
-			"</table>\n<hr><a href=\"xpathstats?%s&amp;d=1\">download</a>\n",
-			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
-		updateText(q, buf.String())
+		fmt.Fprintln(q.w, "]});\n</script>")
+		if ff, ok := q.w.(http.Flusher); ok {
+			ff.Flush()
+		}
+	}
+}
+
+func updateJsonErr(q *Context, s string) {
+	fmt.Fprintf(q.w, `<script type="text/javascript">
+e(%q);
+</script>
+`, html.EscapeString(s))
+	if ff, ok := q.w.(http.Flusher); ok {
+		ff.Flush()
 	}
 }
 
