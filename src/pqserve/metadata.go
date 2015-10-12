@@ -192,7 +192,7 @@ Selecteer een of twee elementen om ze te koppelen:
 <div id="meta2res"></div>
 </div>
 <script type="text/javascript"><!--
-  $('#meta2form input').on('change', function (e) {
+  function metaformcheck() {
     var f = document.forms["meta2form"];
     var n = 0;
     for (i = 0; i < f.cmeta.length; i++) {
@@ -203,6 +203,10 @@ Selecteer een of twee elementen om ze te koppelen:
     } else {
       $('#meta2submit').prop('disabled', true);
     }
+  }
+  metaformcheck();
+  $('#meta2form input').on('change', function (e) {
+    metaformcheck()
   });
 //--></script>
 `, prefix)

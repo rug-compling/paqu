@@ -419,8 +419,7 @@ func home(q *Context) {
 		</div>
 		</div>
 <script type="text/javascript"><!--
-  $('#statsrelsubmit').prop('disabled', true);
-  $('#statsrelform input').on('change', function (e) {
+  function statsrelformcheck() {
     var f = document.forms["statsrelform"];
     var n = 0;
     if (f.cword.checked   ) { n++; }
@@ -440,7 +439,11 @@ func home(q *Context) {
     } else {
       $('#statsrelsubmit').prop('disabled', false);
     }
+  }
+  $('#statsrelform input').on('change', function (e) {
+    statsrelformcheck();
   });
+  statsrelformcheck();
 //--></script>
 `)
 }
