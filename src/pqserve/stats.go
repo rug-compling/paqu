@@ -462,6 +462,13 @@ func statsrel(q *Context) {
 		}
 	}
 
+	qword := urlencode(first(q.r, "word"))
+	qpostag := urlencode(first(q.r, "postag"))
+	qrel := urlencode(first(q.r, "rel"))
+	qhword := urlencode(first(q.r, "hword"))
+	qhpostag := urlencode(first(q.r, "hpostag"))
+	qdb := urlencode(first(q.r, "db"))
+
 	for rows.Next() {
 		n++
 		err := rows.Scan(fields...)
@@ -481,7 +488,6 @@ func statsrel(q *Context) {
 		if !download {
 			if nattr > 0 {
 				// attributen in kolom 1 t/m kolom nattr
-				var qword, qpostag, qrel, qhword, qhpostag string
 				for j := nattr; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
 					if sp, ok := fields[j].(*string); ok {
 						s := *sp
@@ -508,7 +514,7 @@ func statsrel(q *Context) {
 				}
 				link = fmt.Sprintf(
 					"db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s",
-					urlencode(first(q.r, "db")), qword, qpostag, qrel, qhword, qhpostag)
+					qdb, qword, qpostag, qrel, qhword, qhpostag)
 			}
 		}
 
