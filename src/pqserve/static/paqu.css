@@ -1,42 +1,52 @@
 body {
    background-color :#eeeeee;
-   background-image: url("paqu.png");
-   background-postion: top left;
-   background-attachment: scroll;
-   background-repeat: no-repeat;
+   // background-image: url("paqu.png");
+   // background-postion: top left;
+   // background-attachment: scroll;
+   // background-repeat: no-repeat;
    font-family:verdana;
-   margin: 8em 20%;
+   margin: 0px auto;
+   padding: 0px .5em;
+   max-width: 960px;
 }
 
-#topmenu {  left: 20%; }
-#login   {  right: 20%; }
 #topmenu, #login {
-    position: absolute;
-    top: .2em;
     font-family: helvetica, arial;
 }
-
-#topmenu a,
+#login   {
+   background-image: url("paqu.png");
+   background-postion: center left;
+   background-attachment: scroll;
+   background-repeat: no-repeat;
+   background-color: #d0d0d0;
+   text-align: right;
+}
 #login form {
-    display: inline-block;
-    // height: 1.3em;
-    padding: .5em 1em;
-    border: 1px solid black;
-    border-bottom: 2px solid black;
-    margin: 0px;
-    background-color: white;
+   padding: .5em 1em;
 }
-#topmenu a { color: black; }
-#login a   { color: #0000c0; }
-#topmenu a.selected,
-#topmenu a:hover {
-    background-color: #e0e0e0;
-    text-decoration: none;
-}
-
 #login input {
     margin: 0px;
 }
+
+#topmenu {
+  background-color: #707070;
+  padding: 0px .5em;
+  margin-bottom: 4em;
+}
+#topmenu a {
+    display: inline-block;
+    min-width: 4.5em;
+    text-decoration: none;
+    color: white;
+    padding: .5em .5em;
+    margin: 0px;
+}
+#topmenu a.selected,
+#topmenu a:hover {
+    background-color: white;
+    color: black;
+}
+
 
 a {
     text-decoration: none;
@@ -59,6 +69,12 @@ a.ico:hover {
 #statresults td,
 #corpustabel td {
     padding: 0px .5em;
+}
+
+
+table.home td {
+   margin: 0px;
+   padding: .3em 0px;
 }
 
 table.right td,

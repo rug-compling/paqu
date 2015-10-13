@@ -289,6 +289,8 @@ func tree(q *Context) {
 		fmt.Fprintf(q.w, `<!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>PaQu: %s</title>
 <link rel="stylesheet" type="text/css" href="tooltip.css" />

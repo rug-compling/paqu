@@ -865,13 +865,13 @@ corpus: <select name="db">
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
 	}
-	fmt.Fprintf(q.w, `<p><table>
+	fmt.Fprintf(q.w, `<p><table class="home">
 	   <tr>
 		 <td style="background-color: yellow">woord
 		 <td>
 		 <td style="background-color: lightgreen">hoofdwoord
 	   <tr>
-		 <td><input type="text" name="word" size="20" value="%s">
+		 <td><input type="text" name="word" size="12" value="%s">
 	   `, html.EscapeString(first(q.r, "word")))
 	fmt.Fprint(q.w, `
 		 <td>
@@ -880,7 +880,7 @@ corpus: <select name="db">
 	html_opts(q, opt_rel, first(q.r, "rel"), "relatie")
 	fmt.Fprintf(q.w, `
 		   </select>
-		 <td><input type="text" name="hword" size="20" value="%s">
+		 <td><input type="text" name="hword" size="12" value="%s">
 	   `, html.EscapeString(first(q.r, "hword")))
 	fmt.Fprint(q.w, `
 	   <tr>

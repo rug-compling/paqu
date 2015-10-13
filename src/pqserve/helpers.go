@@ -85,8 +85,10 @@ func writeHead(q *Context, title string, tab int) {
 <html>
 <head>
 <title>%s</title>
-<link rel="stylesheet" type="text/css" href="paqu.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" type="text/css" href="paqu.css">
 <!--[if gte IE 10]> -->
 <style type="text/css">span.ie { display:none; }</style>
 <!-- <![endif]-->
@@ -95,7 +97,7 @@ func writeHead(q *Context, title string, tab int) {
 <div id="login">
 `, title)
 	if q.auth {
-		fmt.Fprintf(q.w, "<form action=\"logout\">%s &nbsp; <input type=\"submit\" value=\"Log uit\"></form>\n", html.EscapeString(q.user))
+		fmt.Fprintf(q.w, "<form action=\"logout\">%s &nbsp; <input type=\"submit\" value=\"Log uit\"></form>\n", html.EscapeString(q.user[:strings.Index(q.user, "@")]))
 	} else {
 		if u := strings.TrimSpace(Cfg.Loginurl); u == "" {
 			fmt.Fprintln(q.w, "<form action=\"login1\"><span class=\"ie\">E-mail: </span><input type=\"text\" name=\"mail\" placeholder=\"E-mail\"> <input type=\"submit\" value=\"Log in\"></form>")
