@@ -8,7 +8,11 @@ Zie ook: TODO in diverse bestanden
     - Aanpassen aan API van de server (huidige server is te oud)
       - zie ook TODOs in `work.go`
   - Gebruikershandleiding
+    - Tekst voor pagina *Info*: onder kopje *Metadata*
     - Tekst voor pagina *Info*: onder kopje *Corpora*
+  - Adminhandleiding
+    - optie `loginurl` in `setup-example.toml`
+	- gebruik van `$PAQU/contact.html`
   - Metadata
     - Hoe voer je dat in?
   - pqserve:
@@ -22,7 +26,6 @@ Zie ook: TODO in diverse bestanden
 		- maar dan werken links naar volgende pagina niet meer
 		- pagina updaten i.p.v. opnieuw laden bij uitvoeren van zoeken?
     - weergave op mobiel of tablet
-	- optie `loginurl` in `setup-example.toml` documenteren
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen

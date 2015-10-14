@@ -75,7 +75,6 @@ maxwrd = 1000000
 # Als de waarde 0 is geldt er geen limiet.
 maxdup = 10000
 
-
 # Laat gebruikers corpora downloaden in dact-formaat?
 # Als dit aan staat gebruiken corpora ongeveer zeven keer zoveel schijfruimte.
 # Als dit uit staat kunnen gebruikers nog wel corpora in dact-formaat uploaden,

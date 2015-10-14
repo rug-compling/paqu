@@ -280,7 +280,7 @@ td.multi {
 div.submenu {
   background: #fff;
   position: absolute;
-  width: 135px;
+  max-width: 135px;
   display: none;
   margin: -1.5em 0px 0px 1em;
   padding: 5px 0;
@@ -338,7 +338,7 @@ div.submenu {
 /*** overrides for div.submenu *****/
 
 div.a9999 {
-  width: 50%;
+  max-width: 900px;
 }
 
 div.corpushelp {
