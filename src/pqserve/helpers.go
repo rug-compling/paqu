@@ -100,7 +100,7 @@ func writeHead(q *Context, title string, tab int) {
 		fmt.Fprintf(q.w, "<form action=\"logout\">%s &nbsp; <input type=\"submit\" value=\"Log uit\"></form>\n", html.EscapeString(q.user[:strings.Index(q.user, "@")]))
 	} else {
 		if u := strings.TrimSpace(Cfg.Loginurl); u == "" {
-			fmt.Fprintln(q.w, "<form action=\"login1\"><span class=\"ie\">E-mail: </span><input type=\"text\" name=\"mail\" placeholder=\"E-mail\"> <input type=\"submit\" value=\"Log in\"></form>")
+			fmt.Fprintln(q.w, "<form action=\"login1\"><span class=\"ie\">E-mail: </span><input type=\"email\" name=\"mail\" placeholder=\"E-mail\"> <input type=\"submit\" value=\"Log in\"></form>")
 		} else {
 			fmt.Fprintf(q.w, "<form action=\"%s\"><input type=\"submit\" value=\"Log in\"></form>\n", u)
 		}
