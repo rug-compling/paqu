@@ -26,6 +26,8 @@ Zie ook: TODO in diverse bestanden
 		- maar dan werken links naar volgende pagina niet meer
 		- pagina updaten i.p.v. opnieuw laden bij uitvoeren van zoeken?
     - weergave op mobiel of tablet
+	  - weergave van attributen in bomen
+	- pqserve stopt niet altijd direct bij sigterm, en na sigkill zijn logs niet compleet
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
