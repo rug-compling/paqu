@@ -5,7 +5,7 @@ body {
    // background-attachment: scroll;
    // background-repeat: no-repeat;
    font-family:verdana;
-   margin: 0px auto;
+   margin: 0px auto 4em auto;
    padding: 0px .5em;
    max-width: 960px;
 }

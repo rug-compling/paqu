@@ -820,13 +820,14 @@ func html_uitleg(q *Context) {
 <p>
 <hr>
 <p>
-Met deze toepassing kun je zoeken naar woord-paren in delen van de
-Lassy treebanks. De Lassy treebanks bestaan uit Nederlandstalige
-zinnen die voorzien zijn van hun syntactische ontleding. In de Lassy
-Klein treebank (1 miljoen woorden) is voor elke zin de
-syntactische ontleding handmatig gecheckt. In de Lassy Groot treebank
-(700 miljoen woorden) is de syntactische ontleding automatisch
-toegevoegd door de automatische parser Alpino.
+Met <abbr title="Parse &amp; Query">PaQu</abbr> kun je zoeken in
+syntactisch geannoteerde Nederlandstalige corpora.
+PaQu ondersteunt twee manieren van zoeken. Met de eerste,
+eenvoudige, manier kun je naar woordparen zoeken, met daarbij
+eventueel hun syntactische relatie. De tweede, ingewikkeldere, manier
+gebruikt de zoektaal XPath.
+<p>
+Wanneer je inlogt kun je ook je eigen teksten laten annoteren.
 <p>
 <a href="info.html">Meer info...</a>
 `)
