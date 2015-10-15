@@ -67,7 +67,7 @@ zoekresultaten met XPATH vaak verre van compleet zijn. (Versie 6.0.18 is
 op moment van schrijven de meest actuele versie.)
 Je kunt versie 2.5.16 hier downloaden: https://github.com/rug-compling/dbxml
 
-### Go ###
+### Go: The Go Programming Language ###
 
 De meeste programma's zijn geschreven in de programmeertaal Go. Je hebt
 dus de Go-compiler nodig. In Debian 8 "jessie" is Go beschikbaar in het pakket
