@@ -434,8 +434,14 @@ br.both {
 
 table.credits {
     width: 100%;
+    max-width: 100%;
 }
 table.credits td {
     width: 50%;
+    max-width: 50%;
     text-align: center;
+}
+img.maxwidth,
+table.credits img {
+    max-width: 100%;
 }
