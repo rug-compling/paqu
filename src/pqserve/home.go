@@ -835,13 +835,6 @@ Wanneer je inlogt kun je ook je eigen teksten laten annoteren.
 
 func html_footer(q *Context) {
 	fmt.Fprint(q.w, `
-<p>
-<hr>
-<div class="foot">
-mede mogelijk gemaakt door:
-<p>
-<a href="http://www.clarin.nl/" target="_blank"><img src="clarinnl.png" class="noborder" alt="Clarin NL"></a>
-</div>
 </body>
 </html>
 `)

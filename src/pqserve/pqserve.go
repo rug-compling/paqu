@@ -184,6 +184,7 @@ func main() {
 	handleStatic("debug/env", environment)
 
 	handleStatic("busy.gif", static_busy_gif)
+	handleStatic("clariah.png", static_clariah_png)
 	handleStatic("clarinnl.png", static_clarinnl_png)
 	handleStatic("favicon.ico", static_favicon_ico)
 	handleStatic("jquery.js", static_jquery_js)

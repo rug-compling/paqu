@@ -3,6 +3,7 @@ include ../../Makefile.cfg
 
 DEPS = \
 	busy.gif \
+	clariah.png \
 	clarinnl.png \
 	favicon.ico \
 	info.html \

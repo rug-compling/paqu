@@ -26,6 +26,12 @@ func static_busy_gif(q *Context) {
 	fmt.Fprint(q.w, file__busy__gif)
 }
 
+func static_clariah_png(q *Context) {
+	contentType(q, "image/png")
+	cache(q)
+	fmt.Fprint(q.w, file__clariah__png)
+}
+
 func static_clarinnl_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)

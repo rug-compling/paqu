@@ -431,3 +431,11 @@ br.both {
 .em {
     font-style: italic;
 }
+
+table.credits {
+    width: 100%;
+}
+table.credits td {
+    width: 50%;
+    text-align: center;
+}

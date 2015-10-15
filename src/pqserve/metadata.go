@@ -97,8 +97,6 @@ corpus: <select name="db">
 
 	meta2form(q, prefix, metas)
 
-	fmt.Fprintln(q.w, `<p><b>In ontwikkeling</b>`)
-
 	html_footer(q)
 }
 
