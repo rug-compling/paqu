@@ -142,9 +142,6 @@ func metadl(q *Context) {
 }
 
 func meta2form(q *Context, prefix string, metas []MetaType) {
-	if len(metas) < 2 {
-		return
-	}
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
@@ -193,8 +190,12 @@ Selecteer een of twee elementen om ze te koppelen:
   function metaformcheck() {
     var f = document.forms["meta2form"];
     var n = 0;
-    for (i = 0; i < f.cmeta.length; i++) {
-       if (f.cmeta[i].checked) { n++; }
+    if (f.cmeta.checked) {
+      n = 1;
+    } else {
+      for (i = 0; i < f.cmeta.length; i++) {
+         if (f.cmeta[i].checked) { n++; }
+      }
     }
     if (n == 1 || n == 2) {
       $('#meta2submit').prop('disabled', false);

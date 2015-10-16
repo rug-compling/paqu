@@ -430,8 +430,12 @@ func home(q *Context) {
     if (f.chlemma.checked ) { n++; }
     if (f.chpostag.checked) { n++; }
     if (typeof f.cmeta !== 'undefined' && f.cmeta !== null) {
-      for (i = 0; i < f.cmeta.length; i++) {
-         if (f.cmeta[i].checked) { n++; }
+      if (f.cmeta.checked) {
+        n++;
+      } else {
+        for (i = 0; i < f.cmeta.length; i++) {
+           if (f.cmeta[i].checked) { n++; }
+        }
       }
     }
     if (n <  2) {
