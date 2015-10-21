@@ -28,6 +28,15 @@ Zie ook: TODO in diverse bestanden
     - weergave op mobiel of tablet
 	  - weergave van attributen in bomen
 	- pqserve stopt niet altijd direct bij sigterm, en na sigkill zijn logs niet compleet
+    - Onder *Metadata*: subcorpus maken op basis van metadata
+     - Vanuit meerdere corpora, dan moeten die corpora dezelfde soorten metadata hebben.
+     - setHigh/unHigh
+    - Samenvoegen van corpora (na gewoon zoeken, zoeken met xpath, selectie op metadata)
+     - Probleem: Samenvoegen van corpora met incompatibele metadata
+       (text vs int vs float vs date vs datetime).
+      - Als dingen botsen krijgt de gebruiker vanzelf een foutmelding.
+        Maar als één subcorpus metadata heeft die een ander subcorpus
+        niet heeft, dan de gebruiker waarschuwen?
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
