@@ -1,19 +1,18 @@
 package main
 
 import (
-	"github.com/pebbe/util"
-
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
 
 func main() {
-	x := util.CheckErr
-
 	data, err := ioutil.ReadFile(os.Args[1])
-	x(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	attribs := strings.Fields(string(data))
 
 	fmt.Print(`//

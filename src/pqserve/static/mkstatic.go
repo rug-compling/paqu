@@ -1,11 +1,10 @@
 package main
 
 import (
-	"github.com/pebbe/util"
-
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
@@ -27,7 +26,9 @@ import (
 	for _, filename := range os.Args[1:] {
 		fmt.Printf("\nvar %s = `", varname(filename))
 		data, err := ioutil.ReadFile(filename)
-		util.CheckErr(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 		encoded := base64.StdEncoding.EncodeToString(data)
 		n := len(encoded)
 		for i := 0; i < n; i += 80 {
