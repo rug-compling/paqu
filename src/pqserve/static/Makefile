@@ -19,8 +19,5 @@ DEPS = \
 	tooltip.js \
 
 
-../static_data.go: Makefile mkstatic $(DEPS)
-	./mkstatic $(DEPS) > $@
-
-mkstatic: mkstatic.go
-	go build $(OPTS) $^
+../static_generated.go: Makefile mkstatic.go $(DEPS)
+	go run mkstatic.go $(DEPS) > $@

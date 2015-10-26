@@ -11,7 +11,9 @@ import (
 )
 
 func main() {
-	fmt.Print(`// THIS IS A GENERATED FILE. DO NOT EDIT.
+	fmt.Print(`//
+// THIS IS A GENERATED FILE. DO NOT EDIT.
+//
 
 package main
 
