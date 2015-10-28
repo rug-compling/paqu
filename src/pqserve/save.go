@@ -467,13 +467,15 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 }
 
 var (
-	reMetaSrcRemove  = regexp.MustCompile(`[ \t]*(<\s*metadata\s*/\s*>|<\s*meta\s[^>]*name\s*=\s*['"]paqu\.source['"][^>]*>)\s*`)
+	reMetaSrcChange  = regexp.MustCompile(`(<\s*meta\s[^>]*name\s*=\s*['"]paqu)((?:\.source)+['"][^>]*>)`)
+	reMetaNulRemove  = regexp.MustCompile(`[ \t]*<\s*metadata\s*/\s*>\s*`)
 	reMetaScrInsert1 = regexp.MustCompile(`[ \t]*<\s*/\s*metadata\s*>`)
 	reMetaScrInsert2 = regexp.MustCompile(`[ \t]*<\s*node`)
 )
 
 func xmlSetSource(data []byte, prefix string) []byte {
-	s := string(reMetaSrcRemove.ReplaceAll(data, []byte{}))
+	s := string(reMetaNulRemove.ReplaceAll(data, []byte{}))
+	s = reMetaSrcChange.ReplaceAllString(s, "${1}.source${2}")
 	loc := reMetaScrInsert1.FindStringIndex(s)
 	if loc != nil {
 		return []byte(
