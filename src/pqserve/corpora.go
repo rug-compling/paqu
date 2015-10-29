@@ -324,8 +324,12 @@ symbols in the input</a>.
 `)
 	}
 	fmt.Fprint(q.w, `
-<li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>. De tekst moet getokeniseerd zijn.
-<li>Een bestand in TEI-formaat: <a href="http://www.tei-c.org/" target="_blank">Text Encoding Initiative</a>. De tekst moet getokeniseerd zijn.
+<li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>.
+Het bestand moet gecodeerd zijn in UTF-8.
+De tekst moet getokeniseerd zijn.
+<li>Een bestand in TEI-formaat: <a href="http://www.tei-c.org/" target="_blank">Text Encoding Initiative</a>.
+Het bestand moet gecodeerd zijn in UTF-8.
+De tekst moet getokeniseerd zijn.
 </ul>
 Als je een zip- of tarbestand gebruikt, dan moeten de bestanden die daarin zitten allemaal hetzelfde formaat hebben.
 <p>
