@@ -51,6 +51,7 @@ int
 void
     out (long unsigned),
     out1 (unsigned),
+    do_paqu (char const *),
     get_programname (char const *argv0),
     errit (char const *format, ...),
     syntax (void);
@@ -72,6 +73,7 @@ SPC	([ \t\n\r\f]+)
 
 <INITIAL>{
 
+\n##PAQU.*\n                    { /* skip PAQU-directive */ }
 [\x00-\x7F]                     { /* kan us-ascii of utf-8 zijn */ }
 [\xC0-\xDF][\x80-\xBF]          { /* kan utf-8 zijn */ }
 [\xE0-\xEF][\x80-\xBF]{2}       { /* kan utf-8 zijn */ }
@@ -83,6 +85,15 @@ SPC	([ \t\n\r\f]+)
                                   charset = _win;
                                   yyterminate();
                                 }
+}
+
+<_u0001,_u1000,_u01,_u10,_u8,_win,_b4u0001,_b4u1000,_b2u01,_b2u10,_b3u8>{
+
+\n##PAQU.*\n                    {
+                                   do_paqu (yytext);
+                                   BEGIN charset;
+                                }
+
 }
 
 <_b4u0001>{
@@ -331,6 +342,20 @@ int get_charset() {
 
     n = fread (buffer, 1, BUFSIZE, yyin);
 
+    // PAQU-directives zijn altijd UTF-8, beginnen met \n, en eindigen met \n
+    while (memcmp (buffer, "\n##PAQU", 7) == 0) {
+	for (i = 7; buffer[i] != '\n' && i < n; i++) {
+	    ;
+	}
+	if (buffer[i] == '\n') {
+	    i++;
+	}
+	if (i < n) {
+	    memmove (buffer, buffer + i, n - i);
+	}
+	n = i + fread (buffer + n - i, 1, i, yyin);
+    }
+
     if (n > 3 && buffer[0] == 0xff && buffer[1] == 0xfe && buffer[2] == 0 && buffer[3] == 0)
 	return _b4u1000;
     if (n > 3 && buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0xfe && buffer[3] == 0xff)
@@ -368,6 +393,16 @@ int get_charset() {
     }
 
     return 0;
+}
+
+void do_paqu(char const *s) {
+    int
+	i;
+    fputs ("\n##PAQU", stdout);
+    for (i = 7; s[i] != '\n'; i++) {
+	printf("%2X", (unsigned char) s[i]);
+    }
+    putchar (10);
 }
 
 
