@@ -46,6 +46,8 @@ char
 int
     charset = 0,
     run = 0,
+    lbl = 0,
+    inlbl = 0,
     nl = 0,
     bol = 1,
     hex = 0;
@@ -54,7 +56,9 @@ void
     out (long unsigned),
     out1 (unsigned),
     start_meta (void),
+    start_lbl (void),
     do_paqu (char const *),
+    do_paqumeta (char const *),
     get_programname (char const *argv0),
     errit (char const *format, ...),
     syntax (void);
@@ -91,6 +95,11 @@ SPC	([ \t\n\r\f]+)
 }
 
 <_u0001,_u1000,_u01,_u10,_u8,_win,_b4u0001,_b4u1000,_b2u01,_b2u10,_b3u8>{
+
+\n##PAQUMETA.*\n                {
+                                   do_paqumeta (yytext);
+                                   BEGIN charset;
+                                }
 
 \n##PAQU.*\n                    {
                                    do_paqu (yytext);
@@ -131,7 +140,7 @@ SPC	([ \t\n\r\f]+)
 
 <_u1000>{
 
-#\0\0\0#\0\0\0[mM]\0\0\0[eE]\0\0\0[tT]\0\0\0[aA]\0\0\0 {
+#\0\0\0#\0\0\0[mM]\0\0\0[eE]\0\0\0[tT]\0\0\0[aA]\0\0\0[ ]\0\0\0 {
     if (!bol) {
 	REJECT;
     }
@@ -153,7 +162,7 @@ SPC	([ \t\n\r\f]+)
 
 <_u0001>{
 
-\0\0\0#\0\0\0#\0\0\0[mM]\0\0\0[eE]\0\0\0[tT]\0\0\0[aA] {
+\0\0\0#\0\0\0#\0\0\0[mM]\0\0\0[eE]\0\0\0[tT]\0\0\0[aA]\0\0\0[ ] {
     if (!bol) {
 	REJECT;
     }
@@ -175,7 +184,7 @@ SPC	([ \t\n\r\f]+)
 
 <_u10>{
 
-#\0#\0[mM]\0[eE]\0[tT]\0[aA]\0 {
+#\0#\0[mM]\0[eE]\0[tT]\0[aA]\0[ ]\0 {
     if (!bol) {
 	REJECT;
     }
@@ -194,7 +203,7 @@ SPC	([ \t\n\r\f]+)
 
 <_u01>{
 
-\0#\0#\0[mM]\0[eE]\0[tT]\0[aA] {
+\0#\0#\0[mM]\0[eE]\0[tT]\0[aA]\0[ ] {
     if (!bol) {
 	REJECT;
     }
@@ -213,7 +222,7 @@ SPC	([ \t\n\r\f]+)
 
 <_u8>{
 
-##[mM][eE][tT][aA] {
+##[mM][eE][tT][aA][ ] {
     if (!bol) {
 	REJECT;
     }
@@ -232,7 +241,7 @@ SPC	([ \t\n\r\f]+)
 
 <_win>{
 
-##[mM][eE][tT][aA] {
+##[mM][eE][tT][aA][ ] {
     if (!bol) {
 	REJECT;
     }
@@ -293,12 +302,19 @@ int main (int argc, char *argv [])
     while (argc > 1 && argv [1][0] == '-') {
 	if (argv[1][1] == 'r') {
 	    run = 1;
+	    lbl = 0;
+	} else if (argv[1][1] == 'l') {
+	    lbl = 1;
+	    run = 0;
 	} else {
 	    syntax ();
 	    return 1;
 	}
 	argc--;
 	argv++;
+    }
+    if (lbl) {
+	inlbl = 1;
     }
 
     if (argc == 2) {
@@ -336,6 +352,9 @@ void out (long unsigned c) {
     if (c < 0x80) {
 	out1 (c);
 	return;
+    }
+    if (bol) {
+	start_lbl ();
     }
     bol = 0;
     if (c < 0x800) {
@@ -376,6 +395,18 @@ void out (long unsigned c) {
 }
 
 void out1 (unsigned c) {
+    if (bol) {
+	start_lbl ();
+    }
+    if (inlbl) {
+	if (c == 124) {
+	    putchar (10);
+	    inlbl = 0;
+	} else {
+	    printf ("%02X", c);
+	}
+	return;
+    }
     if (! run) {
 	bol = 0;
 	if (c == 10 || c == 12) {
@@ -450,10 +481,12 @@ int get_charset() {
 	if (buffer[i] == '\n') {
 	    i++;
 	}
-	if (i < n) {
-	    memmove (buffer, buffer + i, n - i);
+	memmove (buffer, buffer + i, n - i);
+	if (! (feof (yyin) || ferror (yyin))) {
+	    n = n - i + fread (buffer + n - i, 1, i, yyin);
+	} else {
+	    n -= i;
 	}
-	n = i + fread (buffer + n - i, 1, i, yyin);
     }
 
     if (n > 3 && buffer[0] == 0xff && buffer[1] == 0xfe && buffer[2] == 0 && buffer[3] == 0)
@@ -500,27 +533,62 @@ void start_meta() {
 	putchar (10);
 	nl = 0;
     }
-    fputs ("##META", stdout);
+    fputs ("##META ", stdout);
     bol = 0;
     hex = 1;
+    inlbl = 0;
+}
+
+void start_lbl() {
+    if (lbl) {
+	fputs ("##PAQULBL ", stdout);
+	inlbl = 1;
+	bol = 0;
+    }
 }
 
 void do_paqu(char const *s) {
     int
+	x,
 	i;
     if (run && nl > 0) {
 	putchar (10);
     }
     fputs ("\n##PAQU", stdout);
+    x = 0;
     for (i = 7; s[i] != '\n'; i++) {
+	if (x) {
+	    printf("%2X", (unsigned char) s[i]);
+	} else {
+	    putchar (s [i]);
+	    if (s [i] == 32) {
+		x = 1;
+	    }
+	}
+    }
+    putchar (10);
+    bol = 1;
+    hex = 0;
+    nl = 0;
+    inlbl = 0;
+}
+
+void do_paqumeta(char const *s) {
+    int
+	i;
+    if (run && nl > 0) {
+	putchar (10);
+    }
+    fputs ("\n##META ", stdout);
+    for (i = 12; s[i] != '\n'; i++) {
 	printf("%2X", (unsigned char) s[i]);
     }
     putchar (10);
     bol = 1;
     hex = 0;
     nl = 0;
+    inlbl = 0;
 }
-
 
 void errit (char const *format, ...)
 {
@@ -562,9 +630,10 @@ void syntax ()
 	"\n"
 	"Version " my_VERSION "\n"
 	"\n"
-	"Usage: %s [-r] textfile\n"
+	"Usage: %s [-r|-l] textfile\n"
 	"\n"
 	"  -r : reformat running text\n"
+	"  -l : escape labels (not with running text)\n"
 	"\n"
 	"Dit programma heeft vier functies:\n\n"
 	" 1. Zet alle varianten van regeleinde om naar newline\n"

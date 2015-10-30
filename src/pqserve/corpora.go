@@ -242,7 +242,10 @@ function rm(idx) {
 				processLock.RUnlock()
 				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
 			} else if st == "bezig" {
-				if corpus.params == "run" || strings.HasPrefix(corpus.params, "line") || corpus.params == "folia" || params == "tei" {
+				if strings.HasPrefix(corpus.params, "run") ||
+					strings.HasPrefix(corpus.params, "line") ||
+					corpus.params == "folia" ||
+					params == "tei" {
 					p := 0
 					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"))
 					if err == nil {

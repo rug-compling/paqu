@@ -30,16 +30,20 @@ var (
 	reMidPoint = regexp.MustCompile(`\pL\pL\pP*[.!?]\s+\S`)
 )
 
-func setinvoer(db *sql.DB, soort string, id string) error {
+func setinvoer(db *sql.DB, soort string, id string, isarch bool) error {
+	s := soort
+	if isarch {
+		s = soort + "-arch"
+	}
 	_, err := db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `params` = %q, `msg` = %q WHERE `id` = %q",
-		Cfg.Prefix, soort, "Bron: "+invoertabel[soort], id))
+		Cfg.Prefix, s, "Bron: "+invoertabel[soort], id))
 	return err
 }
 
 func invoersoort(db *sql.DB, data, id string) (string, error) {
 
 	set := func(soort string) (string, error) {
-		return soort, setinvoer(db, soort, id)
+		return soort, setinvoer(db, soort, id, false)
 	}
 
 	fp, err := os.Open(data)
@@ -76,10 +80,16 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 		return set("tei")
 	}
 
+	// TODO: utf-16, utf-32
 	lines := make([]string, 0, 20)
 	scanner := bufio.NewScanner(fp)
 	for i := 0; i < 20 && scanner.Scan(); i++ {
-		lines = append(lines, scanner.Text())
+		line := strings.ToUpper(scanner.Text())
+		if strings.HasPrefix(line, "##PAQU") || strings.HasPrefix(line, "##META") {
+			i--
+		} else {
+			lines = append(lines, line)
+		}
 	}
 	ln := len(lines)
 	if ln < 2 || scanner.Err() != nil {

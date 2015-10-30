@@ -5,6 +5,7 @@ import (
 
 	"compress/gzip"
 	"database/sql"
+	"encoding/hex"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -49,6 +50,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	}
 
 	params := "unknown"
+	isArch := false
 	var rows *sql.Rows
 	rows, err = db.Query(fmt.Sprintf("SELECT `description`,`owner`,`params` FROM `%s_info` WHERE `id` = %q",
 		Cfg.Prefix, task.id))
@@ -60,6 +62,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		rows.Close()
 		if err != nil {
 			return
+		}
+		if strings.Contains(params, "-arch") {
+			params = strings.Replace(params, "-arch", "", 1)
+			isArch = true
 		}
 	}
 
@@ -131,9 +137,13 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			if !strings.HasPrefix(params, "xmlzip") {
 				params = "xmlzip"
 			}
-			setinvoer(db, params, task.id)
+			setinvoer(db, params, task.id, false)
 			ar.Close()
 		} else {
+			isxml := strings.HasPrefix(string(b), "<?xml")
+			if !isxml {
+				isArch = true
+			}
 			ar.Close()
 			var fp *os.File
 			fp, err = os.Create(data + ".tmp")
@@ -151,6 +161,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					fp.Close()
 					err = e
 					return
+				}
+				if !isxml {
+					n := ar.Name()
+					fmt.Fprintf(fp, "\n##PAQUFILE %s\n\n##PAQUMETA text paqu.filename = %s\n", n, n)
 				}
 				err = ar.Copy(fp)
 				if err != nil {
@@ -174,6 +188,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		if params == "dact" {
 			os.Rename(data, dact)
 		}
+	}
+
+	if isArch {
+		setinvoer(db, params, task.id, true)
 	}
 
 	if params == "folia" {
@@ -337,75 +355,106 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				has_tok = true
 			}
 
-			labels := make([]string, 0)
-			if has_lbl {
-				fp, _ := os.Open(data)
-				fptmp, _ := os.Create(data + ".tmp")
+			//  pqtexter
+			var pqtexter string
+			if params == "run" {
+				pqtexter = "-r"
+			} else if has_lbl {
+				pqtexter = "-l"
+			}
+			err = shell("pqtexter %s %s > %s.tmp 2>> %s", pqtexter, data, data, stderr).Run()
+			if err != nil {
+				return
+			}
+			os.Rename(data+".tmp", data)
 
-				rd := util.NewReader(fp)
-				for {
-					line, err := rd.ReadLineString()
-					if err != nil {
-						break
-					}
-					a := strings.SplitN(line, "|", 2)
-					if len(a) == 2 {
-						labels = append(labels, strings.TrimSpace(a[0]))
-						fmt.Fprintln(fptmp, strings.TrimSpace(a[1]))
-					}
+			// tokenizer
+			if !has_tok {
+				var tok string
+				if params == "run" {
+					tok = "tokenize.sh"
+				} else {
+					tok = "tokenize_no_breaks.sh"
 				}
-				fptmp.Close()
-				fp.Close()
+				err = shell("$ALPINO_HOME/Tokenization/%s < %s > %s.tmp 2>> %s", tok, data, data, stderr).Run()
+				if err != nil {
+					return
+				}
 				os.Rename(data+".tmp", data)
 			}
 
-			var pqtexter, tok string
-			if params == "run" {
-				tok = "tokenize.sh"
-				pqtexter = "-r"
-			} else {
-				tok = "tokenize_no_breaks.sh"
+			var fp, fpin *os.File
+			fpin, err = os.Open(data)
+			if err != nil {
+				return
 			}
-
-			var cmd *exec.Cmd
-			if has_tok {
-				cmd = shell("pqtexter %s 2>> %s", data, stderr)
-			} else {
-				cmd = shell("pqtexter %s %s | $ALPINO_HOME/Tokenization/%s 2>> %s", pqtexter, data, tok, stderr)
-			}
-			chPipe := make(chan string)
-			chTokens := make(chan int, 2)
-			var fp *os.File
 			fp, err = os.Create(data + ".lines")
 			if err != nil {
+				fpin.Close()
 				return
 			}
-			go func() {
-				var tokens, lineno int
-				i := 0
-				for line := range chPipe {
-					tokens += len(strings.Fields(line))
-					if has_lbl {
-						fmt.Fprintf(fp, "%04d/%04d-%s|%s\n", lineno/10000, lineno%10000, encode_filename(labels[i]), line)
-						i++
-					} else {
-						fmt.Fprintf(fp, "%04d/%04d|%s\n", lineno/10000, lineno%10000, strings.TrimSpace(line))
-					}
-					if lineno%10000 == 0 {
-						os.MkdirAll(path.Join(xml, fmt.Sprintf("%04d", lineno/10000)), 0777)
-					}
-					lineno++
+
+			rd := util.NewReader(fpin)
+			var filename, lbl string
+			var tokens, nlines, i int
+			for {
+				line, e := rd.ReadLineString()
+				if e == io.EOF {
+					break
 				}
-				fp.Close()
-				chTokens <- tokens
-				chTokens <- lineno
-			}()
-			err = run(cmd, task.chKill, chPipe)
-			if err != nil {
-				return
+				if e != nil {
+					err = e
+					fp.Close()
+					fpin.Close()
+					return
+				}
+				if line == "" {
+					continue
+				}
+				if strings.HasPrefix(line, "##PAQU") {
+					a := strings.Fields(line)
+					var val string
+					if len(a) == 2 {
+						b, e := hex.DecodeString(a[1])
+						if e != nil {
+							err = e
+							fp.Close()
+							fpin.Close()
+							return
+						}
+						val = strings.TrimSpace(string(b))
+					}
+					if a[0] == "##PAQUFILE" {
+						filename = val
+						if strings.HasSuffix(filename, ".txt") || strings.HasSuffix(filename, ".doc") {
+							filename = filename[:len(filename)-4]
+						}
+						i = 0
+					} else if a[0] == "##PAQULBL" {
+						lbl = val
+					}
+				} else if strings.HasPrefix(line, "##META") {
+				} else {
+					tokens += len(strings.Fields(line))
+					if lbl == "" {
+						if filename != "" {
+							i++
+							fmt.Fprintf(fp, "%04d/%04d-%s.%d|%s\n", nlines/10000, nlines%10000, encode_filename(filename), i, line)
+						} else {
+							fmt.Fprintf(fp, "%04d/%04d|%s\n", nlines/10000, nlines%10000, strings.TrimSpace(line))
+						}
+					} else {
+						fmt.Fprintf(fp, "%04d/%04d-%s|%s\n", nlines/10000, nlines%10000, encode_filename(lbl), line)
+						lbl = ""
+					}
+					if nlines%10000 == 0 {
+						os.MkdirAll(path.Join(xml, fmt.Sprintf("%04d", nlines/10000)), 0777)
+					}
+					nlines++
+				}
 			}
-			tokens := <-chTokens
-			nlines := <-chTokens
+			fp.Close()
+			fpin.Close()
 
 			err = do_quotum(db, task.id, user, tokens, nlines)
 			if err != nil {
@@ -419,6 +468,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 		} // end if !reuse
+
+		//
+		// TODO: ##META
+		//
 
 		if !reuse || reuse_more {
 
@@ -495,7 +548,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	p := regexp.QuoteMeta(xml + "/")
 	d := ""
-	if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
+	if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" || isArch {
 		p += "[0-9]+/[0-9]+-"
 		d = "-d"
 	} else if params == "dact" || strings.HasPrefix(params, "xmlzip") {
@@ -516,7 +569,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	if Cfg.Dact && params != "dact" {
 		p := ""
-		if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
+		if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" || isArch {
 			p = "-"
 		} else if strings.HasPrefix(params, "xmlzip") {
 			p = "/"
