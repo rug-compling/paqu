@@ -248,8 +248,14 @@ function rm(idx) {
 					params == "tei" {
 					p := 0
 					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"))
+					n := 0
+					for _, f := range files {
+						if strings.HasSuffix(f, ".xml") || strings.HasSuffix(f, ".xml.gz") {
+							n++
+						}
+					}
 					if err == nil {
-						p = 1 + int(float64(len(files))/float64(corpus.nline)*98+.5)
+						p = 1 + int(float64(n)/float64(corpus.nline)*98+.5)
 					}
 					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 				}

@@ -80,11 +80,11 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 		return set("tei")
 	}
 
-	// TODO: utf-16, utf-32
 	lines := make([]string, 0, 20)
 	scanner := bufio.NewScanner(fp)
 	for i := 0; i < 20 && scanner.Scan(); i++ {
 		line := strings.ToUpper(scanner.Text())
+		line = strings.Replace(line, "\000", "", -1) // utf-16, utf-32, grove methode
 		if strings.HasPrefix(line, "##PAQU") || strings.HasPrefix(line, "##META") {
 			i--
 		} else {

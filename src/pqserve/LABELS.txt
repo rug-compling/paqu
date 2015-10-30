@@ -38,15 +38,16 @@ line          een zin per regel
 line-lbl      een zin per regel, met labels
 line-tok      een zin per regel, getokeniseerd
 line-lbl-tok  een zin per regel, met labels, getokeniseerd
+   *-arch     samenvoeging van bestanden uit zip- of tar-bestand
 
-    Zonder -lbl :
+    Zonder -lbl en zonder -arch:
 
     mysql arch leeg
     mysql file: compleet path naar xml-bestand, zonder .gz
                 .../0000/0000.xml
     dact: 0000/0000.xml
 
-    Met -lbl :
+    Met -lbl en/of met -arch:
 
     mysql arch leeg
     mysql file: compleet path naar xml-bestand, zonder .gz

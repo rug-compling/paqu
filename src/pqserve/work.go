@@ -9,6 +9,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"io/ioutil"
 	"os"
@@ -163,8 +164,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					return
 				}
 				if !isxml {
-					n := ar.Name()
-					fmt.Fprintf(fp, "\n##PAQUFILE %s\n\n##PAQUMETA text paqu.filename = %s\n", n, n)
+					fmt.Fprintf(fp, "\n##PAQUFILE %s\n", ar.Name())
 				}
 				err = ar.Copy(fp)
 				if err != nil {
@@ -394,6 +394,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				return
 			}
 
+			metalines := make([]string, 0)
+			inmeta := false
+
 			rd := util.NewReader(fpin)
 			var filename, lbl string
 			var tokens, nlines, i int
@@ -430,27 +433,68 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 							filename = filename[:len(filename)-4]
 						}
 						i = 0
+						metalines = metalines[0:0]
+						metalines = append(metalines, "text\tpaqu.filename\t"+filename)
+						inmeta = true
 					} else if a[0] == "##PAQULBL" {
 						lbl = val
 					}
 				} else if strings.HasPrefix(line, "##META") {
+					if !inmeta {
+						if filename == "" {
+							metalines = metalines[0:0]
+						} else {
+							metalines = metalines[:1]
+						}
+						inmeta = true
+					}
+					a := strings.Fields(line)
+					if len(a) == 2 {
+						b, e := hex.DecodeString(a[1])
+						if e != nil {
+							err = e
+							fp.Close()
+							fpin.Close()
+							return
+						}
+						f := strings.Fields(string(b))
+						if len(f) > 3 && f[2] == "=" {
+							metalines = append(metalines, fmt.Sprintf("%s\t%s\t%s", f[0], f[1], strings.Join(f[3:], " ")))
+						}
+					}
 				} else {
+					inmeta = false
 					tokens += len(strings.Fields(line))
+					var fname string
 					if lbl == "" {
 						if filename != "" {
 							i++
-							fmt.Fprintf(fp, "%04d/%04d-%s.%d|%s\n", nlines/10000, nlines%10000, encode_filename(filename), i, line)
+							fname = fmt.Sprintf("%04d/%04d-%s.%d", nlines/10000, nlines%10000, encode_filename(filename), i)
 						} else {
-							fmt.Fprintf(fp, "%04d/%04d|%s\n", nlines/10000, nlines%10000, strings.TrimSpace(line))
+							fname = fmt.Sprintf("%04d/%04d", nlines/10000, nlines%10000)
 						}
 					} else {
-						fmt.Fprintf(fp, "%04d/%04d-%s|%s\n", nlines/10000, nlines%10000, encode_filename(lbl), line)
+						fname = fmt.Sprintf("%04d/%04d-%s", nlines/10000, nlines%10000, encode_filename(lbl))
 						lbl = ""
 					}
+					fmt.Fprintf(fp, "%s|%s\n", fname, strings.TrimSpace(line))
 					if nlines%10000 == 0 {
 						os.MkdirAll(path.Join(xml, fmt.Sprintf("%04d", nlines/10000)), 0777)
 					}
 					nlines++
+					if len(metalines) > 0 {
+						fpm, e := os.Create(path.Join(xml, fname+".meta"))
+						if e != nil {
+							err = e
+							fp.Close()
+							fpin.Close()
+							return
+						}
+						for _, m := range metalines {
+							fmt.Fprintln(fpm, m)
+						}
+						fpm.Close()
+					}
 				}
 			}
 			fp.Close()
@@ -468,10 +512,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 		} // end if !reuse
-
-		//
-		// TODO: ##META
-		//
 
 		if !reuse || reuse_more {
 
@@ -554,6 +594,48 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	} else if params == "dact" || strings.HasPrefix(params, "xmlzip") {
 		p += "[0-9]+/"
 		d = "-d"
+	}
+
+	filenames, e := filenames2(xml)
+	if e != nil {
+		err = e
+		return
+	}
+	for _, filename := range filenames {
+		if !strings.HasSuffix(filename, ".meta") {
+			continue
+		}
+		m := path.Join(xml, filename)
+		x := m[:len(m)-4] + "xml"
+		var xb, mb []byte
+		xb, err = ioutil.ReadFile(x)
+		if err != nil {
+			return
+		}
+		mb, err = ioutil.ReadFile(m)
+		if err != nil {
+			return
+		}
+		fp, err = os.Create(x + ".tmp")
+		if err != nil {
+			return
+		}
+		xt := string(xb)
+		mt := strings.Split(strings.TrimSpace(string(mb)), "\n")
+		i := strings.Index(xt, "<node")
+		fmt.Fprint(fp, xt[:i], "<metadata>\n")
+		for _, m := range mt {
+			mm := strings.Split(m, "\t")
+			fmt.Fprintf(fp,
+				"    <meta type=%q name=%q value=%q/>\n",
+				html.EscapeString(strings.ToLower(mm[0])),
+				html.EscapeString(mm[1]),
+				html.EscapeString(mm[2]))
+		}
+		fmt.Fprint(fp, "  </metadata>\n  ", xt[i:])
+		fp.Close()
+		os.Rename(x+".tmp", x)
+		os.Remove(m)
 	}
 
 	cmd := shell(

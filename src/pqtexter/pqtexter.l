@@ -58,7 +58,6 @@ void
     start_meta (void),
     start_lbl (void),
     do_paqu (char const *),
-    do_paqumeta (char const *),
     get_programname (char const *argv0),
     errit (char const *format, ...),
     syntax (void);
@@ -95,11 +94,6 @@ SPC	([ \t\n\r\f]+)
 }
 
 <_u0001,_u1000,_u01,_u10,_u8,_win,_b4u0001,_b4u1000,_b2u01,_b2u10,_b3u8>{
-
-\n##PAQUMETA.*\n                {
-                                   do_paqumeta (yytext);
-                                   BEGIN charset;
-                                }
 
 \n##PAQU.*\n                    {
                                    do_paqu (yytext);
@@ -565,23 +559,6 @@ void do_paqu(char const *s) {
 		x = 1;
 	    }
 	}
-    }
-    putchar (10);
-    bol = 1;
-    hex = 0;
-    nl = 0;
-    inlbl = 0;
-}
-
-void do_paqumeta(char const *s) {
-    int
-	i;
-    if (run && nl > 0) {
-	putchar (10);
-    }
-    fputs ("\n##META ", stdout);
-    for (i = 12; s[i] != '\n'; i++) {
-	printf("%2X", (unsigned char) s[i]);
     }
     putchar (10);
     bol = 1;
