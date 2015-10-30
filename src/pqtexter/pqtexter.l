@@ -14,7 +14,7 @@
 
 %{
 
-#define my_VERSION "0.01"
+#define my_VERSION "0.02"
 
 #define __NO_MATH_INLINES
 
@@ -39,18 +39,21 @@
 /* veelvoud van 4 */
 #define BUFSIZE 4096
 
-unsigned char    
+unsigned char
     buffer [BUFSIZE];
 char
     *programname;
 int
     charset = 0,
     run = 0,
-    nl = 0;
+    nl = 0,
+    bol = 1,
+    hex = 0;
 
 void
     out (long unsigned),
     out1 (unsigned),
+    start_meta (void),
     do_paqu (char const *),
     get_programname (char const *argv0),
     errit (char const *format, ...),
@@ -128,46 +131,113 @@ SPC	([ \t\n\r\f]+)
 
 <_u1000>{
 
-\n\0\0\0\r\0\0\0|\r\0\0\0\n\0\0\0|\r\0\0\0|\n\0\0\0     { out1 (10); }
-....                            { out ((long unsigned)(unsigned char)yytext[0] + 
-				       256 * (long unsigned)(unsigned char)yytext[1] +
-				       256 * 256 * (long unsigned)(unsigned char)yytext[2] +
-				       256 * 256 * 256 * (long unsigned)(unsigned char)yytext[3]); }
+#\0\0\0#\0\0\0[mM]\0\0\0[eE]\0\0\0[tT]\0\0\0[aA]\0\0\0 {
+    if (!bol) {
+	REJECT;
+    }
+    start_meta();
+ }
+
+\n\0\0\0\r\0\0\0|\r\0\0\0\n\0\0\0|\r\0\0\0|\n\0\0\0     {
+    out1 (10);
+ }
+
+....                            {
+    out ((long unsigned)(unsigned char)yytext[0] +
+	 256 * (long unsigned)(unsigned char)yytext[1] +
+	 256 * 256 * (long unsigned)(unsigned char)yytext[2] +
+	 256 * 256 * 256 * (long unsigned)(unsigned char)yytext[3]);
+ }
 
 }
 
 <_u0001>{
 
-\0\0\0\n\0\0\0\r|\0\0\0\r\0\0\0\n|\0\0\0\r|\0\0\0\n     { out1 (10); }
-....                            { out ((long unsigned)(unsigned char)yytext[3] +
-				       256 * (long unsigned)(unsigned char)yytext[2] +
-				       256 * 256 * (long unsigned)(unsigned char)yytext[1] +
-				       256 * 256 * 256 * (long unsigned)(unsigned char)yytext[0]); }
+\0\0\0#\0\0\0#\0\0\0[mM]\0\0\0[eE]\0\0\0[tT]\0\0\0[aA] {
+    if (!bol) {
+	REJECT;
+    }
+    start_meta();
+ }
+
+\0\0\0\n\0\0\0\r|\0\0\0\r\0\0\0\n|\0\0\0\r|\0\0\0\n     {
+    out1 (10);
+ }
+
+....                            {
+    out ((long unsigned)(unsigned char)yytext[3] +
+	 256 * (long unsigned)(unsigned char)yytext[2] +
+	 256 * 256 * (long unsigned)(unsigned char)yytext[1] +
+	 256 * 256 * 256 * (long unsigned)(unsigned char)yytext[0]);
+ }
 
 }
 
 <_u10>{
 
-\n\0\r\0|\r\0\n\0|\r\0|\n\0     { out1 (10); }
-..                              { out ((long unsigned)(unsigned char)yytext[0] + 256 * (long unsigned)(unsigned char)yytext[1]); }
+#\0#\0[mM]\0[eE]\0[tT]\0[aA]\0 {
+    if (!bol) {
+	REJECT;
+    }
+    start_meta();
+ }
+
+\n\0\r\0|\r\0\n\0|\r\0|\n\0     {
+    out1 (10);
+  }
+
+..                              {
+    out ((long unsigned)(unsigned char)yytext[0] + 256 * (long unsigned)(unsigned char)yytext[1]);
+  }
 
 }
 
 <_u01>{
 
-\0\n\0\r|\0\r\0\n|\0\r|\0\n     { out1 (10); }
-..                              { out ((long unsigned)(unsigned char)yytext[1] + 256 * (long unsigned)(unsigned char)yytext[0]); }
+\0#\0#\0[mM]\0[eE]\0[tT]\0[aA] {
+    if (!bol) {
+	REJECT;
+    }
+    start_meta();
+ }
+
+\0\n\0\r|\0\r\0\n|\0\r|\0\n     {
+    out1 (10);
+ }
+
+..                              {
+    out ((long unsigned)(unsigned char)yytext[1] + 256 * (long unsigned)(unsigned char)yytext[0]);
+ }
 
 }
 
 <_u8>{
 
-\n\r|\r\n|\r|\n                 { out1 (10); }
-.                               { out1 ((unsigned char)yytext[0]); }
+##[mM][eE][tT][aA] {
+    if (!bol) {
+	REJECT;
+    }
+    start_meta();
+ }
+
+\n\r|\r\n|\r|\n                 {
+    out1 (10);
+ }
+
+.                               {
+    out1 ((unsigned char)yytext[0]);
+ }
 
 }
 
 <_win>{
+
+##[mM][eE][tT][aA] {
+    if (!bol) {
+	REJECT;
+    }
+    start_meta();
+ }
 
 \n\r|\r\n|\r|\n { out1 (10); }
 
@@ -267,6 +337,7 @@ void out (long unsigned c) {
 	out1 (c);
 	return;
     }
+    bol = 0;
     if (c < 0x800) {
 	out1 ((c>>6  & 0x1F) | 0xC0);
 	out1 ((c>>0  & 0x3F) | 0x80);
@@ -306,18 +377,47 @@ void out (long unsigned c) {
 
 void out1 (unsigned c) {
     if (! run) {
-	putchar (c);
+	bol = 0;
+	if (c == 10 || c == 12) {
+	    putchar (10);
+	    bol = 1;
+	    hex = 0;
+	} else if (c == 9) {
+	    putchar (32);
+	} else {
+	    if (hex)
+		printf ("%02X", c);
+	    else
+		putchar (c);
+	}
 	return;
     }
+    if (hex && c == 10) {
+	putchar (10);
+	nl = 0;
+	bol = 1;
+	hex = 0;
+	return;
+    }
+    bol = 0;
+    // formfeed
     if (c == 12) {
 	putchar (10);
 	nl = 0;
+	bol = 1;
 	return;
     }
+    // newline
     if (c == 10) {
 	nl++;
+	bol = 1;
 	return;
     }
+    if (hex) {
+	printf ("%02X", c);
+	return;
+    }
+    // spatie || tab
     if (c == 32 || c == 9) {
 	putchar (32);
 	return;
@@ -378,7 +478,7 @@ int get_charset() {
 	return _u1000;
     if (u0001 > 1 && u0001 > n/4 * .9)
 	return _u0001;
-    
+
     u10 = u01 = 0;
     for (i = 0; i < n; i += 2) {
 	if (buffer[i] == 0 && buffer[i+1] != 0)
@@ -395,14 +495,30 @@ int get_charset() {
     return 0;
 }
 
+void start_meta() {
+    if (run && nl > 0) {
+	putchar (10);
+	nl = 0;
+    }
+    fputs ("##META", stdout);
+    bol = 0;
+    hex = 1;
+}
+
 void do_paqu(char const *s) {
     int
 	i;
+    if (run && nl > 0) {
+	putchar (10);
+    }
     fputs ("\n##PAQU", stdout);
     for (i = 7; s[i] != '\n'; i++) {
 	printf("%2X", (unsigned char) s[i]);
     }
     putchar (10);
+    bol = 1;
+    hex = 0;
+    nl = 0;
 }
 
 
@@ -436,7 +552,7 @@ void get_programname (char const *argv0)
         programname = strdup (p + 1);
     else
         programname = strdup (argv0);
-#endif    
+#endif
 }
 
 void syntax ()
@@ -450,14 +566,18 @@ void syntax ()
 	"\n"
 	"  -r : reformat running text\n"
 	"\n"
-	"Dit programma heeft drie functies:\n\n"
+	"Dit programma heeft vier functies:\n\n"
 	" 1. Zet alle varianten van regeleinde om naar newline\n"
 	" 2. Zet invoer om naar utf-8\n"
-	" 3. Met optie -r: haal newlines weg, behalve tussen paragrafen\n\n"
+	" 3. Met optie -r: haal newlines weg, behalve tussen paragrafen\n"
+	" 4. Codering van ##PAQU- en ##META-directives\n\n"
 	"Bij 2: er wordt verondersteld dat de invoer in een van de volgende tekensets is:\n"
-	"utf-8, utf-16, utf-32 (alle met/zonder BOM), us-ascii, iso-8859-1, windows-1252\n\n"
+	"       utf-8, utf-16, utf-32 (alle met/zonder BOM), us-ascii, iso-8859-1, windows-1252\n\n"
 	"Bij 3: een paragraafgrens bestaat uit 2 of meer regeleindes met alleen spaties\n"
-	"of tabs ertussen, of een formfeed\n\n",
+	"       of tabs ertussen, of een formfeed, of een ##PAQU- of ##META-directive\n\n"
+	"Bij 4: ##PAQU (hoofdletters) altijd in utf-8, begint en eindigt met een newline\n"
+	"         (dus tussen twee opeenvolgende ##PAQU-directives zitten twee newlines)\n"
+	"       ##META (hoofd-/kleine letters) altijd in zelfde tekenset als rest van de tekst\n\n",
 	programname
     );
     exit (1);
