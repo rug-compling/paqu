@@ -31,7 +31,7 @@ func get_dact(archive, filename string) ([]byte, error) {
 }
 
 func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
-	files, err := filenames2(xml)
+	files, err := filenames2(xml, false)
 	if err != nil {
 		return err
 	}

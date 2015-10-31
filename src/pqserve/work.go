@@ -141,13 +141,13 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			setinvoer(db, params, task.id, false)
 			ar.Close()
 		} else {
-			isxml := strings.HasPrefix(string(b), "<?xml")
-			if !isxml {
-				isArch = true
-			}
+			//isxml := strings.HasPrefix(string(b), "<?xml")
+			//if !isxml {
+			isArch = true
+			//}
 			ar.Close()
 			var fp *os.File
-			fp, err = os.Create(data + ".tmp")
+			fp, err = os.Create(data + ".unzip")
 			if err != nil {
 				return
 			}
@@ -163,9 +163,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					err = e
 					return
 				}
-				if !isxml {
-					fmt.Fprintf(fp, "\n##PAQUFILE %s\n", ar.Name())
-				}
+				//if !isxml {
+				fmt.Fprintf(fp, "\n##PAQUFILE %s\n", ar.Name())
+				//}
 				err = ar.Copy(fp)
 				if err != nil {
 					fp.Close()
@@ -176,7 +176,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			fp.Close()
 			ar.Close()
-			os.Rename(data+".tmp", data)
 		}
 	}
 
@@ -231,7 +230,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			logerr(gz(f))
 		}
-		fnames, e := filenames2(xml)
+		fnames, e := filenames2(xml, false)
 		if logerr(e) {
 			return
 		}
@@ -295,7 +294,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	} else { // if params != (dact || xmlzip)
 		reuse := false
 		reuse_more := false
-		if files, e := filenames2(xml); e == nil && len(files) > 0 {
+		if files, e := filenames2(xml, false); e == nil && len(files) > 0 {
 			reuse = true
 			done := make(map[string]bool)
 			for _, f := range files {
@@ -356,17 +355,22 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 			//  pqtexter
-			var pqtexter string
+			var pqtexter, unzip string
 			if params == "run" {
 				pqtexter = "-r"
 			} else if has_lbl {
 				pqtexter = "-l"
 			}
-			err = shell("pqtexter %s %s > %s.tmp 2>> %s", pqtexter, data, data, stderr).Run()
+			if isArch {
+				unzip = ".unzip"
+			}
+			err = shell("pqtexter %s %s%s > %s.tmp 2>> %s", pqtexter, data, unzip, data, stderr).Run()
 			if err != nil {
 				return
 			}
-			os.Rename(data+".tmp", data)
+			if isArch {
+				os.Remove(data + ".unzip")
+			}
 
 			// tokenizer
 			if !has_tok {
@@ -376,15 +380,15 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				} else {
 					tok = "tokenize_no_breaks.sh"
 				}
-				err = shell("$ALPINO_HOME/Tokenization/%s < %s > %s.tmp 2>> %s", tok, data, data, stderr).Run()
+				err = shell("$ALPINO_HOME/Tokenization/%s < %s.tmp > %s.tmp2 2>> %s", tok, data, data, stderr).Run()
 				if err != nil {
 					return
 				}
-				os.Rename(data+".tmp", data)
+				os.Rename(data+".tmp2", data+".tmp")
 			}
 
 			var fp, fpin *os.File
-			fpin, err = os.Open(data)
+			fpin, err = os.Open(data + ".tmp")
 			if err != nil {
 				return
 			}
@@ -499,11 +503,14 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			fp.Close()
 			fpin.Close()
+			os.Remove(data + ".tmp")
 
 			err = do_quotum(db, task.id, user, tokens, nlines)
 			if err != nil {
 				os.Remove(data)
 				os.Remove(data + ".lines")
+				os.Remove(stderr)
+				os.RemoveAll(xml)
 				return
 			}
 
@@ -596,15 +603,12 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		d = "-d"
 	}
 
-	filenames, e := filenames2(xml)
+	filenames, e := filenames2(xml, true)
 	if e != nil {
 		err = e
 		return
 	}
 	for _, filename := range filenames {
-		if !strings.HasSuffix(filename, ".meta") {
-			continue
-		}
 		m := path.Join(xml, filename)
 		x := m[:len(m)-4] + "xml"
 		var xb, mb []byte

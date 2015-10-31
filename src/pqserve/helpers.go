@@ -329,7 +329,7 @@ func decode_filename(s string) string {
 }
 
 // alle bestandsnamen van all subdirectories van de gegeven directory)
-func filenames2(dirname string) ([]string, error) {
+func filenames2(dirname string, meta bool) ([]string, error) {
 	fnames := make([]string, 0)
 	dirs, err := ioutil.ReadDir(dirname)
 	if err != nil {
@@ -342,7 +342,9 @@ func filenames2(dirname string) ([]string, error) {
 			return fnames, err
 		}
 		for _, file := range files {
-			fnames = append(fnames, path.Join(dname, file.Name()))
+			if name := file.Name(); strings.HasSuffix(name, ".meta") == meta {
+				fnames = append(fnames, path.Join(dname, name))
+			}
 		}
 	}
 	return fnames, nil

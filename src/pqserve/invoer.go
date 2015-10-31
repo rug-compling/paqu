@@ -1,7 +1,8 @@
 package main
 
 import (
-	"bufio"
+	"github.com/pebbe/util"
+
 	"database/sql"
 	"fmt"
 	"io"
@@ -81,9 +82,13 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 	}
 
 	lines := make([]string, 0, 20)
-	scanner := bufio.NewScanner(fp)
-	for i := 0; i < 20 && scanner.Scan(); i++ {
-		line := strings.ToUpper(scanner.Text())
+	rd := util.NewReader(fp)
+	for i := 0; i < 20; i++ {
+		line, e := rd.ReadLineString()
+		if e != nil {
+			break
+		}
+		line = strings.ToUpper(line)
 		line = strings.Replace(line, "\000", "", -1) // utf-16, utf-32, grove methode
 		if strings.HasPrefix(line, "##PAQU") || strings.HasPrefix(line, "##META") {
 			i--
@@ -92,7 +97,7 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 		}
 	}
 	ln := len(lines)
-	if ln < 2 || scanner.Err() != nil {
+	if ln < 2 {
 		return set("run")
 	}
 

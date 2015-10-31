@@ -140,7 +140,7 @@ func download(q *Context) {
 
 	// xml
 	datadir = path.Join(datadir, "xml")
-	files, err := filenames2(datadir)
+	files, err := filenames2(datadir, false)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
