@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -61,7 +62,7 @@ func tei(infile, outfile string) error {
 			case "s":
 				if inS {
 					if len(words) > 0 {
-						fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
+						fmt.Fprintf(fpout, "##PAQULBL %s\n%s\n", hex.EncodeToString([]byte(label)), strings.Join(words, " "))
 						words = words[0:0]
 					}
 				}

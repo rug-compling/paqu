@@ -193,22 +193,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		setinvoer(db, params, task.id, true)
 	}
 
-	if params == "folia" {
-		err = folia(data, data+".tmp")
-		if err != nil {
-			return
-		}
-		os.Rename(data+".tmp", data)
-	}
-
-	if params == "tei" {
-		err = tei(data, data+".tmp")
-		if err != nil {
-			return
-		}
-		os.Rename(data+".tmp", data)
-	}
-
 	defer func() {
 		select {
 		case <-chGlobalExit:
@@ -354,22 +338,34 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				has_tok = true
 			}
 
-			//  pqtexter
-			var pqtexter, unzip string
-			if params == "run" {
-				pqtexter = "-r"
-			} else if has_lbl {
-				pqtexter = "-l"
-			}
-			if isArch {
-				unzip = ".unzip"
-			}
-			err = shell("pqtexter %s %s%s > %s.tmp 2>> %s", pqtexter, data, unzip, data, stderr).Run()
-			if err != nil {
-				return
-			}
-			if isArch {
-				os.Remove(data + ".unzip")
+			if params == "folia" {
+				err = folia(data, data+".tmp")
+				if err != nil {
+					return
+				}
+			} else if params == "tei" {
+				err = tei(data, data+".tmp")
+				if err != nil {
+					return
+				}
+			} else {
+				//  pqtexter
+				var pqtexter, unzip string
+				if params == "run" {
+					pqtexter = "-r"
+				} else if has_lbl {
+					pqtexter = "-l"
+				}
+				if isArch {
+					unzip = ".unzip"
+				}
+				err = shell("pqtexter %s %s%s > %s.tmp 2>> %s", pqtexter, data, unzip, data, stderr).Run()
+				if err != nil {
+					return
+				}
+				if isArch {
+					os.Remove(data + ".unzip")
+				}
 			}
 
 			// tokenizer
