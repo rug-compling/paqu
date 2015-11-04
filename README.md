@@ -92,8 +92,8 @@ Om PaQu te draaien heb je van
 [Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/) de tokenizer en de
 parser nodig.
 
-Om bestanden in het FoLiA-formaat te kunnen verwerken heb je een versie
-van Alpino nodig van 4 november 2015 of nieuwer.
+Om bestanden in FoLiA- of TEI-formaat te kunnen verwerken heb je een
+versie van Alpino nodig van 4 november 2015 of nieuwer.
 
 In de nabije toekomst is het mogelijk gebruik te maken van een
 Alpino-server, die ergens op een andere website draait. Als je dat

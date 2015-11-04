@@ -245,7 +245,7 @@ function rm(idx) {
 				if corpus.nline > 0 && (strings.HasPrefix(corpus.params, "run") ||
 					strings.HasPrefix(corpus.params, "line") ||
 					corpus.params == "folia" ||
-					params == "tei") {
+					corpus.params == "tei") {
 					p := 0
 					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"), false)
 					if err == nil {
