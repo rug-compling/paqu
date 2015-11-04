@@ -400,6 +400,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			rd := util.NewReader(fpin)
 			var filename, lbl string
 			var tokens, nlines, i int
+			var metaseen map[string]bool
 			for {
 				line, e := rd.ReadLineString()
 				if e == io.EOF {
@@ -435,17 +436,14 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 						i = 0
 						metalines = metalines[0:0]
 						metalines = append(metalines, "text\tpaqu.filename\t"+filename)
+						metaseen = make(map[string]bool)
 						inmeta = true
 					} else if a[0] == "##PAQULBL" {
 						lbl = val
 					}
 				} else if strings.HasPrefix(line, "##META") {
 					if !inmeta {
-						if filename == "" {
-							metalines = metalines[0:0]
-						} else {
-							metalines = metalines[:1]
-						}
+						metaseen = make(map[string]bool)
 						inmeta = true
 					}
 					a := strings.Fields(line)
@@ -458,8 +456,23 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 							return
 						}
 						f := strings.Fields(string(b))
-						if len(f) > 3 && f[2] == "=" {
-							metalines = append(metalines, fmt.Sprintf("%s\t%s\t%s", f[0], f[1], strings.Join(f[3:], " ")))
+						if len(f) > 2 && f[2] == "=" {
+							// als deze voor het eerst, dan alle oude met dezelfde naam wegdoen
+							if !metaseen[f[1]] {
+								metaseen[f[1]] = true
+								for i := 0; i < len(metalines); i++ {
+									if i == 0 && filename != "" {
+										continue
+									}
+									if a := strings.Split(metalines[i], "\t"); a[1] == f[1] {
+										metalines = append(metalines[:i], metalines[i+1:]...)
+										i--
+									}
+								}
+							}
+							if len(f) > 3 {
+								metalines = append(metalines, fmt.Sprintf("%s\t%s\t%s", f[0], f[1], strings.Join(f[3:], " ")))
+							}
 						}
 					}
 				} else {
