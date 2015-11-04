@@ -25,7 +25,7 @@ func folia(infile, outfile string) error {
 
 	d := xml.NewDecoder(fpin)
 	var inS, inW, inT, inCorrection, inOriginal bool
-	var label string
+	var label, wid string
 	var teller uint64
 	words := make([]string, 0, 500)
 	for {
@@ -59,6 +59,13 @@ func folia(infile, outfile string) error {
 				inCorrection = false
 				inOriginal = false
 			case "w":
+				wid = ""
+				for _, e := range t.Attr {
+					if e.Name.Local == "id" {
+						wid = e.Value
+						break
+					}
+				}
 				inW = true
 				inT = false
 			case "t":
@@ -96,7 +103,12 @@ func folia(infile, outfile string) error {
 			}
 		} else if t, ok := tt.(xml.CharData); ok {
 			if inS && inW && inT && !inOriginal {
-				words = append(words, alpinoEscape(string(t)))
+				s := alpinoEscape(string(t))
+				if wid != "" {
+					s = fmt.Sprintf("[ @id %s ] %s", alpinoEscape(wid), s)
+				}
+				words = append(words, s)
+				wid = ""
 				inW = false
 				inT = false
 			}
