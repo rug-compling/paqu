@@ -104,7 +104,7 @@ func folia(infile, outfile string) error {
 		} else if t, ok := tt.(xml.CharData); ok {
 			if inS && inW && inT && !inOriginal {
 				s := alpinoEscape(string(t))
-				if wid != "" {
+				if Cfg.Alpino15 && wid != "" {
 					s = fmt.Sprintf("[ @id %s ] %s", alpinoEscape(wid), s)
 				}
 				words = append(words, s)
