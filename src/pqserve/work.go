@@ -129,7 +129,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 		var b []byte
 		b, err = ar.ReadN(200)
-		if err != nil {
+		if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
 			ar.Close()
 			return
 		}
