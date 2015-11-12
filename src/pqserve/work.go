@@ -435,7 +435,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 						}
 						i = 0
 						metalines = metalines[0:0]
-						metalines = append(metalines, "text\tpaqu.filename\t"+filename)
+						pp := strings.Split(filename, "/")
+						for i, p := range pp {
+							metalines = append(metalines, fmt.Sprintf("text\tpaqu.path%d\t%s", i+1, p))
+						}
 						metaseen = make(map[string]bool)
 						inmeta = true
 					} else if a[0] == "##PAQULBL" {
