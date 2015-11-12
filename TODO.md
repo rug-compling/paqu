@@ -12,22 +12,25 @@ Zie ook: TODO in diverse bestanden
     - Tekst voor pagina *Info*: onder kopje *Corpora*
   - Adminhandleiding
     - optie `loginurl` in `setup-example.toml`
-	- gebruik van `$PAQU/contact.html`
+    - gebruik van `$PAQU/contact.html`
   - Metadata
     - Hoe voer je dat in?
   - pqserve:
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - gewoon zoeken
-	  - Nu alleen link naar boom achter gevonden zinnen. Toevoegen: link
+      - Nu alleen link naar boom achter gevonden zinnen. Toevoegen: link
         naar boom achter elke woord/tag-combinatie onder elke zin.
+      - ook zoeken op metadata
+       - vrije tekst voor dingen als *meta1=fiets*; of
+       - zoekformulier dynamisch aanpassen als een ander corpus wordt geselecteerd
     - XPath
       - zoeken: POST i.p.v. GET?
-	    - anders url misschien te lang
-		- maar dan werken links naar volgende pagina niet meer
-		- pagina updaten i.p.v. opnieuw laden bij uitvoeren van zoeken?
+        - anders url misschien te lang
+        - maar dan werken links naar volgende pagina niet meer
+        - pagina updaten i.p.v. opnieuw laden bij uitvoeren van zoeken?
     - weergave op mobiel of tablet
-	  - weergave van attributen in bomen
-	- pqserve stopt niet altijd direct bij sigterm, en na sigkill zijn logs niet compleet
+      - weergave van attributen in bomen
+    - pqserve stopt niet altijd direct bij sigterm, en na sigkill zijn logs niet compleet
     - Onder *Metadata*: subcorpus maken op basis van metadata
      - Vanuit meerdere corpora, dan moeten die corpora dezelfde soorten metadata hebben.
      - setHigh/unHigh
@@ -40,6 +43,6 @@ Zie ook: TODO in diverse bestanden
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
-	- documentatie
+    - documentatie
   - DbXml
     - zonodig bestanden in verkeerde DbXml-versie omzetten naar goede versie?
