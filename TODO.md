@@ -21,8 +21,8 @@ Zie ook: TODO in diverse bestanden
       - Nu alleen link naar boom achter gevonden zinnen. Toevoegen: link
         naar boom achter elke woord/tag-combinatie onder elke zin.
       - ook zoeken op metadata
-       - vrije tekst voor dingen als *meta1=fiets*; of
-       - zoekformulier dynamisch aanpassen als een ander corpus wordt geselecteerd
+        - vrije tekst voor dingen als *meta1=fiets*; of
+        - zoekformulier dynamisch aanpassen als een ander corpus wordt geselecteerd
     - XPath
       - zoeken: POST i.p.v. GET?
         - anders url misschien te lang
