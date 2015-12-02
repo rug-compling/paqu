@@ -351,6 +351,7 @@ Opties:
 		util.CheckErr(err)
 		// nieuwe tabellen aanmaken
 		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel (
+            idd     int          NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			word    varchar(128) NOT NULL,
 			lemma   varchar(128) NOT NULL,
 			root    varchar(128) NOT NULL,
@@ -737,19 +738,23 @@ Opties:
 				metai[meta]))
 			util.CheckErr(err)
 			var v int
+			iis := make([][2]int, 0)
 			for rows.Next() {
 				util.CheckErr(rows.Scan(&v))
 				s, ix := ir.value(v)
 				idx[ix] = s
+				iis = append(iis, [2]int{ix, v})
+			}
+			util.CheckErr(rows.Err())
+			for _, ii := range iis {
 				_, err = db.Exec(fmt.Sprintf(
 					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `ival` = %d",
 					Cfg.Prefix, prefix,
-					ix,
+					ii[0],
 					metai[meta],
-					v))
+					ii[1]))
 				util.CheckErr(err)
 			}
-			util.CheckErr(rows.Err())
 		case "FLOAT":
 			rows, err := db.Query(fmt.Sprintf(
 				"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` WHERE `id` = %d",
@@ -761,18 +766,30 @@ Opties:
 				rows.Scan(&v1, &v2)
 			}
 			fr := newFrange(v1, v2)
+			indexed := 0
+			if fr.indexed {
+				indexed = 1
+			}
 			_, err = db.Exec(fmt.Sprintf(
-				"INSERT `%s_c_%s_minf` (`id`,`fmin`,`fstep`,`size`) VALUES (%d,%g,%g,%d)",
+				"INSERT `%s_c_%s_minf` (`id`,`fmin`,`fstep`,`indexed`,`size`) VALUES (%d,%g,%g,%d,%d)",
 				Cfg.Prefix, prefix,
-				metai[meta], fr.min, fr.step, len(fr.s)))
+				metai[meta], fr.min, fr.step, indexed, len(fr.s)))
 			util.CheckErr(err)
-			_, err = db.Exec(fmt.Sprintf(
-				"UPDATE `%s_c_%s_meta` SET `idx` = FLOOR((`fval` - %g) / %g) WHERE `id` = %d",
-				Cfg.Prefix, prefix,
-				fr.min,
-				fr.step,
-				metai[meta]))
-			util.CheckErr(err)
+			if fr.indexed {
+				_, err = db.Exec(fmt.Sprintf(
+					"UPDATE `%s_c_%s_meta` SET `idx` = FLOOR((`fval` - %g) / %g) WHERE `id` = %d",
+					Cfg.Prefix, prefix,
+					fr.min,
+					fr.step,
+					metai[meta]))
+				util.CheckErr(err)
+			} else {
+				_, err = db.Exec(fmt.Sprintf(
+					"UPDATE `%s_c_%s_meta` SET `idx` = 0 WHERE `id` = %d",
+					Cfg.Prefix, prefix,
+					metai[meta]))
+				util.CheckErr(err)
+			}
 			rows, err = db.Query(fmt.Sprintf(
 				"SELECT DISTINCT `idx` FROM `%s_c_%s_meta` WHERE `id` = %d",
 				Cfg.Prefix, prefix,
@@ -783,7 +800,7 @@ Opties:
 				util.CheckErr(rows.Scan(&i))
 				idx[i] = fr.s[i]
 			}
-			util.CheckErr(err)
+			util.CheckErr(rows.Err())
 		case "DATE", "DATETIME":
 			dis := "0"
 			if metat[meta] == "DATE" {

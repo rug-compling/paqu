@@ -100,6 +100,35 @@ func main() {
 
 	////////////////////////////////////////////////////////////////
 
+	// tabellen *_deprel
+	// veld `idd` toevoegen
+
+	tables := make([]string, 0)
+	rows, err = db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info`")
+	util.CheckErr(err)
+	for rows.Next() {
+		var t string
+		util.CheckErr(rows.Scan(&t))
+		tables = append(tables, t)
+	}
+	util.CheckErr(rows.Err())
+
+	for _, table := range tables {
+		tb := Cfg.Prefix + "_c_" + table + "_deprel"
+		rows, err = db.Query("SELECT `idd` FROM `" + tb + "`")
+		if err == nil {
+			rows.Close()
+			continue
+		}
+		fmt.Print("Toevoegen van kolom `idd` aan tabel ", tb, "...")
+		_, err := db.Exec("ALTER TABLE `" + tb + "` ADD `idd` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST")
+		fmt.Println()
+		util.CheckErr(err)
+		changed = true
+	}
+
+	////////////////////////////////////////////////////////////////
+
 	if changed {
 		fmt.Println("Database is aangepast")
 	} else {

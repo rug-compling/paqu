@@ -69,11 +69,19 @@ Kies een of meer corpora:
 			html.EscapeString(txt))
 	}
 
-	fmt.Fprintf(q.w, `
+	qword := firstf(q.form, "word")
+	qrel := firstf(q.form, "rel")
+	qhword := firstf(q.form, "hword")
+	qpostag := firstf(q.form, "postag")
+	qhpostag := firstf(q.form, "hpostag")
+	qmeta := firstf(q.form, "meta")
+
+	if qword != "" || qrel != "" || qhword != "" || qpostag != "" || qhpostag != "" {
+		fmt.Fprintf(q.w, `
 <p>
 Zoekopdracht:
 <p>
-<table>
+<table style="margin-left: 2em">
 <tr>
 <td style="background-color: yellow">woord
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -81,21 +89,35 @@ Zoekopdracht:
 <tr><td><em>%s</em><td>%s<td><em>%s</em>
 <tr><td>%s<td><td>%s
 </table>
-<p>
-Titel:<br>
-<input type="text" name="title" size="80" maxlength="64">
 `,
-		html.EscapeString(firstf(q.form, "word")),
-		html.EscapeString(firstf(q.form, "rel")),
-		html.EscapeString(firstf(q.form, "hword")),
-		html.EscapeString(firstf(q.form, "postag")),
-		html.EscapeString(firstf(q.form, "hpostag")))
+			html.EscapeString(qword),
+			html.EscapeString(qrel),
+			html.EscapeString(qhword),
+			html.EscapeString(qpostag),
+			html.EscapeString(qhpostag))
+	}
+
+	if qmeta != "" {
+
+		fmt.Fprintf(q.w, `
+<p>
+Metadata:
+<p>
+<div style="margin-left:2.5em">
+%s
+</div>
+`,
+			html.EscapeString(qmeta))
+	}
 
 	s := "default: geen limiet"
 	if Cfg.Maxdup > 0 {
 		s = fmt.Sprintf("default is maximum van %d", Cfg.Maxdup)
 	}
 	fmt.Fprintf(q.w, `
+<p>
+Titel:<br>
+<input type="text" name="title" size="80" maxlength="64">
 <p>
 Maximum aantal zinnen (%s):<br>
 <input type="text" name="maxdup" size="8" maxlength="10">
@@ -107,14 +129,16 @@ Maximum aantal zinnen (%s):<br>
 <input type="hidden" name="rel" value="%s">
 <input type="hidden" name="hpostag" value="%s">
 <input type="hidden" name="hword" value="%s">
+<input type="hidden" name="meta" value="%s">
 <input type="submit" value="nieuw corpus maken" id="subbut">
 <span id="subsp" class="hide">Even geduld...</span>
 `,
-		html.EscapeString(firstf(q.form, "word")),
-		html.EscapeString(firstf(q.form, "postag")),
-		html.EscapeString(firstf(q.form, "rel")),
-		html.EscapeString(firstf(q.form, "hpostag")),
-		html.EscapeString(firstf(q.form, "hword")))
+		html.EscapeString(qword),
+		html.EscapeString(qpostag),
+		html.EscapeString(qrel),
+		html.EscapeString(qhpostag),
+		html.EscapeString(qhword),
+		html.EscapeString(qmeta))
 
 	fmt.Fprint(q.w, `
 </body>
@@ -186,7 +210,8 @@ func savez2(q *Context) {
 	hword := firstf(q.form, "hword")
 	postag := firstf(q.form, "postag")
 	hpostag := firstf(q.form, "hpostag")
-	if word == "" && hword == "" && rel == "" && postag == "" && hpostag == "" {
+	meta := firstf(q.form, "meta")
+	if word == "" && hword == "" && rel == "" && postag == "" && hpostag == "" && meta == "" {
 		writeHtml(q, "Fout", "Zoektermen ontbreken")
 		return
 	}
@@ -231,13 +256,20 @@ func savez2(q *Context) {
 			return
 		}
 
-		query, err := makeQueryF(q, prefix, "c", chClose)
-		if hErr(q, err) {
+		query, joins, usererr, syserr := makeQueryF(q, prefix, "c", chClose)
+		if hErr(q, syserr) {
 			return
 		}
-		query = fmt.Sprintf("SELECT DISTINCT `f`.`file`, `c`.`arch` FROM `%s_c_%s_deprel` `c`, `%s_c_%s_file` `f` WHERE %s AND `f`.`id` = `c`.`file`",
+		if uhErr(q, usererr) {
+			return
+		}
+
+		query = fmt.Sprintf(
+			"SELECT DISTINCT `f`.`file`, `c`.`arch` FROM `%s_c_%s_deprel` `c` "+
+				"JOIN `%s_c_%s_file` `f` ON (`f`.`id`=`c`.`file`) %s WHERE %s",
 			Cfg.Prefix, prefix,
 			Cfg.Prefix, prefix,
+			joins,
 			query)
 		rows, err := q.db.Query(query)
 		if hErr(q, err) {

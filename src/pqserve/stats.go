@@ -6,6 +6,7 @@ import (
 	"html"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -21,6 +22,23 @@ type StatSorter struct {
 	isInt  []bool
 	n      int
 }
+
+var (
+	mnums = map[string]int{
+		"jan": 1,
+		"feb": 2,
+		"maa": 3,
+		"apr": 4,
+		"mei": 5,
+		"jun": 6,
+		"jul": 7,
+		"aug": 8,
+		"sep": 9,
+		"okt": 10,
+		"nov": 11,
+		"dec": 12,
+	}
+)
 
 func (s *StatSorter) Len() int {
 	return len(s.lines)
@@ -116,10 +134,11 @@ func stats(q *Context) {
 	}
 
 	option := make(map[string]string)
-	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword"} {
+	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword", "meta"} {
 		option[t] = first(q.r, t)
 	}
-	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" && option["hpostag"] == "" && option["hword"] == "" {
+	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" &&
+		option["hpostag"] == "" && option["hword"] == "" && option["meta"] == "" {
 		http.Error(q.w, "Query ontbreekt", http.StatusPreconditionFailed)
 		return
 	}
@@ -134,10 +153,14 @@ func stats(q *Context) {
 		return
 	}
 
-	query, err := makeQuery(q, prefix, "", chClose)
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	query, joins, usererr, syserr := makeQuery(q, prefix, "", chClose)
+	if syserr != nil {
+		http.Error(q.w, syserr.Error(), http.StatusInternalServerError)
+		logerr(syserr)
+		return
+	}
+	if usererr != nil {
+		http.Error(q.w, usererr.Error(), http.StatusPreconditionFailed)
 		return
 	}
 
@@ -181,7 +204,8 @@ window.parent._fn.started();
 		return
 	default:
 	}
-	rows, err := timeoutQuery(q, chClose, "SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+
+	// TODO: kan dit niet sneller, met een DISTINCT en een COUNT?
+	rows, err := timeoutQuery(q, chClose, "SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" WHERE "+
 		query)
 	if err != nil {
 		updateError(q, err, !download)
@@ -230,8 +254,8 @@ window.parent._fn.started();
 			return
 		default:
 		}
-		rows, err := timeoutQuery(q, chClose, "SELECT count(*), `"+ww+"` FROM `"+Cfg.Prefix+"_c_"+prefix+
-			"_deprel` WHERE "+query+" GROUP BY `"+ww+"` COLLATE 'utf8_bin' ORDER BY 1 DESC, 2"+limit)
+		rows, err := timeoutQuery(q, chClose, "SELECT count(*), `"+ww+"` FROM ( SELECT DISTINCT `idd`,`"+ww+"` FROM `"+Cfg.Prefix+"_c_"+prefix+
+			"_deprel` "+joins+" WHERE "+query+" ) `z` GROUP BY `"+ww+"` COLLATE 'utf8_bin' ORDER BY 1 DESC, 2"+limit)
 		if err != nil {
 			updateError(q, err, !download)
 			completed(q, download)
@@ -312,10 +336,11 @@ func statsrel(q *Context) {
 	}
 
 	option := make(map[string]string)
-	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword"} {
+	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword", "meta"} {
 		option[t] = first(q.r, t)
 	}
-	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" && option["hpostag"] == "" && option["hword"] == "" {
+	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" &&
+		option["hpostag"] == "" && option["hword"] == "" && option["meta"] == "" {
 		http.Error(q.w, "Query ontbreekt", http.StatusPreconditionFailed)
 		return
 	}
@@ -342,6 +367,7 @@ func statsrel(q *Context) {
 	}
 
 	qselect := make([]string, 0)
+	qselect1 := make([]string, 0)
 	qfrom := fmt.Sprintf("`%s_c_%s_deprel` `a`", Cfg.Prefix, prefix)
 	qwhere := ""
 	qgo := make([]string, 0)
@@ -355,8 +381,10 @@ func statsrel(q *Context) {
 	for _, t := range []string{"word", "lemma", "postag", "rel", "hword", "hlemma", "hpostag"} {
 		if first(q.r, "c"+t) == "1" {
 			f := "`a`.`" + t + "`"
+			f1 := "`" + t + "`"
 			qselect = append(qselect, f)
-			qgo = append(qgo, f)
+			qselect1 = append(qselect1, f1)
+			qgo = append(qgo, f1)
 			ncols++
 			cols = append(cols, t)
 			aligns = append(aligns, "left")
@@ -365,8 +393,12 @@ func statsrel(q *Context) {
 	}
 	nattr := ncols
 
+	mkeys := make([]string, 0)
+	mtypes := make([]string, 0)
 	for _, meta := range q.r.Form["cmeta"] {
 		cols = append(cols, "meta:"+meta, "idx:"+meta)
+		mkeys = append(mkeys, meta)
+		mtypes = append(mtypes, metat[meta])
 		if metat[meta] == "TEXT" {
 			aligns = append(aligns, "left")
 		} else {
@@ -379,22 +411,29 @@ func statsrel(q *Context) {
 		qfrom += fmt.Sprintf(" JOIN `%s_c_%s_mval` `%sv` USING(`id`,`idx`)", Cfg.Prefix, prefix, table)
 		qfrom += " ) USING(`arch`,`file`)"
 		qwhere += fmt.Sprintf(" AND `%s`.`id` = %d", table, metai[meta])
-		f := "`" + table + "v`.`text`"
-		fi := "`" + table + "v`.`idx`"
+		f := "`" + table + "v`.`text` AS '" + table + "text'"
+		fi := "`" + table + "v`.`idx` AS '" + table + "idx'"
+		f1 := "`" + table + "text`"
+		fi1 := "`" + table + "idx`"
 		qselect = append(qselect, f, fi)
-		qgo = append(qgo, fi)
+		qselect1 = append(qselect1, f1, fi1)
+		qgo = append(qgo, fi1)
 	}
 
-	query, err := makeQuery(q, prefix, "a", chClose)
-	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		logerr(err)
+	query, joins, usererr, syserr := makeQuery(q, prefix, "a", chClose)
+	if syserr != nil {
+		http.Error(q.w, syserr.Error(), http.StatusInternalServerError)
+		logerr(syserr)
+		return
+	}
+	if usererr != nil {
+		http.Error(q.w, usererr.Error(), http.StatusPreconditionFailed)
 		return
 	}
 
 	qgos := strings.Join(qgo, ",")
-	fullquery := fmt.Sprintf("SELECT count(*),%s FROM %s WHERE %s %s GROUP BY %s ORDER BY 1 DESC, %s",
-		strings.Join(qselect, ","), qfrom, query, qwhere, qgos, qgos)
+	fullquery := fmt.Sprintf("SELECT count(*),%s FROM ( SELECT DISTINCT `idd`,%s FROM %s %s WHERE ( %s ) %s ) `a` GROUP BY %s ORDER BY 1 DESC, %s",
+		strings.Join(qselect1, ","), strings.Join(qselect, ","), qfrom, joins, query, qwhere, qgos, qgos)
 
 	// BEGIN UITVOER
 
@@ -467,6 +506,7 @@ func statsrel(q *Context) {
 	qrel := urlencode(first(q.r, "rel"))
 	qhword := urlencode(first(q.r, "hword"))
 	qhpostag := urlencode(first(q.r, "hpostag"))
+	qmeta := urlencode(first(q.r, "meta"))
 	qdb := urlencode(first(q.r, "db"))
 
 	for rows.Next() {
@@ -486,36 +526,93 @@ func statsrel(q *Context) {
 
 		var link string
 		if !download {
-			if nattr > 0 {
-				// attributen in kolom 1 t/m kolom nattr
-				for j := nattr; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
-					if sp, ok := fields[j].(*string); ok {
-						s := *sp
-						switch cols[j] {
-						case "word":
-							qword = urlencode("=" + unHigh(s))
-						case "lemma":
-							qword = urlencode("+" + unHigh(s))
-						case "postag":
-							qpostag = urlencode(s)
-						case "rel":
-							qrel = urlencode(s)
-						case "hword":
-							qhword = urlencode("=" + unHigh(s))
-						case "hlemma":
-							qhword = urlencode("+" + unHigh(s))
-						case "hpostag":
-							qhpostag = urlencode(s)
-							if qhpostag == "" {
-								qhpostag = "--LEEG--"
-							}
+			// attributen in kolom 1 t/m kolom nattr
+			for j := nattr; j > 0; j-- { // van achter naar voor zodat word prioriteit krijgt over lemma
+				if sp, ok := fields[j].(*string); ok {
+					s := *sp
+					switch cols[j] {
+					case "word":
+						qword = urlencode("=" + unHigh(s))
+					case "lemma":
+						qword = urlencode("+" + unHigh(s))
+					case "postag":
+						qpostag = urlencode(s)
+					case "rel":
+						qrel = urlencode(s)
+					case "hword":
+						qhword = urlencode("=" + unHigh(s))
+					case "hlemma":
+						qhword = urlencode("+" + unHigh(s))
+					case "hpostag":
+						qhpostag = urlencode(s)
+						if qhpostag == "" {
+							qhpostag = "--LEEG--"
 						}
 					}
 				}
-				link = fmt.Sprintf(
-					"db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s",
-					qdb, qword, qpostag, qrel, qhword, qhpostag)
 			}
+			mm := make([]string, 0)
+			for j, mkey := range mkeys {
+				mkey = qquote(mkey)
+				v := strings.TrimSpace(*fields[nattr+1+2*j].(*string))
+				switch mtypes[j] {
+				case "TEXT":
+					mm = append(mm, fmt.Sprintf("%s = %s", mkey, qquote(v)))
+				case "INT", "FLOAT":
+					if v == "" {
+						mm = append(mm, fmt.Sprintf("%s = nil", mkey))
+					} else {
+						a := strings.Fields(v)
+						if len(a) == 3 {
+							mm = append(mm, fmt.Sprintf("%s in [ %s %s ]", mkey, a[0], a[2]))
+						} else {
+							mm = append(mm, fmt.Sprintf("%s = %s", mkey, v))
+						}
+					}
+				case "DATE":
+					if v == "" {
+						mm = append(mm, fmt.Sprintf("%s = nil", mkey))
+					} else {
+						a := strings.Fields(v)
+						if len(a) == 4 {
+							day, _ := strconv.Atoi(a[1])
+							mm = append(mm, fmt.Sprintf("%s = %s-%02d-%02d", mkey, a[3], mnums[a[2]], day))
+						} else if len(a) == 2 {
+							mm = append(mm, fmt.Sprintf("%s %% %s-%02d-__", mkey, a[1], mnums[a[0]]))
+						} else if len(v) == 4 {
+							mm = append(mm, fmt.Sprintf("%s %% %s-__-__", mkey, v))
+						} else {
+							y1 := v[:4]
+							y2 := v[len(v)-4:]
+							p := y1[:2] + "_"
+							if y1[:3] == y2[:3] {
+								p = y1[:3]
+							}
+							mm = append(mm, fmt.Sprintf("%s %% %s_-__-__", mkey, p))
+						}
+					}
+				case "DATETIME":
+					if v == "" {
+						mm = append(mm, fmt.Sprintf("%s = nil", mkey))
+					} else {
+						a := strings.Fields(v)
+						day, _ := strconv.Atoi(a[1])
+						hr := a[4][:2]
+						mm = append(mm, fmt.Sprintf("%s %% \"%s-%02d-%02d %s:__\"", mkey, a[3], mnums[a[2]], day, hr))
+					}
+				}
+			}
+			q := urlencode(strings.Join(mm, "\n& "))
+			if qmeta != "" {
+				if q == "" {
+					q = qmeta
+				} else {
+					q = urlencode("( ") + qmeta + urlencode(" )\n& ") + q
+				}
+			}
+			link = fmt.Sprintf(
+				"db=%s&amp;word=%s&amp;postag=%s&amp;rel=%s&amp;hword=%s&amp;hpostag=%s&amp;meta=%s",
+				qdb, qword, qpostag, qrel, qhword, qhpostag, q)
 		}
 
 		for i, e := range fields {
@@ -543,6 +640,9 @@ func statsrel(q *Context) {
 			}
 
 			if strings.HasPrefix(cols[i], "meta:") {
+				if i == 0 {
+					value = link
+				}
 				dataline.cols = append(dataline.cols, StructIS{*fields[i+1].(*int), value})
 			} else {
 				var c int

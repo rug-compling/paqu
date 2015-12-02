@@ -10,16 +10,19 @@ import (
 	"time"
 )
 
+// sys errors moeten gelogd worden
+// user errors hoeven alleen aan gebruiker gemeld te worden (de gebruiker deed iets fout)
+
 // Opstellen van query voor hoofdformulier, en voor stats
-func makeQuery(q *Context, prefix, table string, chClose <-chan bool) (string, error) {
+func makeQuery(q *Context, prefix, table string, chClose <-chan bool) (string, string, error /*user*/, error /*sys*/) {
 	return makeQueryDo(q, prefix, table, chClose, false)
 }
 
-func makeQueryF(q *Context, prefix, table string, chClose <-chan bool) (string, error) {
+func makeQueryF(q *Context, prefix, table string, chClose <-chan bool) (string, string, error /*user*/, error /*sys*/) {
 	return makeQueryDo(q, prefix, table, chClose, true)
 }
 
-func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form bool) (string, error) {
+func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form bool) (string, string, error /*user*/, error /*sys*/) {
 
 	if table != "" {
 		table = "`" + table + "`."
@@ -54,19 +57,19 @@ func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form boo
 				var s string
 				select {
 				case <-chClose:
-					return "", errConnectionClosed
+					return "", "", nil, errConnectionClosed
 				default:
 				}
 				rows, err := q.db.Query(fmt.Sprintf("SELECT `lemma` FROM `%s_c_%s_word` WHERE `word` = %q",
 					Cfg.Prefix, prefix, wrd))
 				if err != nil {
-					return "", err
+					return "", "", nil, err
 				}
 				lset := make(map[string]bool)
 				for rows.Next() {
 					err := rows.Scan(&s)
 					if err != nil {
-						return "", err
+						return "", "", nil, err
 					}
 					for _, i := range strings.Split(s, "\t") {
 						lset[fmt.Sprintf("%q", i)] = true
@@ -74,7 +77,7 @@ func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form boo
 				}
 				err = rows.Err()
 				if err != nil {
-					return "", err
+					return "", "", nil, err
 				}
 				if len(lset) > 0 {
 					ll := make([]string, 0, len(lset))
@@ -105,7 +108,30 @@ func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form boo
 		parts = append(parts, fmt.Sprintf(table+"`hpostag` = %q", s))
 	}
 
-	return strings.Join(parts, " AND "), nil
+	query := strings.Join(parts, " AND ")
+
+	joins := make([]string, 0)
+	if m := frst("meta"); m != "" {
+		meta, n, usererr, syserr := sqlmeta(q, prefix, m)
+		if usererr != nil || syserr != nil {
+			return "", "", usererr, syserr
+		}
+		for i := 1; i <= n; i++ {
+			if table == "" {
+				joins = append(joins, fmt.Sprintf("JOIN `%s_c_%s_meta` `meta%d` USING(`arch`,`file`)", Cfg.Prefix, prefix, i))
+			} else {
+				joins = append(joins, fmt.Sprintf("JOIN `%s_c_%s_meta` `meta%d` ON (`meta%d`.`arch` = %s`arch` AND `meta%d`.`file`=%s`file`)",
+					Cfg.Prefix, prefix, i, i, table, i, table))
+			}
+		}
+		if query != "" {
+			query = query + " AND ( " + meta + " )"
+		} else {
+			query = meta
+		}
+	}
+
+	return query, strings.Join(joins, " "), nil, nil
 }
 
 // Query uitvoeren. Cancel query niet alleen bij timeout, maar ook als request wordt verbroken.

@@ -58,8 +58,11 @@ func home(q *Context) {
 
 	fmt.Fprintln(q.w, "<hr>")
 
-	query, err := makeQuery(q, prefix, "", chClose)
-	if doErr(q, err) {
+	query, joins, usererr, syserr := makeQuery(q, prefix, "", chClose)
+	if doErr(q, syserr) {
+		return
+	}
+	if userErr(q, usererr) {
 		return
 	}
 
@@ -85,7 +88,7 @@ func home(q *Context) {
 	// Om resultaten te krijgen die gegarandeerd correct zijn zou je "ORDER BY 1,2" moeten toevoegen, maar
 	// dat maakt het veel trager (vooral als er heel veel hits zijn), en zo lijkt het ook goed te werken.
 	rows, err := timeoutQuery(q, chClose,
-		"SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
+		"SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
 	if doErr(q, err) {
 		busyClear(q)
 		return
@@ -144,7 +147,7 @@ func home(q *Context) {
 		default:
 		}
 		rows, err = q.db.Query(fmt.Sprintf(
-			"SELECT `word`,`lemma`,`postag`,`rel`,`hpostag`,`hlemma`,`hword`,`begin`,`end`,`hbegin`,`hend`,`mark` FROM `%s_c_%s_deprel` WHERE `arch` = %d AND `file`= %d AND %s ORDER BY `begin`,`hbegin`,`rel`",
+			"SELECT `word`,`lemma`,`postag`,`rel`,`hpostag`,`hlemma`,`hword`,`begin`,`end`,`hbegin`,`hend`,`mark` FROM `%s_c_%s_deprel` "+joins+" WHERE `arch` = %d AND `file`= %d AND ( %s ) ORDER BY `begin`,`hbegin`,`rel`",
 			Cfg.Prefix, prefix, zin.arch, zin.file, query))
 		if doErr(q, err) {
 			busyClear(q)
@@ -256,7 +259,7 @@ func home(q *Context) {
 				continue
 			}
 			seen[s] = true
-			qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, prefix)
+			qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, first(q.r, "meta"), prefix)
 			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"?%s\">%s</a>\n", qq, s)
 		}
 
@@ -274,6 +277,7 @@ func home(q *Context) {
 		first(q.r, "rel"),
 		first(q.r, "hpostag"),
 		first(q.r, "hword"),
+		first(q.r, "meta"),
 		first(q.r, "db"))
 	if offset > 0 || len(zinnen) == ZINMAX {
 		if offset > 0 {
@@ -297,6 +301,7 @@ func home(q *Context) {
 <input type="hidden" name="rel" value="%s">
 <input type="hidden" name="hpostag" value="%s">
 <input type="hidden" name="hword" value="%s">
+<input type="hidden" name="meta" value="%s">
 <input type="hidden" name="db" value="%s">
 <input type="submit" value="nieuw corpus maken op basis van deze zoekopdracht">
 </form>
@@ -306,6 +311,7 @@ func home(q *Context) {
 			html.EscapeString(first(q.r, "rel")),
 			html.EscapeString(first(q.r, "hpostag")),
 			html.EscapeString(first(q.r, "hword")),
+			html.EscapeString(first(q.r, "meta")),
 			html.EscapeString(prefix))
 	}
 
@@ -325,6 +331,7 @@ func home(q *Context) {
 		<input type="hidden" name="rel" value="%s">
 		<input type="hidden" name="hpostag" value="%s">
 		<input type="hidden" name="hword" value="%s">
+		<input type="hidden" name="meta" value="%s">
 		<input type="hidden" name="db" value="%s">
 		<input type="submit" value="tellingen &mdash; algemeen">
 		</form>
@@ -338,6 +345,7 @@ func home(q *Context) {
 		html.EscapeString(first(q.r, "rel")),
 		html.EscapeString(first(q.r, "hpostag")),
 		html.EscapeString(first(q.r, "hword")),
+		html.EscapeString(first(q.r, "meta")),
 		html.EscapeString(prefix))
 
 	if q.hasmeta[prefix] {
@@ -351,6 +359,7 @@ func home(q *Context) {
 		<input type="hidden" name="rel" value="%s">
 		<input type="hidden" name="hpostag" value="%s">
 		<input type="hidden" name="hword" value="%s">
+		<input type="hidden" name="meta" value="%s">
 		<input type="hidden" name="db" value="%s">
 		<input type="submit" value="tellingen &mdash; metadata">
 		</form>
@@ -364,6 +373,7 @@ func home(q *Context) {
 			html.EscapeString(first(q.r, "rel")),
 			html.EscapeString(first(q.r, "hpostag")),
 			html.EscapeString(first(q.r, "hword")),
+			html.EscapeString(first(q.r, "meta")),
 			html.EscapeString(prefix))
 	}
 
@@ -375,6 +385,7 @@ func home(q *Context) {
 		<input type="hidden" name="rel" value="%s">
 		<input type="hidden" name="hpostag" value="%s">
 		<input type="hidden" name="hword" value="%s">
+		<input type="hidden" name="meta" value="%s">
 		<input type="hidden" name="db" value="%s">
 		Selecteer twee of meer elementen om ze te koppelen:
 		<p>
@@ -401,6 +412,7 @@ func home(q *Context) {
 		html.EscapeString(first(q.r, "rel")),
 		html.EscapeString(first(q.r, "hpostag")),
 		html.EscapeString(first(q.r, "hword")),
+		html.EscapeString(first(q.r, "meta")),
 		html.EscapeString(prefix))
 
 	if q.hasmeta[prefix] {
@@ -466,14 +478,15 @@ func get_path(zin *Sentence, idx int, mark map[string]bool) {
 	}
 }
 
-func make_query_string(word, postag, rel, hpostag, hword, db string) string {
+func make_query_string(word, postag, rel, hpostag, hword, meta, db string) string {
 	return fmt.Sprintf(
-		"word=%s&amp;postag=%s&amp;rel=%s&amp;hpostag=%s&amp;hword=%s&amp;db=%s",
+		"word=%s&amp;postag=%s&amp;rel=%s&amp;hpostag=%s&amp;hword=%s&amp;meta=%s&amp;db=%s",
 		urlencode(unHigh(word)),
 		urlencode(postag),
 		urlencode(rel),
 		urlencode(hpostag),
 		urlencode(unHigh(hword)),
+		urlencode(meta),
 		urlencode(db))
 }
 
@@ -588,6 +601,7 @@ func html_header(q *Context) {
     f.rel.value = "";
     f.hpostag.value = "";
     f.hword.value = "";
+    f.meta.value = "";
   }
 
   var result;
@@ -850,7 +864,8 @@ func html_form(q *Context) (has_query bool) {
 		first(q.r, "postag") == "" &&
 		first(q.r, "rel") == "" &&
 		first(q.r, "hpostag") == "" &&
-		first(q.r, "hword") == "" {
+		first(q.r, "hword") == "" &&
+		first(q.r, "meta") == "" {
 		has_query = false
 	}
 
@@ -895,6 +910,10 @@ corpus: <select name="db">
 	html_opts(q, opt_hpostag, first(q.r, "hpostag"), "postag")
 	fmt.Fprint(q.w, `
 		   </select>
+       <tr>
+         <td colspan="3"><span class="ie">Metadata:<br></span>
+           <textarea rows="3" cols="40" name="meta" placeholder="metadata">`+first(q.r, "meta")+`</textarea>
+           <br>TODO: Uitleg over metadata
 	   <tr>
 		 <td style="padding-top:1em">
 		   <input type="button" value="help" onClick="javascript:window.open('info.html')">

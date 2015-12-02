@@ -76,10 +76,11 @@ window.parent._fn.startedmeta();
 	}
 
 	option := make(map[string]string)
-	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword"} {
+	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword", "meta"} {
 		option[t] = first(q.r, t)
 	}
-	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" && option["hpostag"] == "" && option["hword"] == "" {
+	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" &&
+		option["hpostag"] == "" && option["hword"] == "" && option["meta"] == "" {
 		updateError(q, errors.New("Query ontbreekt"), !download)
 		return
 	}
@@ -103,9 +104,14 @@ window.parent._fn.startedmeta();
 		chClose = make(<-chan bool)
 	}
 
-	var query string
-	query, errval = makeQuery(q, prefix, "", chClose)
+	var query, joins string
+	var usererr error
+	query, joins, usererr, errval = makeQuery(q, prefix, "", chClose)
 	if logerr(errval) {
+		return
+	}
+	if usererr != nil {
+		errval = usererr
 		return
 	}
 
@@ -220,11 +226,12 @@ setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 			}
 			if run == 0 {
 				qu = fmt.Sprintf(
-					"SELECT COUNT(`text`), `idx`, `text`, 0 "+
+					"SELECT COUNT(*), `idx`, `text`, 0 FROM ( SELECT DISTINCT `idd`,`m`.`idx`,`text` "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
-						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
-						"WHERE `id` = %d AND %s "+
+						"JOIN `%s_c_%s_mval` `m` USING(`id`,`idx`) "+
+						joins+
+						" WHERE `m`.`id` = %d AND ( %s ) ) `z`"+
 						"GROUP BY `text` ORDER BY %s `idx`",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
@@ -234,11 +241,12 @@ setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 					order)
 			} else {
 				qu = fmt.Sprintf(
-					"SELECT DISTINCT `arch`,`file`,`idx`,`text`,`n` "+
+					"SELECT DISTINCT `arch`,`file`,`m`.`idx`,`text`,`n` "+
 						"FROM `%s_c_%s_deprel` "+
 						"JOIN `%s_c_%s_meta` USING(`arch`,`file`) "+
-						"JOIN `%s_c_%s_mval` USING (`id`,`idx`) "+
-						"WHERE `id` = %d AND %s",
+						"JOIN `%s_c_%s_mval` `m` USING (`id`,`idx`) "+
+						joins+
+						" WHERE `m`.`id` = %d AND ( %s) ",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,

@@ -31,6 +31,7 @@ type drange struct {
 type frange struct {
 	min, step float64
 	s         []string
+	indexed   bool
 }
 
 type irange struct {
@@ -141,6 +142,9 @@ func oldDrange(min, max time.Time, dtype int, indexed bool) *drange {
 }
 
 func newFrange(min, max float64) *frange {
+	if min == max {
+		return oldFrange(min, 0, 1)
+	}
 	step := math.Pow(10, math.Floor(math.Log10(float64(max-min))-.5)) / 5
 	min = step * math.Floor(min/step)
 	size := 0
@@ -153,10 +157,18 @@ func newFrange(min, max float64) *frange {
 
 func oldFrange(fmin, fstep float64, size int) *frange {
 	fr := frange{
-		min:  fmin,
-		step: fstep,
-		s:    make([]string, 0),
+		s:       make([]string, 0),
+		indexed: false,
 	}
+	if size == 1 {
+		fr.s = append(fr.s, fmt.Sprintf("%g", float32(fmin)))
+		return &fr
+	}
+
+	fr.min = fmin
+	fr.step = fstep
+	fr.indexed = true
+
 	for i := 0; i < size; i++ {
 		f := fr.min + float64(i)*fr.step
 		fr.s = append(fr.s, fmt.Sprintf("%g – %g", float32(f), float32(f+fr.step)))
@@ -286,6 +298,10 @@ func (dr *drange) value(val time.Time) (string, int) {
 }
 
 func (fr *frange) value(val float64) (string, int) {
+	if !fr.indexed {
+		return fmt.Sprintf("%g", float32(val)), 0
+	}
+
 	i := int((val - fr.min) / fr.step)
 	if i < 0 || i >= len(fr.s) {
 		return "UNDEF", 2147483647

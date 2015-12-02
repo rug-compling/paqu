@@ -28,6 +28,7 @@ var (
 	reFilecodes = regexp.MustCompile("_[0-9A-F][0-9A-F]|__")
 )
 
+// system error -> log
 func doErr(q *Context, err error) bool {
 	if err == nil {
 		return false
@@ -51,6 +52,20 @@ func doErr(q *Context, err error) bool {
 	return true
 }
 
+// user error -> geen log
+func userErr(q *Context, err error) bool {
+	if err == nil {
+		return false
+	}
+
+	fmt.Fprintln(q.w, "<pre>")
+	fmt.Fprintln(q.w, html.EscapeString(err.Error()))
+	fmt.Fprintln(q.w, "</pre>\n</body>\n</html>")
+
+	return true
+}
+
+// system error -> log
 func hErr(q *Context, err error) bool {
 	if err == nil {
 		return false
@@ -68,6 +83,17 @@ func hErr(q *Context, err error) bool {
 	chLog <- s1
 
 	http.Error(q.w, s, http.StatusInternalServerError)
+
+	return true
+}
+
+// user error -> geen log
+func uhErr(q *Context, err error) bool {
+	if err == nil {
+		return false
+	}
+
+	http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
 
 	return true
 }
@@ -379,6 +405,10 @@ func getMeta(q *Context, prefix string) []MetaType {
 			v = "waarde"
 		case "INT":
 			if !indexed.Bool || istep.Int64 < 2 {
+				v = "waarde"
+			}
+		case "FLOAT":
+			if !indexed.Bool {
 				v = "waarde"
 			}
 		case "DATE", "DATETIME":
