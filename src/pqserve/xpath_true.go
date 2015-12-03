@@ -157,6 +157,8 @@ func xpath(q *Context) {
 		return
 	}
 
+	xpathmax := getxpathmax(q)
+
 	var errval error
 	var db *dbxml.Db
 	var docs *dbxml.Docs
@@ -183,7 +185,7 @@ func xpath(q *Context) {
 
 	// HTML-uitvoer van het formulier
 	// Returnwaarde is true als er een query was gedefinieerd
-	has_query := html_xpath_form(q)
+	has_query := html_xpath_form(q, xpathmax)
 
 	// Als er geen query is gedefinieerd, HTML-uitvoer van korte helptekst, pagina-einde, en exit
 	if !has_query {
@@ -349,7 +351,7 @@ $('#loading span').html('%.1f%%');
 			name := docs.Name()
 			newdoc := false
 			if name != filename {
-				if found && curno > offset && curno <= offset+ZINMAX*2 {
+				if found && curno > offset && curno <= offset+xpathmax {
 					found = false
 					xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 					xmlparts = xmlparts[0:0]
@@ -363,10 +365,10 @@ $('#loading span').html('%.1f%%');
 			}
 			if len(queryparts) == 1 {
 				found = true
-				if curno > offset+ZINMAX*2 {
+				if curno > offset+xpathmax {
 					docs.Close()
 				} else {
-					if curno > offset && curno <= offset+ZINMAX*2 {
+					if curno > offset && curno <= offset+xpathmax {
 						xmlall = docs.Content()
 						xmlparts = append(xmlparts, docs.Match())
 					}
@@ -396,11 +398,11 @@ $('#loading span').html('%.1f%%');
 					if !found {
 						found = true
 						curno++
-						if curno > offset+ZINMAX*2 {
+						if curno > offset+xpathmax {
 							docs.Close()
 						}
 					}
-					if curno > offset && curno <= offset+ZINMAX*2 {
+					if curno > offset && curno <= offset+xpathmax {
 						xmlall = docs2.Content()
 						xmlparts = append(xmlparts, docs2.Match())
 					} else {
@@ -427,12 +429,12 @@ $('#loading span').html('%.1f%%');
 		default:
 		}
 
-		if found && curno > offset && curno <= offset+ZINMAX*2 {
+		if found && curno > offset && curno <= offset+xpathmax {
 			found = false
 			xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 			xmlparts = xmlparts[0:0]
 		}
-		if curno > offset+ZINMAX*2 {
+		if curno > offset+xpathmax {
 			break
 		}
 	} // for _, dactfile := range dactfiles
@@ -446,15 +448,15 @@ $('#loading span').html('%.1f%%');
 
 	// Links naar volgende en vorige pagina's met resultaten
 	qs := "xpath=" + urlencode(query)
-	if offset > 0 || curno > offset+ZINMAX*2 {
+	if offset > 0 || curno > offset+xpathmax {
 		if offset > 0 {
-			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">vorige</a>", qs, offset-ZINMAX*2)
+			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">vorige</a>", qs, offset-xpathmax)
 		} else {
 			fmt.Fprint(q.w, "vorige")
 		}
 		fmt.Fprint(q.w, " | ")
-		if curno > offset+ZINMAX*2 {
-			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">volgende</a>", qs, offset+ZINMAX*2)
+		if curno > offset+xpathmax {
+			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">volgende</a>", qs, offset+xpathmax)
 		} else {
 			fmt.Fprint(q.w, "volgende")
 		}
@@ -549,6 +551,29 @@ $('#loading span').html('%.1f%%');
 		</div>
 `)
 
+}
+
+func getxpathmax(q *Context) int {
+	xn := first(q.r, "xn")
+	if xn == "" {
+		if x, err := q.r.Cookie("paqu-xn"); err == nil {
+			xn = x.Value
+		}
+	}
+
+	xi, err := strconv.Atoi(xn)
+	if err != nil {
+		xi = ZINMAX * 2
+	} else if xi < 10 {
+		xi = 10
+	} else if xi > 500 {
+		xi = 500
+	}
+	xn = fmt.Sprint(xi)
+
+	exp := time.Now().AddDate(0, 0, 14)
+	http.SetCookie(q.w, &http.Cookie{Name: "paqu-xn", Value: xn, Path: cookiepath, Expires: exp})
+	return xi
 }
 
 //. HTML
@@ -1099,7 +1124,7 @@ Voorbeelden, zie:
 `)
 }
 
-func html_xpath_form(q *Context) (has_query bool) {
+func html_xpath_form(q *Context, xpathmax int) (has_query bool) {
 	has_query = true
 	if first(q.r, "xpath") == "" {
 		has_query = false
@@ -1150,8 +1175,19 @@ corpus: <select name="db">
 	fmt.Fprintf(q.w, `<p>
 		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">voorbeelden</a>):<br>
 		<textarea name="xpath" rows="6" cols="80" maxlength="1200" id="xquery">%s</textarea>
+		<p>
+		aantal: <select name="xn">
 		`, html.EscapeString(first(q.r, "xpath")))
-	fmt.Fprint(q.w, `<p>
+	for _, i := range []int{10, 20, 50, 100, 200, 500} {
+		if i == xpathmax {
+			fmt.Fprintf(q.w, "<option selected>%d</option>\n", i)
+		} else {
+			fmt.Fprintf(q.w, "<option>%d</option>\n", i)
+		}
+	}
+	fmt.Fprint(q.w, `
+		</select>
+		<p>
            <input type="submit" value="Zoeken">
            <input type="button" value="Wissen" onClick="javascript:formclear(form)">
            <input type="reset" value="Reset" onClick="javascript:qcheck()">

@@ -20,13 +20,15 @@ func home(q *Context) {
 		return
 	}
 
+	zinmax := getzinmax(q)
+
 	// HTML-uitvoer van begin van de pagina
 	writeHead(q, "", 1)
 	html_header(q)
 
 	// HTML-uitvoer van het formulier
 	// Returnwaarde is true als er een query was gedefinieerd
-	has_query := html_form(q)
+	has_query := html_form(q, prefix, zinmax)
 
 	// Als er geen query is gedefinieerd, HTML-uitvoer van korte helptekst, pagina-einde, en exit
 	if !has_query {
@@ -88,12 +90,12 @@ func home(q *Context) {
 	// Om resultaten te krijgen die gegarandeerd correct zijn zou je "ORDER BY 1,2" moeten toevoegen, maar
 	// dat maakt het veel trager (vooral als er heel veel hits zijn), en zo lijkt het ook goed te werken.
 	rows, err := timeoutQuery(q, chClose,
-		"SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(ZINMAX))
+		"SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" WHERE "+query+" LIMIT "+fmt.Sprint(offset)+", "+fmt.Sprint(zinmax))
 	if doErr(q, err) {
 		busyClear(q)
 		return
 	}
-	zinnen := make([]*Sentence, 0, ZINMAX)
+	zinnen := make([]*Sentence, 0, zinmax)
 	var a, f int
 	for rows.Next() {
 		err := rows.Scan(&a, &f)
@@ -279,15 +281,15 @@ func home(q *Context) {
 		first(q.r, "hword"),
 		first(q.r, "meta"),
 		first(q.r, "db"))
-	if offset > 0 || len(zinnen) == ZINMAX {
+	if offset > 0 || len(zinnen) == zinmax {
 		if offset > 0 {
-			fmt.Fprintf(q.w, "<a href=\"?%s&amp;offset=%d\">vorige</a>", qs, offset-ZINMAX)
+			fmt.Fprintf(q.w, "<a href=\"?%s&amp;offset=%d\">vorige</a>", qs, offset-zinmax)
 		} else {
 			fmt.Fprint(q.w, "vorige")
 		}
 		fmt.Fprint(q.w, " | ")
-		if len(zinnen) == ZINMAX {
-			fmt.Fprintf(q.w, "<a href=\"?%s&amp;offset=%d\">volgende</a>", qs, offset+ZINMAX)
+		if len(zinnen) == zinmax {
+			fmt.Fprintf(q.w, "<a href=\"?%s&amp;offset=%d\">volgende</a>", qs, offset+zinmax)
 		} else {
 			fmt.Fprint(q.w, "volgende")
 		}
@@ -858,7 +860,7 @@ func html_footer(q *Context) {
 `)
 }
 
-func html_form(q *Context) (has_query bool) {
+func html_form(q *Context, prefix string, maxzin int) (has_query bool) {
 	has_query = true
 	if first(q.r, "word") == "" &&
 		first(q.r, "postag") == "" &&
@@ -873,7 +875,7 @@ func html_form(q *Context) (has_query bool) {
 <form action="." method="get" accept-charset="utf-8">
 corpus: <select name="db">
 `)
-	html_opts(q, q.opt_db, getprefix(q), "corpus")
+	html_opts(q, q.opt_db, prefix, "corpus")
 	fmt.Fprintln(q.w, "</select>")
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
@@ -914,6 +916,18 @@ corpus: <select name="db">
          <td colspan="3"><span class="ie">Metadata:<br></span>
            <textarea rows="3" cols="40" name="meta" placeholder="metadata">`+first(q.r, "meta")+`</textarea>
            <br>TODO: Uitleg over metadata
+       <tr>
+         <td colspan="3">aantal: <select name="sn">
+`)
+	for _, i := range []int{10, 20, 50, 100, 200, 500} {
+		if i == maxzin {
+			fmt.Fprintf(q.w, "<option selected>%d</option>\n", i)
+		} else {
+			fmt.Fprintf(q.w, "<option>%d</option>\n", i)
+		}
+	}
+	fmt.Fprint(q.w, `
+         </select>
 	   <tr>
 		 <td style="padding-top:1em">
 		   <input type="button" value="help" onClick="javascript:window.open('info.html')">
@@ -1007,6 +1021,29 @@ func getprefix(q *Context) string {
 	exp := time.Now().AddDate(0, 0, 14)
 	http.SetCookie(q.w, &http.Cookie{Name: "paqu-prev", Value: db, Path: cookiepath, Expires: exp})
 	return db
+}
+
+func getzinmax(q *Context) int {
+	sn := first(q.r, "sn")
+	if sn == "" {
+		if s, err := q.r.Cookie("paqu-sn"); err == nil {
+			sn = s.Value
+		}
+	}
+
+	si, err := strconv.Atoi(sn)
+	if err != nil {
+		si = ZINMAX
+	} else if si < 10 {
+		si = 10
+	} else if si > 500 {
+		si = 500
+	}
+	sn = fmt.Sprint(si)
+
+	exp := time.Now().AddDate(0, 0, 14)
+	http.SetCookie(q.w, &http.Cookie{Name: "paqu-sn", Value: sn, Path: cookiepath, Expires: exp})
+	return si
 }
 
 func busyClear(q *Context) {
