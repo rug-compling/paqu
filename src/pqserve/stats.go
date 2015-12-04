@@ -554,25 +554,21 @@ func statsrel(q *Context) {
 			mm := make([]string, 0)
 			for j, mkey := range mkeys {
 				mkey = qquote(mkey)
-				v := strings.TrimSpace(*fields[nattr+1+2*j].(*string))
-				switch mtypes[j] {
-				case "TEXT":
-					mm = append(mm, fmt.Sprintf("%s = %s", mkey, qquote(v)))
-				case "INT", "FLOAT":
-					if v == "" {
-						mm = append(mm, fmt.Sprintf("%s = nil", mkey))
-					} else {
+				if *fields[nattr+2+2*j].(*int) == 2147483647 {
+					mm = append(mm, fmt.Sprintf("%s = nil", mkey))
+				} else {
+					v := strings.TrimSpace(*fields[nattr+1+2*j].(*string))
+					switch mtypes[j] {
+					case "TEXT":
+						mm = append(mm, fmt.Sprintf("%s = %s", mkey, qquote(v)))
+					case "INT", "FLOAT":
 						a := strings.Fields(v)
 						if len(a) == 3 {
 							mm = append(mm, fmt.Sprintf("%s in [ %s %s ]", mkey, a[0], a[2]))
 						} else {
 							mm = append(mm, fmt.Sprintf("%s = %s", mkey, v))
 						}
-					}
-				case "DATE":
-					if v == "" {
-						mm = append(mm, fmt.Sprintf("%s = nil", mkey))
-					} else {
+					case "DATE":
 						a := strings.Fields(v)
 						if len(a) == 4 {
 							day, _ := strconv.Atoi(a[1])
@@ -590,11 +586,7 @@ func statsrel(q *Context) {
 							}
 							mm = append(mm, fmt.Sprintf("%s %% %s_-__-__", mkey, p))
 						}
-					}
-				case "DATETIME":
-					if v == "" {
-						mm = append(mm, fmt.Sprintf("%s = nil", mkey))
-					} else {
+					case "DATETIME":
 						a := strings.Fields(v)
 						day, _ := strconv.Atoi(a[1])
 						hr := a[4][:2]
