@@ -564,7 +564,7 @@ func statsrel(q *Context) {
 					case "INT", "FLOAT":
 						a := strings.Fields(v)
 						if len(a) == 3 {
-							mm = append(mm, fmt.Sprintf("%s in [ %s %s ]", mkey, a[0], a[2]))
+							mm = append(mm, fmt.Sprintf("%s in %s %s", mkey, a[0], a[2]))
 						} else {
 							mm = append(mm, fmt.Sprintf("%s = %s", mkey, v))
 						}

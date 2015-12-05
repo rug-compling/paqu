@@ -12,7 +12,7 @@ var (
 	reDate      = regexp.MustCompile("^[_1-9][_0-9][_0-9][_0-9]-[_0-9][_0-9]-[_0-9][_0-9]$")
 	reDateTime1 = regexp.MustCompile("^[_1-9][_0-9][_0-9][_0-9]-[_0-9][_0-9]-[_0-9][_0-9]  ?[_0-9][_0-9]?:[_0-9][_0-9]$")
 	reDateTime2 = regexp.MustCompile("^[_1-9][_0-9][_0-9][_0-9]-[_0-9][_0-9]-[_0-9][_0-9]  ?[_0-9][_0-9]?:[_0-9][_0-9]:[_0-9][_0-9]$")
-	reQQ        = regexp.MustCompile(`^[^\\ \t\r\n\f"()\[\]|&<>=~%]+$`)
+	reQQ        = regexp.MustCompile(`^[^\\ \t\r\n\f"()|&<>=~%]+$`)
 )
 
 func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, usererr error, syserr error) {
@@ -60,7 +60,7 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 				tokbuf.WriteString("\"")
 			}
 			inStr = !inStr
-		case '(', ')', '|', '&', '[', ']':
+		case '(', ')', '|', '&':
 			if inWord || inCmp {
 				tokbuf.WriteString("\a")
 				inWord = false
@@ -297,20 +297,10 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 				state = 1
 			}
 		case 21:
-			if token != "[" {
-				return "", 0, fmt.Errorf("Ongeldige operator: %q", token), nil
-			}
+			pair[0] = token
 			state = 22
 		case 22:
-			pair[0] = token
-			state = 23
-		case 23:
 			pair[1] = token
-			state = 24
-		case 24:
-			if token != "]" {
-				return "", 0, fmt.Errorf("Ongeldige operator: %q", token), nil
-			}
 			current[lvl]++
 			if current[lvl] > max[lvl] {
 				max[lvl] = current[lvl]

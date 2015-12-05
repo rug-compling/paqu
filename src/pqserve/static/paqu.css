@@ -114,6 +114,17 @@ dd {
    margin-top: .5em;
    margin-bottom: 1.5em;
 }
+
+div.queryhelp dt {
+   font-weight: normal;
+   margin-top: 1.5em;
+}
+div.queryhelp dd {
+   font-family: monospace;
+   margin-top: .5em;
+   margin-bottom: 0px;
+}
+
 span.hfd {
   background-color: lightgreen;
 }
@@ -341,7 +352,8 @@ div.a9999 {
   max-width: 900px;
 }
 
-div.corpushelp {
+div.corpushelp,
+div.queryhelp  {
     margin: 1em 2em;
 }
 

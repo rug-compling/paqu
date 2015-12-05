@@ -655,11 +655,19 @@ func html_header(q *Context) {
   }
 
   var metavisible = false;
+  var queryvisible = false;
   function metahelp() {
     var e = $("#helpmeta");
     e.show();
     e.css("zIndex", 9999);
     metavisible = true;
+    return false;
+  }
+  function queryhelp() {
+    var e = $("#helpquery");
+    e.show();
+    e.css("zIndex", 9999);
+    queryvisible = true;
     return false;
   }
 
@@ -670,6 +678,12 @@ func html_header(q *Context) {
         e.hide();
         e.css("zIndex", 1);
         metavisible = false;
+      }
+      if (queryvisible) {
+        var e = $("#helpquery");
+        e.hide();
+        e.css("zIndex", 1);
+        queryvisible = false;
       }
     });
 
@@ -914,8 +928,8 @@ corpus: <select name="db">
 		   </select>
        <tr>
          <td colspan="3"><span class="ie">Metadata:<br></span>
-           <textarea rows="3" cols="40" name="meta" placeholder="metadata">`+first(q.r, "meta")+`</textarea>
-           <br>TODO: Uitleg over metadata
+           <textarea rows="3" cols="40" name="meta" placeholder="metadata">`+first(q.r, "meta")+`</textarea><br>
+           <small><a href="javascript:void(0)" onclick="javascript:queryhelp()">voorbeelden</a></small>
        <tr>
          <td colspan="3">aantal: <select name="sn">
 `)
@@ -937,6 +951,41 @@ corpus: <select name="db">
 		   <input type="reset" value="Reset">
 	   </table>
 	   </form>
+<div class="submenu a9999" id="helpquery">
+<div class="queryhelp">
+<b>Voorbeelden van zoeken met metadata</b>
+<dl>
+<dt>Zinnen moeten aan beide voorwaardes voldoen
+<dd>country = BE &amp; sex = female
+<dt>Zinnen moeten aan een van de voorwaardes voldoen
+<dd>country = BE | country = NL
+<dt>Gebruik haakjes om prioriteit aan te geven
+<dd>( country = BE | country = NL ) &amp; sex = female
+<dt>Zet woorden met speciale tekens tussen dubbele aanhalingstekens
+<dd>&quot;Type[A]&quot; = &quot;Eerste category&quot;
+<dt>Vergelijkingen
+<dd>temperature &gt; 20
+<dd>temperature &gt;= 20
+<dd>temperature &lt; 20
+<dd>temperature &lt;= 20
+<dt>Dit doet niet wat je verwacht als een zin meerdere waardes kan hebben voor een meta-attribuut
+<dd>hits >= 10 & hits <= 20
+<dt>Zo zoek je naar een waarde tussen 10 en 20, inclusief
+<dd>hits in 10 20
+<dt>Zoeken zonder onderscheid van hoofdletters en kleine letters, en met SQL-jokers % en _
+<dd>name % jan
+<dd>name % j_n
+<dd>name % &quot;jan%&quot;
+<dt>Zoeken met een reguliere expressie
+<dd>name ~ [Jj]anss?ens?
+<dt>Zoeken naar een ontbrekende waarde
+<dd>name = nil
+<dt>Zoeken naar de naam <em>nil</em>
+<dd>name = &quot;nil&quot;
+</dl>
+</div>
+</div>
+
 	   `)
 
 	return
