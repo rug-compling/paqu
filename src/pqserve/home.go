@@ -962,7 +962,7 @@ corpus: <select name="db">
 <dt>Gebruik haakjes om prioriteit aan te geven
 <dd>( country = BE | country = NL ) &amp; sex = female
 <dt>Zet woorden met speciale tekens tussen dubbele aanhalingstekens
-<dd>&quot;Type[A]&quot; = &quot;Eerste category&quot;
+<dd>&quot;Type(A)&quot; = &quot;Eerste category&quot;
 <dt>Vergelijkingen
 <dd>temperature &gt; 20
 <dd>temperature &gt;= 20
