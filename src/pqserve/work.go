@@ -280,6 +280,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		reuse_more := false
 		if files, e := filenames2(xml, false); e == nil && len(files) > 0 {
 			reuse = true
+			if isArch {
+				os.Remove(data + ".unzip")
+			}
 			done := make(map[string]bool)
 			for _, f := range files {
 				b, e := ioutil.ReadFile(path.Join(xml, f))
