@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -246,11 +247,8 @@ function rm(idx) {
 					strings.HasPrefix(corpus.params, "line") ||
 					corpus.params == "folia" ||
 					corpus.params == "tei") {
-					p := 0
-					files, err := filenames2(path.Join(paqudir, "data", corpus.id, "xml"), false)
-					if err == nil {
-						p = 1 + int(float64(len(files))/float64(corpus.nline)*98+.5)
-					}
+					files := countXML(path.Join(paqudir, "data", corpus.id, "xml"))
+					p := 1 + int(float64(files)/float64(corpus.nline)*98+.5)
 					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 				}
 			}
@@ -513,4 +511,39 @@ func vertaal(s string) string {
 		return s1
 	}
 	return s
+}
+
+func countXML(dir string) int {
+	fis, err := ioutil.ReadDir(dir)
+	if err != nil || len(fis) == 0 {
+		return 0
+	}
+
+	time := fis[0].ModTime()
+	name := fis[0].Name()
+	for _, fi := range fis {
+		if t := fi.ModTime(); time.Before(t) {
+			time = t
+			name = fi.Name()
+		}
+	}
+
+	count := 0
+	for _, fi := range fis {
+		if n := fi.Name(); n < name {
+			count += 10000
+		}
+	}
+
+	files, err := ioutil.ReadDir(dir + "/" + name)
+	if err != nil {
+		return count
+	}
+	for _, f := range files {
+		if strings.HasSuffix(f.Name(), ".xml") {
+			count++
+		}
+	}
+
+	return count
 }
