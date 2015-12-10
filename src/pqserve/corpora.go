@@ -519,29 +519,39 @@ func countXML(dir string) int {
 		return 0
 	}
 
-	time := fis[0].ModTime()
-	name := fis[0].Name()
-	for _, fi := range fis {
-		if t := fi.ModTime(); time.Before(t) {
-			time = t
-			name = fi.Name()
+	count := 0
+
+	name := fis[len(fis)-1].Name()
+	if files, err := ioutil.ReadDir(dir + "/" + name); err == nil {
+		for _, f := range files {
+			if n := f.Name(); strings.HasSuffix(n, ".xml") || strings.HasSuffix(n, ".xml.gz") {
+				count++
+			}
 		}
 	}
 
-	count := 0
+	if count == 0 {
+		time := fis[0].ModTime()
+		name = fis[0].Name()
+		for _, fi := range fis {
+			if t := fi.ModTime(); time.Before(t) {
+				time = t
+				name = fi.Name()
+			}
+		}
+
+		if files, err := ioutil.ReadDir(dir + "/" + name); err == nil {
+			for _, f := range files {
+				if n := f.Name(); strings.HasSuffix(n, ".xml") || strings.HasSuffix(n, ".xml.gz") {
+					count++
+				}
+			}
+		}
+	}
+
 	for _, fi := range fis {
 		if n := fi.Name(); n < name {
 			count += 10000
-		}
-	}
-
-	files, err := ioutil.ReadDir(dir + "/" + name)
-	if err != nil {
-		return count
-	}
-	for _, f := range files {
-		if strings.HasSuffix(f.Name(), ".xml") {
-			count++
 		}
 	}
 
