@@ -65,22 +65,71 @@ func main() {
 	// PARSEN
 
 	if *opt_s == "" {
-		cmd := exec.Command(
-			"/bin/bash",
-			"-c",
-			fmt.Sprintf(
-				"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
-				*opt_d, *opt_t*1000, filename))
-		cmd.Env = []string{
-			"ALPINO_HOME=" + *opt_a,
-			"PATH=" + os.Getenv("PATH"),
-			"LANG=en_US.utf8",
-			"LANGUAGE=en_US.utf8",
-			"LC_ALL=en_US.utf8",
+		var fpin, fpout *os.File
+		var errval error
+		tmpfile := filename + ".part"
+		defer func() {
+			if fpin != nil {
+				fpin.Close()
+			}
+			if fpout != nil {
+				fpout.Close()
+			}
+			os.Remove(tmpfile)
+			if errval != io.EOF {
+				util.CheckErr(errval)
+			}
+		}()
+		fpin, errval = os.Open(filename)
+		if errval != nil {
+			return
 		}
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
-		util.CheckErr(cmd.Run())
+		rd := util.NewReaderSize(fpin, 5000)
+		n := 0
+		for {
+			line, err := rd.ReadLineString()
+			if err != nil && err != io.EOF {
+				errval = err
+				return
+			}
+			if err == nil && n == 0 {
+				fpout, errval = os.Create(tmpfile)
+				if errval != nil {
+					return
+				}
+			}
+			if err == nil {
+				fmt.Fprintln(fpout, line)
+				n++
+			}
+			if (err == io.EOF && n > 0) || n == 10000 {
+				n = 0
+				fpout.Close()
+				fpout = nil
+				cmd := exec.Command(
+					"/bin/bash",
+					"-c",
+					fmt.Sprintf(
+						"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
+						*opt_d, *opt_t*1000, tmpfile))
+				cmd.Env = []string{
+					"ALPINO_HOME=" + *opt_a,
+					"PATH=" + os.Getenv("PATH"),
+					"LANG=en_US.utf8",
+					"LANGUAGE=en_US.utf8",
+					"LC_ALL=en_US.utf8",
+				}
+				cmd.Stderr = os.Stderr
+				cmd.Stdout = os.Stdout
+				errval = cmd.Run()
+				if errval != nil {
+					return
+				}
+			}
+			if err == io.EOF {
+				break
+			}
+		}
 	} else {
 		cmd := exec.Command(
 			"/usr/bin/curl", "-s", "--upload-file", filename, *opt_s)
