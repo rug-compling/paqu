@@ -435,9 +435,7 @@ func newCorpus(q *Context, dirname, title, how string, protected int) {
 	p.nr = taskWaitNr
 	processes[dirname] = p
 	processLock.Unlock()
-	go func() {
-		chWork <- p
-	}()
+	chWork <- p
 
 	writeHtml(
 		q,

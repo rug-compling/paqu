@@ -106,29 +106,13 @@ func main() {
 	}
 	logf("MySQL server-versie: %v (%s)", version, versionstring)
 
-	for i := 0; i < Cfg.Maxjob; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for {
+	semaphore = make(chan struct{}, Cfg.Maxjob)
+	wg.Add(1)
+	go func() {
+		scheduler()
+		wg.Done()
+	}()
 
-				// prioriteit voor chGlobalExit
-				select {
-				case <-chGlobalExit:
-					return
-				default:
-				}
-
-				select {
-				case <-chGlobalExit:
-					return
-				case task := <-chWork:
-					work(task)
-				}
-
-			}
-		}()
-	}
 	go recover()
 
 	go clearMacros()

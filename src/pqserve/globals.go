@@ -184,7 +184,8 @@ var (
 
 	chLog = make(chan string)
 
-	chWork    = make(chan *Process, 10000) // gebufferd om er voor te zorgen dat FIFO
+	semaphore chan struct{}
+	chWork    = make(chan *Process)
 	processes = make(map[string]*Process)
 
 	dirnameLock sync.Mutex
