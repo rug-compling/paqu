@@ -4,6 +4,12 @@
 
 Zie ook: TODO in diverse bestanden
 
+  - PaQu splitsen in twee delen?
+     1. deel voor uploaden data en downloaden geparste data
+	 2. deel voor querying, alleen geparste data uploaden
+	 3. nieuw: deel voor omzetten data naar PaQu-formaat
+	Probleem: extra gedoe voor mensen die data willen uploaden en gelijk
+	willen gebruiken in PaQu
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
       - zie ook TODOs in `work.go`
@@ -34,6 +40,8 @@ Zie ook: TODO in diverse bestanden
       - Als dingen botsen krijgt de gebruiker vanzelf een foutmelding.
         Maar als één subcorpus metadata heeft die een ander subcorpus
         niet heeft, dan de gebruiker waarschuwen?
+	- Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
+      kiezen welke onderdelen hij wil zien?
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
