@@ -50,7 +50,9 @@ int
     inlbl = 0,
     nl = 0,
     bol = 1,
-    hex = 0;
+    hex = 0,
+    un = 0,
+    wn = 0;
 
 void
     out (long unsigned),
@@ -79,17 +81,21 @@ SPC	([ \t\n\r\f]+)
 
 <INITIAL>{
 
-\n##PAQU.*\n                    { /* skip PAQU-directive */ }
+^##PAQU.*\n                     { /* skip PAQU-directive */ }
+
 [\x00-\x7F]                     { /* kan us-ascii of utf-8 zijn */ }
-[\xC0-\xDF][\x80-\xBF]          { /* kan utf-8 zijn */ }
-[\xE0-\xEF][\x80-\xBF]{2}       { /* kan utf-8 zijn */ }
-[\xF0-\xF7][\x80-\xBF]{3}       { /* kan utf-8 zijn */ }
-[\xF8-\xFB][\x80-\xBF]{4}       { /* kan utf-8 zijn */ }
-[\xFC-\xFD][\x80-\xBF]{5}       { /* kan utf-8 zijn */ }
+
+[\xC0-\xDF][\x80-\xBF]          |
+[\xE0-\xEF][\x80-\xBF]{2}       |
+[\xF0-\xF7][\x80-\xBF]{3}       |
+[\xF8-\xFB][\x80-\xBF]{4}       |
+[\xFC-\xFD][\x80-\xBF]{5}       { if (++un == 50) yyterminate(); }
+
 .                               {
-                                  /* geen utf-8, dan gaan we uit van windows-1252 */
-                                  charset = _win;
-                                  yyterminate();
+                                  if (++wn == 50) {
+                              	      charset = _win;
+                                      yyterminate();
+				  }
                                 }
 }
 
@@ -328,6 +334,8 @@ int main (int argc, char *argv [])
 	fseek (yyin, 0, SEEK_SET);
 	yylex ();                     /* test: windows-1252 */
 	yyrestart (yyin);
+	if (wn > un)
+	    charset = _win;
     }
 
     fseek (yyin, 0, SEEK_SET);
