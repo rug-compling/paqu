@@ -29,8 +29,14 @@ Inhoud:
   <li><a href="#woorden" target="_self">Woorden en lemma's</a>
   </ul>
 <li class="dbxml"><a href="#xpath" target="_self" class="dbxml">Zoeken met XPath</a>
-<li><a href="#metadata" target="_self">Metadata</a>
 <li><a href="#corpora" target="_self">Corpora</a>
+<ul>
+  <li><a href="#corplat" target="_self">Platte tekst</a>
+  <ul>
+    <li><a href="#corform" target="_self">Metadata</a>
+  </ul>
+  <li><a href="#cormeta" target="_self">Andere formaten</a>
+</ul>
 <li><a href="#contact" target="_self">Contact</a>
 </ul>
 
@@ -538,15 +544,123 @@ macro's te kunnen uploaden en/of te bewerken.
 </div>
 
 <hr>
-    <h2 id="metadata">Metadata</h2>
-
-TODO
-
-<hr>
     <h2 id="corpora">Corpora</h2>
 
-TODO:
-Over beschikbare corpora en zelf corpora toevoegen
+Als je bent ingelogd kun je onder de tab <em>Corpora</em> je eigen
+corpora toevoegen. Je kunt een enkele tekst uploaden, of een zip- of
+tar-bestand met daarin meerdere teksten. Die meerdere teksten moeten dan
+wel allemaal in hetzelfde formaat zijn.
+
+<h3 id="corplat">Platte tekst</h3>
+
+Gewoonlijk moet de tekst die je uploadt <em>platte tekst</em> zijn. Geen
+Word-document, geen PDF, geen HTML, etc. Veel van zulk soort teksten kun
+je
+<a href="https://www.google.nl/search?q=online+convert+document+to+plain+text">online
+laten omzetten in platte tekst</a>.
+<p>
+De tekst moet bij voorkeur gecodeerd zijn in tekenset UTF-8. Andere tekensets die
+herkend worden zijn US-ASCII, UTF-16 (met of zonder BOM) en UTF-32 (met
+of zonder BOM). Wanneer geen van deze tekensets herkend wordt gaat PaQu
+ervan uit dat de tekenset Windows-1252 is (of ISO-8859-1, een
+subset van Windows-1252). Alle tekst moet in dezelfde tekenset gecodeerd zijn.
+<p>
+Wat PaQu met de tekst doet hangt ervan af hoe het er uitziet. Is het
+doorlopende tekst (eventueel ingedeeld in paragrafen gescheiden door een
+lege regel), of bestaat de tekst al uit één zin per regel? In het eerste
+geval zal PaQu de tekst voor je in zinnen opdelen, tokeniseren, en
+voorzien van een label voor elke zin.
+<p>
+Is de tekst al opgedeeld in één zin per regel, dan kijkt PaQu of de
+tekst al getokeniseerd wordt. Zo niet, dan wordt dat alsnog gedaan. Als
+er nog geen labels aanwezig zijn, dan voegt PaQu die toe. Tekst die al
+getokeniseerd is mag codes bevatten die als instructie voor de parser
+dienen, zie onder <em>Tips and tricks</em> in de
+<a href="http://www.let.rug.nl/vannoord/DCOI/AnnotationGuide.html">Manual
+for syntactic annotators</a>.
+<p>
+PaQu probeert automatisch te bepalen hoe de tekst is ingedeeld. Dat gaat
+niet altijd goed. Daarom kun je voordat je de tekst uploadt onder
+<em>Soort document</em> zelf aangeven wat het juiste formaat is.
+
+<h4 id="cormeta">Metadata</h4>
+
+Je kunt tussen de tekst <em>metadata</em> opnemen, extra gegevens die
+gekoppeld worden aan de zinnen, en die je kunt gebruiken bij het zoeken
+als de tekst eenmaal door PaQu verwerkt is.
+<p>
+Hier is een voorbeeld van invoertekst met metadata:
+<div class="voorbeeld">
+##META text genre = roman<br>
+##META text genre = naturalisme<br>
+##META int hoofdstuk = 1<br>
+##META int paragraaf = 1
+<p>
+De geschiedenis van een vrouw. Hoe zij zocht de koele meren des Doods,
+waar verlossing is, en hoe zij die vond.
+<p>
+##META int paragraaf = 2
+<p>
+Haar naam heet ik Hedwig Marga de Fontayne. Een Hollandsche vrouw, maar
+met bloed in zich van uitheemsche voorouders.
+<p>
+##META int paragraaf = 3
+<p>
+Zij was in 't midden der negentiende eeuw geboren en opgegroeid in een
+Hollandsche provincie-stad, aldaar was klein vertier van handel of
+bedrijf, maar toch welvaart, want er woonden veel rijken in deftige
+huizen.
+</div>
+Metadata definieer je per blok. Blokken worden gescheiden door gewone
+tekst (doorlopende tekst, of één zin per regel, etc...). Een lege regel
+alleen begint geen nieuw blok.
+<p>
+Alle metadata die je definieert in een blok geldt voor de rest van het
+bestand, of tot aan een volgend blok waar metadata met een zelfde naam
+opnieuw wordt gedefinieerd.
+<p>
+In het voorbeeld hierboven, heeft <em>genre</em> twee waardes en
+<em>hoofdstuk</em> één, geldig tot het eind van de tekst, terwijl
+<em>paragraaf</em> voor elk stuk tekst een andere waarde krijgt.
+<p>
+Je kunt een metadata-item uit een eerder blok wissen zonder een nieuwe
+waarde te geven door achter het is-teken geen waarde op te geven.
+<p>
+Er zijn vijf soorten metadata, aangegeven met de aanduidingen
+<em>text</em>, <em>int</em>, <em>float</em>, <em>date</em> en
+<em>datetime</em>. Let op het formaat voor <em>date</em> en
+<em>datetime</em>:
+
+<div class="voorbeeld">
+##META text     naam    = Johannes<br>
+##META int      aantal  = 7<br>
+##META float    score   = 26.34<br>
+##META date     geboren = 1964-04-10<br>
+##META datetime gezien  = 2015-10-31 9:05<br>
+</div class>
+
+
+<h3 id="corform">Andere formaten</h3>
+
+Behalve platte tekst zijn er een paar andere formaten die PaQu accepteert.
+
+<ul>
+<li>XML-bestanden met één door Alpino geparste zin per bestand, samengevoegd in een zip- of tarbestand.
+
+<li>Een bestand in het DbXML-formaat, waarin Alpino XML-bestanden zijn opgeslagen. Dit formaat wordt onder andere gebruikt door het programma
+<a href="http://rug-compling.github.io/dact/" target="_blank" style="">dact</a>.
+
+<li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>.
+Het bestand moet gecodeerd zijn in UTF-8.
+De tekst moet getokeniseerd zijn.
+De tekst wordt opnieuw door PaQu geparst.
+
+<li>Een bestand in TEI-formaat: <a href="http://www.tei-c.org/" target="_blank">Text Encoding Initiative</a>.
+Het bestand moet gecodeerd zijn in UTF-8.
+De tekst moet getokeniseerd zijn.
+De tekst wordt opnieuw door PaQu geparst.
+
+</ul>
 
 <hr>
     <h2 id="contact">Contact</h2>

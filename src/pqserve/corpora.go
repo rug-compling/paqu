@@ -274,7 +274,7 @@ function rm(idx) {
 	fmt.Fprint(q.w, `
 <div class="submenu a9999">
 <div class="corpushelp">
-Keuzes voor het soort document
+Keuzes voor het soort document. Zie ook <a href="info.html#corpora" target="_blank">nadere uitleg</a>.
 <p>
 <dl>
 <dt>Automatisch bepaald
