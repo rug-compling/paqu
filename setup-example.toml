@@ -31,7 +31,7 @@ url = "http://paqu.domain.nl:9876/"
 # De interne poort waarop `pqserve` draait. Dit kan een ander nummer
 # zijn dan de poort voor de buitenwereld, bijvoorbeeld bij gebruik van
 # een proxy of Docker.
-port = 9876
+port = 80
 
 # Het defaultcorpus. Dit moet een globaal corpus zijn, geïnstalleerd
 # door de beheerder. Dit corpus wordt geselecteerd als de gebruiker zelf
