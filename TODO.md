@@ -18,7 +18,6 @@ Zie ook: TODO in diverse bestanden
     - Tekst voor pagina *Info*: onder kopje *Corpora*
   - Adminhandleiding
     - optie `loginurl` in `setup-example.toml`
-    - gebruik van `$PAQU/contact.html`
   - Metadata
     - Handleiding: Invoerformaat
   - pqserve:

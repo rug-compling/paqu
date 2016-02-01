@@ -22,11 +22,16 @@
 ## De default voor $PAQU is: $HOME/.paqu
 ##
 
-# De poort waarop `pqserve` draait.
-port = 9876
+## Contact-informatie die verschijnt op de helppagina van PaQu.
+contact = "Voor vragen en opmerkingen kun je contact opnemen met <a href=\"mailto:help@paqu.domain.nl\">help@paqu.domain.nl</a>."
 
-# De url waarop de server voor de buitenwereld beschikbaar is.
+# De url waarop de server voor de buitenwereld beschikbaar is, zonodig met poortnummer.
 url = "http://paqu.domain.nl:9876/"
+
+# De interne poort waarop `pqserve` draait. Dit kan een ander nummer
+# zijn dan de poort voor de buitenwereld, bijvoorbeeld bij gebruik van
+# een proxy of Docker.
+port = 9876
 
 # Het defaultcorpus. Dit moet een globaal corpus zijn, geïnstalleerd
 # door de beheerder. Dit corpus wordt geselecteerd als de gebruiker zelf

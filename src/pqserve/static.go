@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"path"
 	"strings"
 )
 
@@ -52,10 +50,7 @@ func static_info_html(q *Context) {
 	}
 	i := strings.Index(file__info__html, "<!--##START-->")
 	s += file__info__html[i+15:]
-	data, err := ioutil.ReadFile(path.Join(paqudir, "contact.html"))
-	if err == nil {
-		s = strings.Replace(s, "<!--##CONTACT##-->", string(data), 1)
-	}
+	s = strings.Replace(s, "<!--##CONTACT##-->", string(Cfg.Contact), 1)
 	fmt.Fprint(q.w, s)
 }
 

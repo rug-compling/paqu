@@ -11,6 +11,8 @@ import (
 )
 
 type Config struct {
+	Contact string
+
 	Port int
 	Url  string
 
