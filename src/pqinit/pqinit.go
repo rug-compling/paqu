@@ -16,6 +16,10 @@ type Config struct {
 	Prefix string
 }
 
+var (
+	DefaultPaquDir string
+)
+
 func main() {
 
 	db_overwrite := false
@@ -40,7 +44,11 @@ Syntax: %s [-w]
 
 	paqudir := os.Getenv("PAQU")
 	if paqudir == "" {
-		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		if DefaultPaquDir != "" {
+			paqudir = DefaultPaquDir
+		} else {
+			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		}
 	}
 	var Cfg Config
 	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)

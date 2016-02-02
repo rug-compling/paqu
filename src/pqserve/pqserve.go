@@ -24,6 +24,10 @@ import (
 	"time"
 )
 
+var (
+	DefaultPaquDir string
+)
+
 func init() {
 	expvar.Publish("tasks", ProcessMap(processes))
 	expvar.Publish("info", expvar.Func(GetInfo))
@@ -42,7 +46,11 @@ func main() {
 
 	paqudir = os.Getenv("PAQU")
 	if paqudir == "" {
-		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		if DefaultPaquDir != "" {
+			paqudir = DefaultPaquDir
+		} else {
+			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		}
 	}
 	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)

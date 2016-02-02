@@ -62,13 +62,21 @@ type AccessType struct {
 	Mail  []string
 }
 
+var (
+	DefaultPaquDir string
+)
+
 //. Main
 
 func main() {
 
 	paqudir := os.Getenv("PAQU")
 	if paqudir == "" {
-		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		if DefaultPaquDir != "" {
+			paqudir = DefaultPaquDir
+		} else {
+			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		}
 	}
 
 	cfg := Config{}

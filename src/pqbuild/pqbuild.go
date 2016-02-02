@@ -100,6 +100,8 @@ const (
 //. Variabelen
 
 var (
+	DefaultPaquDir string
+
 	db *sql.DB
 
 	lineno = 0
@@ -212,7 +214,11 @@ Opties:
 
 	paqudir := os.Getenv("PAQU")
 	if paqudir == "" {
-		paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		if DefaultPaquDir != "" {
+			paqudir = DefaultPaquDir
+		} else {
+			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+		}
 	}
 	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
