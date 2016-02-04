@@ -1470,6 +1470,20 @@ func sent_buf_put(arch, file int, sentence, archname, filename string) {
 // Zet een dependency relation in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func deprel_buf_put(arch, file int, rel string, d *Deprel) {
+	if len(d.word) > 128 ||
+		len(d.lemma) > 128 ||
+		len(d.root) > 128 ||
+		len(d.postag) > 64 ||
+		len(rel) > 64 ||
+		len(d.hword) > 128 ||
+		len(d.hlemma) > 128 ||
+		len(d.hroot) > 128 ||
+		len(d.hpostag) > 64 ||
+		len(d.mark) > 128 {
+		fmt.Fprintf(os.Stderr, "Skipping deprel, too long: %v\n", d)
+		return
+	}
+
 	komma := ","
 	if !buf_has_data[DPRL] {
 		komma = ""
@@ -1492,6 +1506,11 @@ func word_buf_put(woord string, lemmas []string) {
 	if len(lemmas) == 1 && simple(woord) == simple(lemmas[0]) {
 		return
 	}
+	if len(woord) > 128 || len(lemmas) > 1024 {
+		fmt.Fprintf(os.Stderr, "Skipping word, too long: %v %v\n", woord, lemmas)
+		return
+	}
+
 	komma := ","
 	if !buf_has_data[WORD] {
 		komma = ""
@@ -1537,6 +1556,10 @@ func file_buf_put(name string, n int) {
 // Zet een meta-item in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval float64, dateval string) {
+	if len(txt) > 128 {
+		fmt.Fprintf(os.Stderr, "Skipping meta, too long: %v\n", txt)
+		return
+	}
 	komma := ","
 	if !buf_has_data[META] {
 		komma = ""
@@ -1552,6 +1575,10 @@ func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval f
 // Zet een meta-indexitem in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func midx_buf_put(id int, name string, mtype string) {
+	if len(name) > 128 {
+		fmt.Fprintf(os.Stderr, "Skipping midx, too long: %v\n", name)
+		return
+	}
 	komma := ","
 	if !buf_has_data[MIDX] {
 		komma = ""
