@@ -1480,7 +1480,7 @@ func deprel_buf_put(arch, file int, rel string, d *Deprel) {
 		len(d.hroot) > 128 ||
 		len(d.hpostag) > 64 ||
 		len(d.mark) > 128 {
-		fmt.Fprintf(os.Stderr, "Skipping deprel, too long: %v\n", d)
+		fmt.Fprintf(os.Stderr, "Skipping deprel, too long: %#v\n", d)
 		return
 	}
 
@@ -1507,7 +1507,7 @@ func word_buf_put(woord string, lemmas []string) {
 		return
 	}
 	if len(woord) > 128 || len(lemmas) > 1024 {
-		fmt.Fprintf(os.Stderr, "Skipping word, too long: %v %v\n", woord, lemmas)
+		fmt.Fprintf(os.Stderr, "Skipping word, too long: %q %q\n", woord, lemmas)
 		return
 	}
 
@@ -1557,7 +1557,7 @@ func file_buf_put(name string, n int) {
 // Als de buffer vol raakt, stuur alles naar de database.
 func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval float64, dateval string) {
 	if len(txt) > 128 {
-		fmt.Fprintf(os.Stderr, "Skipping meta, too long: %v\n", txt)
+		fmt.Fprintf(os.Stderr, "Skipping meta, too long: %q\n", txt)
 		return
 	}
 	komma := ","
@@ -1576,7 +1576,7 @@ func meta_buf_put(id int, arch int, file int, txt string, intval int, floatval f
 // Als de buffer vol raakt, stuur alles naar de database.
 func midx_buf_put(id int, name string, mtype string) {
 	if len(name) > 128 {
-		fmt.Fprintf(os.Stderr, "Skipping midx, too long: %v\n", name)
+		fmt.Fprintf(os.Stderr, "Skipping midx, too long: %q\n", name)
 		return
 	}
 	komma := ","
