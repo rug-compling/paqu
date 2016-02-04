@@ -381,7 +381,7 @@ Opties:
 			arch int          NOT NULL,
 			file int          NOT NULL,
 			sent text         NOT NULL,
-			lbl  varchar(260) NOT NULL)
+			lbl  varchar(190) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
 		util.CheckErr(err)
@@ -1453,6 +1453,10 @@ func sent_buf_put(arch, file int, sentence, archname, filename string) {
 	}
 	if db_decode {
 		lbl = reFilecodes.ReplaceAllStringFunc(lbl, repl_filecode)
+	}
+
+	if len(lbl) > 190 {
+		util.CheckErr(fmt.Errorf("Label too long (max 190 characters): %q", lbl))
 	}
 
 	komma := ","
