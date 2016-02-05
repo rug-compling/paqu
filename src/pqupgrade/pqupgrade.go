@@ -131,7 +131,10 @@ func main() {
 		fmt.Print("Toevoegen van kolom `idd` aan tabel ", tb, "...")
 		_, err := db.Exec("ALTER TABLE `" + tb + "` ADD `idd` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST")
 		fmt.Println()
-		util.CheckErr(err)
+		if util.WarnErr(err) != nil {
+			// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
+			continue
+		}
 		changed = true
 	}
 
