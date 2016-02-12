@@ -1670,6 +1670,9 @@ func value(i int) string {
 }
 
 func connect() *sql.DB {
+	if Cfg.Login[0] == '$' {
+		Cfg.Login = os.Getenv(Cfg.Login[1:])
+	}
 	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
 	return db

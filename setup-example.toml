@@ -55,6 +55,8 @@ smtppass = ""
 # login = "username:password@tcp(www.myserver.nl:3306)/paqu"
 # Voorbeeld met server op lokale machine:
 login = "username:password@/paqu"
+# Als dit een dollarteken is gevolg door de naam van een environment
+# variabele dan wordt de waarde van die variabele later ingelezen.
 
 # Elke table in MySQL krijgt dit als prefix, gevolgd door een
 # underscore, om conflicten met andere toepassingen in dezelfde database

@@ -8,6 +8,9 @@ Parse & Query
 
 Grotendeels voltooid. Zie TODO.md voor wat er nog moet gebeuren.
 
+Je kunt PaQu nu ook in Docker draaien. Zie:
+https://github.com/rug-compling/paqu-docker
+
 ----------------------------------------------------------------
 
 ## Overzicht ##
