@@ -199,7 +199,9 @@ func handleFunc(url string, handler func(*Context)) {
 				q.shared[id] = shared
 				q.params[id] = params
 				q.protected[id] = protected > 0
-				q.hasmeta[id] = hasmeta > 0
+				if hasmeta > 0 {
+					q.hasmeta[id] = true
+				}
 				if q.auth && owner == q.user {
 					q.myprefixes[id] = true
 				}
