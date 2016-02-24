@@ -37,8 +37,9 @@ port = 80
 # door de beheerder. Dit corpus wordt geselecteerd als de gebruiker zelf
 # nog geen corpus heeft gekozen, en voor de voorbeelden in de uitleg.
 # Dit moet dus een corpus zijn waarin voor alle voorbeelden minstens één
-# resultaat is.
-default = "lassysmall"
+# resultaat is. Het kunnen ook meerdere corpora zijn, gescheiden door
+# een spatie, dan wordt het eerste aanwezige corpus gebruikt.
+default = "lassysmall alpinotreebank"
 
 # Gegevens die gebruikt worden om mail naar gebruikers te sturen.
 # De waarde van 'smtpserv' is verplicht met een poortnummer.
