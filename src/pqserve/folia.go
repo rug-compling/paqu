@@ -38,6 +38,22 @@ func folia(infile, outfile string) error {
 		}
 		if t, ok := tt.(xml.StartElement); ok {
 			switch t.Name.Local {
+			case "metadata":
+				var src, typ string
+				for _, e := range t.Attr {
+					switch e.Name.Local {
+					case "src":
+						src = e.Value
+					case "type":
+						typ = e.Value
+					}
+				}
+				if src != "" {
+					fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.src = "+src)))
+					if typ != "" {
+						fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.type = "+typ)))
+					}
+				}
 			case "whitespace":
 				if len(words) > 0 {
 					fmt.Fprintf(fpout, "##PAQULBL %s\n%s\n", hex.EncodeToString([]byte(label)), strings.Join(words, " "))
