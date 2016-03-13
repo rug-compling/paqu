@@ -131,7 +131,7 @@ func (a *arch) Read() ([]byte, error) {
 	return b, err
 }
 
-func (a *arch) Copy(fp *os.File) error {
+func (a *arch) Copy(fp io.Writer) error {
 	if !a.opened {
 		return ArchClosed
 	}

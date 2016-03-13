@@ -336,7 +336,7 @@ func savez2(q *Context) {
 			if arch < 0 {
 				newfile = filename[pathlen:]
 				if !global {
-					if strings.Contains(q.params[prefix], "-lbl") || q.params[prefix] == "folia" || q.params[prefix] == "tei" {
+					if strings.Contains(q.params[prefix], "-lbl") || strings.HasPrefix(q.params[prefix], "folia") || strings.HasPrefix(q.params[prefix], "tei") {
 						newfile = decode_filename(newfile[10:])
 					} else if strings.HasPrefix(q.params[prefix], "xmlzip") || q.params[prefix] == "dact" {
 						newfile = decode_filename(newfile[5:])

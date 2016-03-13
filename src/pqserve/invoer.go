@@ -24,7 +24,9 @@ var (
 		"xmlzip-p":     "afgeleid van een of meer andere corpora (beschermd)",
 		"dact":         "Dact-bestand",
 		"folia":        "FoLiA-bestand",
-		"tei":          "TEI-bestand",
+		"tei":          "TEI-bestand)",
+		"folia-arch":   "FoLiA-bestanden in zip/tar-bestand",
+		"tei-arch":     "TEI-bestanden in zip/tar-bestand",
 	}
 
 	reEndPoint = regexp.MustCompile(`[.!?]\s*$`)

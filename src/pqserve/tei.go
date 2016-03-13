@@ -5,23 +5,10 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
-func tei(infile, outfile string) error {
-
-	fpin, err := os.Open(infile)
-	if err != nil {
-		return err
-	}
-	defer fpin.Close()
-
-	fpout, err := os.Create(outfile)
-	if err != nil {
-		return err
-	}
-	defer fpout.Close()
+func tei(prefix string, fpin io.Reader, fpout io.Writer) error {
 
 	d := xml.NewDecoder(fpin)
 	var inS, inW, inPC bool
@@ -40,7 +27,7 @@ func tei(infile, outfile string) error {
 			switch t.Name.Local {
 			case "s":
 				teller++
-				label = fmt.Sprintf("s.%d", teller)
+				label = fmt.Sprintf("%ss.%d", prefix, teller)
 				for _, e := range t.Attr {
 					if e.Name.Local == "id" {
 						label = e.Value

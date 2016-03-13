@@ -245,8 +245,8 @@ function rm(idx) {
 			} else if st == "bezig" {
 				if corpus.nline > 0 && (strings.HasPrefix(corpus.params, "run") ||
 					strings.HasPrefix(corpus.params, "line") ||
-					corpus.params == "folia" ||
-					corpus.params == "tei") {
+					strings.HasPrefix(corpus.params, "folia") ||
+					strings.HasPrefix(corpus.params, "tei")) {
 					files := countXML(path.Join(paqudir, "data", corpus.id, "xml"))
 					p := 1 + int(float64(files)/float64(corpus.nline)*98+.5)
 					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
@@ -328,9 +328,11 @@ symbols in the input</a>.
 <li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>.
 Het bestand moet gecodeerd zijn in UTF-8.
 De tekst moet getokeniseerd zijn.
+<li>Een zip- of tarbestand met daarin bestanden in FoLiA-formaat.
 <li>Een bestand in TEI-formaat: <a href="http://www.tei-c.org/" target="_blank">Text Encoding Initiative</a>.
 Het bestand moet gecodeerd zijn in UTF-8.
 De tekst moet getokeniseerd zijn.
+<li>Een zip- of tarbestand met daarin bestanden in TEI-formaat.
 </ul>
 Als je een zip- of tarbestand gebruikt, dan moeten de bestanden die daarin zitten allemaal hetzelfde formaat hebben.
 <p>

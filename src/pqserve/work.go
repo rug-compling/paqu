@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/pebbe/util"
 
+	"bytes"
 	"compress/gzip"
 	"database/sql"
 	"encoding/hex"
@@ -128,7 +129,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 
 		var b []byte
-		b, err = ar.ReadN(200)
+		b, err = ar.ReadN(1000)
 		if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
 			ar.Close()
 			return
@@ -141,10 +142,12 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			setinvoer(db, params, task.id, false)
 			ar.Close()
 		} else {
-			//isxml := strings.HasPrefix(string(b), "<?xml")
-			//if !isxml {
+			if strings.Contains(string(b), "<FoLiA") {
+				params = "folia-arch"
+			} else if strings.Contains(string(b), "<TEI") {
+				params = "tei-arch"
+			}
 			isArch = true
-			//}
 			ar.Close()
 			var fp *os.File
 			fp, err = os.Create(data + ".unzip")
@@ -163,19 +166,35 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					err = e
 					return
 				}
-				//if !isxml {
-				fmt.Fprintf(fp, "\n##PAQUFILE %s\n", ar.Name())
-				//}
-				err = ar.Copy(fp)
+				if params == "folia-arch" || params == "tei-arch" {
+					fmt.Fprintf(fp, "##PAQUFILE %s\n", hex.EncodeToString([]byte(ar.Name())))
+				} else {
+					fmt.Fprintf(fp, "\n##PAQUFILE %s\n", ar.Name())
+				}
+				var buf bytes.Buffer
+				if params == "folia-arch" || params == "tei-arch" {
+					err = ar.Copy(&buf)
+				} else {
+					err = ar.Copy(fp)
+				}
 				if err != nil {
 					fp.Close()
 					ar.Close()
 					return
 				}
-				fmt.Fprintln(fp)
+				if params == "folia-arch" {
+					folia(ar.Name(), &buf, fp)
+				} else if params == "tei-arch" {
+					tei(ar.Name(), &buf, fp)
+				} else {
+					fmt.Fprintln(fp)
+				}
 			}
 			fp.Close()
 			ar.Close()
+			if params == "folia-arch" || params == "tei-arch" {
+				os.Rename(data+".unzip", data+".tmp")
+			}
 		}
 	}
 
@@ -333,23 +352,44 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 		} else { // if !reuse
-			var has_tok, has_lbl bool
-			if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
+			var has_tok, has_lbl, is_xml, is_arch bool
+			if strings.Contains(params, "-arch") {
+				is_arch = true
+			}
+			if strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") {
+				is_xml = true
+				has_lbl = true
+				has_tok = true
+			}
+			if strings.Contains(params, "-lbl") {
 				has_lbl = true
 			}
-			if strings.Contains(params, "-tok") || params == "folia" || params == "tei" {
+			if strings.Contains(params, "-tok") {
 				has_tok = true
 			}
 
-			if params == "folia" {
-				err = folia(data, data+".tmp")
-				if err != nil {
-					return
-				}
-			} else if params == "tei" {
-				err = tei(data, data+".tmp")
-				if err != nil {
-					return
+			if is_xml {
+				if !is_arch {
+					var fpin, fpout *os.File
+					fpin, err = os.Open(data)
+					if err != nil {
+						return
+					}
+					fpout, err = os.Create(data + ".tmp")
+					if err != nil {
+						fpin.Close()
+						return
+					}
+					if params == "folia" {
+						err = folia("", fpin, fpout)
+					} else {
+						err = tei("", fpin, fpout)
+					}
+					fpout.Close()
+					fpin.Close()
+					if err != nil {
+						return
+					}
 				}
 			} else {
 				//  pqtexter
@@ -589,10 +629,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				a[1] = strings.Join(a[1:ln-3], "|")
 			}
 			fname := a[0][2:]
-			if params == "run" || strings.HasPrefix(params, "line") || params == "folia" || params == "tei" {
+			if params == "run" || strings.HasPrefix(params, "line") || strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") {
 				fname = decode_filename(a[0][2:])
 			}
-			if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" {
+			if strings.Contains(params, "-lbl") || strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") {
 				fname = fname[1+strings.Index(fname, "-"):]
 			}
 			errlines = append(errlines, fname+"\t"+a[ln-3]+"\t"+a[ln-2]+"\t"+a[1]+"\n")
@@ -610,7 +650,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	p := regexp.QuoteMeta(xml + "/")
 	d := ""
-	if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" || isArch {
+	if strings.Contains(params, "-lbl") || strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") || isArch {
 		p += "[0-9]+/[0-9]+-"
 		d = "-d"
 	} else if params == "dact" || strings.HasPrefix(params, "xmlzip") {
@@ -670,7 +710,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	if Cfg.Dact && params != "dact" {
 		p := ""
-		if strings.Contains(params, "-lbl") || params == "folia" || params == "tei" || isArch {
+		if strings.Contains(params, "-lbl") || strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") || isArch {
 			p = "-"
 		} else if strings.HasPrefix(params, "xmlzip") {
 			p = "/"

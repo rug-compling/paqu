@@ -5,23 +5,10 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
-func folia(infile, outfile string) error {
-
-	fpin, err := os.Open(infile)
-	if err != nil {
-		return err
-	}
-	defer fpin.Close()
-
-	fpout, err := os.Create(outfile)
-	if err != nil {
-		return err
-	}
-	defer fpout.Close()
+func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 
 	d := xml.NewDecoder(fpin)
 	var inS, inW, inT, inCorrection, inOriginal bool
@@ -48,12 +35,8 @@ func folia(infile, outfile string) error {
 						typ = e.Value
 					}
 				}
-				if src != "" {
-					fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.src = "+src)))
-					if typ != "" {
-						fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.type = "+typ)))
-					}
-				}
+				fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.src = "+src)))
+				fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.type = "+typ)))
 			case "whitespace":
 				if len(words) > 0 {
 					fmt.Fprintf(fpout, "##PAQULBL %s\n%s\n", hex.EncodeToString([]byte(label)), strings.Join(words, " "))
@@ -62,7 +45,7 @@ func folia(infile, outfile string) error {
 				}
 			case "s":
 				teller++
-				label = fmt.Sprintf("s.%d", teller)
+				label = fmt.Sprintf("%ss.%d", prefix, teller)
 				for _, e := range t.Attr {
 					if e.Name.Local == "id" {
 						label = e.Value
