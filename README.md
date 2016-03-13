@@ -39,6 +39,10 @@ Je hebt een account op een MySQL-server nodig.
 
 ## Benodigde software ##
 
+### Locale ###
+
+De locale `en_US.utf8` moet geïnstalleerd zijn bij het draaien van PaQu.
+
 ### Graphviz: Graph Visualization Software ###
 
 Van Graphviz heb je de library's en de headers nodig. Op Debian worden
