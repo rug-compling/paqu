@@ -726,9 +726,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 // Run command, maar onderbreek het als chKill of chGlobalExit gesloten is
 func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
-	if !Cfg.Docker {
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	}
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	chRet := make(chan error, 2)
 	// deze functie schrijft twee keer op chRet
@@ -778,15 +776,11 @@ func run(cmd *exec.Cmd, chKill chan bool, chPipe chan string) error {
 
 	<-chRet // commando is gestart
 
-	var pgid int
-	var err error
-	if !Cfg.Docker {
-		pgid, err = syscall.Getpgid(cmd.Process.Pid)
-		if err != nil {
-			// misschien betekent een fout alleen maar dat het process net klaar is
-			logf("BIG TROUBLE: syscall.Getpgid(cmd.Process.Pid) error: %v", err)
-			pgid = 0
-		}
+	pgid, err := syscall.Getpgid(cmd.Process.Pid)
+	if err != nil {
+		// misschien betekent een fout alleen maar dat het process net klaar is
+		logf("BIG TROUBLE: syscall.Getpgid(cmd.Process.Pid) error: %v", err)
+		pgid = 0
 	}
 
 FORSELECT:
@@ -800,11 +794,9 @@ FORSELECT:
 			break FORSELECT
 		}
 	}
-	if !Cfg.Docker {
-		err = syscall.Kill(-pgid, 9)
-		if err != nil {
-			logf("syscall.Kill(-pgid, 9) error: %v", err)
-		}
+	err = syscall.Kill(-pgid, 9)
+	if err != nil {
+		logf("syscall.Kill(-pgid, 9) error: %v", err)
 	}
 	err = <-chRet
 	return err
