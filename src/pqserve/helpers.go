@@ -229,6 +229,9 @@ func shell(format string, a ...interface{}) *exec.Cmd {
 		"LANGUAGE=en_US.utf8",
 		"LC_ALL=en_US.utf8",
 	}
+	if Cfg.Login[0] == '$' {
+		cmd.Env = append(cmd.Env, Cfg.Login[1:]+"="+os.Getenv(Cfg.Login[1:]))
+	}
 	return cmd
 }
 
@@ -250,10 +253,11 @@ func minversion(major, minor, patch int) bool {
 }
 
 func dbopen() (*sql.DB, error) {
-	if Cfg.Login[0] == '$' {
-		Cfg.Login = os.Getenv(Cfg.Login[1:])
+	login := Cfg.Login
+	if login[0] == '$' {
+		login = os.Getenv(login[1:])
 	}
-	return sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	return sql.Open("mysql", login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }
 
 func urlJoin(elem ...string) string {
