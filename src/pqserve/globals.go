@@ -56,6 +56,8 @@ type Config struct {
 
 	View   []ViewType
 	Access []AccessType
+
+	Docker bool
 }
 
 type ViewType struct {
