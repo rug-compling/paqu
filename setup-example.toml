@@ -161,7 +161,7 @@ querytimeout = 120
 # Dit is de url van een externe website.
 # Als dit is gedefinieerd vervangt het de ingebouwde manier van inloggen.
 # Zie voorbeeld: extra/pqlogin.go
-loginurl =
+loginurl = ""
 
 # Wie mag de site bekijken?
 # Selectie op basis van ip-adres.

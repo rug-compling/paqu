@@ -6,50 +6,51 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
+	"fmt"
 	"os"
 	"path"
 )
 
 type Config struct {
-	Contact string
+	Contact string `toml:"contact"`
 
-	Port int
-	Url  string
+	Url  string `toml:"url"`
+	Port int    `toml:"port"`
 
-	Default string
+	Default string `toml:"default"`
 
-	Mailfrom string
-	Smtpserv string
-	Smtpuser string
-	Smtppass string
+	Mailfrom string `toml:"mailfrom"`
+	Smtpserv string `toml:"smtpserv"`
+	Smtpuser string `toml:"smtpuser"`
+	Smtppass string `toml:"smtppass"`
 
-	Login  string
-	Prefix string
+	Login  string `toml:"login"`
+	Prefix string `toml:"prefix"`
 
-	Maxjob int
-	Maxwrd int
-	Maxdup int
-	Dact   bool
+	Maxjob int  `toml:"maxjob"`
+	Maxwrd int  `toml:"maxwrd"`
+	Maxdup int  `toml:"maxdup"`
+	Dact   bool `toml:"dact"`
 
-	Secret string
+	Sh       string `toml:"sh"`
+	Path     string `toml:"path"`
+	Alpino   string `toml:"alpino"`
+	Alpino15 bool   `toml:"alpino15"`
+	Timeout  int    `toml:"timeout"`
 
-	Sh       string
-	Path     string
-	Alpino   string
-	Alpino15 bool
-	Timeout  int
+	Secret string `toml:"secret"`
 
-	Https     bool
-	Httpdual  bool
-	Remote    bool
-	Forwarded bool
+	Https     bool `toml:"https"`
+	Httpdual  bool `toml:"httpdual"`
+	Remote    bool `toml:"remote"`
+	Forwarded bool `toml:"forwarded"`
 
-	Querytimeout int // in secondes
+	Querytimeout int `toml:"querytimeout"` // in secondes
 
-	Directories []string
+	Loginurl string `toml:"loginurl"`
 
-	View   []ViewType
-	Access []AccessType
+	View   []ViewType   `toml:"view"`
+	Access []AccessType `toml:"access"`
 }
 
 type ViewType struct {
@@ -80,9 +81,14 @@ func main() {
 	}
 
 	cfg := Config{}
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &cfg)
+	md, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &cfg)
 	util.CheckErr(err)
+
+	for _, un := range md.Undecoded() {
+		fmt.Println("UNDEFINED:", un)
+	}
 
 	e := toml.NewEncoder(os.Stdout)
 	e.Encode(cfg)
+
 }
