@@ -52,8 +52,13 @@ func main() {
 			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	tom := path.Join(paqudir, "setup.toml")
+	md, err := toml.DecodeFile(tom, &Cfg)
 	util.CheckErr(err)
+	if un := md.Undecoded(); len(un) > 0 {
+		fmt.Fprintln(os.Stderr, "Fout in", tom, ": onbekend :", un)
+		return
+	}
 
 	go func() {
 		wgLogger.Add(1)
