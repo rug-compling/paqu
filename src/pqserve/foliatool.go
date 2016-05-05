@@ -252,8 +252,8 @@ func foliatool(q *Context) {
 	fmt.Fprint(q.w, `
 <form class="foliafile" action="folia" method="post" enctype="multipart/form-data" accept-charset="utf-8">
 <input type="hidden" name="act" value="putdata">
-Nieuwe data (folia: .xml/.zip/.tar/.tar.gz):<br>
-<input type="file" name="data">
+Nieuwe data (folia: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
+<input type="file" name="data" accept=".xml,.xml.gz,.zip,.tar,.tar.gz,.tgz">
 <input type="submit">
 `)
 	if settings.DataInfo != "" {
@@ -270,8 +270,8 @@ Huidige metadata: `)
 	fmt.Fprint(q.w, `
 <form class="foliafile" action="folia" method="post" enctype="multipart/form-data" accept-charset="utf-8">
 <input type="hidden" name="act" value="putmeta">
-Nieuwe metadata (cmdi/imdi/...: .xml/.zip/.tar/.tar.gz):<br>
-<input type="file" name="data">
+Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
+<input type="file" name="data" accept=".xml,.xml.gz,.zip,.tar,.tar.gz,.tgz">
 <input type="submit">
 `)
 	if settings.MetaInfo != "" {
