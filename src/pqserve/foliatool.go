@@ -93,8 +93,8 @@ func foliatool(q *Context) {
 	//
 	// Begin verwerking van upload
 	//
-	for {
-		if q.r.Method == "POST" {
+	if q.r.Method == "POST" {
+		for {
 			act := firstf(q.form, "act")
 			var datadir string
 			if act == "putdata" {
