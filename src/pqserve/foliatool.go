@@ -99,14 +99,19 @@ func foliatool(q *Context) {
 			var datadir string
 			if act == "putdata" {
 				datadir = filepath.Join(fdir, "data")
+				settings.DataInfo = ""
 			} else if act == "putmeta" {
 				datadir = filepath.Join(fdir, "meta")
+				settings.MetaInfo = ""
 			} else {
 				break
 			}
-			// TODO: test of er wel een bestand is geüpload, en of het niet leeg is
-			uploadname := filepath.Base(q.form.File["data"][0].Filename)
+			settingsChanged = true
 			os.RemoveAll(datadir)
+			if len(q.form.File["data"]) < 1 {
+				break
+			}
+			uploadname := filepath.Base(q.form.File["data"][0].Filename)
 			os.MkdirAll(datadir, 0700)
 			datafile := filepath.Join(fdir, "datafile")
 			fpout, err := os.Create(datafile)
@@ -217,7 +222,6 @@ func foliatool(q *Context) {
 			} else {
 				settings.MetaInfo = info
 			}
-			settingsChanged = true
 			break
 		}
 	}
