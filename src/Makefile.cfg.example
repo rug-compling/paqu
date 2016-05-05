@@ -15,8 +15,7 @@ DEFAULT_PAQU_DIR=
 TAGS =
 
 # Extra opties voor 'go'
-# Gebruik de optie -i alleen als je pakketten in _vendor gebruikt (zie onder)
-OPTS = -v -i
+OPTS = -v
 
 #### Environment-variabelen
 

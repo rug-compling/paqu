@@ -1,4 +1,6 @@
 
+include Makefile.cfg
+
 info:
 	@echo
 	@echo Kopieer Makefile.cfg.example naar Makefile.cfg
@@ -7,12 +9,22 @@ info:
 	@echo
 
 all:
+ifneq "$(findstring paqu/_vendor, $(GOPATH))" ""
+	go install github.com/BurntSushi/toml
+	go install github.com/beevik/etree
+	go install github.com/dchest/authcookie
+	go install github.com/go-sql-driver/mysql
+	go install github.com/pebbe/compactcorpus
+	CGO_LDFLAGS="-Wl,-rpath=$(LIBRARY_PATH)" go install github.com/pebbe/dbxml
+	go install github.com/pebbe/util
+endif
 	mkdir -p ../bin
 	make -C pqalpino
 	make -C pqbugtest
 	make -C pqbuild
 	make -C pqclean
 	make -C pqconfig
+	make -C pqfolia
 	make -C pqinit
 	make -C pqrmcorpus
 	make -C pqrmuser
