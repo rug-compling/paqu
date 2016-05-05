@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -407,7 +407,7 @@ func isGlobal(q *Context, prefix string) (global bool, ok bool) {
 func getPathLen(q *Context, prefix string, global, archonly bool) (length int, ok bool) {
 
 	if !global {
-		return len(path.Join(paqudir, "data", prefix, "xml")) + 1, true
+		return len(filepath.Join(paqudir, "data", prefix, "xml")) + 1, true
 	}
 
 	var min, max sql.NullInt64

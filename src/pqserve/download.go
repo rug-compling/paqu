@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -49,7 +49,7 @@ func download(q *Context) {
 		return
 	}
 
-	datadir := path.Join(paqudir, "data", id)
+	datadir := filepath.Join(paqudir, "data", id)
 	var filename string
 	switch dl {
 	case "summary":
@@ -70,7 +70,7 @@ func download(q *Context) {
 	}
 
 	if filename != "" {
-		fp, err := os.Open(path.Join(datadir, filename+".gz"))
+		fp, err := os.Open(filepath.Join(datadir, filename+".gz"))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -92,7 +92,7 @@ func download(q *Context) {
 
 	// dact
 	if dl == "dact" {
-		fp, err := os.Open(path.Join(datadir, "data.dact"))
+		fp, err := os.Open(filepath.Join(datadir, "data.dact"))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -107,7 +107,7 @@ func download(q *Context) {
 
 	// data.lines met verkeerde labels
 	if dl == "zinnen" {
-		fp, err := os.Open(path.Join(datadir, "data.lines.gz"))
+		fp, err := os.Open(filepath.Join(datadir, "data.lines.gz"))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -139,7 +139,7 @@ func download(q *Context) {
 	}
 
 	// xml
-	datadir = path.Join(datadir, "xml")
+	datadir = filepath.Join(datadir, "xml")
 	files, err := filenames2(datadir, false)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
@@ -152,7 +152,7 @@ func download(q *Context) {
 
 	w := zip.NewWriter(q.w)
 	for _, gzname := range files {
-		fullgzname := path.Join(datadir, gzname)
+		fullgzname := filepath.Join(datadir, gzname)
 		file, err := os.Stat(fullgzname)
 		name := decode_filename(gzname[:len(gzname)-3])
 		if params == "dact" || strings.HasPrefix(params, "xmlzip") {
@@ -169,14 +169,14 @@ func download(q *Context) {
 			logerr(err)
 			return
 		}
-		fh.Name = path.Join(id, name)
+		fh.Name = filepath.Join(id, name)
 		f, err := w.CreateHeader(fh)
 		if err != nil {
 			logerr(err)
 			return
 		}
 
-		fp, err := os.Open(path.Join(datadir, gzname))
+		fp, err := os.Open(filepath.Join(datadir, gzname))
 		if err != nil {
 			logerr(err)
 			return

@@ -15,7 +15,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -49,10 +49,10 @@ func main() {
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	tom := path.Join(paqudir, "setup.toml")
+	tom := filepath.Join(paqudir, "setup.toml")
 	md, err := toml.DecodeFile(tom, &Cfg)
 	util.CheckErr(err)
 	if un := md.Undecoded(); len(un) > 0 {
@@ -176,6 +176,8 @@ func main() {
 	handleFunc("relnone.png", static_relnone_png)
 	handleFunc("relother.png", static_relother_png)
 
+	handleFunc("folia", foliatool)
+
 	handleFunc("ext", extension)
 
 	handleStatic("debug/env", environment)
@@ -206,7 +208,7 @@ func main() {
 	if !Cfg.Https && !Cfg.Httpdual {
 		errserve = http.ListenAndServe(addr, Log(http.DefaultServeMux))
 	} else if Cfg.Https && !Cfg.Httpdual {
-		errserve = http.ListenAndServeTLS(addr, path.Join(paqudir, "cert.pem"), path.Join(paqudir, "key.pem"), Log(http.DefaultServeMux))
+		errserve = http.ListenAndServeTLS(addr, filepath.Join(paqudir, "cert.pem"), filepath.Join(paqudir, "key.pem"), Log(http.DefaultServeMux))
 	} else {
 
 		// De ingewikkelde oplossing: acepteer zowel http als https.
@@ -216,7 +218,7 @@ func main() {
 			tlsConfig.NextProtos = []string{"http/1.1"}
 		}
 		tlsConfig.Certificates = make([]tls.Certificate, 1)
-		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(path.Join(paqudir, "cert.pem"), path.Join(paqudir, "key.pem"))
+		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(filepath.Join(paqudir, "cert.pem"), filepath.Join(paqudir, "key.pem"))
 		util.CheckErr(err)
 		ln, err := net.Listen("tcp", addr)
 		util.CheckErr(err)

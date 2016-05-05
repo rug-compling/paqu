@@ -47,7 +47,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -111,7 +111,7 @@ func tree(q *Context) {
 	if has_names {
 		label = first(q.r, "file")
 		if first(q.r, "global") == "true" {
-			label = path.Base(first(q.r, "arch")) + "::" + label
+			label = filepath.Base(first(q.r, "arch")) + "::" + label
 		}
 	} else {
 		rows, err := q.db.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))

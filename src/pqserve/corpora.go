@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -247,7 +247,7 @@ function rm(idx) {
 					strings.HasPrefix(corpus.params, "line") ||
 					strings.HasPrefix(corpus.params, "folia") ||
 					strings.HasPrefix(corpus.params, "tei")) {
-					files := countXML(path.Join(paqudir, "data", corpus.id, "xml"))
+					files := countXML(filepath.Join(paqudir, "data", corpus.id, "xml"))
 					p := 1 + int(float64(files)/float64(corpus.nline)*98+.5)
 					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 				}
@@ -396,7 +396,7 @@ func submitCorpus(q *Context) {
 	}
 
 	if len(q.form.File["data"]) > 0 {
-		fpout, err := os.Create(path.Join(fulldirname, "data"))
+		fpout, err := os.Create(filepath.Join(fulldirname, "data"))
 		if hErr(q, err) {
 			return
 		}
@@ -475,7 +475,7 @@ func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok b
 		dirname = d
 		break
 	}
-	fulldirname = path.Join(paqudir, "data", dirname)
+	fulldirname = filepath.Join(paqudir, "data", dirname)
 	err := os.Mkdir(fulldirname, 0700)
 	if hErr(q, err) {
 		return

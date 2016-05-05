@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -240,7 +240,7 @@ func xpath(q *Context) {
 	dactfiles := make([]string, 0)
 	global := false
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, path.Join(paqudir, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, filepath.Join(paqudir, "data", prefix, "data.dact"))
 	} else {
 		global = true
 		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
@@ -1518,7 +1518,7 @@ $('#loading').addClass('hide');
 var reBugtest = regexp.MustCompile(`\[err:[A-Z]+[0-9]+\]`)
 
 func bugtest(filename, xpath string) error {
-	b, err := exec.Command(path.Dir(os.Args[0])+"/pqbugtest", filename, xpath).CombinedOutput()
+	b, err := exec.Command(filepath.Dir(os.Args[0])+"/pqbugtest", filename, xpath).CombinedOutput()
 	if err != nil {
 		return err
 	}

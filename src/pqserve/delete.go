@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -50,8 +50,8 @@ func remove(q *Context) {
 	kill(id)
 
 	go func() {
-		p := path.Join(paqudir, "data", id)
-		p2 := path.Join(paqudir, "data", "_invalid_"+id)
+		p := filepath.Join(paqudir, "data", id)
+		p2 := filepath.Join(paqudir, "data", "_invalid_"+id)
 		err := os.Rename(p, p2)
 		if err != nil {
 			logf("os.Rename(%q, %q) error: %v", p, p2, err)

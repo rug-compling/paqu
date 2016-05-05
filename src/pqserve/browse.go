@@ -8,7 +8,7 @@ import (
 	"html"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -35,8 +35,8 @@ func browse(q *Context) {
 		return
 	}
 
-	datadir := path.Join(paqudir, "data", id)
-	fp, err := os.Open(path.Join(datadir, "summary.txt.gz"))
+	datadir := filepath.Join(paqudir, "data", id)
+	fp, err := os.Open(filepath.Join(datadir, "summary.txt.gz"))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)

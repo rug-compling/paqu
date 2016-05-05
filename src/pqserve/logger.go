@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"html"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"time"
 )
@@ -22,7 +22,7 @@ func logerr(err error) bool {
 	var msg string
 	_, filename, lineno, ok := runtime.Caller(1)
 	if ok {
-		msg = fmt.Sprintf("%v:%v: %v", path.Base(filename), lineno, err.Error())
+		msg = fmt.Sprintf("%v:%v: %v", filepath.Base(filename), lineno, err.Error())
 	} else {
 		msg = err.Error()
 	}
@@ -37,7 +37,7 @@ func logerrfrag(q *Context, err error) bool {
 	var msg string
 	_, filename, lineno, ok := runtime.Caller(1)
 	if ok {
-		msg = fmt.Sprintf("%v:%v: %v", path.Base(filename), lineno, err.Error())
+		msg = fmt.Sprintf("%v:%v: %v", filepath.Base(filename), lineno, err.Error())
 	} else {
 		msg = err.Error()
 	}
@@ -48,7 +48,7 @@ func logerrfrag(q *Context, err error) bool {
 
 func logger() {
 
-	logfile := path.Join(paqudir, "pqserve.log")
+	logfile := filepath.Join(paqudir, "pqserve.log")
 
 	rotate := func() {
 		for i := 4; i > 1; i-- {

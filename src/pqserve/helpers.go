@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -39,7 +39,7 @@ func doErr(q *Context, err error) bool {
 	var s1 string
 	_, filename, lineno, ok := runtime.Caller(1)
 	if ok {
-		s1 = fmt.Sprintf("FOUT: %v:%v: %v", path.Base(filename), lineno, s)
+		s1 = fmt.Sprintf("FOUT: %v:%v: %v", filepath.Base(filename), lineno, s)
 	} else {
 		s1 = "FOUT: " + s
 	}
@@ -76,7 +76,7 @@ func hErr(q *Context, err error) bool {
 	var s1 string
 	_, filename, lineno, ok := runtime.Caller(1)
 	if ok {
-		s1 = fmt.Sprintf("FOUT: %v:%v: %v", path.Base(filename), lineno, s)
+		s1 = fmt.Sprintf("FOUT: %v:%v: %v", filepath.Base(filename), lineno, s)
 	} else {
 		s1 = "FOUT: " + s
 	}
@@ -370,13 +370,13 @@ func filenames2(dirname string, meta bool) ([]string, error) {
 	}
 	for _, dir := range dirs {
 		dname := dir.Name()
-		files, err := ioutil.ReadDir(path.Join(dirname, dname))
+		files, err := ioutil.ReadDir(filepath.Join(dirname, dname))
 		if err != nil {
 			return fnames, err
 		}
 		for _, file := range files {
 			if name := file.Name(); strings.HasSuffix(name, ".meta") == meta {
-				fnames = append(fnames, path.Join(dname, name))
+				fnames = append(fnames, filepath.Join(dname, name))
 			}
 		}
 	}

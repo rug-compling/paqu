@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -53,7 +53,7 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 		default:
 		}
 
-		data, err := ioutil.ReadFile(path.Join(xml, name))
+		data, err := ioutil.ReadFile(filepath.Join(xml, name))
 		if err != nil {
 			return err
 		}
@@ -119,7 +119,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 		if nline%10000 == 1 {
 			nd++
 			sdir = fmt.Sprintf("%04d", nd)
-			os.Mkdir(path.Join(xmldir, sdir), 0777)
+			os.Mkdir(filepath.Join(xmldir, sdir), 0777)
 		}
 
 		name := docs.Name()
@@ -130,7 +130,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 
 		data := []byte(docs.Content())
 
-		fp, err := os.Create(path.Join(xmldir, sdir, encname+".xml"))
+		fp, err := os.Create(filepath.Join(xmldir, sdir, encname+".xml"))
 		if err != nil {
 			return 0, 0, err
 		}

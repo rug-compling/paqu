@@ -15,7 +15,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -71,13 +71,13 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 	}
 
-	dirname := path.Join(paqudir, "data", task.id)
-	data := path.Join(dirname, "data")
-	xml := path.Join(dirname, "xml")
-	dact := path.Join(dirname, "data.dact")
-	stdout := path.Join(dirname, "stdout.txt")
-	stderr := path.Join(dirname, "stderr.txt")
-	summary := path.Join(dirname, "summary.txt")
+	dirname := filepath.Join(paqudir, "data", task.id)
+	data := filepath.Join(dirname, "data")
+	xml := filepath.Join(dirname, "xml")
+	dact := filepath.Join(dirname, "data.dact")
+	stdout := filepath.Join(dirname, "stdout.txt")
+	stderr := filepath.Join(dirname, "stderr.txt")
+	summary := filepath.Join(dirname, "summary.txt")
 
 	// gzip
 	var fp *os.File
@@ -247,7 +247,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				return
 			default:
 			}
-			logerr(gz(path.Join(xml, fname)))
+			logerr(gz(filepath.Join(xml, fname)))
 		}
 		if params == "dact" && !Cfg.Dact {
 			os.Remove(dact)
@@ -304,7 +304,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			done := make(map[string]bool)
 			for _, f := range files {
-				b, e := ioutil.ReadFile(path.Join(xml, f))
+				b, e := ioutil.ReadFile(filepath.Join(xml, f))
 				if e != nil {
 					err = e
 					return
@@ -538,11 +538,11 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					}
 					fmt.Fprintf(fp, "%s|%s\n", fname, strings.TrimSpace(line))
 					if nlines%10000 == 0 {
-						os.MkdirAll(path.Join(xml, fmt.Sprintf("%04d", nlines/10000)), 0777)
+						os.MkdirAll(filepath.Join(xml, fmt.Sprintf("%04d", nlines/10000)), 0777)
 					}
 					nlines++
 					if len(metalines) > 0 {
-						fpm, e := os.Create(path.Join(xml, fname+".meta"))
+						fpm, e := os.Create(filepath.Join(xml, fname+".meta"))
 						if e != nil {
 							err = e
 							fp.Close()
@@ -664,7 +664,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		return
 	}
 	for _, filename := range filenames {
-		m := path.Join(xml, filename)
+		m := filepath.Join(xml, filename)
 		x := m[:len(m)-4] + "xml"
 		var xb, mb []byte
 		xb, err = ioutil.ReadFile(x)
@@ -702,7 +702,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
 		dirname,
 		quote(p), d,
-		path.Base(dirname), quote(title), quote(user), stdout, stderr)
+		filepath.Base(dirname), quote(title), quote(user), stdout, stderr)
 	err = run(cmd, task.chKill, nil)
 	if err != nil {
 		return
@@ -934,8 +934,8 @@ func recover() {
 		util.CheckErr(err)
 	}
 	for _, corpus := range queuing {
-		util.CheckErr(os.RemoveAll(path.Join(paqudir, "data", corpus)))
-		logf("QUEUING: rm -r %s: ok", path.Join(paqudir, "data", corpus))
+		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "data", corpus)))
+		logf("QUEUING: rm -r %s: ok", filepath.Join(paqudir, "data", corpus))
 	}
 
 	db.Close()
@@ -1052,7 +1052,7 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 		if nline%10000 == 1 {
 			nd++
 			sdir = fmt.Sprintf("%04d", nd)
-			os.Mkdir(path.Join(xmldir, sdir), 0777)
+			os.Mkdir(filepath.Join(xmldir, sdir), 0777)
 		}
 
 		name := ar.Name()
@@ -1061,7 +1061,7 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 		}
 		encname := encode_filename(name)
 
-		fp, err := os.Create(path.Join(xmldir, sdir, encname+".xml"))
+		fp, err := os.Create(filepath.Join(xmldir, sdir, encname+".xml"))
 		if err != nil {
 			return 0, 0, err
 		}
