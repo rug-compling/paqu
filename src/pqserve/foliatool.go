@@ -104,6 +104,7 @@ func foliatool(q *Context) {
 			} else {
 				break
 			}
+			// TODO: test of er wel een bestand is geüpload, en of het niet leeg is
 			uploadname := filepath.Base(q.form.File["data"][0].Filename)
 			os.RemoveAll(datadir)
 			os.MkdirAll(datadir, 0700)
