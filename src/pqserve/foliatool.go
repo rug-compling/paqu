@@ -93,137 +93,135 @@ func foliatool(q *Context) {
 	//
 	// Begin verwerking van upload
 	//
-	if q.r.Method == "POST" {
-		for {
-			act := firstf(q.form, "act")
-			var datadir string
-			if act == "putdata" {
-				datadir = filepath.Join(fdir, "data")
-				settings.DataInfo = ""
-			} else if act == "putmeta" {
-				datadir = filepath.Join(fdir, "meta")
-				settings.MetaInfo = ""
-			} else {
-				break
-			}
-			settingsChanged = true
-			os.RemoveAll(datadir)
-			if len(q.form.File["data"]) < 1 {
-				break
-			}
-			uploadname := filepath.Base(q.form.File["data"][0].Filename)
-			os.MkdirAll(datadir, 0700)
-			datafile := filepath.Join(fdir, "datafile")
-			fpout, err := os.Create(datafile)
-			if doErr(q, err) {
-				return
-			}
-			fpin, err := q.form.File["data"][0].Open()
-			if doErr(q, err) {
-				fpout.Close()
-				return
-			}
-			_, err = io.Copy(fpout, fpin)
-			fpin.Close()
-			fpout.Close()
-			if doErr(q, err) {
-				return
-			}
-
-			// gzip
-			var fp *os.File
-			fp, err = os.Open(datafile)
-			if doErr(q, err) {
-				return
-			}
-			b := make([]byte, 2)
-			io.ReadFull(fp, b)
-			fp.Close()
-			if string(b) == "\x1F\x8B" {
-				// gzip
-				fpin, _ := os.Open(datafile)
-				r, err := gzip.NewReader(fpin)
-				if doErr(q, err) {
-					fpin.Close()
-					return
-				}
-				fpout, _ := os.Create(datafile + ".tmp")
-				_, err = io.Copy(fpout, r)
-				fpout.Close()
-				r.Close()
-				fpin.Close()
-				if doErr(q, err) {
-					return
-				}
-				os.Rename(datafile+".tmp", datafile)
-			}
-
-			var ar *arch
-			ar, err = NewArchReader(datafile)
-			var info string
-			if err != nil {
-				if act == "putdata" {
-					settings.DataMulti = false
-					settings.UseLabelFile = false
-					settings.UseLabelPath = false
-				}
-				st, err := os.Stat(datafile)
-				if doErr(q, err) {
-					return
-				}
-				info = fmt.Sprintf("%s &mdash; %d Kb", html.EscapeString(uploadname), (st.Size()+512)/1024)
-				os.Rename(datafile, filepath.Join(datadir, uploadname))
-			} else {
-				if act == "putdata" {
-					settings.DataMulti = true
-					settings.UseLabelFile = true
-					settings.UseLabelPath = true
-				}
-				filecount := 0
-				var filesize int64
-				for {
-					err := ar.Next()
-					if err == io.EOF {
-						break
-					}
-					if doErr(q, err) {
-						ar.Close()
-						fp.Close()
-						return
-					}
-					filename := ar.Name()
-					newfile := filepath.Join(datadir, filename)
-					os.MkdirAll(filepath.Join(datadir, filepath.Dir(filename)), 0700)
-					fp, err := os.Create(newfile)
-					if doErr(q, err) {
-						return
-					}
-					err = ar.Copy(fp)
-					fp.Close()
-					if doErr(q, err) {
-						return
-					}
-					filecount++
-					st, err := os.Stat(newfile)
-					if doErr(q, err) {
-						return
-					}
-					filesize += st.Size()
-				}
-				if filecount == 1 {
-					info = fmt.Sprintf("%s &mdash; 1 bestand &mdash; %d Kb", html.EscapeString(uploadname), (filesize+512)/1024)
-				} else {
-					info = fmt.Sprintf("%s &mdash; %d bestanden &mdash; %d Kb", html.EscapeString(uploadname), filecount, (filesize+512)/1024)
-				}
-				os.Remove(datafile)
-			}
-			if act == "putdata" {
-				settings.DataInfo = info
-			} else {
-				settings.MetaInfo = info
-			}
+	for q.r.Method == "POST" {
+		act := firstf(q.form, "act")
+		var datadir string
+		if act == "putdata" {
+			datadir = filepath.Join(fdir, "data")
+			settings.DataInfo = ""
+		} else if act == "putmeta" {
+			datadir = filepath.Join(fdir, "meta")
+			settings.MetaInfo = ""
+		} else {
 			break
 		}
+		settingsChanged = true
+		os.RemoveAll(datadir)
+		if len(q.form.File["data"]) < 1 {
+			break
+		}
+		uploadname := filepath.Base(q.form.File["data"][0].Filename)
+		os.MkdirAll(datadir, 0700)
+		datafile := filepath.Join(fdir, "datafile")
+		fpout, err := os.Create(datafile)
+		if doErr(q, err) {
+			return
+		}
+		fpin, err := q.form.File["data"][0].Open()
+		if doErr(q, err) {
+			fpout.Close()
+			return
+		}
+		_, err = io.Copy(fpout, fpin)
+		fpin.Close()
+		fpout.Close()
+		if doErr(q, err) {
+			return
+		}
+
+		// gzip
+		var fp *os.File
+		fp, err = os.Open(datafile)
+		if doErr(q, err) {
+			return
+		}
+		b := make([]byte, 2)
+		io.ReadFull(fp, b)
+		fp.Close()
+		if string(b) == "\x1F\x8B" {
+			// gzip
+			fpin, _ := os.Open(datafile)
+			r, err := gzip.NewReader(fpin)
+			if doErr(q, err) {
+				fpin.Close()
+				return
+			}
+			fpout, _ := os.Create(datafile + ".tmp")
+			_, err = io.Copy(fpout, r)
+			fpout.Close()
+			r.Close()
+			fpin.Close()
+			if doErr(q, err) {
+				return
+			}
+			os.Rename(datafile+".tmp", datafile)
+		}
+
+		var ar *arch
+		ar, err = NewArchReader(datafile)
+		var info string
+		if err != nil {
+			if act == "putdata" {
+				settings.DataMulti = false
+				settings.UseLabelFile = false
+				settings.UseLabelPath = false
+			}
+			st, err := os.Stat(datafile)
+			if doErr(q, err) {
+				return
+			}
+			info = fmt.Sprintf("%s &mdash; %d Kb", html.EscapeString(uploadname), (st.Size()+512)/1024)
+			os.Rename(datafile, filepath.Join(datadir, uploadname))
+		} else {
+			if act == "putdata" {
+				settings.DataMulti = true
+				settings.UseLabelFile = true
+				settings.UseLabelPath = true
+			}
+			filecount := 0
+			var filesize int64
+			for {
+				err := ar.Next()
+				if err == io.EOF {
+					break
+				}
+				if doErr(q, err) {
+					ar.Close()
+					fp.Close()
+					return
+				}
+				filename := ar.Name()
+				newfile := filepath.Join(datadir, filename)
+				os.MkdirAll(filepath.Join(datadir, filepath.Dir(filename)), 0700)
+				fp, err := os.Create(newfile)
+				if doErr(q, err) {
+					return
+				}
+				err = ar.Copy(fp)
+				fp.Close()
+				if doErr(q, err) {
+					return
+				}
+				filecount++
+				st, err := os.Stat(newfile)
+				if doErr(q, err) {
+					return
+				}
+				filesize += st.Size()
+			}
+			if filecount == 1 {
+				info = fmt.Sprintf("%s &mdash; 1 bestand &mdash; %d Kb", html.EscapeString(uploadname), (filesize+512)/1024)
+			} else {
+				info = fmt.Sprintf("%s &mdash; %d bestanden &mdash; %d Kb", html.EscapeString(uploadname), filecount, (filesize+512)/1024)
+			}
+			os.Remove(datafile)
+		}
+		if act == "putdata" {
+			settings.DataInfo = info
+		} else {
+			settings.MetaInfo = info
+		}
+		break
 	}
 	//
 	// Einde verwerking van upload
@@ -285,6 +283,119 @@ Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 		html_footer(q)
 		return
 	}
+
+	checked := " checked"
+
+	ch := ""
+	if settings.Tokenized {
+		ch = checked
+	}
+	fmt.Fprintf(q.w, `
+<hr>
+<form>
+Soort invoer:
+<div class="foliaform">
+<input type="checkbox" name="tokenized" value="true"%s> Getokeniseerd
+</div>
+`, ch)
+
+	if settings.DataMulti {
+		var ch1, ch2 string
+		if settings.OutputZip {
+			ch2 = checked
+		} else {
+			ch1 = checked
+		}
+		fmt.Fprintf(q.w, `
+Uitvoer:
+<div class="foliaform">
+<input type="radio" name="outzip" value="false"%s> Alles in één bestand (tekst)<br>
+<input type="radio" name="outzip" value="true"%s> Eén uitvoerbestand per invoerbestand (zip)
+</div>
+`, ch1, ch2)
+	}
+
+	var ch1, ch2, ch3 string
+	if settings.UseLabelFile {
+		ch1 = checked
+	}
+	if settings.UseLabelPath {
+		ch2 = checked
+	}
+	if settings.UseLabelMeta {
+		ch3 = checked
+	}
+	fmt.Fprintf(q.w, `
+Labels in uitvoer:
+<div class="foliaform">
+<input type="checkbox" name="usefile"%s> Label voor invoerbestand, zonder path<br>
+<input type="text" name="labelfile" value="%s">
+</div>
+
+<div class="foliaform">
+<input type="checkbox" name="usepath"%s> Prefix van delen van het path van het invoerbestand<br>
+<input type="text" name="labelpath" value="%s">
+</div>
+
+<div class="foliaform">
+<input type="checkbox" name="usemeta"%s> Label voor metadatabestand<br>
+<input type="text" name="labelmeta" value="%s">
+</div>
+`,
+		ch1, html.EscapeString(settings.LabelFile),
+		ch2, html.EscapeString(settings.LabelPath),
+		ch3, html.EscapeString(settings.LabelMeta))
+
+	fmt.Fprintln(q.w, `Metadata (zie <a href="foliavb">voorbeelden</a>):`)
+
+	for i, item := range settings.Items {
+		var ch string
+		var chs [5]string
+		if item.Use {
+			ch = checked
+		}
+		var n int
+		switch item.Type {
+		case "text":
+			n = 0
+		case "int":
+			n = 1
+		case "float":
+			n = 2
+		case "date":
+			n = 3
+		case "datetime":
+			n = 4
+		}
+		chs[n] = " selected"
+		fmt.Fprintf(q.w, `
+<div  class="foliaform">
+<input type="checkbox" name="use%d"%s><br>
+Label:
+<input type="text" name="label%d" value="%s"><br>
+Soort:
+<select name="type%d">
+  <option%s>text</option>
+  <option%s>int</option>
+  <option%s>float</option>
+  <option%s>date</option>
+  <option%s>datetime</option>
+</select><br>
+XPath:
+<input type="text" name="xpath%d" value="%s" size="80">
+</div>
+`,
+			i, ch,
+			i, html.EscapeString(item.Label),
+			i, chs[0], chs[1], chs[2], chs[3], chs[4],
+			i, html.EscapeString(item.XPath))
+	}
+
+	fmt.Fprintln(q.w, "<hr>")
+
+	fmt.Fprint(q.w, `
+</form>
+`)
 
 	html_footer(q)
 }

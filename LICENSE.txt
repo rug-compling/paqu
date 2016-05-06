@@ -7,8 +7,8 @@ src/pqserve/static/jquery.textcomplete.LICENSE.txt
 
 _vendor/src/github.com/BurntSushi/toml/COPYING
 Source: https://github.com/BurntSushi/toml
-Commit: 056c9bc7be7190eaa7715723883caffa5f8fa3e4
-Date:   Fri May 1 06:40:42 2015 -0400
+Commit: f0aeabca5a127c4078abb8c8d64298b147264b55
+Date:   Tue Apr 26 03:16:13 2016 -0700
 
 _vendor/src/github.com/beevik/etree/LICENSE
 Source: https://github.com/beevik/etree

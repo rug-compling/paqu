@@ -460,7 +460,8 @@ img.maxwidth,
 table.credits img {
     max-width: 100%;
 }
-form.foliafile {
-    padding: 1em 2em 2em 2em;
+form.foliafile,
+div.foliaform {
+    padding: 1em 2em;
     line-height: 1.5em;
 }
