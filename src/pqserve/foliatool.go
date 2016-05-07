@@ -442,7 +442,7 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 
 	settings.Tokenized = firstf(q.form, "tokenized") != ""
 
-	settings.OutputZip = firstf(q.form, "outzip") != ""
+	settings.OutputZip = firstf(q.form, "outzip") == "true"
 
 	settings.LabelFile = firstf(q.form, "labelfile")
 	settings.UseLabelFile = firstf(q.form, "usefile") != ""
