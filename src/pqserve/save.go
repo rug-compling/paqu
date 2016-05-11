@@ -227,7 +227,7 @@ func savez2(q *Context) {
 		maxdup = Cfg.Maxdup
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, title)
+	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, true)
 	if !ok {
 		return
 	}
@@ -382,7 +382,7 @@ func savez2(q *Context) {
 	if protected != 0 {
 		s = "xmlzip-p"
 	}
-	newCorpus(q, dirname, title, s, protected)
+	newCorpus(q, q.db, dirname, title, s, protected, true)
 	okall = true
 }
 

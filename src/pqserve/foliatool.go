@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/BurntSushi/toml"
 
+	"archive/zip"
 	"compress/gzip"
 	"encoding/hex"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -20,16 +22,11 @@ import (
 type FoliaSettings struct {
 	DataInfo  string
 	DataCount int
+	DataMulti bool
 	MetaInfo  string
 
 	Tokenized bool
 
-	OutputZip bool
-
-	LabelFile    string
-	UseLabelFile bool
-	LabelPath    string
-	UseLabelPath bool
 	LabelMeta    string
 	UseLabelMeta bool
 
@@ -74,10 +71,6 @@ func foliatool(q *Context) {
 	settingsChanged := false
 	settings := FoliaSettings{
 		Tokenized:    true,
-		LabelFile:    "File.Src",
-		UseLabelFile: true,
-		LabelPath:    "File.Path.",
-		UseLabelPath: true,
 		LabelMeta:    "Meta.Src",
 		UseLabelMeta: true,
 		Items:        []FoliaItem{FoliaItem{Type: "text"}},
@@ -91,15 +84,17 @@ func foliatool(q *Context) {
 		}
 	}
 
-	tested := false
+	action := ""
+	idxdel := 0
 	if q.r.Method == "POST" {
-		switch firstf(q.form, "act") {
+		action = firstf(q.form, "act")
+		switch action {
 		case "putdata", "putmeta":
 			settingsChanged = foliaputfile(q, &settings, fdir)
 		case "save":
 			settingsChanged = foliasave(q, &settings)
 		case "delete":
-			settingsChanged = foliadelete(q, &settings)
+			settingsChanged, idxdel = foliadelete(q, &settings)
 		case "new":
 			settingsChanged = folianew(q, &settings)
 		case "test":
@@ -108,7 +103,6 @@ func foliatool(q *Context) {
 			if doErr(q, err) {
 				return
 			}
-			tested = true
 		}
 	}
 
@@ -149,8 +143,14 @@ function testen() {
     x.submit();
 }
 //--></script>
-<h1>Invoer en verwerking van FoLiA met metadata</h1>
-Huidige data: `)
+<h1>Invoer en verwerking van FoLiA met metadata</h1>`)
+
+	if action == "submit" && firstf(q.form, "naam") != "" {
+		foliasubmit(q, &settings, fdir)
+		return
+	}
+
+	fmt.Fprint(q.w, "Huidige data: ")
 	if settings.DataInfo == "" {
 		fmt.Fprint(q.w, "<em>geen</em>")
 	} else {
@@ -200,7 +200,7 @@ Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 		ch = checked
 	}
 	fmt.Fprintf(q.w, `
-<form name="settings" action="folia" method="post" enctype="multipart/form-data" accept-charset="utf-8">
+<form name="settings" action="folia#a" method="post" enctype="multipart/form-data" accept-charset="utf-8">
 <input type="hidden" name="act" value="save">
 <input type="hidden" name="index" value="0">
 <input type="hidden" name="len" value="%d">
@@ -210,55 +210,23 @@ Soort invoer:
 </div>
 `, len(settings.Items), ch)
 
-	if settings.DataCount > 1 {
-		var ch1, ch2 string
-		if settings.OutputZip {
-			ch2 = checked
-		} else {
-			ch1 = checked
-		}
-		fmt.Fprintf(q.w, `
-Uitvoer:
-<div class="foliaform">
-<input type="radio" name="outzip" value="false"%s> Alles in één bestand (tekst)<br>
-<input type="radio" name="outzip" value="true"%s> Eén uitvoerbestand per invoerbestand (zip)
-</div>
-`, ch1, ch2)
-	}
-
-	var ch1, ch2, ch3 string
-	if settings.UseLabelFile {
-		ch1 = checked
-	}
-	if settings.UseLabelPath {
-		ch2 = checked
-	}
 	if settings.UseLabelMeta {
-		ch3 = checked
+		ch = checked
 	}
 	fmt.Fprintf(q.w, `
-Labels in uitvoer:
-<div class="foliaform">
-<input type="checkbox" name="usefile"%s> Label voor invoerbestand, zonder path<br>
-<input type="text" name="labelfile" value="%s">
-</div>
-
-<div class="foliaform">
-<input type="checkbox" name="usepath"%s> Prefix van delen van het path van het invoerbestand<br>
-<input type="text" name="labelpath" value="%s">
-</div>
-
+Label in uitvoer:
 <div class="foliaform">
 <input type="checkbox" name="usemeta"%s> Label voor metadatabestand<br>
 <input type="text" name="labelmeta" value="%s">
 </div>
 `,
-		ch1, html.EscapeString(settings.LabelFile),
-		ch2, html.EscapeString(settings.LabelPath),
-		ch3, html.EscapeString(settings.LabelMeta))
+		ch, html.EscapeString(settings.LabelMeta))
 
 	fmt.Fprintln(q.w, `Metadata (zie <a href="foliavb">voorbeelden</a>):`)
 
+	if idxdel > 0 && idxdel >= len(settings.Items) {
+		idxdel = len(settings.Items) - 1
+	}
 	for i, item := range settings.Items {
 		var ch string
 		var chs [5]string
@@ -279,8 +247,12 @@ Labels in uitvoer:
 			n = 4
 		}
 		chs[n] = " selected"
+		ids := ""
+		if action == "delete" && i == idxdel || action == "new" && i == len(settings.Items)-1 {
+			ids = ` id="a"`
+		}
 		fmt.Fprintf(q.w, `
-<div  class="foliaform">
+<div  class="foliaform"%s>
 <input type="checkbox" name="use%d"%s><br>
 Label:
 <input type="text" name="label%d" value="%s"><br>
@@ -299,6 +271,7 @@ XPath:
 </div>
 </div>
 `,
+			ids,
 			i, ch,
 			i, html.EscapeString(item.Label),
 			i, chs[0], chs[1], chs[2], chs[3], chs[4],
@@ -306,23 +279,27 @@ XPath:
 			i)
 	}
 
-	fmt.Fprintln(q.w, `
+	ids := ""
+	if action == "save" {
+		ids = ` id="a"`
+	}
+	fmt.Fprintf(q.w, `
 <button type="button" onclick="toevoegen()">Toevoegen</button>
 <hr class="wide">
-<button type="button" onclick="opslaan()">Opslaan</button>
+<button type="button" onclick="opslaan()"%s>Opslaan</button>
 <button type="button" onclick="testen()">Testen</button>
-`)
+`, ids)
 
 	fmt.Fprint(q.w, `
 </form>
 `)
 
-	if tested {
+	if action == "test" || action == "submit" {
 		n, m := foliamax(&settings)
 
 		fmt.Fprint(q.w, `
 <hr class="wide">
-Test: fouten`)
+<span id="a">Test:</span> bestandsnamen en eventuele fouten`)
 		if settings.DataCount > n {
 			fmt.Fprintf(q.w, ", maximaal %d bestanden", n)
 		}
@@ -359,7 +336,17 @@ Test: uitvoer, maximaal %d bestanden, %d zinnen per bestand
 			return
 		}
 		fmt.Fprint(q.w, html.EscapeString(string(data)))
-		fmt.Fprintln(q.w, "</div>")
+		fmt.Fprint(q.w, `
+</div>
+Is bovenstaande uitvoer naar wens? Geen onverwachte foutmeldingen? Dan kun je het corpus met deze metadata invoeren.
+<div class="foliaform">
+<form action="folia#a" method="post" enctype="multipart/form-data" accept-charset="utf-8">
+<input type="hidden" name="act" value="submit">
+Naam voor corpus: <input type="text" name="naam"><p>
+<input type="submit" value="Invoeren">
+</form>
+</div>
+`)
 	}
 
 	html_footer(q)
@@ -435,8 +422,7 @@ func foliaputfile(q *Context, settings *FoliaSettings, fdir string) (settingsCha
 	if err != nil {
 		if act == "putdata" {
 			settings.DataCount = 1
-			settings.UseLabelFile = false
-			settings.UseLabelPath = false
+			settings.DataMulti = false
 		}
 		st, err := os.Stat(datafile)
 		if doErr(q, err) {
@@ -484,8 +470,7 @@ func foliaputfile(q *Context, settings *FoliaSettings, fdir string) (settingsCha
 		os.Remove(datafile)
 		if act == "putdata" {
 			settings.DataCount = filecount
-			settings.UseLabelFile = true
-			settings.UseLabelPath = true
+			settings.DataMulti = true
 		}
 	}
 	if act == "putdata" {
@@ -501,12 +486,6 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 
 	settings.Tokenized = firstf(q.form, "tokenized") != ""
 
-	settings.OutputZip = firstf(q.form, "outzip") == "true"
-
-	settings.LabelFile = firstf(q.form, "labelfile")
-	settings.UseLabelFile = firstf(q.form, "usefile") != ""
-	settings.LabelPath = firstf(q.form, "labelpath")
-	settings.UseLabelPath = firstf(q.form, "usepath") != ""
 	settings.LabelMeta = firstf(q.form, "labelmeta")
 	settings.UseLabelMeta = firstf(q.form, "usemeta") != ""
 
@@ -528,11 +507,11 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 	return
 }
 
-func foliadelete(q *Context, settings *FoliaSettings) (settingsChanged bool) {
+func foliadelete(q *Context, settings *FoliaSettings) (settingsChanged bool, index int) {
 	settingsChanged = foliasave(q, settings)
-	n, _ := strconv.Atoi(firstf(q.form, "index"))
-	if n < len(settings.Items) {
-		settings.Items = append(settings.Items[:n], settings.Items[n+1:]...)
+	index, _ = strconv.Atoi(firstf(q.form, "index"))
+	if index < len(settings.Items) {
+		settings.Items = append(settings.Items[:index], settings.Items[index+1:]...)
 		settingsChanged = true
 	}
 	if len(settings.Items) == 0 {
@@ -556,18 +535,8 @@ func foliatest(q *Context, settings *FoliaSettings, fdir string) (settingsChange
 		return
 	}
 
-	if settings.UseLabelFile {
-		fmt.Fprintf(fp, "File_src = %q\n", settings.LabelFile)
-	} else {
-		fmt.Fprintln(fp, `File_src = ""`)
-	}
-
-	if settings.UseLabelPath {
-		fmt.Fprintf(fp, "File_path = %q\n", settings.LabelPath)
-	} else {
-		fmt.Fprintln(fp, `File_path = ""`)
-	}
-
+	fmt.Fprintln(fp, `File_src = ""`)
+	fmt.Fprintln(fp, `File_path = ""`)
 	if settings.UseLabelMeta {
 		fmt.Fprintf(fp, "Meta_src = %q\n", settings.LabelMeta)
 	} else {
@@ -622,4 +591,150 @@ func foliamax(settings *FoliaSettings) (int, int) {
 	}
 	m := 1000 / n
 	return n, m
+}
+
+func foliasubmit(q *Context, settings *FoliaSettings, fdir string) {
+	fmt.Fprint(q.w, `
+<span id="a">Het corpus wordt verwerkt.</span>
+<p>
+Het kan even duren voordat je corpus verschijnt in je lijst met corpora.
+<p>
+Ga naar: <a href="corpora">corpora</a>
+`)
+	html_footer(q)
+
+	go func() {
+		foliaMu.Lock()
+		if _, ok := foliaUsers[q.user]; !ok {
+			foliaUsers[q.user] = new(sync.Mutex)
+		}
+		foliaMu.Unlock()
+
+		foliaUsers[q.user].Lock()
+		defer foliaUsers[q.user].Unlock()
+
+		fp, err := os.Create(filepath.Join(fdir, "config.toml"))
+		if sysErr(q, err) {
+			return
+		}
+
+		fmt.Fprintln(fp, `File_src = ""`)
+		fmt.Fprintln(fp, `File_path = ""`)
+		if settings.UseLabelMeta {
+			fmt.Fprintf(fp, "Meta_src = %q\n", settings.LabelMeta)
+		} else {
+			fmt.Fprintln(fp, `Meta_src = ""`)
+		}
+
+		d := filepath.Join(fdir, "out")
+		if settings.DataMulti {
+			os.RemoveAll(d)
+			os.MkdirAll(d, 0700)
+			fmt.Fprintf(fp, "Output_dir = \"%s\"\n", d)
+		} else {
+			fmt.Fprintln(fp, `Output_dir = ""`)
+		}
+
+		fmt.Fprint(fp, "Item_list = [")
+		pre := ""
+		for _, item := range settings.Items {
+			if item.Use {
+				fmt.Fprintf(fp, "%s\n    %q", pre, item.Label)
+				pre = ","
+			}
+		}
+		fmt.Fprintln(fp, "\n]")
+
+		fmt.Fprintf(fp, "Data_dir = \"%s\"\n", filepath.Join(fdir, "data"))
+		fmt.Fprintf(fp, "Meta_dir = \"%s\"\n", filepath.Join(fdir, "meta"))
+
+		fmt.Fprintf(fp, "Tokenized = %v\n", settings.Tokenized)
+
+		for _, item := range settings.Items {
+			if item.Use {
+				fmt.Fprintf(fp, `
+[Items.%q]
+Type = %q
+XPath = %q
+`, item.Label, item.Type, item.XPath)
+			}
+		}
+
+		fp.Close()
+
+		outfile := filepath.Join(fdir, "outfile")
+
+		o := ""
+		if !settings.DataMulti {
+			o = " > " + outfile
+		}
+		err = shell("pqfolia %s%s", filepath.Join(fdir, "config.toml"), o).Run()
+		if sysErr(q, err) {
+			return
+		}
+
+		if settings.DataMulti {
+			fp, err = os.Create(outfile)
+			if sysErr(q, err) {
+				return
+			}
+			zf := zip.NewWriter(fp)
+			foliazipdir(q, zf, d, "")
+			err = zf.Close()
+			fp.Close()
+			if sysErr(q, err) {
+				return
+			}
+		}
+
+		db, err := dbopen()
+		if sysErr(q, err) {
+			return
+		}
+		defer db.Close()
+
+		title := firstf(q.form, "naam")
+
+		dirname, fulldirname, ok := beginNewCorpus(q, db, title, false)
+		if !ok {
+			return
+		}
+
+		os.Rename(outfile, filepath.Join(fulldirname, "data"))
+
+		newCorpus(q, db, dirname, title, "line-lbl-tok", 0, false)
+
+	}()
+}
+
+func foliazipdir(q *Context, zf *zip.Writer, fdir, subdir string) {
+	dir := filepath.Join(fdir, subdir)
+	files, err := ioutil.ReadDir(dir)
+	if sysErr(q, err) {
+		return
+	}
+	for _, file := range files {
+		fname := path.Join(subdir, file.Name()) // in zip alleen forward slashes toegestaan
+		if file.IsDir() {
+			foliazipdir(q, zf, fdir, fname)
+		} else {
+			data, err := ioutil.ReadFile(filepath.Join(fdir, fname))
+			if sysErr(q, err) {
+				return
+			}
+			fh, err := zip.FileInfoHeader(file)
+			if sysErr(q, err) {
+				return
+			}
+			fh.Name = fname
+			f, err := zf.CreateHeader(fh)
+			if sysErr(q, err) {
+				return
+			}
+			_, err = f.Write(data)
+			if sysErr(q, err) {
+				return
+			}
+		}
+	}
 }

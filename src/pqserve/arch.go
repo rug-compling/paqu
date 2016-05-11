@@ -25,7 +25,6 @@ type arch struct {
 	tr      *tar.Reader
 	theader *tar.Header
 	terr    error
-	tstart  bool
 }
 
 func NewArchReader(filename string) (*arch, error) {
@@ -73,16 +72,13 @@ func (a *arch) Next() error {
 		}
 	}
 
-	if !a.tstart {
-		a.tstart = true
-	} else {
-		for {
-			a.theader, a.terr = a.tr.Next()
-			if a.terr != nil || !a.theader.FileInfo().IsDir() {
-				break
-			}
+	for {
+		a.theader, a.terr = a.tr.Next()
+		if a.terr != nil || !a.theader.FileInfo().IsDir() {
+			break
 		}
 	}
+
 	if a.terr == io.EOF {
 		a.opened = false
 		a.tfp.Close()

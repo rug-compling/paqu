@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"html"
 	"io"
@@ -327,8 +328,8 @@ symbols in the input</a>.
 	fmt.Fprint(q.w, `
 <li>Een bestand in FoLiA-formaat: <a href="http://proycon.github.io/folia/" target="_blank">Format for Linguistic Annotation</a>.
 Het bestand moet gecodeerd zijn in UTF-8.
-De tekst moet getokeniseerd zijn.
-<li>Een zip- of tarbestand met daarin bestanden in FoLiA-formaat.
+De tekst moet getokeniseerd zijn. Als je ook metadata hebt, klik dan <a href="folia">hier</a>.
+<li>Een zip- of tarbestand met daarin bestanden in FoLiA-formaat. Als je ook metadata hebt, klik dan <a href="folia">hier</a>.
 <li>Een bestand in TEI-formaat: <a href="http://www.tei-c.org/" target="_blank">Text Encoding Initiative</a>.
 Het bestand moet gecodeerd zijn in UTF-8.
 De tekst moet getokeniseerd zijn.
@@ -343,9 +344,12 @@ Een tarbestand zelf mag wel gecomprimeerd zijn met gzip.
 <h2>Nieuw corpus maken</h2>
 `)
 	if q.quotum > 0 {
-		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n<p>\n", q.quotum-gebruikt)
+		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n", q.quotum-gebruikt)
 	}
 	fmt.Fprintf(q.w, `
+    <div class="info">
+    Heb je een corpus in <b>FoLiA</b>-formaat, met <b>metadata</b> in XML-formaat, klik dan <b><a href="folia">hier</a></b>.
+    </div>
     <form name="newcorpus" action="submitcorpus" method="post" enctype="multipart/form-data"
       accept-charset="utf-8" onsubmit="javascript:return formtest()">
         De tekst die je uploadt moet platte tekst zijn, zonder opmaak (geen Word of zo), gecodeerd in utf-8.<br>
@@ -390,7 +394,7 @@ func submitCorpus(q *Context) {
 		return
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, title)
+	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, true)
 	if !ok {
 		return
 	}
@@ -412,18 +416,26 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	newCorpus(q, dirname, title, how, 0)
+	newCorpus(q, q.db, dirname, title, how, 0, true)
 }
 
-func newCorpus(q *Context, dirname, title, how string, protected int) {
+func newCorpus(q *Context, db *sql.DB, dirname, title, how string, protected int, htmlOutput bool) {
 
-	_, err := q.db.Exec(fmt.Sprintf(
+	// db is niet altijd gelijk aan q.db
+
+	_, err := db.Exec(fmt.Sprintf(
 		"UPDATE %s_info SET `description` = %q, `owner` = %q, `status` = \"QUEUED\", `params` = %q, `msg` = %q, `protected` = %d WHERE `id` = %q;",
 		Cfg.Prefix,
 		title, q.user, how, "Bron: "+invoertabel[how], protected,
 		dirname))
-	if hErr(q, err) {
-		return
+	if htmlOutput {
+		if hErr(q, err) {
+			return
+		}
+	} else {
+		if sysErr(q, err) {
+			return
+		}
 	}
 
 	logf("QUEUED: " + dirname)
@@ -439,19 +451,23 @@ func newCorpus(q *Context, dirname, title, how string, protected int) {
 	processLock.Unlock()
 	chWork <- p
 
-	writeHtml(
-		q,
-		"Document word verwerkt",
-		`
+	if htmlOutput {
+		writeHtml(
+			q,
+			"Document word verwerkt",
+			`
 Je document wordt verwerkt. Als het klaar is zie je op de hoofdpagina een nieuw corpus bij de databases.
 <p>
 Let op: Dit kan even duren. Minuten, uren, of dagen, afhankelijk van de grootte van je document.
 <p>
 <b>Je krijgt een e-mail als het corpus klaar is.</b>
 `)
+	}
 }
 
-func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok bool) {
+func beginNewCorpus(q *Context, db *sql.DB, title string, htmlOutput bool) (dirname, fulldirname string, ok bool) {
+
+	// db is niet altijd gelijk aan q.db
 
 	dirname = reNoAz.ReplaceAllString(strings.ToLower(title), "")
 	if len(dirname) > 20 {
@@ -464,9 +480,15 @@ func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok b
 	defer dirnameLock.Unlock()
 	for i := 0; true; i++ {
 		d := dirname + abc(i)
-		rows, err := q.db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
-		if hErr(q, err) {
-			return
+		rows, err := db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
+		if htmlOutput {
+			if hErr(q, err) {
+				return
+			}
+		} else {
+			if sysErr(q, err) {
+				return
+			}
 		}
 		if rows.Next() {
 			rows.Close()
@@ -477,17 +499,29 @@ func beginNewCorpus(q *Context, title string) (dirname, fulldirname string, ok b
 	}
 	fulldirname = filepath.Join(paqudir, "data", dirname)
 	err := os.Mkdir(fulldirname, 0700)
-	if hErr(q, err) {
-		return
+	if htmlOutput {
+		if hErr(q, err) {
+			return
+		}
+	} else {
+		if sysErr(q, err) {
+			return
+		}
 	}
 
-	_, err = q.db.Exec(fmt.Sprintf(
+	_, err = db.Exec(fmt.Sprintf(
 		"INSERT %s_info (id) VALUES (%q);",
 		Cfg.Prefix,
 		dirname))
 
-	if hErr(q, err) {
-		return
+	if htmlOutput {
+		if hErr(q, err) {
+			return
+		}
+	} else {
+		if sysErr(q, err) {
+			return
+		}
 	}
 
 	return dirname, fulldirname, true
