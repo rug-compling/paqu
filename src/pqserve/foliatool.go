@@ -8,19 +8,19 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 )
 
 type FoliaSettings struct {
 	DataInfo  string
-	DataMulti bool
+	DataCount int
 	MetaInfo  string
-	WasTested bool
-	WasBuild  bool
 
 	Tokenized bool
 
@@ -91,6 +91,7 @@ func foliatool(q *Context) {
 		}
 	}
 
+	tested := false
 	if q.r.Method == "POST" {
 		switch firstf(q.form, "act") {
 		case "putdata", "putmeta":
@@ -101,6 +102,13 @@ func foliatool(q *Context) {
 			settingsChanged = foliadelete(q, &settings)
 		case "new":
 			settingsChanged = folianew(q, &settings)
+		case "test":
+			var err error
+			settingsChanged, err = foliatest(q, &settings, fdir)
+			if doErr(q, err) {
+				return
+			}
+			tested = true
 		}
 	}
 
@@ -133,6 +141,11 @@ function toevoegen() {
 function opslaan() {
     var x = document.forms["settings"];
     x["act"].value = "save";
+    x.submit();
+}
+function testen() {
+    var x = document.forms["settings"];
+    x["act"].value = "test";
     x.submit();
 }
 //--></script>
@@ -197,7 +210,7 @@ Soort invoer:
 </div>
 `, len(settings.Items), ch)
 
-	if settings.DataMulti {
+	if settings.DataCount > 1 {
 		var ch1, ch2 string
 		if settings.OutputZip {
 			ch2 = checked
@@ -295,13 +308,59 @@ XPath:
 
 	fmt.Fprintln(q.w, `
 <button type="button" onclick="toevoegen()">Toevoegen</button>
-<hr>
+<hr class="wide">
 <button type="button" onclick="opslaan()">Opslaan</button>
+<button type="button" onclick="testen()">Testen</button>
 `)
 
 	fmt.Fprint(q.w, `
 </form>
 `)
+
+	if tested {
+		n, m := foliamax(&settings)
+
+		fmt.Fprint(q.w, `
+<hr class="wide">
+Test: fouten`)
+		if settings.DataCount > n {
+			fmt.Fprintf(q.w, ", maximaal %d bestanden", n)
+		}
+		fmt.Fprint(q.w, `
+<div class="output">
+`)
+		data, err := ioutil.ReadFile(filepath.Join(fdir, "test.err"))
+		if doErr(q, err) {
+			return
+		}
+		fmt.Fprint(q.w, html.EscapeString(strings.Replace(string(data), filepath.Join(fdir, "data"), ".", -1)))
+
+		if settings.DataCount == 1 {
+			fmt.Fprintf(q.w, `
+</div>
+Test: uitvoer, maximaal %d zinnen
+<div class="output">
+`, m)
+		} else if settings.DataCount <= n {
+			fmt.Fprintf(q.w, `
+</div>
+Test: uitvoer, maximaal %d zinnen per bestand
+<div class="output">
+`, m)
+		} else {
+			fmt.Fprintf(q.w, `
+</div>
+Test: uitvoer, maximaal %d bestanden, %d zinnen per bestand
+<div class="output">
+`, n, m)
+		}
+		data, err = ioutil.ReadFile(filepath.Join(fdir, "test.out"))
+		if doErr(q, err) {
+			return
+		}
+		fmt.Fprint(q.w, html.EscapeString(string(data)))
+		fmt.Fprintln(q.w, "</div>")
+	}
 
 	html_footer(q)
 }
@@ -375,7 +434,7 @@ func foliaputfile(q *Context, settings *FoliaSettings, fdir string) (settingsCha
 	var info string
 	if err != nil {
 		if act == "putdata" {
-			settings.DataMulti = false
+			settings.DataCount = 1
 			settings.UseLabelFile = false
 			settings.UseLabelPath = false
 		}
@@ -386,11 +445,6 @@ func foliaputfile(q *Context, settings *FoliaSettings, fdir string) (settingsCha
 		info = fmt.Sprintf("%s &mdash; %d Kb", html.EscapeString(uploadname), (st.Size()+512)/1024)
 		os.Rename(datafile, filepath.Join(datadir, uploadname))
 	} else {
-		if act == "putdata" {
-			settings.DataMulti = true
-			settings.UseLabelFile = true
-			settings.UseLabelPath = true
-		}
 		filecount := 0
 		var filesize int64
 		for {
@@ -428,6 +482,11 @@ func foliaputfile(q *Context, settings *FoliaSettings, fdir string) (settingsCha
 			info = fmt.Sprintf("%s &mdash; %d bestanden &mdash; %d Kb", html.EscapeString(uploadname), filecount, (filesize+512)/1024)
 		}
 		os.Remove(datafile)
+		if act == "putdata" {
+			settings.DataCount = filecount
+			settings.UseLabelFile = true
+			settings.UseLabelPath = true
+		}
 	}
 	if act == "putdata" {
 		settings.DataInfo = info
@@ -487,4 +546,80 @@ func folianew(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 	settingsChanged = foliasave(q, settings)
 	settings.Items = append(settings.Items, FoliaItem{Type: "text"})
 	return
+}
+
+func foliatest(q *Context, settings *FoliaSettings, fdir string) (settingsChanged bool, err error) {
+	settingsChanged = foliasave(q, settings)
+	var fp *os.File
+	fp, err = os.Create(filepath.Join(fdir, "config.toml"))
+	if err != nil {
+		return
+	}
+
+	if settings.UseLabelFile {
+		fmt.Fprintf(fp, "File_src = %q\n", settings.LabelFile)
+	} else {
+		fmt.Fprintln(fp, `File_src = ""`)
+	}
+
+	if settings.UseLabelPath {
+		fmt.Fprintf(fp, "File_path = %q\n", settings.LabelPath)
+	} else {
+		fmt.Fprintln(fp, `File_path = ""`)
+	}
+
+	if settings.UseLabelMeta {
+		fmt.Fprintf(fp, "Meta_src = %q\n", settings.LabelMeta)
+	} else {
+		fmt.Fprintln(fp, `Meta_src = ""`)
+	}
+
+	fmt.Fprintln(fp, `Output_dir = ""`)
+
+	fmt.Fprint(fp, "Item_list = [")
+	p := ""
+	for _, item := range settings.Items {
+		if item.Use {
+			fmt.Fprintf(fp, "%s\n    %q", p, item.Label)
+			p = ","
+		}
+	}
+	fmt.Fprintln(fp, "\n]")
+
+	fmt.Fprintf(fp, "Data_dir = \"%s\"\n", filepath.Join(fdir, "data"))
+	fmt.Fprintf(fp, "Meta_dir = \"%s\"\n", filepath.Join(fdir, "meta"))
+
+	fmt.Fprintf(fp, "Tokenized = %v\n", settings.Tokenized)
+
+	for _, item := range settings.Items {
+		if item.Use {
+			fmt.Fprintf(fp, `
+[Items.%q]
+Type = %q
+XPath = %q
+`, item.Label, item.Type, item.XPath)
+		}
+	}
+
+	fp.Close()
+
+	n, m := foliamax(settings)
+
+	shell("pqfolia -n %d -m %d %s > %s 2> %s",
+		n,
+		m,
+		filepath.Join(fdir, "config.toml"),
+		filepath.Join(fdir, "test.out"),
+		filepath.Join(fdir, "test.err")).Run()
+
+	return
+}
+
+func foliamax(settings *FoliaSettings) (int, int) {
+	n := settings.DataCount
+	if n > 20 {
+		n = 20
+	}
+	m := 1000 / n
+	return n, m
 }

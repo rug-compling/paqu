@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/util"
 
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -18,7 +19,7 @@ import (
 )
 
 type Config struct {
-	Cmdi_dir   string
+	Meta_dir   string
 	Data_dir   string
 	Output_dir string
 	Meta_src   string
@@ -43,15 +44,28 @@ var (
 	currentfile string
 	pathlevel   = 0
 	fpout       = os.Stdout
+	fileno      = 0
+
+	opt_n = flag.Int("n", 0, "maximum aantal bestanden")
+	opt_m = flag.Int("m", 0, "maximum aantal zinner per bestand")
 )
+
+func usage() {
+	fmt.Fprintf(os.Stderr, `
+Syntax: %s [-n int] [-m int] configfile.toml
+
+  -n: maximum aantal bestanden (voor testen)
+  -m: maximum aantal zinner per bestand (voor testen)
+
+`, os.Args[0])
+}
 
 func main() {
 
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, `
-Syntax: %s cofigfile.toml
-
-`, os.Args[0])
+	flag.Usage = usage
+	flag.Parse()
+	if flag.NArg() != 1 {
+		usage()
 		return
 	}
 
@@ -59,10 +73,10 @@ Syntax: %s cofigfile.toml
 	cfg.Meta_src = "Meta.Src"
 	cfg.File_src = "File.Src"
 	cfg.File_path = "File.Path."
-	md, err := toml.DecodeFile(os.Args[1], &cfg)
+	md, err := toml.DecodeFile(flag.Arg(0), &cfg)
 	x(err)
 	if un := md.Undecoded(); len(un) != 0 {
-		fmt.Fprintln(os.Stderr, "De volgende items in", os.Args[1], "zijn onbekend. Spelfout?")
+		fmt.Fprintln(os.Stderr, "De volgende items in", flag.Arg(0), "zijn onbekend. Spelfout?")
 		for _, u := range un {
 			fmt.Fprintln(os.Stderr, "  ->", u)
 		}
@@ -84,11 +98,16 @@ Syntax: %s cofigfile.toml
 
 	doDir("")
 	if cfg.Output_dir == "" {
+		doEnd()
 		doFixed(false, false)
 	}
 }
 
 func doDir(p string) {
+
+	if *opt_n > 0 && *opt_n == fileno {
+		return
+	}
 
 	dir := filepath.Join(cfg.Data_dir, p)
 	fmt.Fprintln(os.Stderr, ">>>", dir)
@@ -98,6 +117,9 @@ func doDir(p string) {
 		x(os.MkdirAll(filepath.Join(cfg.Output_dir, p), 0755))
 	}
 	for _, file := range files {
+		if *opt_n > 0 && *opt_n == fileno {
+			return
+		}
 		if file.IsDir() {
 			doDir(filepath.Join(p, file.Name()))
 		} else {
@@ -110,6 +132,9 @@ func doFile(filename, dirname string) {
 	if !strings.HasSuffix(filename, ".xml") {
 		return
 	}
+
+	fileno++
+	lineno := 0
 
 	if cfg.Output_dir != "" {
 		var f string
@@ -167,6 +192,7 @@ func doFile(filename, dirname string) {
 	var label string
 	var teller uint64
 	words := make([]string, 0, 500)
+PARSE:
 	for {
 		tt, err := d.Token()
 		if err == io.EOF {
@@ -211,7 +237,7 @@ func doFile(filename, dirname string) {
 
 					for i, src := range srcs {
 						doc = etree.NewDocument()
-						err := doc.ReadFromFile(filepath.Join(cfg.Cmdi_dir, src))
+						err := doc.ReadFromFile(filepath.Join(cfg.Meta_dir, src))
 						if err == nil {
 							break
 						}
@@ -230,6 +256,7 @@ func doFile(filename, dirname string) {
 							}
 						}
 						if !found {
+							fmt.Fprintf(os.Stderr, "Niet gevonden in %s voor (%s) %s\n", currentfile, cfg.Items[item].Type, item)
 							fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
 						}
 					}
@@ -248,6 +275,10 @@ func doFile(filename, dirname string) {
 					fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
 					words = words[0:0]
 					label += ".b"
+					lineno++
+					if *opt_m > 0 && *opt_m == lineno {
+						break PARSE
+					}
 				}
 			case "s", "utt":
 				teller++
@@ -293,6 +324,10 @@ func doFile(filename, dirname string) {
 						}
 						fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
 						words = words[0:0]
+						lineno++
+						if *opt_m > 0 && *opt_m == lineno {
+							break PARSE
+						}
 					}
 				}
 				inS = false
@@ -320,6 +355,23 @@ func doFile(filename, dirname string) {
 			}
 		}
 	}
+	fmt.Fprintln(fpout)
+	if cfg.Output_dir != "" {
+		doEnd()
+		doFixed(false, false)
+	}
+}
+
+func doEnd() {
+	if cfg.File_src != "" {
+		fmt.Fprintf(fpout, "##META text %s =\n", cfg.File_src)
+	}
+
+	if cfg.File_path != "" {
+		for i := 0; i < pathlevel; i++ {
+			fmt.Fprintf(fpout, "##META text %s%d =\n", cfg.File_path, i+1)
+		}
+	}
 }
 
 func doFixed(done, hasMeta bool) {
@@ -329,13 +381,6 @@ func doFixed(done, hasMeta bool) {
 
 	if cfg.Meta_src != "" {
 		fmt.Fprintf(fpout, "##META text %s =\n", cfg.Meta_src)
-	}
-
-	if cfg.File_path != "" {
-		for i := 0; i < pathlevel; i++ {
-			fmt.Fprintf(fpout, "##META text %s%d =\n", cfg.File_path, i+1)
-		}
-		pathlevel = 0
 	}
 
 	for _, item := range fixed {
