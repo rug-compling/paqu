@@ -14,6 +14,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -63,7 +64,7 @@ func foliatool(q *Context) {
 	foliaUsers[q.user].Lock()
 	defer foliaUsers[q.user].Unlock()
 
-	fdir := filepath.Join(paqudir, "folia", hex.EncodeToString([]byte(q.user)))
+	fdir := foliadir(q)
 	if doErr(q, os.MkdirAll(fdir, 0700)) {
 		return
 	}
@@ -529,6 +530,9 @@ func folianew(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 
 func foliatest(q *Context, settings *FoliaSettings, fdir string) (settingsChanged bool, err error) {
 	settingsChanged = foliasave(q, settings)
+
+	os.Remove(filepath.Join(fdir, "error.txt"))
+
 	var fp *os.File
 	fp, err = os.Create(filepath.Join(fdir, "config.toml"))
 	if err != nil {
@@ -584,6 +588,10 @@ XPath = %q
 	return
 }
 
+func foliadir(q *Context) string {
+	return filepath.Join(paqudir, "folia", hex.EncodeToString([]byte(q.user)))
+}
+
 func foliamax(settings *FoliaSettings) (int, int) {
 	n := settings.DataCount
 	if n > 20 {
@@ -614,7 +622,7 @@ Ga naar: <a href="corpora">corpora</a>
 		defer foliaUsers[q.user].Unlock()
 
 		fp, err := os.Create(filepath.Join(fdir, "config.toml"))
-		if sysErr(q, err) {
+		if foliaErr(q, err) {
 			return
 		}
 
@@ -626,11 +634,11 @@ Ga naar: <a href="corpora">corpora</a>
 			fmt.Fprintln(fp, `Meta_src = ""`)
 		}
 
-		d := filepath.Join(fdir, "out")
+		outdir := filepath.Join(fdir, "out")
 		if settings.DataMulti {
-			os.RemoveAll(d)
-			os.MkdirAll(d, 0700)
-			fmt.Fprintf(fp, "Output_dir = \"%s\"\n", d)
+			os.RemoveAll(outdir)
+			os.MkdirAll(outdir, 0700)
+			fmt.Fprintf(fp, "Output_dir = \"%s\"\n", outdir)
 		} else {
 			fmt.Fprintln(fp, `Output_dir = ""`)
 		}
@@ -668,73 +676,108 @@ XPath = %q
 		if !settings.DataMulti {
 			o = " > " + outfile
 		}
-		err = shell("pqfolia %s%s", filepath.Join(fdir, "config.toml"), o).Run()
-		if sysErr(q, err) {
+		errfile := filepath.Join(fdir, "pqfolia.err")
+		err = shell("pqfolia %s%s 2> %s", filepath.Join(fdir, "config.toml"), o, errfile).Run()
+		if foliaErr(q, err) {
+			os.Rename(errfile, filepath.Join(foliadir(q), "error.txt"))
 			return
 		}
+		os.Remove(errfile)
 
 		if settings.DataMulti {
 			fp, err = os.Create(outfile)
-			if sysErr(q, err) {
+			if foliaErr(q, err) {
 				return
 			}
 			zf := zip.NewWriter(fp)
-			foliazipdir(q, zf, d, "")
+			ok := foliazipdir(q, zf, outdir, "")
 			err = zf.Close()
 			fp.Close()
-			if sysErr(q, err) {
+			if !ok {
 				return
 			}
+			if foliaErr(q, err) {
+				return
+			}
+			os.RemoveAll(outdir)
 		}
 
 		db, err := dbopen()
-		if sysErr(q, err) {
+		if foliaErr(q, err) {
 			return
 		}
 		defer db.Close()
 
 		title := firstf(q.form, "naam")
 
-		dirname, fulldirname, ok := beginNewCorpus(q, db, title, false)
+		dirname, fulldirname, ok := beginNewCorpus(q, db, title, foliaErr)
 		if !ok {
 			return
 		}
 
 		os.Rename(outfile, filepath.Join(fulldirname, "data"))
 
-		newCorpus(q, db, dirname, title, "line-lbl-tok", 0, false)
+		newCorpus(q, db, dirname, title, "line-lbl-tok", 0, foliaErr, false)
 
 	}()
 }
 
-func foliazipdir(q *Context, zf *zip.Writer, fdir, subdir string) {
+func foliazipdir(q *Context, zf *zip.Writer, fdir, subdir string) (ok bool) {
 	dir := filepath.Join(fdir, subdir)
 	files, err := ioutil.ReadDir(dir)
-	if sysErr(q, err) {
-		return
+	if foliaErr(q, err) {
+		return false
 	}
 	for _, file := range files {
 		fname := path.Join(subdir, file.Name()) // in zip alleen forward slashes toegestaan
 		if file.IsDir() {
-			foliazipdir(q, zf, fdir, fname)
+			if !foliazipdir(q, zf, fdir, fname) {
+				return false
+			}
 		} else {
 			data, err := ioutil.ReadFile(filepath.Join(fdir, fname))
-			if sysErr(q, err) {
-				return
+			if foliaErr(q, err) {
+				return false
 			}
 			fh, err := zip.FileInfoHeader(file)
-			if sysErr(q, err) {
-				return
+			if foliaErr(q, err) {
+				return false
 			}
 			fh.Name = fname
 			f, err := zf.CreateHeader(fh)
-			if sysErr(q, err) {
-				return
+			if foliaErr(q, err) {
+				return false
 			}
 			_, err = f.Write(data)
-			if sysErr(q, err) {
-				return
+			if foliaErr(q, err) {
+				return false
 			}
 		}
 	}
+	return true
+}
+
+// system error zonder user -> alleen log
+func foliaErr(q *Context, err error) bool {
+	if err == nil {
+		return false
+	}
+
+	s := err.Error()
+
+	var s1 string
+	_, filename, lineno, ok := runtime.Caller(1)
+	if ok {
+		s1 = fmt.Sprintf("FOUT: %v:%v: %v", filepath.Base(filename), lineno, s)
+	} else {
+		s1 = "FOUT: " + s
+	}
+	chLog <- s1
+
+	fp, e := os.Create(filepath.Join(foliadir(q), "error.txt"))
+	if e == nil {
+		defer fp.Close()
+		fmt.Fprintln(fp, s)
+	}
+	return true
 }

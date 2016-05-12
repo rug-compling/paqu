@@ -124,6 +124,25 @@ function formtest() {
 
 <h1>Mijn corpora</h1>
 `)
+
+	foliafile := filepath.Join(foliadir(q), "error.txt")
+	if first(q.r, "folia") == "clear" {
+		os.Remove(foliafile)
+	} else {
+		data, err := ioutil.ReadFile(foliafile)
+		if err == nil {
+			fmt.Fprintf(q.w, `
+<div class="error">
+Er ging iets fout met de invoer van een corpus in FoLiA-formaat
+<div class="output">
+%s
+</div>
+<a href="corpora?folia=clear">Sluiten</a>
+</div>
+`, html.EscapeString(strings.Replace(string(data), foliadir(q), "...", -1)))
+		}
+	}
+
 	if len(corpora) == 0 {
 		fmt.Fprintln(q.w, "Je hebt nog geen corpora")
 	} else {
@@ -394,7 +413,7 @@ func submitCorpus(q *Context) {
 		return
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, true)
+	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, hErr)
 	if !ok {
 		return
 	}
@@ -416,10 +435,10 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	newCorpus(q, q.db, dirname, title, how, 0, true)
+	newCorpus(q, q.db, dirname, title, how, 0, hErr, true)
 }
 
-func newCorpus(q *Context, db *sql.DB, dirname, title, how string, protected int, htmlOutput bool) {
+func newCorpus(q *Context, db *sql.DB, dirname, title, how string, protected int, errCheck func(*Context, error) bool, htmlOutput bool) {
 
 	// db is niet altijd gelijk aan q.db
 
@@ -428,14 +447,8 @@ func newCorpus(q *Context, db *sql.DB, dirname, title, how string, protected int
 		Cfg.Prefix,
 		title, q.user, how, "Bron: "+invoertabel[how], protected,
 		dirname))
-	if htmlOutput {
-		if hErr(q, err) {
-			return
-		}
-	} else {
-		if sysErr(q, err) {
-			return
-		}
+	if errCheck(q, err) {
+		return
 	}
 
 	logf("QUEUED: " + dirname)
@@ -465,7 +478,7 @@ Let op: Dit kan even duren. Minuten, uren, of dagen, afhankelijk van de grootte 
 	}
 }
 
-func beginNewCorpus(q *Context, db *sql.DB, title string, htmlOutput bool) (dirname, fulldirname string, ok bool) {
+func beginNewCorpus(q *Context, db *sql.DB, title string, errCheck func(*Context, error) bool) (dirname, fulldirname string, ok bool) {
 
 	// db is niet altijd gelijk aan q.db
 
@@ -481,14 +494,8 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, htmlOutput bool) (dirn
 	for i := 0; true; i++ {
 		d := dirname + abc(i)
 		rows, err := db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
-		if htmlOutput {
-			if hErr(q, err) {
-				return
-			}
-		} else {
-			if sysErr(q, err) {
-				return
-			}
+		if errCheck(q, err) {
+			return
 		}
 		if rows.Next() {
 			rows.Close()
@@ -499,14 +506,8 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, htmlOutput bool) (dirn
 	}
 	fulldirname = filepath.Join(paqudir, "data", dirname)
 	err := os.Mkdir(fulldirname, 0700)
-	if htmlOutput {
-		if hErr(q, err) {
-			return
-		}
-	} else {
-		if sysErr(q, err) {
-			return
-		}
+	if errCheck(q, err) {
+		return
 	}
 
 	_, err = db.Exec(fmt.Sprintf(
@@ -514,14 +515,8 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, htmlOutput bool) (dirn
 		Cfg.Prefix,
 		dirname))
 
-	if htmlOutput {
-		if hErr(q, err) {
-			return
-		}
-	} else {
-		if sysErr(q, err) {
-			return
-		}
+	if errCheck(q, err) {
+		return
 	}
 
 	return dirname, fulldirname, true

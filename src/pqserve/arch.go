@@ -74,16 +74,15 @@ func (a *arch) Next() error {
 	}
 
 	// bij de setup is a.tr.Next() al een keer gedaan, dus vandaar deze vreemde constructie
-	if !a.tstart {
-		a.tstart = true
-	} else {
-		a.theader, a.terr = a.tr.Next()
-	}
 	for {
+		if a.tstart {
+			a.theader, a.terr = a.tr.Next()
+		} else {
+			a.tstart = true
+		}
 		if a.terr != nil || !a.theader.FileInfo().IsDir() {
 			break
 		}
-		a.theader, a.terr = a.tr.Next()
 	}
 
 	if a.terr == io.EOF {

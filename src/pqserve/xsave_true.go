@@ -185,7 +185,7 @@ func xsavez2(q *Context) {
 		maxdup = Cfg.Maxdup
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, true)
+	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, hErr)
 	if !ok {
 		return
 	}
@@ -347,6 +347,6 @@ func xsavez2(q *Context) {
 	if protected != 0 {
 		s = "xmlzip-p"
 	}
-	newCorpus(q, q.db, dirname, title, s, protected, true)
+	newCorpus(q, q.db, dirname, title, s, protected, hErr, true)
 	okall = true
 }
