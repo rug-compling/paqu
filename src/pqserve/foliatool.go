@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type FoliaSettings struct {
@@ -794,4 +795,36 @@ func foliaErr(q *Context, err error) bool {
 		fmt.Fprintln(fp, s)
 	}
 	return true
+}
+
+func foliaclean() {
+	fdir := filepath.Join(paqudir, "folia")
+	for {
+		// clean up
+		then := time.Now().AddDate(0, 0, -Cfg.Foliadays)
+
+		files, err := ioutil.ReadDir(fdir)
+		if sysErr(err) {
+			goto SLEEP
+		}
+		for _, file := range files {
+			if !file.IsDir() {
+				continue
+			}
+			if then.After(file.ModTime()) {
+				fname := file.Name()
+				user, err := hex.DecodeString(fname)
+				if sysErr(err) {
+					user = []byte(fname)
+				}
+				chLog <- "removing FoLiA for: " + string(user)
+				sysErr(os.RemoveAll(filepath.Join(fdir, fname)))
+			}
+		}
+
+	SLEEP:
+		// sleep tot na vier uur 's ochtends
+		time.Sleep(time.Duration((28 - time.Now().Hour())) * time.Hour)
+
+	}
 }

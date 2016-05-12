@@ -49,6 +49,8 @@ type Config struct {
 
 	Loginurl string `toml:"loginurl"`
 
+	Foliadays int `toml:"foliadays"`
+
 	View   []ViewType   `toml:"view"`
 	Access []AccessType `toml:"access"`
 }

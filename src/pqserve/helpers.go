@@ -28,6 +28,26 @@ var (
 	reFilecodes = regexp.MustCompile("_[0-9A-F][0-9A-F]|__")
 )
 
+// fout zonder gebruiker
+func sysErr(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	s := err.Error()
+
+	var s1 string
+	_, filename, lineno, ok := runtime.Caller(1)
+	if ok {
+		s1 = fmt.Sprintf("FOUT: %v:%v: %v", filepath.Base(filename), lineno, s)
+	} else {
+		s1 = "FOUT: " + s
+	}
+	chLog <- s1
+
+	return true
+}
+
 // system error -> log
 func doErr(q *Context, err error) bool {
 	if err == nil {

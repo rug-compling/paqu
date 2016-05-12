@@ -163,6 +163,9 @@ querytimeout = 120
 # Zie voorbeeld: extra/pqlogin.go
 loginurl = ""
 
+# Na hoeveel dagen moeten FoLiA-bestanden van gebruikers worden verwijderd?
+foliadays = 30
+
 # Wie mag de site bekijken?
 # Selectie op basis van ip-adres.
 # Als dit ontbreekt heeft iedereen toegang.

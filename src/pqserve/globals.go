@@ -54,6 +54,8 @@ type Config struct {
 
 	Loginurl string
 
+	Foliadays int
+
 	View   []ViewType
 	Access []AccessType
 }
