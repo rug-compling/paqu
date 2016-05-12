@@ -25,6 +25,7 @@ type arch struct {
 	tr      *tar.Reader
 	theader *tar.Header
 	terr    error
+	tstart  bool
 }
 
 func NewArchReader(filename string) (*arch, error) {
@@ -72,11 +73,17 @@ func (a *arch) Next() error {
 		}
 	}
 
-	for {
+	// bij de setup is a.tr.Next() al een keer gedaan, dus vandaar deze vreemde constructie
+	if !a.tstart {
+		a.tstart = true
+	} else {
 		a.theader, a.terr = a.tr.Next()
+	}
+	for {
 		if a.terr != nil || !a.theader.FileInfo().IsDir() {
 			break
 		}
+		a.theader, a.terr = a.tr.Next()
 	}
 
 	if a.terr == io.EOF {
