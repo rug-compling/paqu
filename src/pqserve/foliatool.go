@@ -502,12 +502,16 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 	n, _ := strconv.Atoi(firstf(q.form, "len"))
 	for i := 0; i < n; i++ {
 		s := fmt.Sprint(i)
-		settings.Items = append(settings.Items, FoliaItem{
+		item := FoliaItem{
 			Label: firstf(q.form, "label"+s),
 			Type:  firstf(q.form, "type"+s),
 			XPath: firstf(q.form, "xpath"+s),
 			Use:   firstf(q.form, "use"+s) != "",
-		})
+		}
+		if item.Label == "" || item.XPath == "" {
+			item.Use = false
+		}
+		settings.Items = append(settings.Items, item)
 	}
 	if len(settings.Items) == 0 {
 		settings.Items = append(settings.Items, FoliaItem{Type: "text"})
