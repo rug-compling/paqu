@@ -817,7 +817,7 @@ func foliaclean() {
 				if sysErr(err) {
 					user = []byte(fname)
 				}
-				chLog <- "removing FoLiA for: " + string(user)
+				chLog <- "Verwijderen FoLiA-bestanden van gebruiker " + string(user)
 				sysErr(os.RemoveAll(filepath.Join(fdir, fname)))
 			}
 		}
