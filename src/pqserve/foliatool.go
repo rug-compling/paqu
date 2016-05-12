@@ -122,6 +122,14 @@ func foliatool(q *Context) {
 	// pagina maken
 	fmt.Fprint(q.w, `
 <script type="text/javascript"><!--
+function markeer(i) {
+    var x = document.forms["settings"];
+    if (x["label" + i].value == "" || x["xpath" + i].value == "") {
+        x["use" + i].checked = false;
+    } else {
+        x["use" + i].checked = true;
+    }
+}
 function verwijder(i) {
     var x = document.forms["settings"];
     x["act"].value = "delete";
@@ -256,7 +264,7 @@ Label in uitvoer:
 <div  class="foliaform"%s>
 <input type="checkbox" name="use%d"%s><br>
 Label:
-<input type="text" name="label%d" value="%s"><br>
+<input type="text" name="label%d" value="%s" onchange="markeer('%d')"><br>
 Soort:
 <select name="type%d">
   <option%s>text</option>
@@ -266,7 +274,7 @@ Soort:
   <option%s>datetime</option>
 </select><br>
 XPath:
-<input type="text" name="xpath%d" value="%s" size="80">
+<input type="text" name="xpath%d" value="%s" size="80" onchange="markeer('%d')">
 <div class="right">
 <button type="button" onclick="verwijder(%d)">Verwijderen</button>
 </div>
@@ -274,9 +282,9 @@ XPath:
 `,
 			ids,
 			i, ch,
-			i, html.EscapeString(item.Label),
+			i, html.EscapeString(item.Label), i,
 			i, chs[0], chs[1], chs[2], chs[3], chs[4],
-			i, html.EscapeString(item.XPath),
+			i, html.EscapeString(item.XPath), i,
 			i)
 	}
 
@@ -680,6 +688,7 @@ XPath = %q
 		err = shell("pqfolia %s%s 2> %s", filepath.Join(fdir, "config.toml"), o, errfile).Run()
 		if foliaErr(q, err) {
 			os.Rename(errfile, filepath.Join(foliadir(q), "error.txt"))
+			os.RemoveAll(outdir)
 			return
 		}
 		os.Remove(errfile)
@@ -687,19 +696,20 @@ XPath = %q
 		if settings.DataMulti {
 			fp, err = os.Create(outfile)
 			if foliaErr(q, err) {
+				os.RemoveAll(outdir)
 				return
 			}
 			zf := zip.NewWriter(fp)
 			ok := foliazipdir(q, zf, outdir, "")
 			err = zf.Close()
 			fp.Close()
+			os.RemoveAll(outdir)
 			if !ok {
 				return
 			}
 			if foliaErr(q, err) {
 				return
 			}
-			os.RemoveAll(outdir)
 		}
 
 		db, err := dbopen()
