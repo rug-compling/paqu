@@ -33,18 +33,28 @@ type Config struct {
 type Item struct {
 	Type  string
 	XPath string
+	ID    string
+}
+
+type Native struct {
+	Label string
+	Type  string
 }
 
 var (
-	x           = util.CheckErr
-	cfg         Config
-	Map         = make(map[string]string)
-	fixed       = make([]string, 0)
-	nonfixed    = make([]string, 0)
-	currentfile string
-	pathlevel   = 0
-	fpout       = os.Stdout
-	fileno      = 0
+	x            = util.CheckErr
+	cfg          Config
+	Map          = make(map[string]string)
+	fixed        = make([]string, 0)
+	nonfixed     = make([]string, 0)
+	native       = make([]string, 0)
+	native_use   = make(map[string]bool)
+	native_items = make(map[string]Native)
+	native_seen  map[string]bool
+	currentfile  string
+	pathlevel    = 0
+	fpout        = os.Stdout
+	fileno       = 0
 
 	opt_n = flag.Int("n", 0, "maximum aantal bestanden")
 	opt_m = flag.Int("m", 0, "maximum aantal zinner per bestand")
@@ -89,7 +99,14 @@ func main() {
 			fmt.Fprintln(os.Stderr, "Geen definitie gevonden voor:", i)
 			return
 		}
-		if strings.Contains(it.XPath, "%speaker%") {
+		if it.ID != "" {
+			native = append(native, it.ID)
+			native_use[it.ID] = true
+			native_items[it.ID] = Native{
+				Label: i,
+				Type:  it.Type,
+			}
+		} else if strings.Contains(it.XPath, "%speaker%") {
 			nonfixed = append(nonfixed, i)
 		} else {
 			fixed = append(fixed, i)
@@ -99,7 +116,8 @@ func main() {
 	doDir("")
 	if cfg.Output_dir == "" {
 		doEnd()
-		doFixed(false, false)
+		native_seen = make(map[string]bool)
+		doFixed(false, false, false)
 	}
 }
 
@@ -135,6 +153,8 @@ func doFile(filename, dirname string) {
 
 	fileno++
 	lineno := 0
+
+	native_seen = make(map[string]bool)
 
 	if cfg.Output_dir != "" {
 		var f string
@@ -182,14 +202,15 @@ func doFile(filename, dirname string) {
 	values := make(map[string]map[string][]string)
 	hasMeta := false
 	fixedDone := false
+	nativeDone := false
 
 	currentfile = filepath.Join(cfg.Data_dir, filename)
 	fpin, err := os.Open(currentfile)
 	x(err)
 	defer fpin.Close()
 	d := xml.NewDecoder(fpin)
-	var inS, inW, inT, inCorrection, inOriginal bool
-	var label string
+	var inMetadata, inMeta, inS, inW, inT, inCorrection, inOriginal bool
+	var meta, label string
 	var teller uint64
 	words := make([]string, 0, 500)
 PARSE:
@@ -216,6 +237,7 @@ PARSE:
 
 			switch t.Name.Local {
 			case "metadata":
+				inMetadata = true
 				var src string
 				for _, e := range t.Attr {
 					if e.Name.Local == "src" {
@@ -264,10 +286,20 @@ PARSE:
 					hasMeta = true
 					fixedDone = true
 				}
+			case "meta":
+				meta = ""
+				for _, e := range t.Attr {
+					if e.Name.Local == "id" {
+						meta = e.Value
+						break
+					}
+				}
+				inMeta = native_use[meta]
 			case "whitespace":
 				if len(words) > 0 {
-					doFixed(fixedDone, hasMeta)
+					doFixed(fixedDone, nativeDone, hasMeta)
 					fixedDone = true
+					nativeDone = true
 					if sp := speakerstack[len(speakerstack)-1]; sp != currentspeaker {
 						doSpeaker(sp, hasMeta, values, doc)
 						currentspeaker = sp
@@ -310,14 +342,25 @@ PARSE:
 
 			if _, ok := tt.(xml.EndElement); ok {
 				speakerstack = speakerstack[0 : len(speakerstack)-1]
+				switch t.Name.Local {
+				case "metadata":
+					inMetadata = false
+				case "meta":
+					inMeta = false
+				}
 			}
 		} else if t, ok := tt.(xml.EndElement); ok {
 			switch t.Name.Local {
+			case "metadata":
+				inMetadata = false
+			case "meta":
+				inMeta = false
 			case "s", "utt":
 				if inS {
 					if len(words) > 0 {
-						doFixed(fixedDone, hasMeta)
+						doFixed(fixedDone, nativeDone, hasMeta)
 						fixedDone = true
+						nativeDone = true
 						if sp := speakerstack[len(speakerstack)-1]; sp != currentspeaker {
 							doSpeaker(sp, hasMeta, values, doc)
 							currentspeaker = sp
@@ -346,6 +389,10 @@ PARSE:
 			}
 			speakerstack = speakerstack[0 : len(speakerstack)-1]
 		} else if t, ok := tt.(xml.CharData); ok {
+			if inMetadata && inMeta {
+				fmt.Fprintf(fpout, "##META %s %s = %s\n", native_items[meta].Type, native_items[meta].Label, string(t))
+				native_seen[meta] = true
+			}
 			if inS && inT && !inOriginal && (inW && cfg.Tokenized || !inW && !cfg.Tokenized) {
 				for _, w := range strings.Fields(string(t)) {
 					words = append(words, alpinoEscape(w))
@@ -358,7 +405,8 @@ PARSE:
 	fmt.Fprintln(fpout)
 	if cfg.Output_dir != "" {
 		doEnd()
-		doFixed(false, false)
+		native_seen = make(map[string]bool)
+		doFixed(false, false, false)
 	}
 }
 
@@ -374,21 +422,28 @@ func doEnd() {
 	}
 }
 
-func doFixed(done, hasMeta bool) {
-	if done {
-		return
-	}
+func doFixed(metadone, nativedone, hasMeta bool) {
 
-	if cfg.Meta_src != "" {
-		fmt.Fprintf(fpout, "##META text %s =\n", cfg.Meta_src)
-	}
+	if !metadone {
+		if cfg.Meta_src != "" {
+			fmt.Fprintf(fpout, "##META text %s =\n", cfg.Meta_src)
+		}
 
-	for _, item := range fixed {
-		fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
-	}
-	if !hasMeta {
-		for _, item := range nonfixed {
+		for _, item := range fixed {
 			fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
+		}
+		if !hasMeta {
+			for _, item := range nonfixed {
+				fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
+			}
+		}
+	}
+
+	if !nativedone {
+		for _, item := range native {
+			if !native_seen[item] {
+				fmt.Fprintf(fpout, "##META %s %s =\n", native_items[item].Type, native_items[item].Label)
+			}
 		}
 	}
 }
