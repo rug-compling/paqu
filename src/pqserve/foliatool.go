@@ -36,10 +36,11 @@ type FoliaSettings struct {
 }
 
 type FoliaItem struct {
-	Label string
-	Type  string
-	XPath string
-	Use   bool
+	Label  string
+	Type   string
+	Source string
+	Value  string
+	Use    bool
 }
 
 var (
@@ -125,7 +126,7 @@ func foliatool(q *Context) {
 <script type="text/javascript"><!--
 function markeer(i) {
     var x = document.forms["settings"];
-    if (x["label" + i].value == "" || x["xpath" + i].value == "") {
+    if (x["label" + i].value == "" || x["value" + i].value == "") {
         x["use" + i].checked = false;
     } else {
         x["use" + i].checked = true;
@@ -198,7 +199,7 @@ Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 </form>
 `)
 
-	if settings.DataInfo == "" || settings.MetaInfo == "" {
+	if settings.DataInfo == "" {
 		html_footer(q)
 		return
 	}
@@ -240,6 +241,7 @@ Label in uitvoer:
 	for i, item := range settings.Items {
 		var ch string
 		var chs [5]string
+		var che [2]string
 		if item.Use {
 			ch = checked
 		}
@@ -257,6 +259,11 @@ Label in uitvoer:
 			n = 4
 		}
 		chs[n] = " selected"
+		n = 0
+		if item.Source == "id" {
+			n = 1
+		}
+		che[n] = " selected"
 		ids := ""
 		if action == "delete" && i == idxdel || action == "new" && i == len(settings.Items)-1 {
 			ids = ` id="a"`
@@ -274,8 +281,11 @@ Soort:
   <option%s>date</option>
   <option%s>datetime</option>
 </select><br>
-XPath:
-<input type="text" name="xpath%d" value="%s" size="80" onchange="markeer('%d')">
+<select name="source%d">
+  <option value="xpath"%s>Extern XPath:</option>
+  <option value="id"%s>Intern ID:</option>
+</select>
+<input type="text" name="value%d" value="%s" size="80" onchange="markeer('%d')">
 <div class="right">
 <button type="button" onclick="verwijder(%d)">Verwijderen</button>
 </div>
@@ -285,7 +295,8 @@ XPath:
 			i, ch,
 			i, html.EscapeString(item.Label), i,
 			i, chs[0], chs[1], chs[2], chs[3], chs[4],
-			i, html.EscapeString(item.XPath), i,
+			i, che[0], che[1],
+			i, html.EscapeString(item.Value), i,
 			i)
 	}
 
@@ -504,12 +515,13 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 	for i := 0; i < n; i++ {
 		s := fmt.Sprint(i)
 		item := FoliaItem{
-			Label: firstf(q.form, "label"+s),
-			Type:  firstf(q.form, "type"+s),
-			XPath: firstf(q.form, "xpath"+s),
-			Use:   firstf(q.form, "use"+s) != "",
+			Label:  firstf(q.form, "label"+s),
+			Type:   firstf(q.form, "type"+s),
+			Source: firstf(q.form, "source"+s),
+			Value:  firstf(q.form, "value"+s),
+			Use:    firstf(q.form, "use"+s) != "",
 		}
-		if item.Label == "" || item.XPath == "" {
+		if item.Label == "" || item.Value == "" {
 			item.Use = false
 		}
 		settings.Items = append(settings.Items, item)
@@ -579,11 +591,15 @@ func foliatest(q *Context, settings *FoliaSettings, fdir string) (settingsChange
 
 	for _, item := range settings.Items {
 		if item.Use {
+			p := "XPath"
+			if item.Source == "id" {
+				p = "ID"
+			}
 			fmt.Fprintf(fp, `
 [Items.%q]
 Type = %q
-XPath = %q
-`, item.Label, item.Type, item.XPath)
+%s = %q
+`, item.Label, item.Type, p, item.Value)
 		}
 	}
 
@@ -673,11 +689,15 @@ Ga naar: <a href="corpora">corpora</a>
 
 		for _, item := range settings.Items {
 			if item.Use {
+				p := "XPath"
+				if item.Source == "id" {
+					p = "ID"
+				}
 				fmt.Fprintf(fp, `
 [Items.%q]
 Type = %q
-XPath = %q
-`, item.Label, item.Type, item.XPath)
+%s = %q
+`, item.Label, item.Type, p, item.Value)
 			}
 		}
 
