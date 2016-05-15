@@ -367,7 +367,7 @@ Een tarbestand zelf mag wel gecomprimeerd zijn met gzip.
 	}
 	fmt.Fprintf(q.w, `
     <div class="info">
-    Heb je een corpus in <b>FoLiA</b>-formaat, met <b>metadata</b> in XML-formaat, klik dan <b><a href="folia">hier</a></b>.
+    Heb je een corpus in <b>FoLiA</b>-formaat, met interne of externe <b>metadata</b>, klik dan <b><a href="folia">hier</a></b>.
     </div>
     <form name="newcorpus" action="submitcorpus" method="post" enctype="multipart/form-data"
       accept-charset="utf-8" onsubmit="javascript:return formtest()">
