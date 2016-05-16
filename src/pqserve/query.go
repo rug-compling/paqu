@@ -156,6 +156,7 @@ func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, err
 	defer close(chFinished)
 	go cancelQuery(id, timeout, chFinished, chClose)
 
+	logf("Timeout Query: %s", query)
 	return q.db.Query(query)
 }
 
