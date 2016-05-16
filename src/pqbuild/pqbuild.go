@@ -1675,6 +1675,8 @@ func connect() *sql.DB {
 	}
 	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
+	_, err = db.Exec("SET SESSION sql_mode = ''")
+	util.CheckErr(err)
 	return db
 }
 
