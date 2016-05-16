@@ -20,8 +20,6 @@ Zie ook: TODO in diverse bestanden
     - optie `loginurl` in `setup-example.toml`
   - Metadata
     - Handleiding: Invoerformaat
-  - pqstatus:
-    - aanpassen aan MySQL versie 5.7, zie: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-variable-table-migration.html
   - pqserve:
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - gewoon zoeken
