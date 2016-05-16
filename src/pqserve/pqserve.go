@@ -97,7 +97,7 @@ func main() {
 
 	db, err := dbopen()
 	util.CheckErr(err)
-	rows, err := db.Query("SELECT `VARIABLE_VALUE` FROM `information_schema`.`GLOBAL_VARIABLES` WHERE `VARIABLE_NAME` = \"VERSION\"")
+	rows, err := db.Query("SELECT VERSION()")
 	util.CheckErr(err)
 	if rows.Next() {
 		util.CheckErr(rows.Scan(&versionstring))
@@ -116,6 +116,7 @@ func main() {
 		}
 	}
 	db.Close()
+
 	if minversion(5, 7, 4) {
 		hasMaxStatementTime = true
 	}
