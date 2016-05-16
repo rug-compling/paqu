@@ -279,7 +279,7 @@ func dbopen() (*sql.DB, error) {
 	}
 	db, err := sql.Open("mysql", login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	if err != nil {
-		_, err = db.Exec("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'")
+		_, err = db.Exec("SET SESSION sql_mode = ''")
 	}
 	return db, err
 }
