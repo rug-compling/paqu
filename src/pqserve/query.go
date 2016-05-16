@@ -146,8 +146,8 @@ func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, err
 	query = strings.Replace(query, " ", " "+id+" ", 1)
 
 	timeout := true
-	if Cfg.Querytimeout > 0 && hasMaxStatementTime {
-		t := fmt.Sprintf(" MAX_STATEMENT_TIME = %d000 ", Cfg.Querytimeout)
+	if Cfg.Querytimeout > 0 && hasMaxExecutionTime {
+		t := fmt.Sprintf(" /*+ MAX_EXECUTION_TIME(%d000) */", Cfg.Querytimeout)
 		query = strings.Replace(query, " ", t, 1)
 		timeout = false // laat timeout door MySQL-server doen
 	}

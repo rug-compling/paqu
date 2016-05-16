@@ -218,7 +218,7 @@ var (
 	versionstring string
 	version       [3]int
 
-	hasMaxStatementTime bool
+	hasMaxExecutionTime bool
 
 	taskWaitNr int
 	taskWorkNr int

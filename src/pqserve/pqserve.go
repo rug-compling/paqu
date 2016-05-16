@@ -117,8 +117,8 @@ func main() {
 	}
 	db.Close()
 
-	if minversion(5, 7, 4) {
-		hasMaxStatementTime = true
+	if minversion(5, 7, 7) {
+		hasMaxExecutionTime = true
 	}
 	logf("MySQL server-versie: %v (%s)", version, versionstring)
 
