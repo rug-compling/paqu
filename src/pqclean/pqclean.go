@@ -104,5 +104,5 @@ func dbopen() (*sql.DB, error) {
 	if Cfg.Login[0] == '$' {
 		Cfg.Login = os.Getenv(Cfg.Login[1:])
 	}
-	return sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	return sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam&sql_mode=''")
 }
