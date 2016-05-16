@@ -79,13 +79,13 @@ Syntax: %s [-w]
 
 	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_info (
 		id          varchar(128) NOT NULL,
-		description varchar(128) NOT NULL COLLATE utf8_unicode_ci,
+		description varchar(128) NOT NULL COLLATE utf8_unicode_ci DEFAULT '',
 		owner       varchar(128) NOT NULL DEFAULT 'none',
 		status      enum('QUEUED','WORKING','FINISHED','FAILED','QUEUING') NOT NULL DEFAULT 'QUEUING',
-		msg         varchar(256) NOT NULL,
+		msg         varchar(256) NOT NULL DEFAULT '',
 		nline       int          NOT NULL DEFAULT 0,
 		nword       int          NOT NULL DEFAULT 0,
-		params      varchar(128) NOT NULL,
+		params      varchar(128) NOT NULL DEFAULT '',
 		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
