@@ -277,11 +277,7 @@ func dbopen() (*sql.DB, error) {
 	if login[0] == '$' {
 		login = os.Getenv(login[1:])
 	}
-	db, err := sql.Open("mysql", login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
-	if err != nil {
-		_, err = db.Exec("SET SESSION sql_mode = ''")
-	}
-	return db, err
+	return sql.Open("mysql", login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 }
 
 func urlJoin(elem ...string) string {

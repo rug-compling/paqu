@@ -511,7 +511,7 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, errCheck func(*Context
 	}
 
 	_, err = db.Exec(fmt.Sprintf(
-		"INSERT %s_info (id) VALUES (%q);",
+		"INSERT %s_info (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
 		Cfg.Prefix,
 		dirname))
 

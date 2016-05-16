@@ -330,7 +330,7 @@ Opties:
 		share = "PUBLIC"
 	}
 
-	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`) VALUES (%q);", Cfg.Prefix, prefix)) // negeer fout
+	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");", Cfg.Prefix, prefix)) // negeer fout
 	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q WHERE `id` = %q",
 		Cfg.Prefix, desc, owner, share, prefix))
 	util.CheckErr(err)
@@ -1674,8 +1674,6 @@ func connect() *sql.DB {
 		Cfg.Login = os.Getenv(Cfg.Login[1:])
 	}
 	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
-	util.CheckErr(err)
-	_, err = db.Exec("SET SESSION sql_mode = ''")
 	util.CheckErr(err)
 	return db
 }

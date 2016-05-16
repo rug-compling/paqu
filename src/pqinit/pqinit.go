@@ -59,8 +59,6 @@ Syntax: %s [-w]
 	}
 	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
 	util.CheckErr(err)
-	_, err = db.Exec("SET SESSION sql_mode = ''")
-	util.CheckErr(err)
 	defer db.Close()
 
 	if db_overwrite {
@@ -81,13 +79,13 @@ Syntax: %s [-w]
 
 	_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + `_info (
 		id          varchar(128) NOT NULL,
-		description varchar(128) NOT NULL COLLATE utf8_unicode_ci DEFAULT '',
+		description varchar(128) NOT NULL COLLATE utf8_unicode_ci,
 		owner       varchar(128) NOT NULL DEFAULT 'none',
 		status      enum('QUEUED','WORKING','FINISHED','FAILED','QUEUING') NOT NULL DEFAULT 'QUEUING',
-		msg         varchar(256) NOT NULL DEFAULT '',
+		msg         varchar(256) NOT NULL,
 		nline       int          NOT NULL DEFAULT 0,
 		nword       int          NOT NULL DEFAULT 0,
-		params      varchar(128) NOT NULL DEFAULT '',
+		params      varchar(128) NOT NULL,
 		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
