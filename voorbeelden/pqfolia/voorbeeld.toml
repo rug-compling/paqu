@@ -1,0 +1,80 @@
+#
+# Gebruik: pqfolia voorbeeld.toml
+#
+# Dit bestand is in toml-formaat, zie: https://github.com/mojombo/toml                                         
+#
+
+################################################################
+#
+# INSTELLINGEN VOOR DE UITVOER
+#
+
+# Label waaronder naam van bronbestand in de uitvoer komt.
+# Als dit leeg is, dan wordt het niet gebruikt.
+File_src = "File.Src"
+
+# Prefix van label waaronder delen van het path van het bronbestand in de uitvoer komen.
+# Als dit leeg is, dan wordt het niet gebruikt.
+File_path = "File.Path."
+
+# Label waaronder naam van metadata in de uitvoer komt.
+# Als dit leeg is, dan wordt het niet gebruikt.
+Meta_src = "Meta.Src"
+
+# Directory waar uitvoer wordt opgeslagen.
+# Bestaande bestanden worden overschreven.
+# Als dit leeg is gaat alle uitvoer naar stdout.
+Output_dir = ""
+
+# Alleen metadata uit deze lijst wordt gebruikt.
+# Je kunt definities voor metadata toevoegen aan het eind van dit bestand.
+Item_list = [
+    "Titel",
+    "Auteurs",
+    "Niveau",
+    "Land",
+    "Leeftijd",
+    "CGN.firstLang"
+]
+
+################################################################
+#
+# INFO OVER DE INVOER
+#
+
+Data_dir = "data"
+Meta_dir = "metadata"
+Tokenized = true
+
+################################################################
+#
+# DEFINITIES VOOR METADATA
+#
+
+# Voor interne metadata wordt ID gebruikt
+
+[Items."Titel"]
+Type = "text"
+ID = "title"
+
+[Items."Auteurs"]
+Type = "text"
+ID = "authors"
+
+[Items."Niveau"]
+Type = "text"
+ID = "level"
+
+# Voor externe metadata wordt XPath gebruikt
+
+[Items."Land"]                                                                                               
+Type = "text"                                                                                                   
+XPath = "CMD/Components/Session/MDGroup/Location/Country"                                                       
+
+[Items."Leeftijd"]
+Type = "int"
+XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Age"
+
+[Items."CGN.firstLang"]
+Type = "text"
+XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Keys/Key[@Name='CGN.firstLang']"

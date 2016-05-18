@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:MPI="http://www.mpi.nl/"
+     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1271859438204/xsd">
+   <Header>
+      <MdCreator>imdi2clarin.xsl</MdCreator>
+      <MdCreationDate>2016-02-09</MdCreationDate>
+      <MdSelfLink>hdl:1839/00-0000-0000-0002-ADD3-2@format=cmdi</MdSelfLink>
+      <MdProfile>clarin.eu:cr1:p_1271859438204</MdProfile>
+      <MdCollectionDisplayName>TLA: MPI CGN</MdCollectionDisplayName>
+   </Header>
+   <Resources>
+      <ResourceProxyList>
+         <ResourceProxy id="d33401e1">
+            <ResourceType>LandingPage</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADD3-2@view</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e430">
+            <ResourceType mimetype="audio/mp4">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-000D-A683-4</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e493">
+            <ResourceType mimetype="audio/x-wav">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADD4-F</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e555">
+            <ResourceType mimetype="text/x-cgn-bpt+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADD5-7</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e634">
+            <ResourceType mimetype="text/x-cgn-tag+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADD6-5</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e713">
+            <ResourceType mimetype="text/x-cgn-pri+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADD7-9</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e793">
+            <ResourceType mimetype="text/x-eaf+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-001F-13CB-1</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e872">
+            <ResourceType mimetype="text/x-cgn-skp+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADD9-0</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e951">
+            <ResourceType mimetype="text/x-cgn-tig+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADDA-A</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e1030">
+            <ResourceType mimetype="text/x-cgn-prx+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADDB-1</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="d33401e1109">
+            <ResourceType mimetype="text/x-cgn-prx+xml">Resource</ResourceType>
+            <ResourceRef>hdl:1839/00-0000-0000-0002-ADDC-7</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="sru">
+            <ResourceType>SearchService</ResourceType>
+            <ResourceRef>http://cqlservlet.mpi.nl/</ResourceRef>
+         </ResourceProxy>
+      </ResourceProxyList>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <Session>
+         <Name>fv400007</Name>
+         <Title>ceremonious speech: opening of the academic year</Title>
+         <Date>1999</Date>
+         <descriptions>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = SAMPLING</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CNTS-UA</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = ORTHOGRAPHIC TRANSCRIPTION</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CNTS-UA</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = PART-OF-SPEECH TAGGING</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CCL-KUL</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = LEMMATISATION</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CCL-KUL</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = LEXICON LINK-UP</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CCL-KUL</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = WORD SEGMENTATION</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = ESAT-KUL</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = PHONETIC TRANSCRIPTION</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CNTS-UA</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = SYNTACTIC ANNOTATION</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CCL-KUL</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Type = PROSODIC ANNOTATION</Description>
+            <Description LanguageId="ISO639:eng">Responsibility.Name = CNTS-UA/ELIS-UG</Description>
+            <Description LanguageId="ISO639:eng">Total number of words = 604</Description>
+            <Description LanguageId="ISO639:eng">CGN Header Date = 1-1-2004</Description>
+         </descriptions>
+         <MDGroup>
+            <Location>
+               <Continent>Europe</Continent>
+               <Country>Belgium</Country>
+               <Region>B-261, auditorium</Region>
+               <Address>B-261, auditorium</Address>
+            </Location>
+            <Project>
+               <Name/>
+               <Title/>
+               <Id/>
+               <Contact>
+                  <Name/>
+                  <Address/>
+                  <Email/>
+                  <Organisation/>
+               </Contact>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+            </Project>
+            <Keys>
+               <Key Name="CGN.wordCount">604</Key>
+               <Key Name="CGN.secCount">262</Key>
+               <Key Name="CGN.byteCount">8000000</Key>
+               <Key Name="CGN.tempoAv">8299</Key>
+               <Key Name="CGN.recDate">1999</Key>
+               <Key Name="CGN.locName">B-261, auditorium</Key>
+               <Key Name="CGN.locale">LOC3</Key>
+               <Key Name="CGN.availability">CGN_WAV_29</Key>
+               <Key Name="CGN.segmentation">manual</Key>
+               <Key Name="CGN.fon.available">true</Key>
+               <Key Name="CGN.pro.available">true</Key>
+               <Key Name="CGN.syn.available">true</Key>
+               <Key Name="CGN.wrd.available">true</Key>
+            </Keys>
+            <Content>
+               <Genre>Discourse</Genre>
+               <SubGenre>Oratory</SubGenre>
+               <Task>Activity: Unspecified</Task>
+               <Modalities>speech</Modalities>
+               <CommunicationContext>
+                  <Interactivity>non-interactive</Interactivity>
+                  <PlanningType>semi-spontaneous</PlanningType>
+                  <Involvement>non-elicited</Involvement>
+                  <SocialContext>Public</SocialContext>
+                  <EventStructure>Monologue</EventStructure>
+                  <Channel>Face to Face</Channel>
+               </CommunicationContext>
+               <Content_Languages>
+                  <Content_Language>
+                     <Id>RFC1766:x-sil-DUT</Id>
+                     <Name>Dutch</Name>
+                  </Content_Language>
+               </Content_Languages>
+               <Keys>
+                  <Key Name="IMDI__1_9.Interactional"/>
+                  <Key Name="IMDI__1_9.Discursive"/>
+                  <Key Name="IMDI__1_9.Interactional"/>
+                  <Key Name="CGN.textClass.target">ttm,prep1,mod3,dom2</Key>
+                  <Key Name="CGN.textClass.keywords"/>
+                  <Key Name="CGN.activity">Unspecified</Key>
+               </Keys>
+               <descriptions>
+                  <Description LanguageId="ISO639:eng">This file was generated from an IMDI 1.9 file and transformed to IMDI 3.0. The substructure of Genre is replaced by two elements named "Genre" and "SubGenre". The original content of Genre substructure was: Interactional = '', Discursive = '', Performance = ''. These values have been added as Keys to the Content information.</Description>
+                  <Description LanguageId=""/>
+               </descriptions>
+            </Content>
+            <Actors>
+               <descriptions>
+                  <Description LanguageId="ISO639:eng">
+  	Participant interaction = 
+  			NO INTERACTION
+  		
+  	Number of active participants = 1
+  	Number of passive participants = no
+  	---------------------------------------------------
+  	Active Speaker: not used
+  	Passive Speaker: not used
+  	Relation: not used
+  	Mutual: not used
+  	---------------------------------------------------
+  </Description>
+               </descriptions>
+               <Actor>
+                  <Role>professor</Role>
+                  <Name/>
+                  <FullName/>
+                  <Code>V40005</Code>
+                  <FamilySocialRole/>
+                  <EthnicGroup/>
+                  <Age>62</Age>
+                  <BirthDate>Unspecified</BirthDate>
+                  <Sex>Male</Sex>
+                  <Education>high</Education>
+                  <Anonymized>true</Anonymized>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <Keys>
+                     <Key Name="CGN.age">age5</Key>
+                     <Key Name="CGN.birth.year">1937</Key>
+                     <Key Name="CGN.birth.place">B-260</Key>
+                     <Key Name="CGN.birth.reg">regV1</Key>
+                     <Key Name="CGN.firstLang">Unknown</Key>
+                     <Key Name="CGN.homeLang">Unknown</Key>
+                     <Key Name="CGN.workLang">Unknown</Key>
+                     <Key Name="CGN.residence.place">B-202</Key>
+                     <Key Name="CGN.residence.reg">regV1</Key>
+                     <Key Name="CGN.education.placesize">sizeX</Key>
+                     <Key Name="CGN.education.place">B-260</Key>
+                     <Key Name="CGN.education.reg">regV1</Key>
+                     <Key Name="CGN.education.type">universiteit</Key>
+                     <Key Name="CGN.education.level">edu1</Key>
+                     <Key Name="CGN.occupation">professor</Key>
+                     <Key Name="CGN.occupation.level">occC</Key>
+                  </Keys>
+                  <descriptions>
+                     <Description LanguageId="ISO639:eng">none</Description>
+                  </descriptions>
+                  <Actor_Languages>
+                     <Actor_Language>
+                        <Id>RFC1766:x-sil-DUT</Id>
+                        <Name>unknown
+   </Name>
+                        <descriptions>
+                           <Description LanguageId="ISO639:eng">First Language</Description>
+                        </descriptions>
+                     </Actor_Language>
+                     <Actor_Language>
+                        <Id>RFC1766:x-sil-DUT</Id>
+                        <Name>unknown
+   </Name>
+                        <descriptions>
+                           <Description LanguageId="ISO639:eng">Home Language</Description>
+                        </descriptions>
+                     </Actor_Language>
+                     <Actor_Language>
+                        <Id>RFC1766:x-sil-DUT</Id>
+                        <Name>unknown
+   </Name>
+                        <descriptions>
+                           <Description LanguageId="ISO639:eng">Work Language</Description>
+                        </descriptions>
+                     </Actor_Language>
+                  </Actor_Languages>
+               </Actor>
+               <Actor>
+                  <Role>Collector</Role>
+                  <Name/>
+                  <FullName/>
+                  <Code>Unspecified</Code>
+                  <FamilySocialRole>Unspecified</FamilySocialRole>
+                  <EthnicGroup/>
+                  <Age>Unspecified</Age>
+                  <BirthDate>Unspecified</BirthDate>
+                  <Sex>Unspecified</Sex>
+                  <Education/>
+                  <Anonymized>false</Anonymized>
+                  <Contact>
+                     <Name>ELIS-UG</Name>
+                     <Address/>
+                     <Email/>
+                     <Organisation>ELIS-UG</Organisation>
+                  </Contact>
+                  <Keys/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+                  <Actor_Languages/>
+               </Actor>
+            </Actors>
+         </MDGroup>
+         <Resources>
+            <MediaFile ref="d33401e430">
+               <ResourceLink>../Media/fv400007.m4a</ResourceLink>
+               <Type>audio</Type>
+               <Format>audio/mp4</Format>
+               <Size>12904796</Size>
+               <Quality>Unspecified</Quality>
+               <RecordingConditions/>
+               <TimePosition>
+                  <Start>Unspecified</Start>
+                  <End>Unspecified</End>
+               </TimePosition>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys>
+                  <Key Name=""/>
+               </Keys>
+            </MediaFile>
+            <MediaFile ref="d33401e493">
+               <ResourceLink>../Media/fv400007.wav</ResourceLink>
+               <Type>audio</Type>
+               <Format>audio/x-wav</Format>
+               <Size>8M</Size>
+               <Quality>Unknown</Quality>
+               <RecordingConditions>CGN.locale= public place Medium= DAT tape microphone= Unspecified noise= Unspecified digitisation.recording= DIG2 digitisation.processing= DIG2 digitisation.status= DIG2</RecordingConditions>
+               <TimePosition>
+                  <Start>Unknown</Start>
+                  <End>Unknown</End>
+               </TimePosition>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher>ELDA</Publisher>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </MediaFile>
+            <WrittenResource ref="d33401e555">
+               <ResourceLink>../Annotations/fv400007.bpt</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>phonetics</SubType>
+               <Format>text/x-cgn-bpt+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e634">
+               <ResourceLink>../Annotations/fv400007.tag</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>pos, lemma, marked</SubType>
+               <Format>text/x-cgn-tag+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e713">
+               <ResourceLink>../Annotations/fv400007.pri</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>orthography</SubType>
+               <Format>text/x-cgn-pri+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e793">
+               <ResourceLink>../Annotations/fv400007.eaf</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>phonetics</SubType>
+               <Format>text/x-eaf+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e872">
+               <ResourceLink>../Annotations/fv400007.skp</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>labelling</SubType>
+               <Format>text/x-cgn-skp+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e951">
+               <ResourceLink>../Annotations/fv400007.tig</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>syntax</SubType>
+               <Format>text/x-cgn-tig+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e1030">
+               <ResourceLink>../Annotations/fv400007_prx1.prx</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>prosody</SubType>
+               <Format>text/x-cgn-prx+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <WrittenResource ref="d33401e1109">
+               <ResourceLink>../Annotations/fv400007_prx2.prx</ResourceLink>
+               <MediaResourceLink>../Media/fv400007.wav</MediaResourceLink>
+               <Date/>
+               <Type>Annotation</Type>
+               <SubType>prosody</SubType>
+               <Format>text/x-cgn-prx+xml</Format>
+               <Size>Unspecified</Size>
+               <Derivation>Annotation</Derivation>
+               <CharacterEncoding>ASCII</CharacterEncoding>
+               <ContentEncoding/>
+               <LanguageId/>
+               <Anonymized>false</Anonymized>
+               <Validation>
+                  <Type>Unspecified</Type>
+                  <Methodology>Unspecified</Methodology>
+                  <Level/>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Validation>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId=""/>
+               </descriptions>
+               <Keys/>
+            </WrittenResource>
+            <Source>
+               <Id>CGN_WAV_29</Id>
+               <Format>DVD</Format>
+               <Quality>Unknown</Quality>
+               <CounterPosition>
+                  <Start>Unknown</Start>
+                  <End>Unknown</End>
+               </CounterPosition>
+               <Access>
+                  <Availability/>
+                  <Date>Unspecified</Date>
+                  <Owner/>
+                  <Publisher/>
+                  <Contact>
+                     <Name/>
+                     <Address/>
+                     <Email/>
+                     <Organisation/>
+                  </Contact>
+                  <descriptions>
+                     <Description LanguageId=""/>
+                  </descriptions>
+               </Access>
+               <descriptions>
+                  <Description LanguageId="ISO639:eng">
+	Author: not applicable
+    
+	Title: ceremonious speech: opening of the academic year
+    
+	Publisher: not applicable
+    
+	Place: not applicable
+    
+	Date: not applicable
+    
+	Recording date: 1999
+	Recording time: 16u00-17u30
+	From: CGN recording
+   
+	Produced from: CGN
+   </Description>
+               </descriptions>
+               <Keys/>
+            </Source>
+         </Resources>
+      </Session>
+   </Components>
+</CMD>
