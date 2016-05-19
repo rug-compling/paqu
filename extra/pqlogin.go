@@ -90,7 +90,7 @@ func main() {
 	sec := rand16()
 
 	// Verbinding maken met MySQL
-	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam")
+	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam&sql_mode=''")
 	if x(err) {
 		return
 	}
