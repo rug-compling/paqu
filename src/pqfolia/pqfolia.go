@@ -41,6 +41,16 @@ type Native struct {
 	Type  string
 }
 
+type State struct {
+	speaker    string
+	inMetadata bool
+	inMeta     bool
+	inS        bool
+	inW        bool
+	inT        bool
+	inSkip     bool
+}
+
 var (
 	x            = util.CheckErr
 	cfg          Config
@@ -197,7 +207,7 @@ func doFile(filename, dirname string) {
 	fmt.Fprintln(os.Stderr, ">", filename)
 
 	var doc *etree.Document
-	speakerstack := []string{""}
+	statestack := make([]State, 1, 10)
 	currentspeaker := " oiqoewij doijqowiu98793olj fdowqjoiequ8nf  fke f wf  wejfo  fwoiu92  "
 	values := make(map[string]map[string][]string)
 	hasMeta := false
@@ -209,7 +219,6 @@ func doFile(filename, dirname string) {
 	x(err)
 	defer fpin.Close()
 	d := xml.NewDecoder(fpin)
-	var inMetadata, inMeta, inS, inW, inT, inCorrection, inOriginal bool
 	var meta, label string
 	var teller uint64
 	words := make([]string, 0, 500)
@@ -222,22 +231,26 @@ PARSE:
 		x(err)
 
 		if t, ok := tt.(xml.StartElement); ok {
-			sp := ""
+
+			state := statestack[len(statestack)-1]
+
 			for _, e := range t.Attr {
-				if e.Name.Local == "speaker" {
-					sp = e.Value
-					break
+				switch e.Name.Local {
+				case "speaker":
+					state.speaker = e.Value
+				case "class":
+					for _, s := range strings.Fields(e.Value) {
+						if s == "original" {
+							state.inSkip = true
+							break
+						}
+					}
 				}
-			}
-			if sp == "" {
-				speakerstack = append(speakerstack, speakerstack[len(speakerstack)-1])
-			} else {
-				speakerstack = append(speakerstack, sp)
 			}
 
 			switch t.Name.Local {
 			case "metadata":
-				inMetadata = true
+				state.inMetadata = true
 				var src string
 				for _, e := range t.Attr {
 					if e.Name.Local == "src" {
@@ -294,15 +307,15 @@ PARSE:
 						break
 					}
 				}
-				inMeta = native_use[meta]
+				state.inMeta = native_use[meta]
 			case "whitespace":
 				if len(words) > 0 {
 					doFixed(fixedDone, nativeDone, hasMeta)
 					fixedDone = true
 					nativeDone = true
-					if sp := speakerstack[len(speakerstack)-1]; sp != currentspeaker {
-						doSpeaker(sp, hasMeta, values, doc)
-						currentspeaker = sp
+					if state.speaker != currentspeaker {
+						doSpeaker(state.speaker, hasMeta, values, doc)
+						currentspeaker = state.speaker
 					}
 					fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
 					words = words[0:0]
@@ -321,49 +334,34 @@ PARSE:
 						break
 					}
 				}
-				inS = true
-				inW = false
-				inT = false
-				inCorrection = false
-				inOriginal = false
+				state.inS = true
+				state.inW = false
+				state.inT = false
 			case "w":
-				inW = true
-				inT = false
+				state.inW = true
+				state.inT = false
 			case "t":
-				inT = true
-			case "correction":
-				inCorrection = true
-				inOriginal = false
-			case "original":
-				if inCorrection {
-					inOriginal = true
-				}
+				state.inT = true
+			case "original", "morphology", "suggestion":
+				state.inSkip = true
 			}
 
-			if _, ok := tt.(xml.EndElement); ok {
-				speakerstack = speakerstack[0 : len(speakerstack)-1]
-				switch t.Name.Local {
-				case "metadata":
-					inMetadata = false
-				case "meta":
-					inMeta = false
-				}
+			if _, ok := tt.(xml.EndElement); !ok {
+				statestack = append(statestack, state)
 			}
 		} else if t, ok := tt.(xml.EndElement); ok {
+			state := statestack[len(statestack)-1]
+			statestack = statestack[0 : len(statestack)-1]
 			switch t.Name.Local {
-			case "metadata":
-				inMetadata = false
-			case "meta":
-				inMeta = false
 			case "s", "utt":
-				if inS {
+				if state.inS {
 					if len(words) > 0 {
 						doFixed(fixedDone, nativeDone, hasMeta)
 						fixedDone = true
 						nativeDone = true
-						if sp := speakerstack[len(speakerstack)-1]; sp != currentspeaker {
-							doSpeaker(sp, hasMeta, values, doc)
-							currentspeaker = sp
+						if state.speaker != currentspeaker {
+							doSpeaker(state.speaker, hasMeta, values, doc)
+							currentspeaker = state.speaker
 						}
 						fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
 						words = words[0:0]
@@ -373,32 +371,17 @@ PARSE:
 						}
 					}
 				}
-				inS = false
-				inW = false
-				inT = false
-			case "w":
-				inW = false
-				inT = false
-			case "t":
-				inT = false
-			case "correction":
-				inCorrection = false
-				inOriginal = false
-			case "original":
-				inOriginal = false
 			}
-			speakerstack = speakerstack[0 : len(speakerstack)-1]
 		} else if t, ok := tt.(xml.CharData); ok {
-			if inMetadata && inMeta {
+			state := statestack[len(statestack)-1]
+			if state.inMetadata && state.inMeta {
 				fmt.Fprintf(fpout, "##META %s %s = %s\n", native_items[meta].Type, native_items[meta].Label, string(t))
 				native_seen[meta] = true
 			}
-			if inS && inT && !inOriginal && (inW && cfg.Tokenized || !inW && !cfg.Tokenized) {
+			if state.inS && state.inT && !state.inSkip && (state.inW && cfg.Tokenized || !state.inW && !cfg.Tokenized) {
 				for _, w := range strings.Fields(string(t)) {
 					words = append(words, alpinoEscape(w))
 				}
-				inW = false
-				inT = false
 			}
 		}
 	}
