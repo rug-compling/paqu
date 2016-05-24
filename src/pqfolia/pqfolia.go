@@ -42,13 +42,14 @@ type Native struct {
 }
 
 type State struct {
-	speaker    string
+	el         string
 	inMetadata bool
 	inMeta     bool
 	inS        bool
 	inW        bool
 	inT        bool
 	inSkip     bool
+	speaker    string
 }
 
 var (
@@ -233,6 +234,7 @@ PARSE:
 		if t, ok := tt.(xml.StartElement); ok {
 
 			state := statestack[len(statestack)-1]
+			state.el = t.Name.Local
 
 			for _, e := range t.Attr {
 				switch e.Name.Local {

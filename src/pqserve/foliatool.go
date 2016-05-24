@@ -752,7 +752,11 @@ Type = %q
 
 		os.Rename(outfile, filepath.Join(fulldirname, "data"))
 
-		newCorpus(q, db, dirname, title, "line-lbl-tok", 0, foliaErr, false)
+		tok := ""
+		if settings.Tokenized {
+			tok = "-tok"
+		}
+		newCorpus(q, db, dirname, title, "line-lbl"+tok, 0, foliaErr, false)
 
 	}()
 }
