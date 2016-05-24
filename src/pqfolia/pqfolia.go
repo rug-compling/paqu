@@ -42,9 +42,9 @@ type Native struct {
 }
 
 type State struct {
-	el         string
 	inMetadata bool
 	inMeta     bool
+	inX        bool
 	inS        bool
 	inW        bool
 	inT        bool
@@ -221,8 +221,8 @@ func doFile(filename, dirname string) {
 	defer fpin.Close()
 	d := xml.NewDecoder(fpin)
 	var meta, label string
-	var teller uint64
-	words := make([]string, 0, 500)
+	text := make([]byte, 0)
+	var teller, xteller uint64
 PARSE:
 	for {
 		tt, err := d.Token()
@@ -234,19 +234,19 @@ PARSE:
 		if t, ok := tt.(xml.StartElement); ok {
 
 			state := statestack[len(statestack)-1]
-			state.el = t.Name.Local
 
+			hasClass := false
+			id := ""
 			for _, e := range t.Attr {
 				switch e.Name.Local {
 				case "speaker":
 					state.speaker = e.Value
+				case "id":
+					id = e.Value
 				case "class":
-					for _, s := range strings.Fields(e.Value) {
-						if s == "original" {
-							state.inSkip = true
-							break
-						}
-					}
+					hasClass = true
+				case "auth":
+					state.inSkip = true
 				}
 			}
 
@@ -310,42 +310,49 @@ PARSE:
 					}
 				}
 				state.inMeta = native_use[meta]
-			case "whitespace":
-				if len(words) > 0 {
-					doFixed(fixedDone, nativeDone, hasMeta)
-					fixedDone = true
-					nativeDone = true
-					if state.speaker != currentspeaker {
-						doSpeaker(state.speaker, hasMeta, values, doc)
-						currentspeaker = state.speaker
-					}
-					fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
-					words = words[0:0]
-					label += ".b"
-					lineno++
-					if *opt_m > 0 && *opt_m == lineno {
-						break PARSE
-					}
-				}
-			case "s", "utt":
+			case "s":
 				teller++
-				label = fmt.Sprintf("%ss.%d", filename, teller)
-				for _, e := range t.Attr {
-					if e.Name.Local == "id" {
-						label = e.Value
-						break
+				if !state.inSkip {
+					if state.inS {
+						if !cfg.Tokenized {
+							state.inSkip = true
+						}
+					} else {
+						if id == "" {
+							label = fmt.Sprintf("%s.s.%d", filename, teller)
+						} else {
+							label = id
+						}
+						text = text[0:0]
+						state.inS = true
+						state.inW = false
+						state.inT = false
 					}
 				}
-				state.inS = true
-				state.inW = false
-				state.inT = false
+			case "utt", "event":
+				xteller++
+				if !state.inSkip && !state.inS { // inS, niet inX
+					if id == "" {
+						label = fmt.Sprintf("%s.x.%d", filename, xteller)
+					} else {
+						label = id
+					}
+					text = text[0:0]
+					state.inX = true
+					state.inW = false
+					state.inT = false
+				}
 			case "w":
 				state.inW = true
 				state.inT = false
 			case "t":
-				state.inT = true
-			case "original", "morphology", "suggestion":
-				state.inSkip = true
+				if !hasClass {
+					state.inT = true
+				}
+			case "morpheme", "str":
+				if cfg.Tokenized {
+					state.inSkip = true
+				}
 			}
 
 			if _, ok := tt.(xml.EndElement); !ok {
@@ -354,10 +361,12 @@ PARSE:
 		} else if t, ok := tt.(xml.EndElement); ok {
 			state := statestack[len(statestack)-1]
 			statestack = statestack[0 : len(statestack)-1]
-			switch t.Name.Local {
-			case "s", "utt":
-				if state.inS {
-					if len(words) > 0 {
+			if !state.inSkip {
+				switch t.Name.Local {
+				case "w":
+					text = append(text, ' ')
+				case "s", "utt", "event":
+					if !statestack[len(statestack)-1].inS && strings.TrimSpace(string(text)) != "" {
 						doFixed(fixedDone, nativeDone, hasMeta)
 						fixedDone = true
 						nativeDone = true
@@ -365,8 +374,12 @@ PARSE:
 							doSpeaker(state.speaker, hasMeta, values, doc)
 							currentspeaker = state.speaker
 						}
+						words := make([]string, 0)
+						for _, w := range strings.Fields(string(text)) {
+							words = append(words, alpinoEscape(w))
+						}
 						fmt.Fprintf(fpout, "%s|%s\n", label, strings.Join(words, " "))
-						words = words[0:0]
+						text = text[0:0]
 						lineno++
 						if *opt_m > 0 && *opt_m == lineno {
 							break PARSE
@@ -380,10 +393,11 @@ PARSE:
 				fmt.Fprintf(fpout, "##META %s %s = %s\n", native_items[meta].Type, native_items[meta].Label, string(t))
 				native_seen[meta] = true
 			}
-			if state.inS && state.inT && !state.inSkip && (state.inW && cfg.Tokenized || !state.inW && !cfg.Tokenized) {
-				for _, w := range strings.Fields(string(t)) {
-					words = append(words, alpinoEscape(w))
-				}
+			if !state.inSkip &&
+				(state.inS || state.inX) &&
+				(state.inW && cfg.Tokenized || !state.inW && !cfg.Tokenized) &&
+				state.inT {
+				text = append(text, []byte(t)...)
 			}
 		}
 	}

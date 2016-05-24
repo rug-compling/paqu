@@ -221,6 +221,7 @@ Soort invoer:
 </div>
 `, len(settings.Items), ch)
 
+	ch = ""
 	if settings.UseLabelMeta {
 		ch = checked
 	}
