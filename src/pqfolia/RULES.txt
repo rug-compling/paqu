@@ -1,0 +1,28 @@
+  1. Als ik zoek naar niet-getokeniseerde tekst (<t> niet onder <w>), 
+     dan sla ik geneste <s> over.
+
+  2. Als ik zoek naar getokeniseerde tekst (<w> ... <t> ...</t> ... </w>),
+     dan beschouw ik tekst van de geneste <s> als deel van de
+     buitenste <s>.
+
+  3. Als er geen <s> is (als voorouder of afstammeling), maar wel een 
+     <utt> of <event>, dan gebruik ik die als zin. Dus, voor <utt>:
+
+     <utt> ... <s> ... </s> ... </utt>  -> gebruik <s>
+
+     <s> ... <utt> ... </utt> ... </s>  -> gebruik <s>
+
+     <utt> ... </utt>  -> gebruik <utt> alsof het een <s> is
+
+     Kan ik dat doen? Ik ben op zoek naar losse zinnen.
+     Als een <event> voor een tweet staat, dan kan die meerdere 
+     zinnen bevatten.
+
+     En kunnen <utt> of <event> genest zijn?
+
+  4. Alles onder <morpheme> of <str> sla ik over.
+
+  5. Alles onder <t> met attribuut 'class' sla ik over.
+
+  6. Alles onder een element met een attribuut 'auth' sla ik over.
+
