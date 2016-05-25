@@ -44,7 +44,7 @@ type Native struct {
 type State struct {
 	inMetadata bool
 	inMeta     bool
-	inX        bool
+	inUtt      bool
 	inS        bool
 	inW        bool
 	inT        bool
@@ -222,7 +222,7 @@ func doFile(filename, dirname string) {
 	d := xml.NewDecoder(fpin)
 	var meta, label string
 	text := make([]byte, 0)
-	var teller, xteller uint64
+	var teller, uttteller uint64
 PARSE:
 	for {
 		tt, err := d.Token()
@@ -329,16 +329,16 @@ PARSE:
 						state.inT = false
 					}
 				}
-			case "utt", "event":
-				xteller++
-				if !state.inSkip && !state.inS { // inS, niet inX
+			case "utt":
+				uttteller++
+				if !state.inSkip && !state.inS { // inS, niet inUtt
 					if id == "" {
-						label = fmt.Sprintf("%s.x.%d", filename, xteller)
+						label = fmt.Sprintf("%s.utt.%d", filename, uttteller)
 					} else {
 						label = id
 					}
 					text = text[0:0]
-					state.inX = true
+					state.inUtt = true
 					state.inW = false
 					state.inT = false
 				}
@@ -365,7 +365,7 @@ PARSE:
 				switch t.Name.Local {
 				case "w":
 					text = append(text, ' ')
-				case "s", "utt", "event":
+				case "s", "utt":
 					if !statestack[len(statestack)-1].inS && strings.TrimSpace(string(text)) != "" {
 						doFixed(fixedDone, nativeDone, hasMeta)
 						fixedDone = true
@@ -394,7 +394,7 @@ PARSE:
 				native_seen[meta] = true
 			}
 			if !state.inSkip &&
-				(state.inS || state.inX) &&
+				(state.inS || state.inUtt) &&
 				(state.inW && cfg.Tokenized || !state.inW && !cfg.Tokenized) &&
 				state.inT {
 				text = append(text, []byte(t)...)
