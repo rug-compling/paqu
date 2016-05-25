@@ -50,13 +50,25 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
+)
+
+//. Variables
+
+var (
+	treeMu sync.Mutex
 )
 
 //. Functies
 
 func tree(q *Context) {
+
+	// Zeldzame crash toen er zo te zien twee bomen tegelijk getekend werden.
+	// Is graphviz soms niet thread-safe?
+	treeMu.Lock()
+	defer treeMu.Unlock()
 
 	ctx := &TreeContext{
 		yellow: make(map[int]bool),
