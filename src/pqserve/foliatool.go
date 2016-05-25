@@ -242,7 +242,7 @@ Label in uitvoer:
 	for i, item := range settings.Items {
 		var ch string
 		var chs [5]string
-		var che [2]string
+		var che [3]string
 		if item.Use {
 			ch = checked
 		}
@@ -261,8 +261,13 @@ Label in uitvoer:
 		}
 		chs[n] = " selected"
 		n = 0
-		if item.Source == "id" {
+		switch item.Source {
+		case "xpath":
+			n = 0
+		case "xpath2":
 			n = 1
+		case "id":
+			n = 2
 		}
 		che[n] = " selected"
 		ids := ""
@@ -284,6 +289,7 @@ Soort:
 </select><br>
 <select name="source%d">
   <option value="xpath"%s>Extern XPath:</option>
+  <option value="xpath2"%s>Intern XPath:</option>
   <option value="id"%s>Intern ID:</option>
 </select>
 <input type="text" name="value%d" value="%s" size="80" onchange="markeer('%d')">
@@ -296,7 +302,7 @@ Soort:
 			i, ch,
 			i, html.EscapeString(item.Label), i,
 			i, chs[0], chs[1], chs[2], chs[3], chs[4],
-			i, che[0], che[1],
+			i, che[0], che[1], che[2],
 			i, html.EscapeString(item.Value), i,
 			i)
 	}
@@ -592,8 +598,13 @@ func foliatest(q *Context, settings *FoliaSettings, fdir string) (settingsChange
 
 	for _, item := range settings.Items {
 		if item.Use {
-			p := "XPath"
-			if item.Source == "id" {
+			var p string
+			switch item.Source {
+			case "xpath":
+				p = "XPath"
+			case "xpath2":
+				p = "XPath2"
+			case "id":
 				p = "ID"
 			}
 			fmt.Fprintf(fp, `
@@ -690,8 +701,13 @@ Ga naar: <a href="corpora">corpora</a>
 
 		for _, item := range settings.Items {
 			if item.Use {
-				p := "XPath"
-				if item.Source == "id" {
+				var p string
+				switch item.Source {
+				case "xpath":
+					p = "XPath"
+				case "xpath2":
+					p = "XPath2"
+				case "id":
 					p = "ID"
 				}
 				fmt.Fprintf(fp, `
