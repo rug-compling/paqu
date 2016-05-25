@@ -8,9 +8,10 @@ import (
 	"github.com/pebbe/util"
 
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -43,10 +44,10 @@ func main() {
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	db, err := dbopen()
@@ -93,6 +94,7 @@ func main() {
 		util.CheckErr(err)
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 		util.CheckErr(err)
+		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "folia", hex.EncodeToString([]byte(user)))))
 	}
 }
 

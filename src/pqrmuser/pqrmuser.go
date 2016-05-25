@@ -8,9 +8,10 @@ import (
 	"github.com/pebbe/util"
 
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -38,10 +39,10 @@ func main() {
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
@@ -93,7 +94,7 @@ func main() {
 			Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
-		util.CheckErr(os.RemoveAll(path.Join(paqudir, "data", corpus)))
+		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "data", corpus)))
 
 		// deze pas als de rest goed ging
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, corpus))
@@ -116,4 +117,6 @@ func main() {
 	} else {
 		fmt.Printf("Gebruiker niet gevonden: %s\n", user)
 	}
+
+	util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "folia", hex.EncodeToString([]byte(user)))))
 }

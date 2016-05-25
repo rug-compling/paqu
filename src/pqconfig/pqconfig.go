@@ -8,7 +8,7 @@ import (
 
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type Config struct {
@@ -78,12 +78,12 @@ func main() {
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
 
 	cfg := Config{}
-	md, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &cfg)
+	md, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &cfg)
 	util.CheckErr(err)
 
 	for _, un := range md.Undecoded() {

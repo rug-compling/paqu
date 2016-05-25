@@ -10,7 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -38,10 +38,10 @@ func main() {
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
@@ -91,8 +91,8 @@ func main() {
 	fmt.Printf("DROP TABLE IF EXISTS `%s_c_%s_*` (9): ok\n", Cfg.Prefix, corpus)
 
 	if strings.Contains(owner, "@") {
-		util.CheckErr(os.RemoveAll(path.Join(paqudir, "data", corpus)))
-		fmt.Printf("rm -r %s: ok\n", path.Join(paqudir, "data", corpus))
+		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "data", corpus)))
+		fmt.Printf("rm -r %s: ok\n", filepath.Join(paqudir, "data", corpus))
 	}
 
 }

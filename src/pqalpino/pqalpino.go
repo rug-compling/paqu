@@ -12,7 +12,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -160,7 +160,7 @@ func main() {
 					a = a[strings.LastIndex(a, ".")+1:]
 					n, err := strconv.Atoi(a)
 					util.CheckErr(err)
-					fname := path.Join(*opt_d, fmt.Sprintf("%08d.xml", n))
+					fname := filepath.Join(*opt_d, fmt.Sprintf("%08d.xml", n))
 					fp, err = os.Create(fname)
 					util.CheckErr(err)
 					fmt.Fprintln(fp, topline)

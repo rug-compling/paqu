@@ -17,7 +17,6 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -217,10 +216,10 @@ Opties:
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if desc == "" {

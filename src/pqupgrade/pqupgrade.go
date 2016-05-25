@@ -8,7 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -28,11 +28,11 @@ func main() {
 		if DefaultPaquDir != "" {
 			paqudir = DefaultPaquDir
 		} else {
-			paqudir = path.Join(os.Getenv("HOME"), ".paqu")
+			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
 	var Cfg Config
-	_, err := toml.DecodeFile(path.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
