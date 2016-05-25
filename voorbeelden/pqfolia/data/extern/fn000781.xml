@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FoLiA xmlns="http://ilk.uvt.nl/folia" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <metadata>
+    <foreign-data xmlns:bla="http://bla.bla/bla/elements/1.0/">
+      <bla:publisher>De Uitgever</bla:publisher>
+      <bla:staff id="N01999">
+        <bla:role>Kapelaan</bla:role>
+      </bla:staff>
+    </foreign-data>
+  </metadata>
   <text>
     <s xml:id="fn000781.s001" speaker="N01999">
       <w><t>nou</t></w>

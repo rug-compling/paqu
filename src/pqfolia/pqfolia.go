@@ -31,9 +31,10 @@ type Config struct {
 }
 
 type Item struct {
-	Type  string
-	XPath string
-	ID    string
+	Type   string
+	XPath  string
+	XPath2 string
+	ID     string
 }
 
 type Native struct {
@@ -57,7 +58,9 @@ var (
 	cfg          Config
 	Map          = make(map[string]string)
 	fixed        = make([]string, 0)
+	fixed2       = make([]string, 0)
 	nonfixed     = make([]string, 0)
+	nonfixed2    = make([]string, 0)
 	native       = make([]string, 0)
 	native_use   = make(map[string]bool)
 	native_items = make(map[string]Native)
@@ -117,10 +120,18 @@ func main() {
 				Label: i,
 				Type:  it.Type,
 			}
-		} else if strings.Contains(it.XPath, "%speaker%") {
-			nonfixed = append(nonfixed, i)
+		} else if it.XPath2 != "" {
+			if strings.Contains(it.XPath2, "%speaker%") {
+				nonfixed2 = append(nonfixed2, i)
+			} else {
+				fixed2 = append(fixed2, i)
+			}
 		} else {
-			fixed = append(fixed, i)
+			if strings.Contains(it.XPath, "%speaker%") {
+				nonfixed = append(nonfixed, i)
+			} else {
+				fixed = append(fixed, i)
+			}
 		}
 	}
 
@@ -128,7 +139,7 @@ func main() {
 	if cfg.Output_dir == "" {
 		doEnd()
 		native_seen = make(map[string]bool)
-		doFixed(false, false, false)
+		doFixed(false, false, false, false, false)
 	}
 }
 
@@ -207,12 +218,14 @@ func doFile(filename, dirname string) {
 
 	fmt.Fprintln(os.Stderr, ">", filename)
 
-	var doc *etree.Document
+	var doc, doc2 *etree.Document
 	statestack := make([]State, 1, 10)
 	currentspeaker := " oiqoewij doijqowiu98793olj fdowqjoiequ8nf  fke f wf  wejfo  fwoiu92  "
 	values := make(map[string]map[string][]string)
 	hasMeta := false
+	hasMeta2 := false
 	fixedDone := false
+	fixedDone2 := false
 	nativeDone := false
 
 	currentfile = filepath.Join(cfg.Data_dir, filename)
@@ -225,6 +238,7 @@ func doFile(filename, dirname string) {
 	var teller, uttteller uint64
 PARSE:
 	for {
+		offset1 := d.InputOffset()
 		tt, err := d.Token()
 		if err == io.EOF {
 			break
@@ -297,7 +311,6 @@ PARSE:
 							fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
 						}
 					}
-
 					hasMeta = true
 					fixedDone = true
 				}
@@ -310,6 +323,45 @@ PARSE:
 					}
 				}
 				state.inMeta = native_use[meta]
+			case "foreign-data":
+				if !state.inMetadata {
+					x(fmt.Errorf("Invalid tag <foreign-data>"))
+				}
+				x(d.Skip())
+				offset2 := d.InputOffset()
+				fp, err := os.Open(currentfile)
+				x(err)
+				_, err = fp.Seek(offset1, 0)
+				if err != nil {
+					fp.Close()
+					x(err)
+				}
+				data2 := make([]byte, offset2-offset1)
+				_, err = io.ReadFull(fp, data2)
+				fp.Close()
+				x(err)
+
+				doc2 = etree.NewDocument()
+				data := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+				data = append(data, data2...)
+				x(doc2.ReadFromBytes(data))
+				x(err)
+				for _, item := range fixed2 {
+					found := false
+					for _, t := range doc2.FindElements(cfg.Items[item].XPath2) {
+						value := t.Text()
+						if value != "" && oktype(item, value) {
+							found = true
+							fmt.Fprintf(fpout, "##META %s %s = %s\n", cfg.Items[item].Type, item, value)
+						}
+					}
+					if !found {
+						fmt.Fprintf(os.Stderr, "Niet gevonden in %s voor (%s) %s\n", currentfile, cfg.Items[item].Type, item)
+						fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
+					}
+				}
+				hasMeta2 = true
+				fixedDone2 = true
 			case "s":
 				teller++
 				if !state.inSkip {
@@ -367,11 +419,12 @@ PARSE:
 					text = append(text, ' ')
 				case "s", "utt":
 					if !statestack[len(statestack)-1].inS && strings.TrimSpace(string(text)) != "" {
-						doFixed(fixedDone, nativeDone, hasMeta)
+						doFixed(fixedDone, fixedDone2, nativeDone, hasMeta, hasMeta2)
 						fixedDone = true
+						fixedDone2 = true
 						nativeDone = true
 						if state.speaker != currentspeaker {
-							doSpeaker(state.speaker, hasMeta, values, doc)
+							doSpeaker(state.speaker, hasMeta, hasMeta2, values, doc, doc2)
 							currentspeaker = state.speaker
 						}
 						words := make([]string, 0)
@@ -405,7 +458,7 @@ PARSE:
 	if cfg.Output_dir != "" {
 		doEnd()
 		native_seen = make(map[string]bool)
-		doFixed(false, false, false)
+		doFixed(false, false, false, false, false)
 	}
 }
 
@@ -421,7 +474,7 @@ func doEnd() {
 	}
 }
 
-func doFixed(metadone, nativedone, hasMeta bool) {
+func doFixed(metadone, metadone2, nativedone, hasMeta, hasMeta2 bool) {
 
 	if !metadone {
 		if cfg.Meta_src != "" {
@@ -438,6 +491,17 @@ func doFixed(metadone, nativedone, hasMeta bool) {
 		}
 	}
 
+	if !metadone2 {
+		for _, item := range fixed2 {
+			fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
+		}
+		if !hasMeta2 {
+			for _, item := range nonfixed2 {
+				fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
+			}
+		}
+	}
+
 	if !nativedone {
 		for _, item := range native {
 			if !native_seen[item] {
@@ -447,38 +511,64 @@ func doFixed(metadone, nativedone, hasMeta bool) {
 	}
 }
 
-func doSpeaker(speaker string, hasMeta bool, values map[string]map[string][]string, doc *etree.Document) {
-	if !hasMeta || len(nonfixed) == 0 {
-		return
-	}
+func doSpeaker(speaker string, hasMeta, hasMeta2 bool, values map[string]map[string][]string, doc, doc2 *etree.Document) {
+	need_scan := false
 	if _, ok := values[speaker]; !ok {
 		values[speaker] = make(map[string][]string)
-		for _, item := range nonfixed {
-			found := false
-			xpath := strings.Replace(cfg.Items[item].XPath, "%speaker%", speaker, -1)
-			for _, t := range doc.FindElements(xpath) {
-				found = true
-				value := t.Text()
-				if value != "" && oktype(item, value) {
-					if _, ok := values[speaker][item]; !ok {
-						values[speaker][item] = make([]string, 0, 1)
+		need_scan = true
+	}
+
+	var run_hasMeta bool
+	var run_doc *etree.Document
+	var run_nonfixed []string
+	for run := 0; run < 2; run++ {
+		if run == 0 {
+			run_hasMeta = hasMeta
+			run_doc = doc
+			run_nonfixed = nonfixed
+		} else {
+			run_hasMeta = hasMeta2
+			run_doc = doc2
+			run_nonfixed = nonfixed2
+		}
+
+		if run_hasMeta && len(run_nonfixed) > 0 {
+			if need_scan {
+				for _, item := range run_nonfixed {
+					found := false
+					var xp string
+					if run == 0 {
+						xp = cfg.Items[item].XPath
+					} else {
+						xp = cfg.Items[item].XPath2
 					}
-					values[speaker][item] = append(values[speaker][item], value)
+					xpath := strings.Replace(xp, "%speaker%", speaker, -1)
+					for _, t := range run_doc.FindElements(xpath) {
+						found = true
+						value := strings.TrimSpace(t.Text())
+						if value != "" && oktype(item, value) {
+							if _, ok := values[speaker][item]; !ok {
+								values[speaker][item] = make([]string, 0, 1)
+							}
+							values[speaker][item] = append(values[speaker][item], value)
+						}
+					}
+					if !found && speaker != "" {
+						fmt.Fprintf(os.Stderr, "Niet gevonden in %s voor (%s) %s, %q\n", currentfile, cfg.Items[item].Type, item, speaker)
+					}
 				}
 			}
-			if !found && speaker != "" {
-				fmt.Fprintf(os.Stderr, "Niet gevonden in %s voor (%s) %s, %q\n", currentfile, cfg.Items[item].Type, item, speaker)
+
+			for _, item := range run_nonfixed {
+				ii, ok := values[speaker][item]
+				if !ok || len(ii) == 0 {
+					fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
+					continue
+				}
+				for _, i := range ii {
+					fmt.Fprintf(fpout, "##META %s %s = %s\n", cfg.Items[item].Type, item, i)
+				}
 			}
-		}
-	}
-	for _, item := range nonfixed {
-		ii, ok := values[speaker][item]
-		if !ok || len(ii) == 0 {
-			fmt.Fprintf(fpout, "##META %s %s =\n", cfg.Items[item].Type, item)
-			continue
-		}
-		for _, i := range ii {
-			fmt.Fprintf(fpout, "##META %s %s = %s\n", cfg.Items[item].Type, item, i)
 		}
 	}
 }

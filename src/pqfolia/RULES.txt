@@ -6,19 +6,13 @@
      buitenste <s>.
 
   3. Als er geen <s> is (als voorouder of afstammeling), maar wel een 
-     <utt> of <event>, dan gebruik ik die als zin. Dus, voor <utt>:
+     <utt>, dan gebruik ik die als zin. Dus:
 
      <utt> ... <s> ... </s> ... </utt>  -> gebruik <s>
 
      <s> ... <utt> ... </utt> ... </s>  -> gebruik <s>
 
      <utt> ... </utt>  -> gebruik <utt> alsof het een <s> is
-
-     Kan ik dat doen? Ik ben op zoek naar losse zinnen.
-     Als een <event> voor een tweet staat, dan kan die meerdere 
-     zinnen bevatten.
-
-     En kunnen <utt> of <event> genest zijn?
 
   4. Alles onder <morpheme> of <str> sla ik over.
 

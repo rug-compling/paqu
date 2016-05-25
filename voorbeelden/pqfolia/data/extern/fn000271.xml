@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FoLiA xmlns="http://ilk.uvt.nl/folia" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <metadata src="oai_www_mpi_nl_MPI89511.xml"/>
+  <metadata src="oai_www_mpi_nl_MPI89511.xml">
+    <foreign-data xmlns:bla="http://bla.bla/bla/elements/1.0/">
+      <bla:publisher>De Uitgever</bla:publisher>
+      <bla:staff id="N00390">
+        <bla:role>Pastoor</bla:role>
+      </bla:staff>
+    </foreign-data>
+  </metadata>
   <text>
     <s xml:id="fn000271.s001" speaker="N00390">
       <w><t>niet</t></w>

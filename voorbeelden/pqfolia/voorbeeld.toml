@@ -1,7 +1,7 @@
 #
 # Gebruik: pqfolia voorbeeld.toml
 #
-# Dit bestand is in toml-formaat, zie: https://github.com/mojombo/toml                                         
+# Dit bestand is in toml-formaat, zie: https://github.com/mojombo/toml
 #
 
 ################################################################
@@ -29,12 +29,14 @@ Output_dir = ""
 # Alleen metadata uit deze lijst wordt gebruikt.
 # Je kunt definities voor metadata toevoegen aan het eind van dit bestand.
 Item_list = [
-    "Titel",
-    "Auteurs",
-    "Niveau",
     "Land",
     "Leeftijd",
-    "CGN.firstLang"
+    "CGN.firstLang",
+    "Uitgever",
+    "Functie",
+    "Titel",
+    "Auteurs",
+    "Niveau"
 ]
 
 ################################################################
@@ -51,7 +53,31 @@ Tokenized = true
 # DEFINITIES VOOR METADATA
 #
 
-# Voor interne metadata wordt ID gebruikt
+# Voor externe metadata wordt XPath gebruikt
+
+[Items."Land"]
+Type = "text"
+XPath = "CMD/Components/Session/MDGroup/Location/Country"
+
+[Items."Leeftijd"]
+Type = "int"
+XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Age"
+
+[Items."CGN.firstLang"]
+Type = "text"
+XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Keys/Key[@Name='CGN.firstLang']"
+
+# Voor interne metadata met <foreign-data> wordt XPath2 gebruikt
+
+[Items."Uitgever"]
+Type = "text"
+XPath2 = "foreign-data/publisher"
+
+[Items."Functie"]
+Type = "text"
+XPath2 = "foreign-data/staff[@id='%speaker%']/role"
+
+# Voor interne metadata met <meta> wordt ID gebruikt
 
 [Items."Titel"]
 Type = "text"
@@ -65,16 +91,3 @@ ID = "authors"
 Type = "text"
 ID = "level"
 
-# Voor externe metadata wordt XPath gebruikt
-
-[Items."Land"]                                                                                               
-Type = "text"                                                                                                   
-XPath = "CMD/Components/Session/MDGroup/Location/Country"                                                       
-
-[Items."Leeftijd"]
-Type = "int"
-XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Age"
-
-[Items."CGN.firstLang"]
-Type = "text"
-XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Keys/Key[@Name='CGN.firstLang']"
