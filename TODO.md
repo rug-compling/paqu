@@ -8,8 +8,8 @@ Zie ook: TODO in diverse bestanden
      1. deel voor uploaden data en downloaden geparste data
      2. deel voor querying, alleen geparste data uploaden
      3. nieuw: deel voor omzetten data naar PaQu-formaat
-     Probleem: extra gedoe voor mensen die data willen uploaden en gelijk
-     willen gebruiken in PaQu
+    Probleem: extra gedoe voor mensen die data willen uploaden en gelijk
+    willen gebruiken in PaQu
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
       - zie ook TODOs in `work.go`
