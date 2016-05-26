@@ -6,20 +6,15 @@ Zie ook: TODO in diverse bestanden
 
   - PaQu splitsen in twee delen?
      1. deel voor uploaden data en downloaden geparste data
-	 2. deel voor querying, alleen geparste data uploaden
-	 3. nieuw: deel voor omzetten data naar PaQu-formaat
-	Probleem: extra gedoe voor mensen die data willen uploaden en gelijk
-	willen gebruiken in PaQu
+     2. deel voor querying, alleen geparste data uploaden
+     3. nieuw: deel voor omzetten data naar PaQu-formaat
+     Probleem: extra gedoe voor mensen die data willen uploaden en gelijk
+     willen gebruiken in PaQu
   - Alpino-server
     - Aanpassen aan API van de server (huidige server is te oud)
       - zie ook TODOs in `work.go`
-  - Gebruikershandleiding
-    - Tekst voor pagina *Info*: onder kopje *Metadata*
-    - Tekst voor pagina *Info*: onder kopje *Corpora*
   - Adminhandleiding
     - optie `loginurl` in `setup-example.toml`
-  - Metadata
-    - Handleiding: Invoerformaat
   - pqserve:
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - gewoon zoeken
@@ -34,13 +29,17 @@ Zie ook: TODO in diverse bestanden
       - weergave van attributen in bomen
     - pqserve stopt niet altijd direct bij sigterm, en na sigkill zijn logs niet compleet
     - Samenvoegen van corpora (na gewoon zoeken, zoeken met xpath, selectie op metadata)
-     - Probleem: Samenvoegen van corpora met incompatibele metadata
-       (text vs int vs float vs date vs datetime).
+      - Probleem: Samenvoegen van corpora met incompatibele metadata
+        (text vs int vs float vs date vs datetime).
       - Als dingen botsen krijgt de gebruiker vanzelf een foutmelding.
         Maar als één subcorpus metadata heeft die een ander subcorpus
         niet heeft, dan de gebruiker waarschuwen?
-	- Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
+    - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
       kiezen welke onderdelen hij wil zien?
+    - Expert-opties voor Alpino bij invoer nieuw corpus
+      - Kleinere timeout
+      - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
+        - Optie `application_type=qa` vóór de optie `-parse`
   - programma tags.go toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen

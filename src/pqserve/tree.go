@@ -65,11 +65,6 @@ var (
 
 func tree(q *Context) {
 
-	// Zeldzame crash toen er zo te zien twee bomen tegelijk getekend werden.
-	// Is graphviz soms niet thread-safe?
-	treeMu.Lock()
-	defer treeMu.Unlock()
-
 	ctx := &TreeContext{
 		yellow: make(map[int]bool),
 		green:  make(map[int]bool),
@@ -385,9 +380,13 @@ func tree(q *Context) {
 
 	// Dot omzetten naar svg.
 	// De C-string wordt in de C-code ge'free'd.
+	// Zeldzame crash toen er zo te zien twee bomen tegelijk getekend werden.
+	// Is graphviz soms niet thread-safe?
+	treeMu.Lock()
 	s := C.makeGraph(C.CString(ctx.graph.String()))
 	svg := C.GoString(s)
 	C.free(unsafe.Pointer(s))
+	treeMu.Unlock()
 
 	// BEGIN: svg nabewerken en printen
 

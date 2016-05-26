@@ -177,9 +177,14 @@ Nieuwe data (folia: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 	if settings.DataInfo != "" {
 		fmt.Fprint(q.w, "<BR>LET OP: Upload vervangt oude data!\n")
 	}
-	fmt.Fprint(q.w, `
-</form>
-Huidige metadata: `)
+	fmt.Fprintln(q.w, "</form>")
+
+	if settings.DataInfo == "" {
+		html_footer(q)
+		return
+	}
+
+	fmt.Fprintln(q.w, "Huidige metadata:")
 	if settings.MetaInfo == "" {
 		fmt.Fprint(q.w, "<em>geen</em>")
 	} else {
@@ -198,11 +203,6 @@ Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 	fmt.Fprint(q.w, `
 </form>
 `)
-
-	if settings.DataInfo == "" {
-		html_footer(q)
-		return
-	}
 
 	checked := " checked"
 
