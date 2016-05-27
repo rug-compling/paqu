@@ -450,7 +450,7 @@ PARSE:
 				(state.inS || state.inUtt) &&
 				(state.inW && cfg.Tokenized || !state.inW && !cfg.Tokenized) &&
 				state.inT {
-				text = append(text, []byte(t)...)
+				text = append(text, t...)
 			}
 		}
 	}

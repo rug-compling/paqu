@@ -183,9 +183,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					return
 				}
 				if params == "folia-arch" {
-					folia(ar.Name(), &buf, fp)
+					folia(ar.Name()+".", &buf, fp)
 				} else if params == "tei-arch" {
-					tei(ar.Name(), &buf, fp)
+					tei(ar.Name()+".", &buf, fp)
 				} else {
 					fmt.Fprintln(fp)
 				}
