@@ -105,30 +105,25 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 
 	endletter := 0
 	midpoint := 0
+	nlabel := 0
 	for _, line := range lines {
 		if !reEndPoint.MatchString(line) {
 			endletter++
 		}
 		midpoint += len(reMidPoint.FindAllString(line, -1))
+		if strings.Contains(line, "|") {
+			nlabel++
+		}
 	}
-	if endletter > ln/3 || midpoint > endletter/2 {
+	if nlabel < ln && (endletter > ln/3 || midpoint > endletter/2) {
 		return set("run")
 	}
 
 	soort := "line"
 
-	nlabel := 0
 	ntok := 0
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line == "" {
-			nlabel++
-			ntok++
-			continue
-		}
-		if strings.Contains(line, "|") {
-			nlabel++
-		}
 		if strings.HasSuffix(line, " .") || strings.HasSuffix(line, " !") || strings.HasSuffix(line, " ?") {
 			ntok++
 		}
