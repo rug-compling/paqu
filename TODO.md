@@ -40,7 +40,7 @@ Zie ook: TODO in diverse bestanden
       - Kleinere timeout
       - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
         - Optie `application_type=qa` vóór de optie `-parse`
-  - programma tags.go toevoegen
+  - programma `tags.go` toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
     - documentatie
