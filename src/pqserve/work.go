@@ -228,6 +228,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		os.Remove(data + ".lines.tmp")
 		os.Remove(data + ".tmp")
+		os.Remove(data + ".tmp2")
 		for _, f := range []string{data, data + ".lines", stdout, stderr, summary} {
 			if f == data && (params == "dact" || strings.HasPrefix(params, "xmlzip")) {
 				continue
@@ -412,6 +413,60 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				}
 				if isArch {
 					os.Remove(data + ".unzip")
+				}
+			}
+
+			// ontdubbelen van labels
+			if strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") || strings.Contains(params, "-lbl") {
+				var fpin, fpout *os.File
+				var dubbel bool
+				fpin, err = os.Open(data + ".tmp")
+				if err != nil {
+					return
+				}
+				fpout, err = os.Create(data + ".tmp2")
+				if err != nil {
+					fpin.Close()
+					return
+				}
+				rd := util.NewReader(fpin)
+				seen := make(map[string]bool)
+				for {
+					line, e := rd.ReadLineString()
+					if e != nil {
+						break
+					}
+					if strings.HasPrefix(line, "##PAQULBL") {
+						var b []byte
+						b, err = hex.DecodeString(strings.Fields(line)[1])
+						if err != nil {
+							fpout.Close()
+							fpin.Close()
+							return
+						}
+						lbl := string(b)
+						if seen[lbl] {
+							dubbel = true
+							for i := 1; true; i++ {
+								lbl2 := fmt.Sprintf("%s.dup.%d", lbl, i)
+								if !seen[lbl2] {
+									lbl = lbl2
+									break
+								}
+							}
+							line = "##PAQULBL " + hex.EncodeToString([]byte(lbl))
+						}
+						seen[lbl] = true
+					}
+					fmt.Fprintln(fpout, line)
+				}
+				fpout.Close()
+				fpin.Close()
+				if dubbel {
+					os.Remove(data + ".tmp")
+					os.Rename(data+".tmp2", data+".tmp")
+				} else {
+					os.Remove(data + ".tmp2")
 				}
 			}
 
