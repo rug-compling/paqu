@@ -39,10 +39,13 @@ func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 
 			hasClass := false
 			id := ""
+			src := ""
 			for _, e := range t.Attr {
 				switch e.Name.Local {
 				case "id":
 					id = e.Value
+				case "src":
+					src = e.Value
 				case "class":
 					hasClass = true
 				case "auth":
@@ -52,17 +55,7 @@ func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 
 			switch t.Name.Local {
 			case "metadata":
-				var src, typ string
-				for _, e := range t.Attr {
-					switch e.Name.Local {
-					case "src":
-						src = e.Value
-					case "type":
-						typ = e.Value
-					}
-				}
 				fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.src = "+src)))
-				fmt.Fprintf(fpout, "##META %s\n", hex.EncodeToString([]byte("text metadata.type = "+typ)))
 			case "s":
 				teller++
 				if !state.inSkip && !state.inS {
@@ -109,27 +102,29 @@ func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 			statestack = statestack[0 : len(statestack)-1]
 			if !state.inSkip {
 				switch t.Name.Local {
-				case "w":
-					text = append(text, ' ')
 				case "s", "utt":
-					if !statestack[len(statestack)-1].inS && strings.TrimSpace(string(text)) != "" {
-						words := make([]string, 0)
-						for _, w := range strings.Fields(string(text)) {
-							words = append(words, alpinoEscape(w))
+					if !statestack[len(statestack)-1].inS {
+						if t := strings.TrimSpace(string(text)); t != "" {
+							fmt.Fprintf(fpout, "##PAQULBL %s\n%s\n", hex.EncodeToString([]byte(label)), t)
+							text = text[0:0]
 						}
-						fmt.Fprintf(fpout, "##PAQULBL %s\n%s\n", hex.EncodeToString([]byte(label)), strings.Join(words, " "))
-						text = text[0:0]
 					}
 				}
 			}
 		} else if t, ok := tt.(xml.CharData); ok {
 			state := statestack[len(statestack)-1]
 			if !state.inSkip && (state.inS || state.inUtt) && state.inW && state.inT {
-				s := alpinoEscape(string(t))
-				if Cfg.Alpino15 && wid != "" {
-					s = fmt.Sprintf("[ @id %s ] %s", alpinoEscape(wid), s)
+				ww := make([]string, 0, 1)
+				for _, w := range strings.Fields(string(t)) {
+					ww = append(ww, alpinoEscape(w))
 				}
-				text = append(text, []byte(s)...)
+				if len(ww) > 0 {
+					s := strings.Join(ww, " ") + " "
+					if Cfg.Alpino15 && wid != "" {
+						s = fmt.Sprintf("[ @id %s ] %s", alpinoEscape(wid), s)
+					}
+					text = append(text, []byte(s)...)
+				}
 			}
 		}
 	}
