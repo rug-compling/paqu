@@ -92,7 +92,7 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 		}
 		line = strings.ToUpper(line)
 		line = strings.Replace(line, "\000", "", -1) // utf-16, utf-32, grove methode
-		if strings.HasPrefix(line, "##PAQU") || strings.HasPrefix(line, "##META") {
+		if strings.TrimSpace(line) == "" || strings.HasPrefix(line, "##PAQU") || strings.HasPrefix(line, "##META") {
 			i--
 		} else {
 			lines = append(lines, line)

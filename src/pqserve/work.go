@@ -199,7 +199,11 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	}
 
 	if params == "auto" {
-		params, err = invoersoort(db, data, task.id)
+		if isArch {
+			params, err = invoersoort(db, data+".unzip", task.id)
+		} else {
+			params, err = invoersoort(db, data, task.id)
+		}
 		if err != nil {
 			return
 		}
@@ -392,7 +396,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 					}
 				}
 			} else {
-				//  pqtexter
+				// pqtexter
 				var pqtexter, unzip string
 				if params == "run" {
 					pqtexter = "-r"
