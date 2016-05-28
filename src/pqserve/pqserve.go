@@ -180,6 +180,11 @@ func main() {
 	handleFunc("relother.png", static_relother_png)
 
 	handleFunc("folia", foliatool)
+	handleFunc("foliah1", static_foliahelp1_html)
+	handleFunc("foliah2", static_foliahelp2_html)
+	handleFunc("foliah3", static_foliahelp3_html)
+	handleFunc("foliah4", static_foliahelp4_html)
+	handleFunc("foliah5", static_foliahelp5_html)
 
 	handleFunc("ext", extension)
 

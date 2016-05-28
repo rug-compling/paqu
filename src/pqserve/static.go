@@ -54,6 +54,33 @@ func static_info_html(q *Context) {
 	fmt.Fprint(q.w, s)
 }
 
+func static_foliahelp(q *Context, html, title string) {
+	cache(q)
+	writeHead(q, "FoLiA Help -- "+title, 0)
+	i := strings.Index(html, "<!--##START-->")
+	fmt.Fprint(q.w, html[i+15:])
+}
+
+func static_foliahelp1_html(q *Context) {
+	static_foliahelp(q, file__foliahelp1__html, "Upload data")
+}
+
+func static_foliahelp2_html(q *Context) {
+	static_foliahelp(q, file__foliahelp2__html, "Upload metadata")
+}
+
+func static_foliahelp3_html(q *Context) {
+	static_foliahelp(q, file__foliahelp3__html, "Soort invoer")
+}
+
+func static_foliahelp4_html(q *Context) {
+	static_foliahelp(q, file__foliahelp4__html, "Label voor metadata")
+}
+
+func static_foliahelp5_html(q *Context) {
+	static_foliahelp(q, file__foliahelp5__html, "Gebruik metadata")
+}
+
 func static_jquery_js(q *Context) {
 	contentType(q, "application/javascript")
 	cache(q)

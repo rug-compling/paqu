@@ -168,6 +168,7 @@ function testen() {
 		fmt.Fprint(q.w, settings.DataInfo)
 	}
 	fmt.Fprint(q.w, `
+(<a href="foliah1" target="_blank">help</a>)
 <form class="foliafile" action="folia" method="post" enctype="multipart/form-data" accept-charset="utf-8">
 <input type="hidden" name="act" value="putdata">
 Nieuwe data (folia: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
@@ -191,6 +192,7 @@ Nieuwe data (folia: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 		fmt.Fprint(q.w, settings.MetaInfo)
 	}
 	fmt.Fprint(q.w, `
+(<a href="foliah2" target="_blank">help</a>)
 <form class="foliafile" action="folia" method="post" enctype="multipart/form-data" accept-charset="utf-8">
 <input type="hidden" name="act" value="putmeta">
 Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
@@ -215,7 +217,7 @@ Nieuwe metadata (cmdi/imdi/...: .xml/.xml.gz/.zip/.tar/.tar.gz/.tgz):<br>
 <input type="hidden" name="act" value="save">
 <input type="hidden" name="index" value="0">
 <input type="hidden" name="len" value="%d">
-Soort invoer:
+Soort invoer  (<a href="foliah3" target="_blank">help</a>)
 <div class="foliaform">
 <input type="checkbox" name="tokenized" value="true"%s> Getokeniseerd
 </div>
@@ -226,7 +228,7 @@ Soort invoer:
 		ch = checked
 	}
 	fmt.Fprintf(q.w, `
-Label in uitvoer:
+Label in uitvoer  (<a href="foliah4" target="_blank">help</a>)
 <div class="foliaform">
 <input type="checkbox" name="usemeta"%s> Label voor metadatabestand<br>
 <input type="text" name="labelmeta" value="%s">
@@ -234,7 +236,7 @@ Label in uitvoer:
 `,
 		ch, html.EscapeString(settings.LabelMeta))
 
-	fmt.Fprintln(q.w, `Metadata (zie <a href="foliavb">voorbeelden</a>):`)
+	fmt.Fprintln(q.w, `Metadata (<a href="foliah5" target="_blank">help</a>)`)
 
 	if idxdel > 0 && idxdel >= len(settings.Items) {
 		idxdel = len(settings.Items) - 1
@@ -290,7 +292,7 @@ Soort:
 <select name="source%d">
   <option value="xpath"%s>Extern XPath:</option>
   <option value="xpath2"%s>Intern XPath:</option>
-  <option value="id"%s>Intern ID:</option>
+  <option value="id"%s>Native ID:</option>
 </select>
 <input type="text" name="value%d" value="%s" size="80" onchange="markeer('%d')">
 <div class="right">

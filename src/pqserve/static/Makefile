@@ -6,6 +6,11 @@ DEPS = \
 	clariah.png \
 	clarinnl.png \
 	favicon.ico \
+	foliahelp1.html \
+	foliahelp2.html \
+	foliahelp3.html \
+	foliahelp4.html \
+	foliahelp5.html \
 	info.html \
 	jquery.js \
 	jquery.textcomplete.js \
