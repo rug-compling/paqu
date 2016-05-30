@@ -516,7 +516,7 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 
 	settings.Tokenized = firstf(q.form, "tokenized") != ""
 
-	settings.LabelMeta = firstf(q.form, "labelmeta")
+	settings.LabelMeta = folialabel(firstf(q.form, "labelmeta"))
 	settings.UseLabelMeta = firstf(q.form, "usemeta") != ""
 
 	settings.Items = settings.Items[0:0]
@@ -524,7 +524,7 @@ func foliasave(q *Context, settings *FoliaSettings) (settingsChanged bool) {
 	for i := 0; i < n; i++ {
 		s := fmt.Sprint(i)
 		item := FoliaItem{
-			Label:  firstf(q.form, "label"+s),
+			Label:  folialabel(firstf(q.form, "label"+s)),
 			Type:   firstf(q.form, "type"+s),
 			Source: firstf(q.form, "source"+s),
 			Value:  firstf(q.form, "value"+s),
@@ -870,4 +870,8 @@ func foliaclean() {
 		time.Sleep(time.Duration((28 - time.Now().Hour())) * time.Hour)
 
 	}
+}
+
+func folialabel(s string) string {
+	return strings.Replace(strings.Replace(s, " ", "_", -1), "=", "::", -1)
 }
