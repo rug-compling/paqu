@@ -62,7 +62,7 @@ func static_foliahelp(q *Context, html, title string) {
 }
 
 func static_foliahelp1_html(q *Context) {
-	static_foliahelp(q, file__foliahelp1__html, "Upload data")
+	static_foliahelp(q, file__foliahelp1__html, "Upload FoLiA-bestanden")
 }
 
 func static_foliahelp2_html(q *Context) {
@@ -74,11 +74,11 @@ func static_foliahelp3_html(q *Context) {
 }
 
 func static_foliahelp4_html(q *Context) {
-	static_foliahelp(q, file__foliahelp4__html, "Label voor metadata")
+	static_foliahelp(q, file__foliahelp4__html, "Label voor metadatabestand")
 }
 
 func static_foliahelp5_html(q *Context) {
-	static_foliahelp(q, file__foliahelp5__html, "Gebruik metadata")
+	static_foliahelp(q, file__foliahelp5__html, "Gebruik van metadata")
 }
 
 func static_jquery_js(q *Context) {

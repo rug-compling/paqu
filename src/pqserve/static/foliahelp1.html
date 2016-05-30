@@ -9,8 +9,41 @@
   </head>
   <body>
 <!--##START-->
-<div>
-TODO
-</div>
+    <div>
+<h3>FoLiA &mdash; Help</h3>
+<h4>Upload FoLiA-bestanden</h4>
+
+Upload een corpus in het FoLiA-formaat.
+<p>
+Informatie over FoLiA vind je hier:
+<a href="https://proycon.github.io/folia/" target="_blank"> FoLiA &mdash; Format for Linguistic Annotation</a>
+<p>
+De tekst in het corpus moet ingedeeld zijn in zinnen, al dan niet
+getokeniseerd. Voorbeeld zonder tokenisatie:
+<pre>
+    &lt;s&gt;&lt;t&gt;Dit is een zin.&lt;t&gt;&lt;/s&gt;
+</pre>
+Voorbeeld met tokenisatie:
+<pre>
+    &lt;s&gt;
+        &lt;w&gt;&lt;t&gt;Dit&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;is&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;een&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;zin&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;.&lt;/t&gt;&lt;/w&gt;
+    &lt;/s&gt;
+</pre>
+Voor gesprekken kan als alternatief voor <tt>&lt;s&gt;</tt> ook <tt>&lt;utt&gt;</tt>
+zonder <tt>&lt;s&gt;</tt> gebruikt worden, mits zo'n
+<tt>&lt;utt&gt;</tt> de tekst van slechts één zin bevat.
+<p>
+Je kunt een enkel FoLiA-bestand uploaden, of meerdere in één
+tar- of zip-bestand. Als je opnieuw iets uploadt worden oude FoLiA-bestanden
+verwijderd. Je kunt dus geen data toevoegen.
+<p>
+De naam van elk FoLiA-bestand moet met <tt>.xml</tt> eindigen,
+anders wordt het geruisloos genegeerd.
+      
+    </div>
   </body>
 </html>

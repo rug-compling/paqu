@@ -10,7 +10,27 @@
   <body>
 <!--##START-->
 <div>
-TODO
+      <h3>FoLiA &mdash; Help</h3>
+      <h4>Soort invoer</h4>
+      Is de tekst in je corpus getokeniseerd?
+      <p>
+Voorbeeld zonder tokenisatie:
+<pre>
+    &lt;s&gt;&lt;t&gt;Dit is een zin.&lt;t&gt;&lt;/s&gt;
+</pre>
+Voorbeeld met tokenisatie:
+<pre>
+    &lt;s&gt;
+        &lt;w&gt;&lt;t&gt;Dit&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;is&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;een&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;zin&lt;/t&gt;&lt;/w&gt;
+        &lt;w&gt;&lt;t&gt;.&lt;/t&gt;&lt;/w&gt;
+    &lt;/s&gt;
+</pre>
+Een FoLiA-bestand kan zowel getokeniseerde als niet-getokeniseerde
+zinnen bevatten. Als je aangeeft dat de tekst getokeniseerd is
+wordt alle niet-getokeniseerde tekst genegeerd, en andersom.
 </div>
-  </body>
+</body>
 </html>

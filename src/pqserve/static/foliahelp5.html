@@ -10,7 +10,763 @@
   <body>
 <!--##START-->
 <div>
-TODO
+
+<h3>FoLiA &mdash; Help</h3>
+<h4>Gebruik van metadata</h4>
+
+Onder <em>metadata</em> definieer je de elementen uit de metadata die je
+met je corpus wilt invoeren in PaQu.
+<p>
+Alleen definities die je aanvinkt worden uiteindelijk gebruikt.
+<p>
+Bij <em>label</em> geef je de naam op waarmee dit item in de uitvoer
+komt.
+<p>
+Daaronder moet je aangeven wat voor soort metadata het is. Voor uitleg, zie:
+<a href="info.html#cormeta" target="_blank">Info &mdash; metadata</a>.
+<p>
+Tot slot moet je aangeven wat de bron is van de metadata, en de
+expressie waarmee het element dat je hebben wilt is te vinden.
+
+<h5>Optie: Extern XPath</h5>
+
+Hier is een voorbeeld van een FoLiA-bestand dat verwijst naar externe
+metadata:
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;FoLiA xmlns=&quot;http://ilk.uvt.nl/folia&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+  &lt;metadata src=&quot;voorbeeld.xml&quot; type=&quot;cmdi&quot;&gt;
+    ...
+  &lt;/metadata&gt;
+  &lt;text&gt;
+    ...
+  &lt;/text&gt;
+&lt;/FoLiA&gt;
+</pre>
+Je moet een XPath-expressie gebruiken om aan te geven hoe je iets uit de
+metadata wilt halen. Voor voorbeelden, zie beneden.
+
+<h5>Optie: Intern XPath</h5>
+
+Hier is een voorbeeld van een FoLiA-bestand met daarin
+metadata opgenomen:
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;FoLiA xmlns=&quot;http://ilk.uvt.nl/folia&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+  &lt;metadata&gt;
+    &lt;foreign-data xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;&gt;
+      &lt;dc:identifier&gt;mydoc&lt;/dc:identifier&gt;
+      &lt;dc:format&gt;text/xml&lt;/dc:format&gt;
+      &lt;dc:type&gt;Example&lt;/dc:type&gt;
+      &lt;dc:contributor&gt;proycon&lt;/dc:contributor&gt;
+      &lt;dc:creator&gt;proycon&lt;/dc:creator&gt;
+      &lt;dc:language&gt;en&lt;/dc:language&gt;
+      &lt;dc:publisher&gt;RadboudUniversity&lt;/dc:publisher&gt;
+      &lt;dc:rights&gt;publicDomain&lt;/dc:rights&gt;
+    &lt;/foreign-data&gt;
+  &lt;/metadata&gt;
+  &lt;text&gt;
+    ...
+  &lt;/text&gt;
+&lt;/FoLiA&gt;
+</pre>
+Dit is metadata met een simpele structuur, maar het kan ook complex
+zijn, zoals bijvoorbeeld cmdi.
+<p>
+Je moet een XPath-expressie gebruiken om aan te geven hoe je iets uit de
+metadata wilt halen. Voor voorbeelden, zie beneden.
+
+<h5>Optie: Native ID</h5>
+
+Hier is een voorbeeld van native metadata:
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;FoLiA xmlns=&quot;http://ilk.uvt.nl/folia&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+  &lt;metadata type=&quot;native&quot;&gt;
+    &lt;meta id=&quot;titel&quot;&gt;De avonden&lt;/meta&gt;
+    &lt;meta id=&quot;auteur&quot;&gt;Gerard Reve&lt;/meta&gt;
+  &lt;/metadata&gt;
+  &lt;text&gt;
+    ...
+  &lt;/text&gt;
+&lt;/FoLiA&gt;
+</pre>
+
+Je gebruikt de waarde van het ID om de metadata te selecteren, hier
+	    <tt>titel</tt> of <tt>auteur</tt>.
+
+<h5>Voorbeelden van XPath</h5>
+
+Voor informatie over XPath, zie:
+<a href="http://www.w3schools.com/xsl/xpath_intro.asp" target="_blank">XPath Tutorial</a>
+<p>
+Hier is een voorbeeld van een compleet extern metadatabestand:
+<div class="output">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;CMD xmlns=&quot;http://www.clarin.eu/cmd/&quot;
+     xmlns:MPI=&quot;http://www.mpi.nl/&quot;
+     xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+     CMDVersion=&quot;1.1&quot;
+     xsi:schemaLocation=&quot;http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1271859438204/xsd&quot;&gt;
+   &lt;Header&gt;
+      &lt;MdCreator&gt;imdi2clarin.xsl&lt;/MdCreator&gt;
+      &lt;MdCreationDate&gt;2016-02-09&lt;/MdCreationDate&gt;
+      &lt;MdSelfLink&gt;hdl:1839/00-0000-0000-0001-5EB5-E@format=cmdi&lt;/MdSelfLink&gt;
+      &lt;MdProfile&gt;clarin.eu:cr1:p_1271859438204&lt;/MdProfile&gt;
+      &lt;MdCollectionDisplayName&gt;TLA: MPI CGN&lt;/MdCollectionDisplayName&gt;
+   &lt;/Header&gt;
+   &lt;Resources&gt;
+      &lt;ResourceProxyList&gt;
+         &lt;ResourceProxy id=&quot;d124504e1&quot;&gt;
+            &lt;ResourceType&gt;LandingPage&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EB5-E@view&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e423&quot;&gt;
+            &lt;ResourceType mimetype=&quot;audio/mp4&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-000D-8500-D&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e486&quot;&gt;
+            &lt;ResourceType mimetype=&quot;audio/x-wav&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EB6-0&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e548&quot;&gt;
+            &lt;ResourceType mimetype=&quot;text/x-cgn-bpt+xml&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EB7-A&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e627&quot;&gt;
+            &lt;ResourceType mimetype=&quot;text/x-cgn-tag+xml&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EB8-F&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e706&quot;&gt;
+            &lt;ResourceType mimetype=&quot;text/x-cgn-pri+xml&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EB9-6&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e786&quot;&gt;
+            &lt;ResourceType mimetype=&quot;text/x-eaf+xml&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-001E-F248-2&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e865&quot;&gt;
+            &lt;ResourceType mimetype=&quot;text/x-cgn-skp+xml&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EBB-F&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;d124504e944&quot;&gt;
+            &lt;ResourceType mimetype=&quot;text/x-cgn-tig+xml&quot;&gt;Resource&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;hdl:1839/00-0000-0000-0001-5EBC-A&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+         &lt;ResourceProxy id=&quot;sru&quot;&gt;
+            &lt;ResourceType&gt;SearchService&lt;/ResourceType&gt;
+            &lt;ResourceRef&gt;http://cqlservlet.mpi.nl/&lt;/ResourceRef&gt;
+         &lt;/ResourceProxy&gt;
+      &lt;/ResourceProxyList&gt;
+      &lt;JournalFileProxyList/&gt;
+      &lt;ResourceRelationList/&gt;
+   &lt;/Resources&gt;
+   &lt;Components&gt;
+      &lt;Session&gt;
+         &lt;Name&gt;fn000298&lt;/Name&gt;
+         &lt;Title&gt;Eucharist: mignight mass&lt;/Title&gt;
+         &lt;Date&gt;2000&lt;/Date&gt;
+         &lt;descriptions&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = SAMPLING&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = SPEX&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = ORTHOGRAPHIC TRANSCRIPTION&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = SPEX&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = PART-OF-SPEECH TAGGING&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = CLS-KUN&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = LEMMATISATION&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = CLS-KUN&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = LEXICON LINK-UP&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = CLS-KUN&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = WORD SEGMENTATION&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = CLS-KUN&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = PHONETIC TRANSCRIPTION&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = SPEX&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Type = SYNTACTIC ANNOTATION&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Responsibility.Name = OTS&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Total number of words = 797&lt;/Description&gt;
+            &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;CGN Header Date = 1-1-2004&lt;/Description&gt;
+         &lt;/descriptions&gt;
+         &lt;MDGroup&gt;
+            &lt;Location&gt;
+               &lt;Continent&gt;Europe&lt;/Continent&gt;
+               &lt;Country&gt;Netherlands&lt;/Country&gt;
+               &lt;Region&gt;Unspecified&lt;/Region&gt;
+               &lt;Address&gt;Unspecified&lt;/Address&gt;
+            &lt;/Location&gt;
+            &lt;Project&gt;
+               &lt;Name/&gt;
+               &lt;Title/&gt;
+               &lt;Id/&gt;
+               &lt;Contact&gt;
+                  &lt;Name/&gt;
+                  &lt;Address/&gt;
+                  &lt;Email/&gt;
+                  &lt;Organisation/&gt;
+               &lt;/Contact&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+            &lt;/Project&gt;
+            &lt;Keys&gt;
+               &lt;Key Name=&quot;CGN.wordCount&quot;&gt;797&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.secCount&quot;&gt;468&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.byteCount&quot;&gt;14300000&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.tempoAv&quot;&gt;6131&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.recDate&quot;&gt;2000&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.locName&quot;&gt;Unspecified&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.locale&quot;&gt;Unspecified&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.availability&quot;&gt;CGN_WAV_29&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.segmentation&quot;&gt;manual&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.fon.available&quot;&gt;true&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.pro.available&quot;&gt;false&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.syn.available&quot;&gt;true&lt;/Key&gt;
+               &lt;Key Name=&quot;CGN.wrd.available&quot;&gt;true&lt;/Key&gt;
+            &lt;/Keys&gt;
+            &lt;Content&gt;
+               &lt;Genre&gt;Discourse&lt;/Genre&gt;
+               &lt;SubGenre&gt;Oratory&lt;/SubGenre&gt;
+               &lt;Task&gt;Activity: Unspecified&lt;/Task&gt;
+               &lt;Modalities&gt;speech&lt;/Modalities&gt;
+               &lt;CommunicationContext&gt;
+                  &lt;Interactivity&gt;non-interactive&lt;/Interactivity&gt;
+                  &lt;PlanningType&gt;semi-spontaneous&lt;/PlanningType&gt;
+                  &lt;Involvement&gt;non-elicited&lt;/Involvement&gt;
+                  &lt;SocialContext&gt;Public&lt;/SocialContext&gt;
+                  &lt;EventStructure&gt;Monologue&lt;/EventStructure&gt;
+                  &lt;Channel&gt;Face to Face&lt;/Channel&gt;
+               &lt;/CommunicationContext&gt;
+               &lt;Content_Languages&gt;
+                  &lt;Content_Language&gt;
+                     &lt;Id&gt;RFC1766:x-sil-DUT&lt;/Id&gt;
+                     &lt;Name&gt;Dutch&lt;/Name&gt;
+                  &lt;/Content_Language&gt;
+               &lt;/Content_Languages&gt;
+               &lt;Keys&gt;
+                  &lt;Key Name=&quot;IMDI__1_9.Interactional&quot;/&gt;
+                  &lt;Key Name=&quot;IMDI__1_9.Discursive&quot;/&gt;
+                  &lt;Key Name=&quot;IMDI__1_9.Interactional&quot;/&gt;
+                  &lt;Key Name=&quot;CGN.textClass.target&quot;&gt;ttm,prep1,mod3,dom2&lt;/Key&gt;
+                  &lt;Key Name=&quot;CGN.textClass.keywords&quot;/&gt;
+                  &lt;Key Name=&quot;CGN.activity&quot;&gt;Unspecified&lt;/Key&gt;
+               &lt;/Keys&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;This file was generated from an IMDI 1.9 file and transformed to IMDI 3.0. The substructure of Genre is replaced by two elements named &quot;Genre&quot; and &quot;SubGenre&quot;. The original content of Genre substructure was: Interactional = '', Discursive = '', Performance = ''. These values have been added as Keys to the Content information.&lt;/Description&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+            &lt;/Content&gt;
+            &lt;Actors&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;
+  	Participant interaction =
+  			NOT APPLICABLE
+
+  	Number of active participants = 1
+  	Number of passive participants = no
+  	---------------------------------------------------
+  	Active Speaker: not used
+  	Passive Speaker: not used
+  	Relation: not used
+  	Mutual: not used
+  	---------------------------------------------------
+  &lt;/Description&gt;
+               &lt;/descriptions&gt;
+               &lt;Actor&gt;
+                  &lt;Role&gt;priest&lt;/Role&gt;
+                  &lt;Name/&gt;
+                  &lt;FullName/&gt;
+                  &lt;Code&gt;N00392&lt;/Code&gt;
+                  &lt;FamilySocialRole/&gt;
+                  &lt;EthnicGroup/&gt;
+                  &lt;Age&gt;60&lt;/Age&gt;
+                  &lt;BirthDate&gt;Unspecified&lt;/BirthDate&gt;
+                  &lt;Sex&gt;Male&lt;/Sex&gt;
+                  &lt;Education&gt;high&lt;/Education&gt;
+                  &lt;Anonymized&gt;true&lt;/Anonymized&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;Keys&gt;
+                     &lt;Key Name=&quot;CGN.age&quot;&gt;age5&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.birth.year&quot;&gt;1940&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.birth.place&quot;&gt;NL-544&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.birth.reg&quot;&gt;regN4a&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.firstLang&quot;&gt;SD&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.homeLang&quot;&gt;SD&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.workLang&quot;&gt;SD&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.residence.place&quot;&gt;NL-748&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.residence.reg&quot;&gt;regN3b&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.education.placesize&quot;&gt;size6&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.education.place&quot;&gt;NL-544&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.education.reg&quot;&gt;regN4a&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.education.type&quot;&gt;universiteit&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.education.level&quot;&gt;edu1&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.occupation&quot;&gt;clergyman&lt;/Key&gt;
+                     &lt;Key Name=&quot;CGN.occupation.level&quot;&gt;occ2&lt;/Key&gt;
+                  &lt;/Keys&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;none&lt;/Description&gt;
+                  &lt;/descriptions&gt;
+                  &lt;Actor_Languages&gt;
+                     &lt;Actor_Language&gt;
+                        &lt;Id&gt;RFC1766:x-sil-DUT&lt;/Id&gt;
+                        &lt;Name&gt;Dutch&lt;/Name&gt;
+                        &lt;descriptions&gt;
+                           &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;First Language&lt;/Description&gt;
+                        &lt;/descriptions&gt;
+                     &lt;/Actor_Language&gt;
+                     &lt;Actor_Language&gt;
+                        &lt;Id&gt;RFC1766:x-sil-DUT&lt;/Id&gt;
+                        &lt;Name&gt;Dutch&lt;/Name&gt;
+                        &lt;descriptions&gt;
+                           &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Home Language&lt;/Description&gt;
+                        &lt;/descriptions&gt;
+                     &lt;/Actor_Language&gt;
+                     &lt;Actor_Language&gt;
+                        &lt;Id&gt;RFC1766:x-sil-DUT&lt;/Id&gt;
+                        &lt;Name&gt;Dutch&lt;/Name&gt;
+                        &lt;descriptions&gt;
+                           &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;Work Language&lt;/Description&gt;
+                        &lt;/descriptions&gt;
+                     &lt;/Actor_Language&gt;
+                  &lt;/Actor_Languages&gt;
+               &lt;/Actor&gt;
+               &lt;Actor&gt;
+                  &lt;Role&gt;Collector&lt;/Role&gt;
+                  &lt;Name/&gt;
+                  &lt;FullName/&gt;
+                  &lt;Code&gt;Unspecified&lt;/Code&gt;
+                  &lt;FamilySocialRole&gt;Unspecified&lt;/FamilySocialRole&gt;
+                  &lt;EthnicGroup/&gt;
+                  &lt;Age&gt;Unspecified&lt;/Age&gt;
+                  &lt;BirthDate&gt;Unspecified&lt;/BirthDate&gt;
+                  &lt;Sex&gt;Unspecified&lt;/Sex&gt;
+                  &lt;Education/&gt;
+                  &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+                  &lt;Contact&gt;
+                     &lt;Name&gt;CLS-KUN&lt;/Name&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation&gt;CLS-KUN&lt;/Organisation&gt;
+                  &lt;/Contact&gt;
+                  &lt;Keys/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+                  &lt;Actor_Languages/&gt;
+               &lt;/Actor&gt;
+            &lt;/Actors&gt;
+         &lt;/MDGroup&gt;
+         &lt;Resources&gt;
+            &lt;MediaFile ref=&quot;d124504e423&quot;&gt;
+               &lt;ResourceLink&gt;../Media/fn000298.m4a&lt;/ResourceLink&gt;
+               &lt;Type&gt;audio&lt;/Type&gt;
+               &lt;Format&gt;audio/mp4&lt;/Format&gt;
+               &lt;Size&gt;23043618&lt;/Size&gt;
+               &lt;Quality&gt;Unspecified&lt;/Quality&gt;
+               &lt;RecordingConditions/&gt;
+               &lt;TimePosition&gt;
+                  &lt;Start&gt;Unspecified&lt;/Start&gt;
+                  &lt;End&gt;Unspecified&lt;/End&gt;
+               &lt;/TimePosition&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys&gt;
+                  &lt;Key Name=&quot;&quot;/&gt;
+               &lt;/Keys&gt;
+            &lt;/MediaFile&gt;
+            &lt;MediaFile ref=&quot;d124504e486&quot;&gt;
+               &lt;ResourceLink&gt;../Media/fn000298.wav&lt;/ResourceLink&gt;
+               &lt;Type&gt;audio&lt;/Type&gt;
+               &lt;Format&gt;audio/x-wav&lt;/Format&gt;
+               &lt;Size&gt;14300K&lt;/Size&gt;
+               &lt;Quality&gt;Unknown&lt;/Quality&gt;
+               &lt;RecordingConditions&gt;CGN.locale= Unspecified Medium= CAS tape microphone= Unspecified noise= Unspecified digitisation.recording= DIG1 digitisation.processing= DIG1 digitisation.status= DIG2&lt;/RecordingConditions&gt;
+               &lt;TimePosition&gt;
+                  &lt;Start&gt;Unknown&lt;/Start&gt;
+                  &lt;End&gt;Unknown&lt;/End&gt;
+               &lt;/TimePosition&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher&gt;ELDA&lt;/Publisher&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/MediaFile&gt;
+            &lt;WrittenResource ref=&quot;d124504e548&quot;&gt;
+               &lt;ResourceLink&gt;../Annotations/fn000298.bpt&lt;/ResourceLink&gt;
+               &lt;MediaResourceLink&gt;../Media/fn000298.wav&lt;/MediaResourceLink&gt;
+               &lt;Date/&gt;
+               &lt;Type&gt;Annotation&lt;/Type&gt;
+               &lt;SubType&gt;phonetics&lt;/SubType&gt;
+               &lt;Format&gt;text/x-cgn-bpt+xml&lt;/Format&gt;
+               &lt;Size&gt;Unspecified&lt;/Size&gt;
+               &lt;Derivation&gt;Annotation&lt;/Derivation&gt;
+               &lt;CharacterEncoding&gt;ASCII&lt;/CharacterEncoding&gt;
+               &lt;ContentEncoding/&gt;
+               &lt;LanguageId/&gt;
+               &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+               &lt;Validation&gt;
+                  &lt;Type&gt;Unspecified&lt;/Type&gt;
+                  &lt;Methodology&gt;Unspecified&lt;/Methodology&gt;
+                  &lt;Level/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Validation&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/WrittenResource&gt;
+            &lt;WrittenResource ref=&quot;d124504e627&quot;&gt;
+               &lt;ResourceLink&gt;../Annotations/fn000298.tag&lt;/ResourceLink&gt;
+               &lt;MediaResourceLink&gt;../Media/fn000298.wav&lt;/MediaResourceLink&gt;
+               &lt;Date/&gt;
+               &lt;Type&gt;Annotation&lt;/Type&gt;
+               &lt;SubType&gt;pos, lemma, marked&lt;/SubType&gt;
+               &lt;Format&gt;text/x-cgn-tag+xml&lt;/Format&gt;
+               &lt;Size&gt;Unspecified&lt;/Size&gt;
+               &lt;Derivation&gt;Annotation&lt;/Derivation&gt;
+               &lt;CharacterEncoding&gt;ASCII&lt;/CharacterEncoding&gt;
+               &lt;ContentEncoding/&gt;
+               &lt;LanguageId/&gt;
+               &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+               &lt;Validation&gt;
+                  &lt;Type&gt;Unspecified&lt;/Type&gt;
+                  &lt;Methodology&gt;Unspecified&lt;/Methodology&gt;
+                  &lt;Level/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Validation&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/WrittenResource&gt;
+            &lt;WrittenResource ref=&quot;d124504e706&quot;&gt;
+               &lt;ResourceLink&gt;../Annotations/fn000298.pri&lt;/ResourceLink&gt;
+               &lt;MediaResourceLink&gt;../Media/fn000298.wav&lt;/MediaResourceLink&gt;
+               &lt;Date/&gt;
+               &lt;Type&gt;Annotation&lt;/Type&gt;
+               &lt;SubType&gt;orthography&lt;/SubType&gt;
+               &lt;Format&gt;text/x-cgn-pri+xml&lt;/Format&gt;
+               &lt;Size&gt;Unspecified&lt;/Size&gt;
+               &lt;Derivation&gt;Annotation&lt;/Derivation&gt;
+               &lt;CharacterEncoding&gt;ASCII&lt;/CharacterEncoding&gt;
+               &lt;ContentEncoding/&gt;
+               &lt;LanguageId/&gt;
+               &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+               &lt;Validation&gt;
+                  &lt;Type&gt;Unspecified&lt;/Type&gt;
+                  &lt;Methodology&gt;Unspecified&lt;/Methodology&gt;
+                  &lt;Level/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Validation&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/WrittenResource&gt;
+            &lt;WrittenResource ref=&quot;d124504e786&quot;&gt;
+               &lt;ResourceLink&gt;../Annotations/fn000298.eaf&lt;/ResourceLink&gt;
+               &lt;MediaResourceLink&gt;../Media/fn000298.wav&lt;/MediaResourceLink&gt;
+               &lt;Date/&gt;
+               &lt;Type&gt;Annotation&lt;/Type&gt;
+               &lt;SubType&gt;phonetics&lt;/SubType&gt;
+               &lt;Format&gt;text/x-eaf+xml&lt;/Format&gt;
+               &lt;Size&gt;Unspecified&lt;/Size&gt;
+               &lt;Derivation&gt;Annotation&lt;/Derivation&gt;
+               &lt;CharacterEncoding&gt;ASCII&lt;/CharacterEncoding&gt;
+               &lt;ContentEncoding/&gt;
+               &lt;LanguageId/&gt;
+               &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+               &lt;Validation&gt;
+                  &lt;Type&gt;Unspecified&lt;/Type&gt;
+                  &lt;Methodology&gt;Unspecified&lt;/Methodology&gt;
+                  &lt;Level/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Validation&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/WrittenResource&gt;
+            &lt;WrittenResource ref=&quot;d124504e865&quot;&gt;
+               &lt;ResourceLink&gt;../Annotations/fn000298.skp&lt;/ResourceLink&gt;
+               &lt;MediaResourceLink&gt;../Media/fn000298.wav&lt;/MediaResourceLink&gt;
+               &lt;Date/&gt;
+               &lt;Type&gt;Annotation&lt;/Type&gt;
+               &lt;SubType&gt;labelling&lt;/SubType&gt;
+               &lt;Format&gt;text/x-cgn-skp+xml&lt;/Format&gt;
+               &lt;Size&gt;Unspecified&lt;/Size&gt;
+               &lt;Derivation&gt;Annotation&lt;/Derivation&gt;
+               &lt;CharacterEncoding&gt;ASCII&lt;/CharacterEncoding&gt;
+               &lt;ContentEncoding/&gt;
+               &lt;LanguageId/&gt;
+               &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+               &lt;Validation&gt;
+                  &lt;Type&gt;Unspecified&lt;/Type&gt;
+                  &lt;Methodology&gt;Unspecified&lt;/Methodology&gt;
+                  &lt;Level/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Validation&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/WrittenResource&gt;
+            &lt;WrittenResource ref=&quot;d124504e944&quot;&gt;
+               &lt;ResourceLink&gt;../Annotations/fn000298.tig&lt;/ResourceLink&gt;
+               &lt;MediaResourceLink&gt;../Media/fn000298.wav&lt;/MediaResourceLink&gt;
+               &lt;Date/&gt;
+               &lt;Type&gt;Annotation&lt;/Type&gt;
+               &lt;SubType&gt;syntax&lt;/SubType&gt;
+               &lt;Format&gt;text/x-cgn-tig+xml&lt;/Format&gt;
+               &lt;Size&gt;Unspecified&lt;/Size&gt;
+               &lt;Derivation&gt;Annotation&lt;/Derivation&gt;
+               &lt;CharacterEncoding&gt;ASCII&lt;/CharacterEncoding&gt;
+               &lt;ContentEncoding/&gt;
+               &lt;LanguageId/&gt;
+               &lt;Anonymized&gt;false&lt;/Anonymized&gt;
+               &lt;Validation&gt;
+                  &lt;Type&gt;Unspecified&lt;/Type&gt;
+                  &lt;Methodology&gt;Unspecified&lt;/Methodology&gt;
+                  &lt;Level/&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Validation&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;&quot;/&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/WrittenResource&gt;
+            &lt;Source&gt;
+               &lt;Id&gt;CGN_WAV_29&lt;/Id&gt;
+               &lt;Format&gt;DVD&lt;/Format&gt;
+               &lt;Quality&gt;Unknown&lt;/Quality&gt;
+               &lt;CounterPosition&gt;
+                  &lt;Start&gt;Unknown&lt;/Start&gt;
+                  &lt;End&gt;Unknown&lt;/End&gt;
+               &lt;/CounterPosition&gt;
+               &lt;Access&gt;
+                  &lt;Availability/&gt;
+                  &lt;Date&gt;Unspecified&lt;/Date&gt;
+                  &lt;Owner/&gt;
+                  &lt;Publisher/&gt;
+                  &lt;Contact&gt;
+                     &lt;Name/&gt;
+                     &lt;Address/&gt;
+                     &lt;Email/&gt;
+                     &lt;Organisation/&gt;
+                  &lt;/Contact&gt;
+                  &lt;descriptions&gt;
+                     &lt;Description LanguageId=&quot;&quot;/&gt;
+                  &lt;/descriptions&gt;
+               &lt;/Access&gt;
+               &lt;descriptions&gt;
+                  &lt;Description LanguageId=&quot;ISO639:eng&quot;&gt;
+	Author: not applicable
+
+	Title: Eucharist: mignight mass
+
+	Publisher: not applicable
+
+	Place: not applicable
+
+	Date: not applicable
+
+	Recording date: 2000
+	Recording time: Unspecified
+	From: CGN recording
+
+	Produced from: CGN
+   &lt;/Description&gt;
+               &lt;/descriptions&gt;
+               &lt;Keys/&gt;
+            &lt;/Source&gt;
+         &lt;/Resources&gt;
+      &lt;/Session&gt;
+   &lt;/Components&gt;
+&lt;/CMD&gt;
 </div>
+
+Dat is een hoop informatie. Je wilt maar een of enkele elementen eruit
+halen. Dat kun je met een XPath-expressie doen.
+<p>
+De titel:
+<pre>
+    CMD/Components/Session/Title
+</pre>
+Het land:
+<pre>
+    CMD/Components/Session/MDGroup/Location/Country
+</pre>
+Hier een voorbeeld dat gebruik maakt van de interne metadata, zoals in het
+voorbeeld onder het kopje <b>Intern XPath</b>. De root van de metadata
+is voor interne metadata altijd <tt>foreign-data</tt>:
+<pre>
+    foreign-data/publisher
+</pre>
+<b>Let op:</b> Gebruik geen namespaces in je XPath-expressies.
+<p>
+<b>Let op:</b> Begin je expressie niet met een enkele schuine streep.<br>
+Beginnen met een dubbele schuine streep kan wel, zoals: <tt>//MDGroup/Location/Country</tt>
+
+<h5>Voorbeelden van XPath met speaker</h5>
+
+Je kunt FoLiA gebruiken voor het weergeven van dialogen. Met het
+attribuut <tt>speaker</tt> geef je dan aan wie wat zegt.
+Bijvoorbeeld:
+<pre>
+    &lt;s speaker=&quot;jaap&quot;&gt;&lt;t&gt;Hoe is het?&lt;/t&gt;&lt;/s&gt;
+    &lt;s speaker=&quot;mien&quot;&gt;&lt;t&gt;Ik mag niet klagen.&lt;/t&gt;&lt;/s&gt;
+</pre>
+Wanneer je de string <tt>%speaker%</tt> (dus tussen procenten) in je XPath gebruikt, dan wordt
+dat vervangen door de actuele waarde van het attribuut
+<tt>speaker</tt>, en zo kun je een waarde voor de juiste spreker uit de
+metadata halen.
+<p>
+Voorbeeld, de leeftijd van de huidige spreker:
+<pre>
+    CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Age
+</pre>
+Voorbeeld, de eerste taal van de spreker:
+<pre>
+    CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Keys/Key[@Name='CGN.firstLang']
+</pre>
+Als je <tt>[Code='%speaker%']</tt> zou weglaten, dan zou je bij elke zin
+de gegevens van alle sprekers krijgen.
+    </div>
   </body>
 </html>

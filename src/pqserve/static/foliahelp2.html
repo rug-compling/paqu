@@ -10,7 +10,38 @@
   <body>
 <!--##START-->
 <div>
-TODO
-</div>
+<h3>FoLiA &mdash; Help</h3>
+<h4>Upload metadata</h4>
+Als je corpus verwijst naar externe metadata moet je dat apart uploaden.
+<p>
+Hier is een voorbeeld van een FoLiA-bestand dat	verwijst naar externe metadata:
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;                                                                          
+&lt;FoLiA xmlns=&quot;http://ilk.uvt.nl/folia&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+  &lt;metadata src=&quot;voorbeeld.xml&quot; type=&quot;cmdi&quot;&gt;
+    ...
+  &lt;/metadata&gt;
+  &lt;text&gt;
+    ...
+  &lt;/text&gt;
+&lt;/FoLiA&gt;
+</pre>
+<p>
+Externe metadata moet XML zijn, bijvoorbeeld
+<a href="https://www.clarin.eu/content/component-metadata" target="_blank">cmdi<a/>
+of <a href="https://en.wikipedia.org/wiki/IMDI"	target="_blank">imdi</a>,
+en gecodeerd zijn in UTF-8.
+<p>
+Je kunt een enkel metadatabestand uploaden, of meerdere in één
+tar- of zip-bestand. Als je opnieuw metadata uploadt wordt oude metadata
+verwijderd. Je kunt dus geen metadata toevoegen.
+<p>
+Wanneer je FoLiA-bestanden hebt geüpload in een tar- of zip-bestand, en
+daarin zijn paden gebruikt, dan moet je voor de
+metadatabestanden dezelfde paden gebruiken. Dus als je een FoLiA-bestand
+<tt>path/to/folia1.xml</tt> hebt met daarin een
+verwijzing naar <tt>metadata1.xml</tt>, dan moet je een
+metadatabestand <tt>path/to/metadata1.xml</tt> hebben.
+    </div>
   </body>
 </html>
