@@ -1,7 +1,12 @@
 #
-# Gebruik: pqfolia voorbeeld.toml
-#
 # Dit bestand is in toml-formaat, zie: https://github.com/mojombo/toml
+#
+# Gebruik:
+#
+#     pqfolia [-n int] [-m int] config.toml
+#
+#         -n: maximum aantal bestanden (voor testen)
+#         -m: maximum aantal zinnen per bestand (voor testen)
 #
 
 ################################################################
@@ -44,16 +49,46 @@ Item_list = [
 # INFO OVER DE INVOER
 #
 
+# Directory van de FoLiA-bestanden. Bestanden zonder de extensie .xml
+# worden genegeerd.
 Data_dir = "data"
+
+# Directory van de bestanden met metadata (indien aanwezig). Subpaden
+# onder deze directory moeten overeenkomen met die in Data_dir.
 Meta_dir = "metadata"
+
+# Data moet ingedeeld zijn in zinnen, met <s> of eventueel met <utt>.
+# Niet getokeniseerd:
+#
+#   <s><t>Dit is een zin.<t></s>
+#
+# Of wel getokeniseerd:
+#
+#   <s>
+#     <w><t>Dit</t></w>
+#     <w><t>is</t></w>
+#     <w><t>een</t></w>
+#     <w><t>zin</t></w>
+#     <w><t>.</t></w>
+#   </s>
 Tokenized = true
 
 ################################################################
 #
 # DEFINITIES VOOR METADATA
 #
+# De mogelijk waardes voor Type zijn:
+#
+#     text  int  float  date  datetime
+#
+# In XPath-expressies kun je de string %speaker% gebruiken als
+# plaatsvervanger voor de aanduiding van de huidige spreker in een
+# dialoog.
+#
 
-# Voor externe metadata met <metadata src> wordt de key XPath gebruikt
+# Voor EXTERNE METADATA met <metadata src> wordt de key XPath gebruikt.
+# De waarde is een XPath-expressie.
+#
 
 [Items."Land"]
 Type = "text"
@@ -67,7 +102,10 @@ XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Age"
 Type = "text"
 XPath = "CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Keys/Key[@Name='CGN.firstLang']"
 
-# Voor interne metadata met <metadata><foreign-data> wordt de key XPath2 gebruikt
+# Voor INTERNE METADATA met <metadata><foreign-data> wordt de key XPath2 gebruikt
+# De waarde is een XPath-expressie.
+# De root voor de XPath-expressie is altijd 'foreign-data'.
+#
 
 [Items."Uitgever"]
 Type = "text"
@@ -77,7 +115,9 @@ XPath2 = "foreign-data/publisher"
 Type = "text"
 XPath2 = "foreign-data/staff[@id='%speaker%']/role"
 
-# Voor native metadata met <metadata><meta> wordt de key ID gebruikt
+# Voor NATIVE METADATA met <metadata><meta> wordt de key ID gebruikt
+# De waarde is die van het attribuut 'id' in <meta id="...">
+#
 
 [Items."Titel"]
 Type = "text"
@@ -90,4 +130,3 @@ ID = "authors"
 [Items."Niveau"]
 Type = "text"
 ID = "level"
-

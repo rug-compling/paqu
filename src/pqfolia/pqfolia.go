@@ -71,7 +71,7 @@ var (
 	fileno       = 0
 
 	opt_n = flag.Int("n", 0, "maximum aantal bestanden")
-	opt_m = flag.Int("m", 0, "maximum aantal zinner per bestand")
+	opt_m = flag.Int("m", 0, "maximum aantal zinnen per bestand")
 )
 
 func usage() {
@@ -79,7 +79,7 @@ func usage() {
 Syntax: %s [-n int] [-m int] configfile.toml
 
   -n: maximum aantal bestanden (voor testen)
-  -m: maximum aantal zinner per bestand (voor testen)
+  -m: maximum aantal zinnen per bestand (voor testen)
 
 `, os.Args[0])
 }
@@ -107,7 +107,12 @@ func main() {
 		return
 	}
 
+	x(valid("File_src", cfg.File_src))
+	x(valid("File_path", cfg.File_path))
+	x(valid("Meta_src", cfg.Meta_src))
+
 	for _, i := range cfg.Item_list {
+		x(valid("Metadata", i))
 		it, ok := cfg.Items[i]
 		if !ok {
 			fmt.Fprintln(os.Stderr, "Geen definitie gevonden voor:", i)
@@ -626,4 +631,14 @@ func alpinoEscape(s string) string {
 		}
 	}
 	return s
+}
+
+func valid(text, value string) error {
+	if strings.Contains(value, " ") {
+		return fmt.Errorf("Spatie in label voor %s %q is niet toegestaan", text, value)
+	}
+	if strings.Contains(value, "=") {
+		return fmt.Errorf("Is-teken in label voor %s %q is niet toegestaan", text, value)
+	}
+	return nil
 }
