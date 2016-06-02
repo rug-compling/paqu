@@ -40,6 +40,11 @@ Source: https://github.com/pebbe/util
 Commit: 075222f0069cead83665ade6989862366d9cafd3
 Date:   Fri Jun 13 12:36:12 2014 +0200
 
+_vendor/src/github.com/robertkrimen/otto/LICENSE
+Source: https://github.com/robertkrimen/otto
+Commit: 610cd3ae864b5f0977234663966e6108c63b0f8e
+Date:   Mon May 30 13:32:50 2016 +1000
+
 ================================================================
 For all other stuff:
 

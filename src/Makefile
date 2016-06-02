@@ -17,6 +17,7 @@ ifneq "$(findstring paqu/_vendor, $(GOPATH))" ""
 	go install github.com/pebbe/compactcorpus
 	CGO_LDFLAGS="-Wl,-rpath=$(LIBRARY_PATH)" go install github.com/pebbe/dbxml
 	go install github.com/pebbe/util
+	go install github.com/robertkrimen/otto
 endif
 	mkdir -p ../bin
 	make -C pqalpino
