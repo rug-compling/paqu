@@ -5,6 +5,7 @@
       <bla:publisher>De Uitgever</bla:publisher>
       <bla:staff id="N00390">
         <bla:role>Pastoor</bla:role>
+	<bla:age>P45Y6M20D</bla:age>
       </bla:staff>
     </foreign-data>
   </metadata>

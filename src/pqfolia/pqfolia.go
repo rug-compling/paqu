@@ -4,6 +4,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/beevik/etree"
 	"github.com/pebbe/util"
+	"github.com/robertkrimen/otto"
 
 	"encoding/xml"
 	"flag"
@@ -31,15 +32,18 @@ type Config struct {
 }
 
 type Item struct {
-	Type   string
-	XPath  string
-	XPath2 string
-	ID     string
+	Type      string
+	XPath     string
+	XPath2    string
+	ID        string
+	Filter    string
+	hasFilter bool
 }
 
 type Native struct {
-	Label string
-	Type  string
+	Label     string
+	Type      string
+	hasFilter bool
 }
 
 type State struct {
@@ -69,6 +73,7 @@ var (
 	pathlevel    = 0
 	fpout        = os.Stdout
 	fileno       = 0
+	vm           *otto.Otto
 
 	opt_n = flag.Int("n", 0, "maximum aantal bestanden")
 	opt_m = flag.Int("m", 0, "maximum aantal zinnen per bestand")
@@ -118,12 +123,23 @@ func main() {
 			fmt.Fprintln(os.Stderr, "Geen definitie gevonden voor:", i)
 			return
 		}
+		if it.Filter != "" {
+			it.hasFilter = true
+			cfg.Items[i] = it
+			if vm == nil {
+				vm = otto.New()
+				vm.Run(`var fn = [];`)
+			}
+			_, err := vm.Run(fmt.Sprintf("fn[%q] = %s;", i, it.Filter))
+			x(err, "\nParsing function for "+i+":\n"+it.Filter)
+		}
 		if it.ID != "" {
 			native = append(native, it.ID)
 			native_use[it.ID] = true
 			native_items[it.ID] = Native{
-				Label: i,
-				Type:  it.Type,
+				Label:     i,
+				Type:      it.Type,
+				hasFilter: it.hasFilter,
 			}
 		} else if it.XPath2 != "" {
 			if strings.Contains(it.XPath2, "%speaker%") {
@@ -306,6 +322,11 @@ PARSE:
 						found := false
 						for _, t := range doc.FindElements(cfg.Items[item].XPath) {
 							value := t.Text()
+							if cfg.Items[item].hasFilter {
+								val, err := vm.Run(fmt.Sprintf("fn[%q](%q);", item, value))
+								x(err, "\nRunning function for "+item+":\n"+cfg.Items[item].Filter)
+								value = val.String()
+							}
 							if value != "" && oktype(item, value) {
 								found = true
 								fmt.Fprintf(fpout, "##META %s %s = %s\n", cfg.Items[item].Type, item, value)
@@ -355,6 +376,11 @@ PARSE:
 					found := false
 					for _, t := range doc2.FindElements(cfg.Items[item].XPath2) {
 						value := t.Text()
+						if cfg.Items[item].hasFilter {
+							val, err := vm.Run(fmt.Sprintf("fn[%q](%q);", item, value))
+							x(err, "\nRunning function for "+item+":\n"+cfg.Items[item].Filter)
+							value = val.String()
+						}
 						if value != "" && oktype(item, value) {
 							found = true
 							fmt.Fprintf(fpout, "##META %s %s = %s\n", cfg.Items[item].Type, item, value)
@@ -448,8 +474,17 @@ PARSE:
 		} else if t, ok := tt.(xml.CharData); ok {
 			state := statestack[len(statestack)-1]
 			if state.inMetadata && state.inMeta {
-				fmt.Fprintf(fpout, "##META %s %s = %s\n", native_items[meta].Type, native_items[meta].Label, string(t))
-				native_seen[meta] = true
+				item := native_items[meta].Label
+				value := string(t)
+				if cfg.Items[item].hasFilter {
+					val, err := vm.Run(fmt.Sprintf("fn[%q](%q);", item, value))
+					x(err, "\nRunning function for "+item+":\n"+cfg.Items[item].Filter)
+					value = val.String()
+				}
+				if value != "" && oktype(item, value) {
+					fmt.Fprintf(fpout, "##META %s %s = %s\n", native_items[meta].Type, item, value)
+					native_seen[meta] = true
+				}
 			}
 			if !state.inSkip &&
 				(state.inS || state.inUtt) &&
@@ -549,13 +584,18 @@ func doSpeaker(speaker string, hasMeta, hasMeta2 bool, values map[string]map[str
 					}
 					xpath := strings.Replace(xp, "%speaker%", speaker, -1)
 					for _, t := range run_doc.FindElements(xpath) {
-						found = true
 						value := strings.TrimSpace(t.Text())
+						if cfg.Items[item].hasFilter {
+							val, err := vm.Run(fmt.Sprintf("fn[%q](%q);", item, value))
+							x(err, "\nRunning function for "+item+":\n"+cfg.Items[item].Filter)
+							value = val.String()
+						}
 						if value != "" && oktype(item, value) {
 							if _, ok := values[speaker][item]; !ok {
 								values[speaker][item] = make([]string, 0, 1)
 							}
 							values[speaker][item] = append(values[speaker][item], value)
+							found = true
 						}
 					}
 					if !found && speaker != "" {

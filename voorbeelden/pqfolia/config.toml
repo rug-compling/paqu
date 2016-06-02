@@ -36,6 +36,7 @@ Output_dir = ""
 Item_list = [
     "Land",
     "Leeftijd",
+    "Maanden",
     "CGN.firstLang",
     "Uitgever",
     "Functie",
@@ -130,3 +131,30 @@ ID = "authors"
 [Items."Niveau"]
 Type = "text"
 ID = "level"
+
+# FILTERS
+#
+# Filter is een functie in Javascript (zonder naam) die de waarde uit
+# de metadata omzet in een andere vorm.
+#
+# Filters kunnnen voor alledrie de soorten metadata gebruikt worden,
+# extern, intern en native.
+#
+# In dit voorbeeld wordt een leeftijd uitgedrukt als P1Y4M20D of P1Y4M
+# omgzet in een aantal maanden.
+#
+
+[Items."Maanden"]
+Type = "float"
+XPath2 = "foreign-data/[@id='%speaker%']/age"
+Filter = '''
+  function(s) {
+    if (s.match(/^P([0-9]+)Y([0-9]+)M([0-9]+)D$/)) {
+        return eval(s.replace(/P(.*)Y(.*)M(.*)D/, "12 * $1 + $2 + $3 / 31"));
+    } else if (s.match(/^P([0-9]+)Y([0-9]+)M$/)) {
+        return eval(s.replace(/P(.*)Y(.*)M/, "12 * $1 + $2"));
+    } else {
+        return s;
+    }
+  }
+'''
