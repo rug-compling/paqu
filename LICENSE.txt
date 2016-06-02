@@ -45,7 +45,7 @@ Source: https://github.com/robertkrimen/otto
 Commit: 610cd3ae864b5f0977234663966e6108c63b0f8e
 Date:   Mon May 30 13:32:50 2016 +1000
 
-_vendor/src/gopkg.in/sourcemap.v1 -> no license available
+_vendor/src/gopkg.in/sourcemap.v1/LICENSE
 Source: https://gopkg.in/sourcemap.v1
 Commit: 8cd1e2e0ddc78dcb4511bcb184d23171bed15c67
 Date:   Tue May 31 11:25:40 2016 +0300
