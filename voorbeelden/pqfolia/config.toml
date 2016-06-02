@@ -141,7 +141,7 @@ ID = "level"
 # extern, intern en native.
 #
 # In dit voorbeeld wordt een leeftijd uitgedrukt als P1Y4M20D of P1Y4M
-# omgzet in een aantal maanden.
+# omgezet in een aantal maanden.
 #
 
 [Items."Maanden"]
