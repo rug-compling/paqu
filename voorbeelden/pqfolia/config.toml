@@ -134,13 +134,17 @@ ID = "level"
 
 # FILTERS
 #
-# Filter is een functie in Javascript (zonder naam) die de waarde uit
-# de metadata omzet in een andere vorm.
+# Filter is een NAAMLOZE functie in JavaScript die de waarde uit de
+# metadata omzet naar een andere vorm.
+#
+# Je kunt dit bijvoorbeeld gebruiken om een datum in de vorm "Jan 20, 2016"
+# om te zetten naar de vorm "2016-01-20", het enige datumformaat dat PaQu
+# kan verwerken.
 #
 # Filters kunnnen voor alledrie de soorten metadata gebruikt worden,
 # extern, intern en native.
 #
-# In dit voorbeeld wordt een leeftijd uitgedrukt als P1Y4M20D of P1Y4M
+# In dit voorbeeld wordt een leeftijd uitgedrukt als "P1Y4M20D" of "P1Y4M"
 # omgezet in een aantal maanden.
 #
 
