@@ -12,21 +12,43 @@
 <div>
 
 <h3>FoLiA &mdash; Help</h3>
-<h4>Gebruik van metadata</h4>
+<h4>Metadata</h4>
 
 Onder <em>metadata</em> definieer je de elementen uit de metadata die je
 met je corpus wilt invoeren in PaQu.
 <p>
+<input type="checkbox" checked>
 Alleen definities die je aanvinkt worden uiteindelijk gebruikt.
 <p>
-Bij <em>label</em> geef je de naam op waarmee dit item in de uitvoer
+<dl>
+<dt>Label
+<dd>Hier geef je de naam op waarmee dit item in de uitvoer
 komt.
-<p>
-Daaronder moet je aangeven wat voor soort metadata het is. Voor uitleg, zie:
-<a href="info.html#cormeta" target="_blank">Info &mdash; metadata</a>.
-<p>
-Tot slot moet je aangeven wat de bron is van de metadata, en de
-expressie waarmee het element dat je hebben wilt is te vinden.
+<dt>Soort
+<dd>Wat voor soort gegeven is het? Kies een van de
+vijf mogelijkheden.<br>
+Voor <em>date</em> moet de waarde dit formaat
+hebben: <code>YYYY-MM-DD</code>
+(bijv: <code>2016-04-25</code>)<br>
+Voor <em>datetime</em> moet de waarde een van
+deze formaten hebben:
+<code>YYYY-MM-DD hh:mm:ss</code> of <code>YYYY-MM-DD hh:mm</code>
+(bijv: <code>2016-04-25 13:45:30</code> of <code>2016-04-25 13:45</code>)<br>
+<dt>Extern XPath / Intern XPath / Native ID
+<dd>Er zijn vier verschillende manieren om metadata in FoLiA op te nemen.
+Drie daarvan worden ondersteund. Er zijn dus ook drie
+manieren om gegevens uit die
+metadata te halen.
+<dt>Specificatie
+<dd>Tot slot moet je aangeven
+waarmee je de waarde uit de
+metadata haalt. Voor
+<em>Native ID</em> is dit een
+ID, voor de andere twee
+gevallen is het een
+XPath-expressie. Zie hieronder
+voor voorbeelden.
+</dl>
 
 <h5>Optie: Extern XPath</h5>
 
@@ -71,7 +93,7 @@ metadata opgenomen:
 &lt;/FoLiA&gt;
 </pre>
 Dit is metadata met een simpele structuur, maar het kan ook complex
-zijn, zoals bijvoorbeeld cmdi.
+zijn, zoals bijvoorbeeld cmdi, imdi... als het maar XML is.
 <p>
 Je moet een XPath-expressie gebruiken om aan te geven hoe je iets uit de
 metadata wilt halen. Voor voorbeelden, zie beneden.
@@ -93,7 +115,7 @@ Hier is een voorbeeld van native metadata:
 </pre>
 
 Je gebruikt de waarde van het ID om de metadata te selecteren, hier
-	    <tt>titel</tt> of <tt>auteur</tt>.
+	    <code>titel</code> of <code>auteur</code>.
 
 <h5>Voorbeelden van XPath</h5>
 
@@ -734,27 +756,27 @@ Het land:
 </pre>
 Hier een voorbeeld dat gebruik maakt van de interne metadata, zoals in het
 voorbeeld onder het kopje <b>Intern XPath</b>. De root van de metadata
-is voor interne metadata altijd <tt>foreign-data</tt>:
+is voor interne metadata altijd <code>foreign-data</code>:
 <pre>
     foreign-data/publisher
 </pre>
 <b>Let op:</b> Gebruik geen namespaces in je XPath-expressies.
 <p>
 <b>Let op:</b> Begin je expressie niet met een enkele schuine streep.<br>
-Beginnen met een dubbele schuine streep kan wel, zoals: <tt>//MDGroup/Location/Country</tt>
+Beginnen met een dubbele schuine streep kan wel, zoals: <code>//MDGroup/Location/Country</code>
 
 <h5>Voorbeelden van XPath met speaker</h5>
 
 Je kunt FoLiA gebruiken voor het weergeven van dialogen. Met het
-attribuut <tt>speaker</tt> geef je dan aan wie wat zegt.
+attribuut <code>speaker</code> geef je dan aan wie wat zegt.
 Bijvoorbeeld:
 <pre>
     &lt;s speaker=&quot;jaap&quot;&gt;&lt;t&gt;Hoe is het?&lt;/t&gt;&lt;/s&gt;
     &lt;s speaker=&quot;mien&quot;&gt;&lt;t&gt;Ik mag niet klagen.&lt;/t&gt;&lt;/s&gt;
 </pre>
-Wanneer je de string <tt>%speaker%</tt> (dus tussen procenten) in je XPath gebruikt, dan wordt
+Wanneer je de string <code>%speaker%</code> (dus tussen procenten) in je XPath gebruikt, dan wordt
 dat vervangen door de actuele waarde van het attribuut
-<tt>speaker</tt>, en zo kun je een waarde voor de juiste spreker uit de
+<code>speaker</code>, en zo kun je een waarde voor de juiste spreker uit de
 metadata halen.
 <p>
 Voorbeeld, de leeftijd van de huidige spreker:
@@ -765,7 +787,7 @@ Voorbeeld, de eerste taal van de spreker:
 <pre>
     CMD/Components/Session/MDGroup/Actors/Actor[Code='%speaker%']/Keys/Key[@Name='CGN.firstLang']
 </pre>
-Als je <tt>[Code='%speaker%']</tt> zou weglaten, dan zou je bij elke zin
+Als je <code>[Code='%speaker%']</code> zou weglaten, dan zou je bij elke zin
 de gegevens van alle sprekers krijgen.
     </div>
   </body>

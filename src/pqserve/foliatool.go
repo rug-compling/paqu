@@ -294,7 +294,7 @@ Soort:
   <option value="xpath2"%s>Intern XPath:</option>
   <option value="id"%s>Native ID:</option>
 </select>
-<input type="text" name="value%d" value="%s" size="80" onchange="markeer('%d')">
+<input type="text" name="value%d" value="%s" size="80" onchange="markeer('%d')" placeholder="Specificatie">
 <div class="right">
 <button type="button" onclick="verwijder(%d)">Verwijderen</button>
 </div>

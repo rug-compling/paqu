@@ -74,11 +74,11 @@ func static_foliahelp3_html(q *Context) {
 }
 
 func static_foliahelp4_html(q *Context) {
-	static_foliahelp(q, file__foliahelp4__html, "Label voor metadatabestand")
+	static_foliahelp(q, file__foliahelp4__html, "Label in uitvoer")
 }
 
 func static_foliahelp5_html(q *Context) {
-	static_foliahelp(q, file__foliahelp5__html, "Gebruik van metadata")
+	static_foliahelp(q, file__foliahelp5__html, "Metadata")
 }
 
 func static_jquery_js(q *Context) {

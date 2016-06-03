@@ -4,7 +4,7 @@ body {
    // background-postion: top left;
    // background-attachment: scroll;
    // background-repeat: no-repeat;
-   font-family:verdana;
+   font-family: verdana;
    margin: 0px auto 4em auto;
    padding: 0px .5em;
    max-width: 960px;
@@ -416,6 +416,8 @@ ol.xpath li {
     cursor: pointer;
 }
 
+/****************************************************************/
+
 a.normal {
     text-decoration: underline;
     color: #0000EE;
@@ -450,6 +452,7 @@ img.left {
 br.both {
     clear: both;
 }
+
 .em {
     font-style: italic;
 }
@@ -483,4 +486,11 @@ div.output {
 }
 hr.wide {
     margin: 1em 0em;
+}
+
+code {
+    font-family: monospace;
+    white-space: nowrap;
+    background-color: #ffffd0;
+    padding: 0px .3em;
 }
