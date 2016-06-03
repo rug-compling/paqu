@@ -104,10 +104,6 @@ path = "/local/opt/paqu/bin:/bin:/usr/bin"
 # Alpino lokaal gebruikt moet worden.
 alpino = "/local/opt/Alpino"
 
-# Welke versie van Alpino gebruik je?
-# Produceert het xml met alpino_ds version="1.5" of hoger?
-alpino15 = true
-
 # Timeout voor Alpino voor de bewerking van één regel. In seconden.
 # Dit heeft geen effect als er een Alpino-server wordt gebruikt.
 timeout = 900

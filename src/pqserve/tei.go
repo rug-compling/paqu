@@ -12,7 +12,7 @@ func tei(prefix string, fpin io.Reader, fpout io.Writer) error {
 
 	d := xml.NewDecoder(fpin)
 	var inS, inW, inPC bool
-	var label, wid string
+	var label string
 	var teller uint64
 	words := make([]string, 0, 500)
 	for {
@@ -38,13 +38,6 @@ func tei(prefix string, fpin io.Reader, fpout io.Writer) error {
 				inW = false
 				inPC = false
 			case "w":
-				wid = ""
-				for _, e := range t.Attr {
-					if e.Name.Local == "id" {
-						wid = e.Value
-						break
-					}
-				}
 				inW = true
 				inPC = false
 			case "pc":
@@ -70,12 +63,7 @@ func tei(prefix string, fpin io.Reader, fpout io.Writer) error {
 			}
 		} else if t, ok := tt.(xml.CharData); ok {
 			if inS && (inW || inPC) {
-				s := alpinoEscape(string(t))
-				if Cfg.Alpino15 && wid != "" {
-					s = fmt.Sprintf("[ @id %s ] %s", alpinoEscape(wid), s)
-				}
-				words = append(words, s)
-				wid = ""
+				words = append(words, alpinoEscape(string(t)))
 				inW = false
 				inPC = false
 			}

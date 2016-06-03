@@ -21,7 +21,7 @@ func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 	statestack := make([]FoliaState, 1, 10)
 
 	d := xml.NewDecoder(fpin)
-	var label, wid string
+	var label string
 	text := make([]byte, 0)
 	var teller, uttteller uint64
 
@@ -83,7 +83,6 @@ func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 					state.inT = false
 				}
 			case "w":
-				wid = id
 				state.inW = true
 				state.inT = false
 			case "t":
@@ -119,11 +118,7 @@ func folia(prefix string, fpin io.Reader, fpout io.Writer) error {
 					ww = append(ww, alpinoEscape(w))
 				}
 				if len(ww) > 0 {
-					s := strings.Join(ww, " ") + " "
-					if Cfg.Alpino15 && wid != "" {
-						s = fmt.Sprintf("[ @id %s ] %s", alpinoEscape(wid), s)
-					}
-					text = append(text, []byte(s)...)
+					text = append(text, []byte(strings.Join(ww, " ")+" ")...)
 				}
 			}
 		}
