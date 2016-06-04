@@ -295,7 +295,7 @@ func home(q *Context) {
 		}
 	}
 
-	if q.auth && (offset > 0 || len(zinnen) > 0) {
+	if offset > 0 || len(zinnen) > 0 {
 		fmt.Fprintf(q.w, `<p>
 <form action="dl" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="word" value="%s">
@@ -330,7 +330,9 @@ func home(q *Context) {
 			html.EscapeString(first(q.r, "hword")),
 			html.EscapeString(first(q.r, "meta")),
 			html.EscapeString(prefix))
+	}
 
+	if q.auth && (offset > 0 || len(zinnen) > 0) {
 		fmt.Fprintf(q.w, `<p>
 <form action="savez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="word" value="%s">
@@ -1204,7 +1206,7 @@ func homedl(q *Context) {
 		return
 	}
 
-	fmt.Fprintln(q.w, "#", strings.Join(columns, "\t"))
+	fmt.Fprintln(q.w, strings.Join(columns, "\t"))
 
 	step, _ := strconv.Atoi(firstf(q.form, "step"))
 	if step < 1 {
