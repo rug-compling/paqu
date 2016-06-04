@@ -134,6 +134,7 @@ func main() {
 	go clearMacros()
 
 	handleFunc("", home)
+	handleFunc("dl", homedl)
 	handleFunc("tree", tree)
 	handleFunc("stats", stats)
 	handleFunc("statsmeta", statsmeta)

@@ -297,6 +297,41 @@ func home(q *Context) {
 
 	if q.auth && (offset > 0 || len(zinnen) > 0) {
 		fmt.Fprintf(q.w, `<p>
+<form action="dl" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
+<input type="hidden" name="word" value="%s">
+<input type="hidden" name="postag" value="%s">
+<input type="hidden" name="rel" value="%s">
+<input type="hidden" name="hpostag" value="%s">
+<input type="hidden" name="hword" value="%s">
+<input type="hidden" name="meta" value="%s">
+<input type="hidden" name="db" value="%s">
+<select name="step">
+<option value="1">alles</option>
+<option value="2">1 per 2</option>
+<option value="5">1 per 5</option>
+<option value="10">1 per 10</option>
+<option value="20">1 per 20</option>
+<option value="50">1 per 50</option>
+<option value="100">1 per 100</option>
+<option value="200">1 per 200</option>
+<option value="500">1 per 500</option>
+<option value="1000">1 per `+iformat(1000)+`</option>
+<option value="2000">1 per `+iformat(2000)+`</option>
+<option value="5000">1 per `+iformat(5000)+`</option>
+<option value="10000">1 per `+iformat(10000)+`</option>
+</select>
+<input type="submit" value="relaties downloaden">
+</form>
+`,
+			html.EscapeString(first(q.r, "word")),
+			html.EscapeString(first(q.r, "postag")),
+			html.EscapeString(first(q.r, "rel")),
+			html.EscapeString(first(q.r, "hpostag")),
+			html.EscapeString(first(q.r, "hword")),
+			html.EscapeString(first(q.r, "meta")),
+			html.EscapeString(prefix))
+
+		fmt.Fprintf(q.w, `<p>
 <form action="savez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="word" value="%s">
 <input type="hidden" name="postag" value="%s">
@@ -1124,4 +1159,72 @@ func unHigh(s string) string {
 
 func setHigh(s string) string {
 	return reSetHigh.ReplaceAllStringFunc(s, setHighFunc)
+}
+
+func homedl(q *Context) {
+	prefix := firstf(q.form, "db")
+	if prefix == "" {
+		http.Error(q.w, "Geen corpus opgegeven", http.StatusPreconditionFailed)
+		return
+	}
+	if !q.prefixes[prefix] {
+		http.Error(q.w, "Ongeldig corpus: "+prefix, http.StatusPreconditionFailed)
+		return
+	}
+
+	var chClose <-chan bool
+	if f, ok := q.w.(http.CloseNotifier); ok {
+		chClose = f.CloseNotify()
+	} else {
+		chClose = make(<-chan bool)
+	}
+
+	query, joins, usererr, syserr := makeQueryF(q, prefix, "", chClose)
+	if doErr(q, syserr) {
+		return
+	}
+	if userErr(q, usererr) {
+		return
+	}
+
+	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	q.w.Header().Set("Content-Disposition", "attachment; filename=relaties.txt")
+
+	rows, err := timeoutQuery(q, chClose,
+		"SELECT `word`,`begin`,`end`,`postag`,`rel`,`hword`,`hbegin`,`hend`,`hpostag`,`lbl`,`sent` FROM `"+
+			Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" JOIN `"+Cfg.Prefix+"_c_"+prefix+"_sent` USING (`arch`, `file`) WHERE "+query)
+	if doErr(q, err) {
+		return
+	}
+
+	fmt.Fprintln(q.w, "# word\tbegin\tend\tpostag\trel\thword\thbegin\thend\thpostag\tlbl\tsent")
+
+	step, _ := strconv.Atoi(firstf(q.form, "step"))
+	if step < 1 {
+		step = 1
+	}
+	lineno := 0
+
+	items := make([]string, 11)
+	fields := make([]interface{}, len(items))
+	for i := range items {
+		fields[i] = &items[i]
+	}
+	for rows.Next() {
+		err := rows.Scan(fields...)
+		if doErr(q, err) {
+			return
+		}
+		lineno++
+		if lineno%step == 0 {
+			fmt.Fprintln(q.w, strings.Join(items, "\t"))
+		}
+		select {
+		case <-chClose:
+			logerr(errConnectionClosed)
+			rows.Close()
+			return
+		default:
+		}
+	}
 }
