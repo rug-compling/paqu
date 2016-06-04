@@ -1190,14 +1190,21 @@ func homedl(q *Context) {
 	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	q.w.Header().Set("Content-Disposition", "attachment; filename=relaties.txt")
 
+	columns := []string{
+		"word", "begin", "end", "postag",
+		"rel",
+		"hword", "hbegin", "hend", "hpostag",
+		"lbl", "sent",
+	}
+
 	rows, err := timeoutQuery(q, chClose,
-		"SELECT `word`,`begin`,`end`,`postag`,`rel`,`hword`,`hbegin`,`hend`,`hpostag`,`lbl`,`sent` FROM `"+
-			Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" JOIN `"+Cfg.Prefix+"_c_"+prefix+"_sent` USING (`arch`, `file`) WHERE "+query)
+		"SELECT `"+strings.Join(columns, "`,`")+"` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+
+			joins+" JOIN `"+Cfg.Prefix+"_c_"+prefix+"_sent` USING (`arch`,`file`) WHERE "+query)
 	if doErr(q, err) {
 		return
 	}
 
-	fmt.Fprintln(q.w, "# word\tbegin\tend\tpostag\trel\thword\thbegin\thend\thpostag\tlbl\tsent")
+	fmt.Fprintln(q.w, "#", strings.Join(columns, "\t"))
 
 	step, _ := strconv.Atoi(firstf(q.form, "step"))
 	if step < 1 {
@@ -1205,8 +1212,8 @@ func homedl(q *Context) {
 	}
 	lineno := 0
 
-	items := make([]string, 11)
-	fields := make([]interface{}, len(items))
+	items := make([]string, len(columns))
+	fields := make([]interface{}, len(columns))
 	for i := range items {
 		fields[i] = &items[i]
 	}
