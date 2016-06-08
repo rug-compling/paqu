@@ -48,8 +48,9 @@ Zie ook: TODO in diverse bestanden
 In overweging:
 
   - pqserve:
-    - Expert-opties voor Alpino bij invoer nieuw corpus
-      - Kleinere timeout
-      - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
-        - Optie `application_type=qa` vóór de optie `-parse`
+    - Invoer nieuw corpus
+      - Expert-opties voor Alpino
+        - Kleinere timeout
+        - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
+          - Optie `application_type=qa` vóór de optie `-parse`
       - Door gebruiker andere labels laten kiezen voor `paqu.path1`, `paqu.path2`, etc
