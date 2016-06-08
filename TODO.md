@@ -36,13 +36,20 @@ Zie ook: TODO in diverse bestanden
         niet heeft, dan de gebruiker waarschuwen?
     - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
       kiezen welke onderdelen hij wil zien?
-    - Expert-opties voor Alpino bij invoer nieuw corpus
-      - Kleinere timeout
-      - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
-        - Optie `application_type=qa` vóór de optie `-parse`
   - programma `tags.go` toevoegen
     - kopiëren uit /net/aistaff/alfa/lassy
     - aanpassen
     - documentatie
   - DbXml
     - zonodig bestanden in verkeerde DbXml-versie omzetten naar goede versie?
+
+## Verzoeken ##
+
+In overweging:
+
+  - pqserve:
+    - Expert-opties voor Alpino bij invoer nieuw corpus
+      - Kleinere timeout
+      - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
+        - Optie `application_type=qa` vóór de optie `-parse`
+      - Door gebruiker andere labels laten kiezen voor `paqu.path1`, `paqu.path2`, etc

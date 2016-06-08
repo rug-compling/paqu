@@ -320,7 +320,7 @@ func home(q *Context) {
 <option value="5000">1 per `+iformat(5000)+`</option>
 <option value="10000">1 per `+iformat(10000)+`</option>
 </select>
-<input type="submit" value="relaties downloaden">
+<input type="submit" value="downloaden">
 </form>
 `,
 			html.EscapeString(first(q.r, "word")),
@@ -1190,7 +1190,7 @@ func homedl(q *Context) {
 	}
 
 	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	q.w.Header().Set("Content-Disposition", "attachment; filename=relaties.txt")
+	q.w.Header().Set("Content-Disposition", "attachment; filename=uitvoer.txt")
 
 	columns := []string{
 		"word", "begin", "end", "postag",

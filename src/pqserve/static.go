@@ -61,6 +61,10 @@ func static_foliahelp(q *Context, html, title string) {
 	fmt.Fprint(q.w, html[i+15:])
 }
 
+func static_foliahelp0_html(q *Context) {
+	static_foliahelp(q, file__foliahelp0__html, "Offline verwerking")
+}
+
 func static_foliahelp1_html(q *Context) {
 	static_foliahelp(q, file__foliahelp1__html, "Upload FoLiA-bestanden")
 }

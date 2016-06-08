@@ -181,6 +181,7 @@ func main() {
 	handleFunc("relother.png", static_relother_png)
 
 	handleFunc("folia", foliatool)
+	handleFunc("foliah0", static_foliahelp0_html)
 	handleFunc("foliah1", static_foliahelp1_html)
 	handleFunc("foliah2", static_foliahelp2_html)
 	handleFunc("foliah3", static_foliahelp3_html)

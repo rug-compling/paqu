@@ -363,7 +363,7 @@ Een tarbestand zelf mag wel gecomprimeerd zijn met gzip.
 <h2>Nieuw corpus maken</h2>
 `)
 	if q.quotum > 0 {
-		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %d woorden (tokens)\n", q.quotum-gebruikt)
+		fmt.Fprintf(q.w, "Je hebt nog ruimte voor %s woorden (tokens)\n", iformat(q.quotum-gebruikt))
 	}
 	fmt.Fprintf(q.w, `
     <div class="info">

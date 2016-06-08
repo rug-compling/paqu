@@ -154,7 +154,13 @@ function testen() {
     x.submit();
 }
 //--></script>
-<h1>Invoer en verwerking van FoLiA met metadata</h1>`)
+<h1>Invoer en verwerking van FoLiA met metadata</h1>
+
+Je kunt dit ook <b>offline</b> doen. Dat heeft voordelen. <a href="foliah0" target="_blank">Lees meer.</a>
+<p>
+<hr>
+<p>
+`)
 
 	if action == "submit" && firstf(q.form, "naam") != "" {
 		foliasubmit(q, &settings, fdir)

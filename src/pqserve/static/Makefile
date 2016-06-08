@@ -6,6 +6,7 @@ DEPS = \
 	clariah.png \
 	clarinnl.png \
 	favicon.ico \
+	foliahelp0.html \
 	foliahelp1.html \
 	foliahelp2.html \
 	foliahelp3.html \
