@@ -4,9 +4,7 @@ Parse & Query
 
 ----------------------------------------------------------------
 
-## Status ##
-
-Grotendeels voltooid. Zie TODO.md voor wat er nog moet gebeuren.
+## Docker ##
 
 Je kunt PaQu nu ook in Docker draaien. Zie:
 https://github.com/rug-compling/paqu-docker
@@ -24,7 +22,7 @@ verwerken tot een nieuw corpus. Vervolgens kan de gebruiker dat nieuwe
 corpus alleen zelf raadplegen, of delen met andere gebruikers die het
 dan ook kunnen raadplegen.
 
-Momenteel draait dit op de volgende site: http://zardoz.service.rug.nl:8067/
+Momenteel draait dit op de volgende site: http://www.let.rug.nl/alfa/paqu
 
 ----------------------------------------------------------------
 
@@ -98,12 +96,11 @@ Om PaQu te draaien heb je van
 [Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/) de tokenizer en de
 parser nodig.
 
-Om bestanden in FoLiA- of TEI-formaat te kunnen verwerken heb je een
-versie van Alpino nodig van 4 november 2015 of nieuwer.
-
 In de nabije toekomst is het mogelijk gebruik te maken van een
 Alpino-server, die ergens op een andere website draait. Als je dat
 gebruikt heb je zelf van Alpino alleen de tokenizer nodig.
+
+TODO: Komt die server er ooit? Het lijkt er niet op.
 
 ----------------------------------------------------------------
 

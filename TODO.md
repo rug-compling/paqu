@@ -11,11 +11,13 @@ Zie ook: TODO in diverse bestanden
      2. deel voor querying, alleen geparste data uploaden
      3. nieuw: deel voor omzetten data naar PaQu-formaat
   - Alpino-server
+    - Komt die er nog? Lijkt er niet op.
     - Aanpassen aan API van de server (huidige server is te oud)
       - zie ook TODOs in `work.go`
   - Adminhandleiding
-    - optie `loginurl` in `setup-example.toml`
+    - Alpino Treebank als alternatief voor Lassy Klein
   - pqserve:
+    - check versie DbXML, uitschakelen als het een gebroken versie is
     - https zonder http? de combinatie maakt het erg ingewikkeld
     - gewoon zoeken
       - Nu alleen link naar boom achter gevonden zinnen. Toevoegen: link
@@ -36,10 +38,10 @@ Zie ook: TODO in diverse bestanden
         niet heeft, dan de gebruiker waarschuwen?
     - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
       kiezen welke onderdelen hij wil zien?
-  - programma `tags.go` toevoegen
-    - kopiëren uit /net/aistaff/alfa/lassy
-    - aanpassen
-    - documentatie
+  - pqalpino verwijderen, inbouwen in pqserve
+  - pqtexter verwijderen, inbouwen in pqserve met gebruik van flexgo
+    i.p.v. flex
+  - pqinit verwijderen, en inbouwen in pqbuild?
   - DbXml
     - zonodig bestanden in verkeerde DbXml-versie omzetten naar goede versie?
 

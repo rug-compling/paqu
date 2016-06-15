@@ -205,10 +205,10 @@ var (
 		"Apredc", "Apredm", "Ase", "Asu", "Asup", "Asvp", "Avc", "Bbody/cmp", "Bbody/rhd", "Bbody/whd", "Bcnj/cnj",
 		"Bcnj/crd", "Bcrd/cnj", "Bcrd/crd", "Bmod/cmp", "Bnucl/dlink", "Bobj1/su", "Bobj2/su", "Bsu/obj1", "Bsu/obj2",
 		"C--/-",
-		"Ccmp/-", "Cdlink/-", "Cdp/-", "Chd/-", "Cnucl/-", "Csat/-", "Ctag/-", "Dapp/cnj", "Dapp/crd", "Dapp/mod",
+		"Ccmp/-", "Cdlink/-", "Cdp/-", "Chd/-", "Cnucl/-", "Csat/-", "Ctag/-", "Dapp/cnj", "Dapp/crd", "Dapp/mod", "Dapp/rhd",
 		"Dcnj/app", "Dcnj/det", "Dcnj/mod", "Dcrd/-", "Dcrd/app", "Dcrd/det", "Dcrd/mod", "Ddet/-", "Ddet/cnj",
 		"Ddet/crd", "Ddet/mod", "Dmod/-", "Dmod/app", "Dmod/cnj", "Dmod/crd", "Dmod/det", "Dmod/mod", "Dmod/rhd",
-		"Dmod/whd", "Dmwp/-", "Dobj1/-", "Dsat/dlink", "Dsu/-", "Dtag/dlink", "Dwhd/-"}
+		"Dmod/whd", "Dmwp/-", "Dobj1/-", "Drhd/-", "Dsat/dlink", "Dsu/-", "Dtag/dlink", "Dwhd/-"}
 
 	errConnectionClosed = errors.New("Verbinding gesloten")
 	errGlobalExit       = errors.New("Global Exit")
