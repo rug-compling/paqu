@@ -728,7 +728,8 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		var xb, mb []byte
 		xb, err = ioutil.ReadFile(x)
 		if err != nil {
-			return
+			os.Remove(m)
+			continue
 		}
 		mb, err = ioutil.ReadFile(m)
 		if err != nil {
