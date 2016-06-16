@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"html"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -96,9 +97,10 @@ Er waren problemen met %d van de %d zinnen:
 			if lineno == nerr {
 				eo += " last"
 			}
-			fmt.Fprintf(q.w, "<tr class=\"%s\"><td class=\"odd first\">%s<td class=\"even\">%s&nbsp;|&nbsp;%s<td class=\"odd\">%s",
+			fmt.Fprintf(q.w, "<tr class=\"%s\"><td class=\"odd first\"><b><a href=\"browserr?db=%s&amp;s=%s\" target=\"_blank\">%s</a></b><td class=\"even\">%s&nbsp;|&nbsp;%s<td class=\"odd\">%s",
 				eo,
-				html.EscapeString(a[0]), html.EscapeString(a[1]), a[2], html.EscapeString(a[3]))
+				id, html.EscapeString(a[0]), html.EscapeString(a[0]),
+				html.EscapeString(a[1]), a[2], html.EscapeString(a[3]))
 		}
 		fmt.Fprint(q.w, "</table>\n<p>\n")
 	}
@@ -233,4 +235,85 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 
 	fmt.Fprint(q.w, "</body>\n</html>\n")
 
+}
+
+func browserr(q *Context) {
+
+	if !q.auth {
+		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
+		return
+	}
+
+	db := first(q.r, "db")
+	if !q.myprefixes[db] {
+		http.Error(q.w, "Dat is niet je corpus", http.StatusUnauthorized)
+		return
+	}
+
+	lbl := first(q.r, "s")
+	if lbl == "" {
+		http.Error(q.w, "Label ontbreekt", http.StatusPreconditionFailed)
+		return
+	}
+
+	rows, err := q.db.Query("SELECT `f`.`file` FROM `" + Cfg.Prefix + "_c_" + db + "_sent` `s` JOIN `" +
+		Cfg.Prefix + "_c_" + db + "_file` `f` ON (`s`.`file` = `f`.`id`) WHERE `s`.`lbl` = \"" + lbl + "\"")
+	if sysErr(err) {
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	lbl = ""
+	for rows.Next() {
+		rows.Scan(&lbl)
+	}
+	if lbl == "" {
+		err := fmt.Errorf("Label niet gevonden in Database")
+		sysErr(err)
+		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+	}
+
+	contentType(q, "text/plain; charset=utf-8")
+
+	datadir := filepath.Join(paqudir, "data", db)
+
+	lbl = lbl[len(datadir)+5 : len(lbl)-4]
+
+	fp, err := os.Open(filepath.Join(datadir, "stderr.txt.gz"))
+	if err != nil {
+		sysErr(err)
+		fmt.Fprintln(q.w, err)
+		return
+	}
+	defer fp.Close()
+	gz, err := gzip.NewReader(fp)
+	if err != nil {
+		sysErr(err)
+		fmt.Fprintln(q.w, err)
+		return
+	}
+	defer gz.Close()
+	rd := util.NewReader(gz)
+	state := 0
+	for {
+		line, err := rd.ReadLineString()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			sysErr(err)
+			fmt.Fprintln(q.w, err)
+			return
+		}
+		if state == 0 {
+			if strings.HasPrefix(line, "****") && strings.Contains(line, lbl) {
+				state = 1
+				fmt.Fprintln(q.w, line)
+			}
+		} else {
+			fmt.Fprintln(q.w, line)
+			if strings.HasPrefix(line, "****") {
+				break
+			}
+		}
+	}
 }

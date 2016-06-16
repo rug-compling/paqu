@@ -148,6 +148,7 @@ func main() {
 	handleFunc("corsave", corsave)
 
 	handleFunc("browse", browse)
+	handleFunc("browserr", browserr)
 
 	handleFunc("xpath", xpath)
 	handleFunc("xpathcheck", xpathcheck)
