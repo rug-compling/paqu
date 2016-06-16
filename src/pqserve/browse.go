@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +22,10 @@ type ZinArchFile struct {
 	file int
 	lbl  string
 }
+
+var (
+	reBasicName = regexp.MustCompile(`^[0-9]{4}[\\/][0-9]{4}$`)
+)
 
 // TAB: browse (zinnen)
 func browse(q *Context) {
@@ -251,32 +256,19 @@ func browserr(q *Context) {
 	}
 
 	lbl := first(q.r, "s")
+	coded := false
 	if lbl == "" {
 		http.Error(q.w, "Label ontbreekt", http.StatusPreconditionFailed)
 		return
 	}
-
-	rows, err := q.db.Query("SELECT `f`.`file` FROM `" + Cfg.Prefix + "_c_" + db + "_sent` `s` JOIN `" +
-		Cfg.Prefix + "_c_" + db + "_file` `f` ON (`s`.`file` = `f`.`id`) WHERE `s`.`lbl` = \"" + lbl + "\"")
-	if sysErr(err) {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	lbl = ""
-	for rows.Next() {
-		rows.Scan(&lbl)
-	}
-	if lbl == "" {
-		err := fmt.Errorf("Label niet gevonden in Database")
-		sysErr(err)
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+	if !reBasicName.MatchString(lbl) {
+		lbl = encode_filename(lbl)
+		coded = true
 	}
 
 	contentType(q, "text/plain; charset=utf-8")
 
 	datadir := filepath.Join(paqudir, "data", db)
-
-	lbl = lbl[len(datadir)+5 : len(lbl)-4]
 
 	fp, err := os.Open(filepath.Join(datadir, "stderr.txt.gz"))
 	if err != nil {
@@ -305,9 +297,24 @@ func browserr(q *Context) {
 			return
 		}
 		if state == 0 {
-			if strings.HasPrefix(line, "****") && strings.Contains(line, lbl) {
-				state = 1
-				fmt.Fprintln(q.w, line)
+			if strings.HasPrefix(line, "****") {
+				f := strings.Fields(line)
+				if len(f) > 2 && f[1] == "parsing" {
+					if coded {
+						if f[2][5:] == lbl {
+							state = 1
+						} else if len(f[2]) > 10 && f[2][9] == '-' && f[2][10:] == lbl {
+							state = 1
+						}
+					} else {
+						if f[2] == lbl {
+							state = 1
+						}
+					}
+					if state == 1 {
+						fmt.Fprintln(q.w, line)
+					}
+				}
 			}
 		} else {
 			fmt.Fprintln(q.w, line)
