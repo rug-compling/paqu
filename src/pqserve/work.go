@@ -664,6 +664,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		return
 	}
 	rd := util.NewReader(fp)
+	errseen := make(map[string]bool)
 	for {
 		line, e := rd.ReadLineString()
 		if e != nil {
@@ -694,7 +695,14 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			if strings.Contains(params, "-lbl") || strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") {
 				fname = fname[1+strings.Index(fname, "-"):]
 			}
-			errlines = append(errlines, fname+"\t"+a[ln-3]+"\t"+a[ln-2]+"\t"+a[1]+"\n")
+			// bij herstart worden mislukte zinnen opnieuw geparst, en mislukken dan opnieuw
+			errline := fname + "\t" + a[ln-3] + "\t" + a[ln-2] + "\t" + a[1] + "\n"
+			if errseen[errline] {
+				nlines--
+			} else {
+				errlines = append(errlines, errline)
+				errseen[errline] = true
+			}
 		}
 	}
 	fp, err = os.Create(summary)
