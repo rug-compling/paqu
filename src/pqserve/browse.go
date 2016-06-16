@@ -24,7 +24,8 @@ type ZinArchFile struct {
 }
 
 var (
-	reBasicName = regexp.MustCompile(`^[0-9]{4}[\\/][0-9]{4}$`)
+	reBasicName   = regexp.MustCompile(`^[0-9]{4}[\\/][0-9]{4}$`)
+	reCodedPrefix = regexp.MustCompile(`^[0-9]{4}[\\/][0-9]{4}-`)
 )
 
 // TAB: browse (zinnen)
@@ -303,7 +304,7 @@ func browserr(q *Context) {
 					if coded {
 						if f[2][5:] == lbl {
 							state = 1
-						} else if len(f[2]) > 10 && f[2][9] == '-' && f[2][10:] == lbl {
+						} else if len(f[2]) > 10 && f[2][9] == '-' && f[2][10:] == lbl && reCodedPrefix.MatchString(f[2]) {
 							state = 1
 						}
 					} else {
