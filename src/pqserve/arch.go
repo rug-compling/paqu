@@ -98,18 +98,18 @@ func (a *arch) ReadN(n uint) ([]byte, error) {
 		return []byte{}, ArchClosed
 	}
 
+	b := make([]byte, n)
+
 	if a.isZip {
 		rc, err := a.zr.File[a.zi-1].Open()
 		if err != nil {
 			return []byte{}, err
 		}
-		b := make([]byte, n)
 		_, err = io.ReadFull(rc, b)
 		rc.Close()
 		return b, err
 	}
 
-	b := make([]byte, n)
 	_, err := io.ReadFull(a.tr, b)
 	return b, err
 }
