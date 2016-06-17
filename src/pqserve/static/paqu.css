@@ -57,7 +57,11 @@ a:hover {
 a.ico {
     padding: 0px .5em;
 }
-a.ico:hover {
+a.icol {
+    padding: 0px 0px 0px .5em;
+}
+a.ico:hover,
+a.icol:hover {
     text-decoration: none;
 }
 #stats, #statsmeta, #statsrel, #xstats {

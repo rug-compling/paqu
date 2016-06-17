@@ -252,17 +252,40 @@ func home(q *Context) {
 
 		// HTML-uitvoer van alle matchende dependency relations voor huidige zin
 		seen := make(map[string]bool)
+		lines := make([][2]string, 0)
+		links := make(map[string][]string)
 		for _, item := range zin.items {
 			s := fmt.Sprintf("%s:%s — %s — %s:%s",
 				html.EscapeString(unHigh(item.word)), item.postag,
 				item.rel,
 				html.EscapeString(unHigh(item.hword)), item.hpostag)
-			if seen[s] {
-				continue
+			if !seen[s] {
+				seen[s] = true
+				qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, first(q.r, "meta"), prefix)
+				line := fmt.Sprintf("<li class=\"li2\"><a href=\"?%s\">%s</a>\n", qq, s)
+				lines = append(lines, [2]string{s, line})
+				links[s] = make([]string, 0)
 			}
-			seen[s] = true
-			qq := make_query_string(item.word, item.postag, item.rel, item.hpostag, item.hword, first(q.r, "meta"), prefix)
-			fmt.Fprintf(q.w, "<li class=\"li2\"><a href=\"?%s\">%s</a>\n", qq, s)
+			// Link naar bomen voor individuele matchende dependency relation
+			green := ""
+			if item.hword != "" {
+				green = fmt.Sprint(item.hbegin)
+			}
+			links[s] = append(links[s],
+				fmt.Sprintf("<a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%d&amp;gr=%s&amp;ms=%s\" class=\"icol\">&#10020;</a>\n",
+					prefix,
+					zin.arch,
+					zin.file,
+					item.begin,
+					green,
+					item.mark))
+
+		}
+		for _, line := range lines {
+			fmt.Fprint(q.w, line[1])
+			for _, link := range links[line[0]] {
+				fmt.Fprint(q.w, link)
+			}
 		}
 
 		// Einde zin + dependency relations
