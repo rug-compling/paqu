@@ -293,6 +293,10 @@ func home(q *Context) {
 	}
 	fmt.Fprint(q.w, "</ol>\n<p>\n")
 
+	if offset == 0 && len(zinnen) == 0 {
+		fmt.Fprintln(q.w, "geen match gevonden")
+	}
+
 	defer html_footer(q)
 
 	// Links naar volgende en vorige pagina's met resultaten

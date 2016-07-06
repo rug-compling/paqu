@@ -53,6 +53,7 @@ In overweging:
         - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
           - Optie `application_type=qa` vóór de optie `-parse`
       - Door gebruiker andere labels laten kiezen voor `paqu.path1`, `paqu.path2`, etc
-    - corrigeren van ingevoerd corpus
-      - download en vervangen van parse van enkele zin
-        - is dit mogelijk? ik vermoed ernstige problemen met bijwerken van gegevens in MySQL
+    - Corrigeren van ingevoerd corpus
+      - Download en vervangen van parse van enkele zin
+        - Is dit mogelijk? Ik vermoed ernstige problemen met bijwerken van gegevens in MySQL
+    - Kunnen telresultaten ook dichtklapbaar worden gemaakt?
