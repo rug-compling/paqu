@@ -471,7 +471,51 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 
 			// tokenizer
-			if !has_tok {
+			if has_tok {
+				if !(strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei")) {
+					var fpin, fpout *os.File
+					fpin, err = os.Open(data + ".tmp")
+					if err != nil {
+						return
+					}
+					fpout, err = os.Create(data + ".tmp2")
+					if err != nil {
+						fpin.Close()
+						return
+					}
+					r := util.NewReader(fpin)
+					for {
+						line, e := r.ReadLineString()
+						if e != nil {
+							fpout.Close()
+							fpin.Close()
+							if e != io.EOF {
+								err = e
+								return
+							}
+							break
+						}
+						if !(strings.HasPrefix(line, "##META") || strings.HasPrefix(line, "##PAQU")) {
+							words := strings.Fields(line)
+							for i, word := range words {
+								if word == `[` {
+									words[i] = `\[`
+								} else if word == `\[` {
+									words[i] = `\\[`
+								} else if word == `]` {
+									words[i] = `\]`
+								} else if word == `\]` {
+									words[i] = `\\]`
+								}
+							}
+							fmt.Fprintln(fpout, strings.Join(words, " "))
+						} else {
+							fmt.Fprintln(fpout, line)
+						}
+					}
+					os.Rename(data+".tmp2", data+".tmp")
+				}
+			} else {
 				var tok string
 				if params == "run" {
 					tok = "tokenize.sh"

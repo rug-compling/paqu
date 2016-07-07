@@ -75,14 +75,17 @@ var (
 	fileno       = 0
 	vm           *otto.Otto
 
+	opt_e = flag.Bool("e", false, "geen escape-codes gebruiken voor haken")
 	opt_n = flag.Int("n", 0, "maximum aantal bestanden")
 	opt_m = flag.Int("m", 0, "maximum aantal zinnen per bestand")
 )
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
-Syntax: %s [-n int] [-m int] configfile.toml
+Syntax: %s [-e] [-n int] [-m int] configfile.toml
 
+  -e: geen escape-codes gebruiken voor haken
+      als de tekst niet getokeniseerd is worden nooit escape-codes gebruikt
   -n: maximum aantal bestanden (voor testen)
   -m: maximum aantal zinnen per bestand (voor testen)
 
@@ -658,7 +661,7 @@ func oktype(item, value string) bool {
 }
 
 func alpinoEscape(s string) string {
-	if cfg.Tokenized {
+	if cfg.Tokenized && !*opt_e {
 		switch s {
 		case `[`:
 			return `\[`

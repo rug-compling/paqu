@@ -627,7 +627,7 @@ Type = %q
 
 	n, m := foliamax(settings)
 
-	shell("pqfolia -n %d -m %d %s > %s 2> %s",
+	shell("pqfolia -e -n %d -m %d %s > %s 2> %s",
 		n,
 		m,
 		filepath.Join(fdir, "config.toml"),
@@ -735,7 +735,7 @@ Type = %q
 			o = " > " + outfile
 		}
 		errfile := filepath.Join(fdir, "pqfolia.err")
-		err = shell("pqfolia %s%s 2> %s", filepath.Join(fdir, "config.toml"), o, errfile).Run()
+		err = shell("pqfolia -e %s%s 2> %s", filepath.Join(fdir, "config.toml"), o, errfile).Run()
 		if foliaErr(q, err) {
 			os.Rename(errfile, filepath.Join(foliadir(q), "error.txt"))
 			os.RemoveAll(outdir)
