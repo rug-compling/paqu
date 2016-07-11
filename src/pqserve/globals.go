@@ -39,10 +39,11 @@ type Config struct {
 
 	Secret string
 
-	Sh      string
-	Path    string
-	Alpino  string
-	Timeout int
+	Sh           string
+	Path         string
+	Alpino       string
+	Timeout      int
+	Alpinoserver string
 
 	Https     bool
 	Httpdual  bool

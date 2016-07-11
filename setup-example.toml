@@ -108,6 +108,10 @@ alpino = "/local/opt/Alpino"
 # Dit heeft geen effect als er een Alpino-server wordt gebruikt.
 timeout = 900
 
+# URL van een remote server
+# TODO: uitleg
+alpinoserver = ""
+
 # Een willekeurige tekst die wordt gebruikt voor versleuteling bij het
 # inloggen.
 # VERANDER DIT IN EEN ANDERE TEKST.

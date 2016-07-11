@@ -685,13 +685,16 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				ext = ".tmp"
 			}
 
-			var timeout string
+			var server, timeout string
+			if Cfg.Alpinoserver != "" {
+				server = "-s " + Cfg.Alpinoserver
+			}
 			if Cfg.Timeout > 0 {
 				timeout = fmt.Sprint("-t ", Cfg.Timeout)
 			}
 			cmd := shell(
-				`pqalpino -a %s -d %s %s %s.lines%s >> %s 2>> %s`,
-				Cfg.Alpino, xml, timeout, data, ext, stdout, stderr)
+				`pqalpino -a %s -d %s %s %s %s.lines%s >> %s 2>> %s`,
+				Cfg.Alpino, xml, server, timeout, data, ext, stdout, stderr)
 			err = run(cmd, task.chKill, nil)
 			if err != nil {
 				return
@@ -699,7 +702,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 	} // end if params != (dact || xmlzip)
 
-	// TODO: inlezen uit xml-bestanden als er een Alpino-server wordt gebruikt
 	nlines := 0
 	errlines := make([]string, 0)
 	fp, e := os.Open(stderr)
@@ -906,9 +908,14 @@ FORSELECT:
 			break FORSELECT
 		}
 	}
-	err = syscall.Kill(-pgid, 9)
-	if err != nil {
-		logf("syscall.Kill(-pgid, 9) error: %v", err)
+	for _, sig := range []int{15, 9} {
+		err = syscall.Kill(-pgid, syscall.Signal(sig))
+		if err != nil {
+			logf("syscall.Kill(-pgid, %d) error: %v", sig, err)
+		}
+		if sig != 9 {
+			time.Sleep(2 * time.Second)
+		}
 	}
 	err = <-chRet
 	return err

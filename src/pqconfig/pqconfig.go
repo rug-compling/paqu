@@ -32,10 +32,11 @@ type Config struct {
 	Maxdup int  `toml:"maxdup"`
 	Dact   bool `toml:"dact"`
 
-	Sh      string `toml:"sh"`
-	Path    string `toml:"path"`
-	Alpino  string `toml:"alpino"`
-	Timeout int    `toml:"timeout"`
+	Sh           string `toml:"sh"`
+	Path         string `toml:"path"`
+	Alpino       string `toml:"alpino"`
+	Timeout      int    `toml:"timeout"`
+	Alpinoserver string `toml:"alpinoserver"`
 
 	Secret string `toml:"secret"`
 

@@ -1,24 +1,40 @@
-/*
-TODO: Geen curl gebruiken, maar Go-functies
-*/
-
 package main
 
 import (
 	"github.com/pebbe/util"
 
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
-	"strconv"
-	"strings"
+	"syscall"
+	"time"
 )
 
-type Splitter struct {
-	r io.Reader
+type Response struct {
+	Code     int
+	Status   string
+	Message  string
+	Id       string
+	Interval int
+	Finished bool
+	Batch    []Line
+}
+
+type Line struct {
+	Status   string
+	Lineno   int
+	Label    string
+	Sentence string
+	Xml      string
+	Log      string
 }
 
 var (
@@ -26,6 +42,8 @@ var (
 	opt_d = flag.String("d", "xml", "Directory voor uitvoer")
 	opt_s = flag.String("s", "", "Alpino server")
 	opt_t = flag.Int("t", 900, "Time-out in seconden per regel")
+
+	x = util.CheckErr
 )
 
 func usage() {
@@ -77,7 +95,7 @@ func main() {
 			}
 			os.Remove(tmpfile)
 			if errval != io.EOF {
-				util.CheckErr(errval)
+				x(errval)
 			}
 		}()
 		fpin, errval = os.Open(filename)
@@ -131,48 +149,87 @@ func main() {
 			}
 		}
 	} else {
-		cmd := exec.Command(
-			"/usr/bin/curl", "-s", "--upload-file", filename, *opt_s)
-		cmd.Stderr = os.Stderr
-		reader, err := cmd.StdoutPipe()
+		var buf bytes.Buffer
+		fmt.Fprintf(&buf, `{"request":"parse", "lines":true, "tokens":true, "timeout":%d}`, *opt_t)
+		fp, err := os.Open(filename)
+		x(err)
+		_, err = io.Copy(&buf, fp)
+		fp.Close()
+		x(err)
+		resp, err := http.Post(*opt_s, "application/json", &buf)
 		util.CheckErr(err)
-		util.CheckErr(cmd.Start())
-		var fp *os.File
-		opened := false
-		var topline string
-		lineread := util.NewReader(reader)
+		data, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		util.CheckErr(err)
+		var response Response
+		err = json.Unmarshal(data, &response)
+		util.CheckErr(err)
+		if response.Code > 299 {
+			x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
+		}
+		maxinterval := response.Interval
+		id := response.Id
+
+		go func() {
+			chSignal := make(chan os.Signal, 1)
+			signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+			sig := <-chSignal
+			fmt.Fprintf(os.Stderr, "Signal: %v\n", sig)
+
+			var buf bytes.Buffer
+			fmt.Fprintf(&buf, `{"request":"cancel", "id":%q}`, id)
+			resp, err := http.Post(*opt_s, "application/json", &buf)
+			util.CheckErr(err)
+			_, err = ioutil.ReadAll(resp.Body)
+			resp.Body.Close()
+			util.CheckErr(err)
+
+			os.Exit(0)
+		}()
+
+		interval := 2
 		for {
-			line, err := lineread.ReadLineString()
-			if err == io.EOF {
+			if interval > maxinterval {
+				interval = maxinterval
+			}
+			time.Sleep(time.Duration(interval) * time.Second)
+
+			var buf bytes.Buffer
+			fmt.Fprintf(&buf, `{"request":"output", "id":%q}`, id)
+			resp, err := http.Post(*opt_s, "application/json", &buf)
+			util.CheckErr(err)
+			data, err := ioutil.ReadAll(resp.Body)
+			resp.Body.Close()
+			util.CheckErr(err)
+			var response Response
+			err = json.Unmarshal(data, &response)
+			util.CheckErr(err)
+			if response.Code > 299 {
+				x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
+			}
+			for _, line := range response.Batch {
+				if line.Status == "ok" {
+					fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
+					x(err)
+					fmt.Fprintln(fp, line.Xml)
+					fp.Close()
+				} else {
+					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
+%s
+Q#%s|%s|%s|??|????
+**** parsed %s (line number %d)
+`,
+						line.Label, line.Lineno,
+						line.Log,
+						line.Label, line.Sentence, line.Status,
+						line.Label, line.Lineno)
+				}
+			}
+
+			if response.Finished {
 				break
 			}
-			util.CheckErr(err)
-			if opened {
-				fmt.Fprintln(fp, line)
-				if strings.HasPrefix(line, "</alpino_ds") {
-					fp.Close()
-					opened = false
-				}
-			} else {
-				if strings.HasPrefix(line, "<alpino_ds") {
-					a := strings.Split(line, " id=\"")[1]
-					a = strings.Split(a, "\"")[0]
-					a = a[strings.LastIndex(a, ".")+1:]
-					n, err := strconv.Atoi(a)
-					util.CheckErr(err)
-					fname := filepath.Join(*opt_d, fmt.Sprintf("%08d.xml", n))
-					fp, err = os.Create(fname)
-					util.CheckErr(err)
-					fmt.Fprintln(fp, topline)
-					fmt.Fprintln(fp, line)
-					opened = true
-				} else if strings.HasPrefix(line, "<?xml") {
-					topline = line
-				} else {
-					fmt.Fprintln(os.Stderr, line)
-				}
-			}
+			interval = (3 * interval) / 2
 		}
-		util.CheckErr(cmd.Wait())
 	}
 }

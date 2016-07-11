@@ -6,10 +6,13 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
+	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"expvar"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -23,6 +26,14 @@ import (
 	"syscall"
 	"time"
 )
+
+type AlpinoInfo struct {
+	Limits AlpinoLimits `json:"limits"`
+}
+
+type AlpinoLimits struct {
+	Jobs int `json:"jobs"`
+}
 
 var (
 	DefaultPaquDir string
@@ -122,7 +133,22 @@ func main() {
 	}
 	logf("MySQL server-versie: %v (%s)", version, versionstring)
 
-	semaphore = make(chan struct{}, Cfg.Maxjob)
+	maxjobs := Cfg.Maxjob
+	if Cfg.Alpinoserver != "" {
+		buf := bytes.NewBufferString(`{"request":"info"}`)
+		resp, err := http.Post(Cfg.Alpinoserver, "application/json", buf)
+		util.CheckErr(err)
+		data, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		util.CheckErr(err)
+		var info AlpinoInfo
+		err = json.Unmarshal(data, &info)
+		util.CheckErr(err)
+		if info.Limits.Jobs > 0 && info.Limits.Jobs < maxjobs {
+			maxjobs = info.Limits.Jobs
+		}
+	}
+	semaphore = make(chan struct{}, maxjobs)
 	wg.Add(1)
 	go func() {
 		scheduler()
