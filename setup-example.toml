@@ -105,11 +105,14 @@ path = "/local/opt/paqu/bin:/bin:/usr/bin"
 alpino = "/local/opt/Alpino"
 
 # Timeout voor Alpino voor de bewerking van één regel. In seconden.
-# Dit heeft geen effect als er een Alpino-server wordt gebruikt.
+# Het effect is niet exact als er een Alpino-server wordt gebruikt.
 timeout = 900
 
-# URL van een remote server
-# TODO: uitleg
+# URL van een Alpino-server.
+# Als dit leeg is wordt de lokale versie van Alpino gebruikt.
+# De server moet deze API implementeren: https://github.com/rug-compling/alpino-api
+# Een server kan in principe de data parallel verwerken, en dus veel
+# sneller zijn dan wanneer je Alpino lokaal gebruikt.
 alpinoserver = ""
 
 # Een willekeurige tekst die wordt gebruikt voor versleuteling bij het

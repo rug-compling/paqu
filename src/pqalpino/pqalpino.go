@@ -40,7 +40,7 @@ type Line struct {
 var (
 	opt_a = flag.String("a", "", "ALPINO_HOME")
 	opt_d = flag.String("d", "xml", "Directory voor uitvoer")
-	opt_s = flag.String("s", "", "Alpino server")
+	opt_s = flag.String("s", "", "Alpino-server")
 	opt_t = flag.Int("t", 900, "Time-out in seconden per regel")
 
 	x = util.CheckErr
@@ -55,9 +55,9 @@ Verplichte optie:
 
 Overige opties:
   -d directory : Directory waar uitvoer wordt geplaatst (default: xml)
-  -s server    : Alpino-server ZONDER TOKENISATIE, als deze ontbreekt wordt
-                 een lokale versie van Alpino gebruikt
-  -t seconden  : Time-out per regel (default: 900), geen effect in combinatie met -s
+  -s server    : Alpino-server, zie: https://github.com/rug-compling/alpino-api
+                 Als deze ontbreekt wordt een lokale versie van Alpino gebruikt
+  -t seconden  : Time-out per regel (default: 900)
 
 `, os.Args[0])
 }

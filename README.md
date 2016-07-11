@@ -96,11 +96,11 @@ Om PaQu te draaien heb je van
 [Alpino](http://www.let.rug.nl/vannoord/alp/Alpino/) de tokenizer en de
 parser nodig.
 
-In de nabije toekomst is het mogelijk gebruik te maken van een
-Alpino-server, die ergens op een andere website draait. Als je dat
-gebruikt heb je zelf van Alpino alleen de tokenizer nodig.
-
-TODO: Komt die server er ooit? Het lijkt er niet op.
+Je kunt ook een Alpino-server gebruiken die voldoet aan de
+[Alpino API](https://github.com/rug-compling/alpino-api).
+Als je dat doet heb je zelf van Alpino alleen de tokenizer nodig.
+Zo'n server kan in principe de data parallel verwerken, en dus veel
+sneller zijn dan wanneer je Alpino lokaal gebruikt.
 
 ----------------------------------------------------------------
 
