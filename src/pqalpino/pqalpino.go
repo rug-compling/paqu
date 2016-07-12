@@ -192,6 +192,9 @@ func main() {
 			if interval > maxinterval {
 				interval = maxinterval
 			}
+			if interval > 120 {
+				interval = 120
+			}
 			time.Sleep(time.Duration(interval) * time.Second)
 
 			var buf bytes.Buffer
