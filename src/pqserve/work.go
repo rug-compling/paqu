@@ -498,15 +498,20 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 						if !(strings.HasPrefix(line, "##META") || strings.HasPrefix(line, "##PAQU")) {
 							words := strings.Fields(line)
 							for i, word := range words {
+								// TODO: expert-optie: escape=none/half/full
+								// dit is escape=half
 								if word == `[` {
 									words[i] = `\[`
 								} else if word == `\[` {
 									words[i] = `\\[`
-								} else if word == `]` {
-									words[i] = `\]`
-								} else if word == `\]` {
-									words[i] = `\\]`
 								}
+								/*
+									} else if word == `]` {
+										words[i] = `\]`
+									} else if word == `\]` {
+										words[i] = `\\]`
+									}
+								*/
 							}
 							fmt.Fprintln(fpout, strings.Join(words, " "))
 						} else {

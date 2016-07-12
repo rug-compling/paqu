@@ -31,6 +31,12 @@ Zie ook: TODO in diverse bestanden
         niet heeft, dan de gebruiker waarschuwen?
     - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
       kiezen welke onderdelen hij wil zien?
+    - Expert-opties bij invoer nieuw corpus
+      - Escapen van invoer die al getokeniseerd is: none/half/full
+      - Maximaal aantal tokens per zin
+      - Kleinere timeout
+      - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
+        - Optie `application_type=qa` vóór de optie `-parse`
   - pqalpino verwijderen, inbouwen in pqserve
   - pqtexter verwijderen, inbouwen in pqserve met gebruik van flexgo
     i.p.v. flex
@@ -44,10 +50,6 @@ In overweging:
 
   - pqserve:
     - Invoer nieuw corpus
-      - Expert-opties voor Alpino
-        - Kleinere timeout
-        - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
-          - Optie `application_type=qa` vóór de optie `-parse`
       - Door gebruiker andere labels laten kiezen voor `paqu.path1`, `paqu.path2`, etc
     - Corrigeren van ingevoerd corpus
       - Download en vervangen van parse van enkele zin

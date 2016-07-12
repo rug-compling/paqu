@@ -150,7 +150,7 @@ func main() {
 		}
 	} else {
 		var buf bytes.Buffer
-		fmt.Fprintf(&buf, `{"request":"parse", "lines":true, "tokens":true, "timeout":%d}`, *opt_t)
+		fmt.Fprintf(&buf, `{"request":"parse", "lines":true, "tokens":true, "escape":"none", "timeout":%d}`, *opt_t)
 		fp, err := os.Open(filename)
 		x(err)
 		_, err = io.Copy(&buf, fp)
