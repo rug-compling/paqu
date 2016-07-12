@@ -502,12 +502,12 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 								// dit is escape=half
 								if word == `[` {
 									words[i] = `\[`
-								} else if word == `\[` {
-									words[i] = `\\[`
+								} else if word == `]` {
+									words[i] = `\]`
 								}
 								/*
-									} else if word == `]` {
-										words[i] = `\]`
+									} else if word == `\[` {
+										words[i] = `\\[`
 									} else if word == `\]` {
 										words[i] = `\\]`
 									}
