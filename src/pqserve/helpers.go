@@ -134,6 +134,7 @@ func writeHead(q *Context, title string, tab int) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="stylesheet" type="text/css" href="paqu.css">
 <!--[if gte IE 10]> -->
 <style type="text/css">span.ie { display:none; }</style>
