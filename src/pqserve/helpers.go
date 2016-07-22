@@ -334,8 +334,7 @@ func gz(filename string) error {
 	if err != nil {
 		return err
 	}
-	os.Remove(filename)
-	return nil
+	return os.Remove(filename)
 }
 
 func repl_filechar(s string) string {
