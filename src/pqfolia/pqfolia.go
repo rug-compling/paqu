@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/util"
 	"github.com/robertkrimen/otto"
 
+	"bytes"
 	"encoding/xml"
 	"flag"
 	"fmt"
@@ -105,7 +106,7 @@ func main() {
 	cfg.Meta_src = "Meta.Src"
 	cfg.File_src = "File.Src"
 	cfg.File_path = "File.Path."
-	md, err := toml.DecodeFile(flag.Arg(0), &cfg)
+	md, err := TomlDecodeFile(flag.Arg(0), &cfg)
 	x(err)
 	if un := md.Undecoded(); len(un) != 0 {
 		fmt.Fprintln(os.Stderr, "De volgende items in", flag.Arg(0), "zijn onbekend. Spelfout?")
@@ -684,4 +685,16 @@ func valid(text, value string) error {
 		return fmt.Errorf("Is-teken in label voor %s %q is niet toegestaan", text, value)
 	}
 	return nil
+}
+
+func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
+	bs, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return toml.MetaData{}, err
+	}
+	// skip BOM (berucht op Windows)
+	if bytes.HasPrefix(bs, []byte{239, 187, 191}) {
+		bs = bs[3:]
+	}
+	return toml.Decode(string(bs), v)
 }

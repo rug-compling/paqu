@@ -81,7 +81,7 @@ func foliatool(q *Context) {
 
 	settingsFile := filepath.Join(fdir, "settings.toml")
 	if _, err := os.Stat(settingsFile); err == nil {
-		_, err := toml.DecodeFile(settingsFile, &settings)
+		_, err := TomlDecodeFile(settingsFile, &settings)
 		if doErr(q, err) {
 			return
 		}

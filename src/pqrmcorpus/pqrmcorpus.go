@@ -7,8 +7,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
 
+	"bytes"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,7 +43,7 @@ func main() {
 			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
 		}
 	}
-	_, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
@@ -100,4 +102,16 @@ func main() {
 func rijen(r sql.Result) int64 {
 	n, _ := r.RowsAffected()
 	return n
+}
+
+func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
+	bs, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return toml.MetaData{}, err
+	}
+	// skip BOM (berucht op Windows)
+	if bytes.HasPrefix(bs, []byte{239, 187, 191}) {
+		bs = bs[3:]
+	}
+	return toml.Decode(string(bs), v)
 }

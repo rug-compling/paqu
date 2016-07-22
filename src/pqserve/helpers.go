@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 
 	"bytes"
@@ -460,4 +461,16 @@ func getMeta(q *Context, prefix string) []MetaType {
 	}
 	logerr(rows.Err())
 	return result
+}
+
+func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
+	bs, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return toml.MetaData{}, err
+	}
+	// skip BOM (berucht op Windows)
+	if bytes.HasPrefix(bs, []byte{239, 187, 191}) {
+		bs = bs[3:]
+	}
+	return toml.Decode(string(bs), v)
 }

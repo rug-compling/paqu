@@ -3,7 +3,6 @@ package main
 //. Imports
 
 import (
-	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
 	"bytes"
@@ -64,7 +63,7 @@ func main() {
 		}
 	}
 	tom := filepath.Join(paqudir, "setup.toml")
-	md, err := toml.DecodeFile(tom, &Cfg)
+	md, err := TomlDecodeFile(tom, &Cfg)
 	util.CheckErr(err)
 	if un := md.Undecoded(); len(un) > 0 {
 		fmt.Fprintln(os.Stderr, "Fout in", tom, ": onbekend :", un)

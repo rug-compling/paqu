@@ -6,7 +6,9 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -83,7 +85,7 @@ func main() {
 	}
 
 	cfg := Config{}
-	md, err := toml.DecodeFile(filepath.Join(paqudir, "setup.toml"), &cfg)
+	md, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &cfg)
 	util.CheckErr(err)
 
 	for _, un := range md.Undecoded() {
@@ -93,4 +95,16 @@ func main() {
 	e := toml.NewEncoder(os.Stdout)
 	e.Encode(cfg)
 
+}
+
+func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
+	bs, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return toml.MetaData{}, err
+	}
+	// skip BOM (berucht op Windows)
+	if bytes.HasPrefix(bs, []byte{239, 187, 191}) {
+		bs = bs[3:]
+	}
+	return toml.Decode(string(bs), v)
 }
