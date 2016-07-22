@@ -322,9 +322,9 @@ func gz(filename string) error {
 	if err != nil {
 		return err
 	}
-	defer fpin.Close()
 	fpout, err := os.Create(filename + ".gz")
 	if err != nil {
+		fpin.Close()
 		return err
 	}
 	defer fpout.Close()
@@ -332,8 +332,10 @@ func gz(filename string) error {
 	defer w.Close()
 	_, err = io.Copy(w, fpin)
 	if err != nil {
+		fpin.Close()
 		return err
 	}
+	fpin.Close()
 	return os.Remove(filename)
 }
 
