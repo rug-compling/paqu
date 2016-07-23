@@ -86,6 +86,7 @@ func main() {
 		wg.Wait()
 
 		logf("Uptime: %v", time.Now().Sub(started))
+		time.Sleep(time.Second)
 		close(chLoggerExit)
 		wgLogger.Wait()
 
