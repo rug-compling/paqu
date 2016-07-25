@@ -38,10 +38,15 @@ type Line struct {
 }
 
 var (
-	opt_a = flag.String("a", "", "ALPINO_HOME")
-	opt_d = flag.String("d", "xml", "Directory voor uitvoer")
-	opt_s = flag.String("s", "", "Alpino-server")
-	opt_t = flag.Int("t", 900, "Time-out in seconden per regel")
+	opt_d = flag.String("d", "xml", "directory voor uitvoer")
+	opt_e = flag.String("e", "half", "escape level: none / half / full")
+	opt_l = flag.String("l", "false", "true: één zin per regel; false: doorlopende tekst")
+	opt_L = flag.String("L", "doc", "prefix voor labels")
+	opt_n = flag.Int("n", 0, "maximum aantal tokens per regel")
+	opt_p = flag.String("p", "", "alternatieve parser")
+	opt_s = flag.String("s", "", "URL van Alpino-server")
+	opt_t = flag.Int("t", 900, "time-out in seconden per regel")
+	opt_T = flag.String("T", "false", "true: zinnen zijn getokeniseerd")
 
 	x = util.CheckErr
 )
@@ -50,14 +55,32 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `
 Syntax: %s [opties] datafile
 
-Verplichte optie:
-  -a directory : ALPINO_HOME
+Optie:
+
+  -s string : Alpino-server, zie: https://github.com/rug-compling/alpino-api
+              Als deze ontbreekt wordt een lokale versie van Alpino gebruikt
+
+Zonder gebruik van Alpino-server:
+
+  De tekst moet bestaan uit één zin per regel, getokeniseerd, met of zonder labels.
+
+Met gebruik van Alpino-server:
+
+  De tekst kan verschillende vormen hebben.
 
 Overige opties:
-  -d directory : Directory waar uitvoer wordt geplaatst (default: xml)
-  -s server    : Alpino-server, zie: https://github.com/rug-compling/alpino-api
-                 Als deze ontbreekt wordt een lokale versie van Alpino gebruikt
-  -t seconden  : Time-out per regel (default: 900)
+
+  -d string : Directory waar uitvoer wordt geplaatst (default: xml)
+  -n int    : Maximum aantal tokens per regel (default: 0 = geen limiet)
+  -p string : Alternatieve parser, zoals qa (default: geen)
+  -t int    : Time-out per regel (default: 900)
+
+Opties alleen van toepassing bij gebruik Alpino-server:
+
+  -e string : Escape level: none / half / full (default: half)
+  -l bool   : true: één zin per regel; false: doorlopende tekst (default: false)
+  -L string : Prefix voor labels (default: doc)
+  -T bool   : true: zinnen zijn getokeniseerd (default: false)
 
 `, os.Args[0])
 }
@@ -73,19 +96,20 @@ func main() {
 	}
 	filename := flag.Arg(0)
 
-	if *opt_a == "" {
-		fmt.Println("Optie -a ontbreekt")
-		return
-	}
-
-	os.Mkdir(*opt_d, 0777)
-
 	// PARSEN
 
 	if *opt_s == "" {
+		os.MkdirAll(*opt_d, 0777)
 		var fpin, fpout *os.File
 		var errval error
 		tmpfile := filename + ".part"
+		var maxtok, parser string
+		if *opt_n > 0 {
+			maxtok = fmt.Sprint("max_sentence_length=", *opt_n)
+		}
+		if *opt_p != "" {
+			parser = "application_type=" + *opt_p
+		}
 		defer func() {
 			if fpin != nil {
 				fpin.Close()
@@ -128,11 +152,11 @@ func main() {
 					"/bin/bash",
 					"-c",
 					fmt.Sprintf(
-						"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d -parse < %s",
-						*opt_d, *opt_t*1000, tmpfile))
+						"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d %s %s -parse < %s",
+						*opt_d, *opt_t*1000, maxtok, parser, tmpfile))
 				cmd.Env = []string{
-					"ALPINO_HOME=" + *opt_a,
-					"PATH=" + os.Getenv("PATH"),
+					"ALPINO_HOME=" + os.Getenv("ALPINO_HOME"),
+					"PATH=" + os.Getenv("ALPINO_HOME") + "/bin:" + os.Getenv("PATH"),
 					"LANG=en_US.utf8",
 					"LANGUAGE=en_US.utf8",
 					"LC_ALL=en_US.utf8",
@@ -150,7 +174,16 @@ func main() {
 		}
 	} else {
 		var buf bytes.Buffer
-		fmt.Fprintf(&buf, `{"request":"parse", "lines":true, "tokens":true, "escape":"none", "timeout":%d}`, *opt_t)
+		fmt.Fprintf(
+			&buf,
+			`{"request":"parse", "lines":%v, "tokens":%v, "escape":%q, "label":%q, "timeout":%d, "parser":%q, "maxtokens":%d}`,
+			*opt_l == "true",
+			*opt_T == "true",
+			*opt_e,
+			*opt_L,
+			*opt_t,
+			*opt_p,
+			*opt_n)
 		fp, err := os.Open(filename)
 		x(err)
 		_, err = io.Copy(&buf, fp)
@@ -210,8 +243,18 @@ func main() {
 			if response.Code > 299 {
 				x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
 			}
+			var lastdir string
 			for _, line := range response.Batch {
 				if line.Status == "ok" {
+					if line.Label == "" {
+						line.Label = fmt.Sprint(line.Lineno)
+					}
+					filename := filepath.Join(*opt_d, line.Label+".xml")
+					dirname := filepath.Dir(filename)
+					if dirname != lastdir {
+						lastdir = dirname
+						os.MkdirAll(dirname, 0777)
+					}
 					fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
 					x(err)
 					fmt.Fprintln(fp, line.Xml)

@@ -698,8 +698,8 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				timeout = fmt.Sprint("-t ", Cfg.Timeout)
 			}
 			cmd := shell(
-				`pqalpino -a %s -d %s %s %s %s.lines%s >> %s 2>> %s`,
-				Cfg.Alpino, xml, server, timeout, data, ext, stdout, stderr)
+				`pqalpino -e none -l true -T true -d %s %s %s %s.lines%s >> %s 2>> %s`,
+				xml, server, timeout, data, ext, stdout, stderr)
 			err = run(cmd, task.chKill, nil)
 			if err != nil {
 				return
