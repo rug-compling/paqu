@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -98,8 +99,8 @@ func main() {
 
 	// PARSEN
 
+	var lastdir string
 	if *opt_s == "" {
-		os.MkdirAll(*opt_d, 0777)
 		var fpin, fpout *os.File
 		var errval error
 		tmpfile := filename + ".part"
@@ -127,25 +128,46 @@ func main() {
 			return
 		}
 		rd := util.NewReaderSize(fpin, 5000)
-		n := 0
+		lineno := 0
 		for {
 			line, err := rd.ReadLineString()
 			if err != nil && err != io.EOF {
 				errval = err
 				return
 			}
-			if err == nil && n == 0 {
+			if err == nil && lineno == 0 {
 				fpout, errval = os.Create(tmpfile)
 				if errval != nil {
 					return
 				}
 			}
 			if err == nil {
+				if strings.HasPrefix(line, "%") {
+					continue
+				}
+				lineno++
+				var label string
+				a := strings.SplitN(line, "|", 2)
+				if len(a) == 2 {
+					a[0] = strings.TrimSpace(a[0])
+					a[1] = strings.TrimSpace(a[1])
+					if a[0] == "" {
+						a[0] = fmt.Sprint(lineno)
+					}
+					label = a[0]
+					line = a[0] + "|" + a[1]
+				} else {
+					label = fmt.Sprint(lineno)
+					line = label + "|" + line
+				}
 				fmt.Fprintln(fpout, line)
-				n++
+				dirname := filepath.Dir(filepath.Join(*opt_d, label))
+				if dirname != lastdir {
+					lastdir = dirname
+					os.MkdirAll(dirname, 0777)
+				}
 			}
-			if (err == io.EOF && n > 0) || n == 10000 {
-				n = 0
+			if (err == io.EOF && lineno%10000 != 0) || lineno%10000 == 0 {
 				fpout.Close()
 				fpout = nil
 				cmd := exec.Command(
@@ -243,7 +265,6 @@ func main() {
 			if response.Code > 299 {
 				x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
 			}
-			var lastdir string
 			for _, line := range response.Batch {
 				if line.Status == "ok" {
 					if line.Label == "" {

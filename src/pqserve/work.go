@@ -645,9 +645,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 						lbl = ""
 					}
 					fmt.Fprintf(fp, "%s|%s\n", fname, strings.TrimSpace(line))
-					if nlines%10000 == 0 {
-						os.MkdirAll(filepath.Join(xml, fmt.Sprintf("%04d", nlines/10000)), 0777)
-					}
 					nlines++
 					if len(metalines) > 0 {
 						fpm, e := os.Create(filepath.Join(xml, fname+".meta"))
