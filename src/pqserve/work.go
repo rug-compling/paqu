@@ -695,7 +695,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				timeout = fmt.Sprint("-t ", Cfg.Timeout)
 			}
 			cmd := shell(
-				`pqalpino -e none -l true -T true -d %s %s %s %s.lines%s >> %s 2>> %s`,
+				`pqalpino -e none -l -T -q -d %s %s %s %s.lines%s >> %s 2>> %s`,
 				xml, server, timeout, data, ext, stdout, stderr)
 			err = run(cmd, task.chKill, nil)
 			if err != nil {

@@ -25,6 +25,8 @@ type Response struct {
 	Message  string
 	Id       string
 	Interval int
+	Lines    int
+	Timeout  int
 	Finished bool
 	Batch    []Line
 }
@@ -41,13 +43,14 @@ type Line struct {
 var (
 	opt_d = flag.String("d", "xml", "directory voor uitvoer")
 	opt_e = flag.String("e", "half", "escape level: none / half / full")
-	opt_l = flag.String("l", "false", "true: één zin per regel; false: doorlopende tekst")
+	opt_l = flag.Bool("l", false, "true: één zin per regel; false: doorlopende tekst")
 	opt_L = flag.String("L", "doc", "prefix voor labels")
 	opt_n = flag.Int("n", 0, "maximum aantal tokens per regel")
 	opt_p = flag.String("p", "", "alternatieve parser")
+	opt_q = flag.Bool("q", false, "true: quiet")
 	opt_s = flag.String("s", "", "URL van Alpino-server")
 	opt_t = flag.Int("t", 900, "time-out in seconden per regel")
-	opt_T = flag.String("T", "false", "true: zinnen zijn getokeniseerd")
+	opt_T = flag.Bool("T", false, "true: zinnen zijn getokeniseerd")
 
 	x = util.CheckErr
 )
@@ -79,9 +82,11 @@ Overige opties:
 Opties alleen van toepassing bij gebruik Alpino-server:
 
   -e string : Escape level: none / half / full (default: half)
-  -l bool   : true: één zin per regel; false: doorlopende tekst (default: false)
+  -l        : Eén zin per regel (default: doorlopende tekst)
   -L string : Prefix voor labels (default: doc)
-  -T bool   : true: zinnen zijn getokeniseerd (default: false)
+  -q        : Stil
+  -T        : Zinnen zijn getokeniseerd (default: niet getokeniseerd)
+
 
 `, os.Args[0])
 }
@@ -199,8 +204,8 @@ func main() {
 		fmt.Fprintf(
 			&buf,
 			`{"request":"parse", "lines":%v, "tokens":%v, "escape":%q, "label":%q, "timeout":%d, "parser":%q, "maxtokens":%d}`,
-			*opt_l == "true",
-			*opt_T == "true",
+			*opt_l,
+			*opt_T,
 			*opt_e,
 			*opt_L,
 			*opt_t,
@@ -223,7 +228,14 @@ func main() {
 			x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
 		}
 		maxinterval := response.Interval
+		totallines := response.Lines
 		id := response.Id
+		if !*opt_q {
+			if response.Timeout > 0 {
+				fmt.Printf("timeout: %ds\n", response.Timeout)
+			}
+			fmt.Println(totallines)
+		}
 
 		go func() {
 			chSignal := make(chan os.Signal, 1)
@@ -242,7 +254,9 @@ func main() {
 			os.Exit(0)
 		}()
 
+		seen := 0
 		interval := 2
+		incr := true
 		for {
 			if interval > maxinterval {
 				interval = maxinterval
@@ -264,6 +278,14 @@ func main() {
 			util.CheckErr(err)
 			if response.Code > 299 {
 				x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
+			}
+			seen += len(response.Batch)
+			if !*opt_q {
+				if totallines > 0 {
+					fmt.Println(totallines - seen)
+				} else {
+					fmt.Println(seen)
+				}
 			}
 			for _, line := range response.Batch {
 				if line.Status == "ok" {
@@ -296,7 +318,17 @@ Q#%s|%s|%s|??|????
 			if response.Finished {
 				break
 			}
-			interval = (3 * interval) / 2
+			if incr && totallines > 0 && len(response.Batch) > totallines-seen {
+				incr = false
+				interval *= totallines - seen
+				interval /= len(response.Batch)
+				if interval < 10 {
+					interval = 10
+				}
+			}
+			if incr {
+				interval = (3 * interval) / 2
+			}
 		}
 	}
 }
