@@ -84,7 +84,7 @@ Er waren problemen met %d van de %d zinnen:
 <p>
 <table class="corpora">
 <tr><th>Label<th>Fout<th>Zin</tr>
-`, nerr, nline)
+`, nerr, nline+nerr)
 		lineno := 0
 		for {
 			lineno++
