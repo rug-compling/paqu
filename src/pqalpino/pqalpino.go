@@ -75,18 +75,17 @@ Met gebruik van Alpino-server:
 Overige opties:
 
   -d string : Directory waar uitvoer wordt geplaatst (default: xml)
+  -e string : Escape level: none / half / full (default: half)
   -n int    : Maximum aantal tokens per regel (default: 0 = geen limiet)
   -p string : Alternatieve parser, zoals qa (default: geen)
   -t int    : Time-out per regel (default: 900)
 
-Opties alleen van toepassing bij gebruik Alpino-server:
+Opties alleen van toepassing bij gebruik van Alpino-server:
 
-  -e string : Escape level: none / half / full (default: half)
   -l        : Eén zin per regel (default: doorlopende tekst)
   -L string : Prefix voor labels (default: doc)
   -q        : Stil
   -T        : Zinnen zijn getokeniseerd (default: niet getokeniseerd)
-
 
 `, os.Args[0])
 }
@@ -160,10 +159,10 @@ func main() {
 						a[0] = fmt.Sprint(lineno)
 					}
 					label = a[0]
-					line = a[0] + "|" + a[1]
+					line = a[0] + "|" + escape(a[1])
 				} else {
 					label = fmt.Sprint(lineno)
-					line = label + "|" + line
+					line = label + "|" + escape(line)
 				}
 				fmt.Fprintln(fpout, line)
 				dirname := filepath.Dir(filepath.Join(*opt_d, label))
@@ -331,4 +330,28 @@ Q#%s|%s|%s|??|????
 			}
 		}
 	}
+}
+
+func escape(s string) string {
+	if *opt_e == "none" {
+		return s
+	}
+	words := strings.Fields(s)
+	for i, word := range words {
+		switch word {
+		case `[`:
+			words[i] = `\[`
+		case `]`:
+			words[i] = `\]`
+		case `\[`:
+			if *opt_e == "full" {
+				words[i] = `\\[`
+			}
+		case `\]`:
+			if *opt_e == "full" {
+				words[i] = `\\]`
+			}
+		}
+	}
+	return strings.Join(words, " ")
 }
