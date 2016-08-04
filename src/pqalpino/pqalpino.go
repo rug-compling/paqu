@@ -20,15 +20,16 @@ import (
 )
 
 type Response struct {
-	Code     int
-	Status   string
-	Message  string
-	Id       string
-	Interval int
-	Lines    int
-	Timeout  int
-	Finished bool
-	Batch    []Line
+	Code      int
+	Status    string
+	Message   string
+	Id        string
+	Interval  int
+	Lines     int
+	Timeout   int
+	Maxtokens int
+	Finished  bool
+	Batch     []Line
 }
 
 type Line struct {
@@ -232,6 +233,9 @@ func main() {
 		if !*opt_q {
 			if response.Timeout > 0 {
 				fmt.Printf("timeout: %ds\n", response.Timeout)
+			}
+			if response.Maxtokens > 0 {
+				fmt.Printf("maxtokens: %d\n", response.Maxtokens)
 			}
 			fmt.Println(totallines)
 		}
