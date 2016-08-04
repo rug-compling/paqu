@@ -43,6 +43,7 @@ type Config struct {
 	Path         string
 	Alpino       string
 	Timeout      int
+	Maxtokens    int
 	Alpinoserver string
 
 	Https     bool

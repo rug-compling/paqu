@@ -38,6 +38,7 @@ type Config struct {
 	Path         string `toml:"path"`
 	Alpino       string `toml:"alpino"`
 	Timeout      int    `toml:"timeout"`
+	Maxtokens    int    `toml:"maxtokens"`
 	Alpinoserver string `toml:"alpinoserver"`
 
 	Secret string `toml:"secret"`

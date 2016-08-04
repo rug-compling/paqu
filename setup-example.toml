@@ -108,6 +108,10 @@ alpino = "/local/opt/Alpino"
 # Het effect is niet exact als er een Alpino-server wordt gebruikt.
 timeout = 900
 
+# Maximum aantal tokens per regel. Kies 0 voor geen maximum.
+# Wanneer een Alpino-server gebruikt wordt kan die een lagere limiet opleggen.
+maxtokens = 100
+
 # URL van een Alpino-server.
 # Als dit leeg is wordt de lokale versie van Alpino gebruikt.
 # De server moet deze API implementeren: https://github.com/rug-compling/alpino-api

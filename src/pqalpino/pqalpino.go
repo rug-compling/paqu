@@ -165,6 +165,20 @@ func main() {
 					label = fmt.Sprint(lineno)
 					line = label + "|" + escape(line)
 				}
+				if *opt_n > 0 {
+					if n := len(strings.Fields(line)); n > *opt_n {
+						fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
+line too long: %d tokens
+Q#%s|skipped|??|????
+**** parsed %s (line number %d)
+`,
+							label, lineno,
+							n,
+							line,
+							label, lineno)
+						// geen continue, anders kloppen regelnummers gegeven door Alpino niet meer
+					}
+				}
 				fmt.Fprintln(fpout, line)
 				dirname := filepath.Dir(filepath.Join(*opt_d, label))
 				if dirname != lastdir {
