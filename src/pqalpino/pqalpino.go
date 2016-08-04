@@ -176,7 +176,7 @@ Q#%s|skipped|??|????
 							n,
 							line,
 							label, lineno)
-						// geen continue, anders kloppen regelnummers gegeven door Alpino niet meer
+						continue
 					}
 				}
 				fmt.Fprintln(fpout, line)

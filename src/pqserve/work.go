@@ -656,13 +656,33 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	} // end if params != (dact || xmlzip)
 
 	nlines := 0
-	errlines := make([]string, 0)
-	fp, e := os.Open(stderr)
+	fp, e := os.Open(data + ".lines")
 	if e != nil {
 		err = e
 		return
 	}
 	rd := util.NewReader(fp)
+	for {
+		_, e := rd.ReadLine()
+		if e != nil {
+			fp.Close()
+			if e == io.EOF {
+				break
+			} else {
+				err = e
+				return
+			}
+		}
+		nlines++
+	}
+
+	errlines := make([]string, 0)
+	fp, e = os.Open(stderr)
+	if e != nil {
+		err = e
+		return
+	}
+	rd = util.NewReader(fp)
 	errseen := make(map[string]bool)
 	for {
 		line, e := rd.ReadLineString()
@@ -676,7 +696,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 		}
 		if strings.HasPrefix(line, "Q#") {
-			nlines++
 			a := strings.Split(line, "|")
 			ln := len(a)
 			n, err := strconv.Atoi(a[ln-3])
@@ -696,9 +715,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			}
 			// bij herstart worden mislukte zinnen opnieuw geparst, en mislukken dan opnieuw
 			errline := fname + "\t" + a[ln-3] + "\t" + a[ln-2] + "\t" + a[1] + "\n"
-			if errseen[errline] {
-				nlines--
-			} else {
+			if !errseen[errline] {
 				errlines = append(errlines, errline)
 				errseen[errline] = true
 			}
