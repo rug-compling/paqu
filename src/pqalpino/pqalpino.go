@@ -20,25 +20,25 @@ import (
 )
 
 type Response struct {
-	Code      int
-	Status    string
-	Message   string
-	Id        string
-	Interval  int
-	Lines     int
-	Timeout   int
-	Maxtokens int
-	Finished  bool
-	Batch     []Line
+	Code            int
+	Status          string
+	Message         string
+	Id              string
+	Interval        int
+	Number_of_lines int
+	Timeout         int
+	Max_tokens      int
+	Finished        bool
+	Batch           []Line
 }
 
 type Line struct {
-	Status   string
-	Lineno   int
-	Label    string
-	Sentence string
-	Xml      string
-	Log      string
+	Error       int
+	Line_number int
+	Label       string
+	Sentence    string
+	Alpino_ds   string
+	Log         string
 }
 
 var (
@@ -215,13 +215,24 @@ Q#%s|skipped|??|????
 		}
 	} else {
 		var buf bytes.Buffer
+		var dataType string
+		if *opt_l {
+			if *opt_T {
+				dataType = "lines tokens " + *opt_e
+			} else {
+				dataType = "lines"
+			}
+		} else {
+			if *opt_L == "" {
+				dataType = "text doc"
+			} else {
+				dataType = "text " + *opt_L
+			}
+		}
 		fmt.Fprintf(
 			&buf,
-			`{"request":"parse", "lines":%v, "tokens":%v, "escape":%q, "label":%q, "timeout":%d, "parser":%q, "maxtokens":%d}`,
-			*opt_l,
-			*opt_T,
-			*opt_e,
-			*opt_L,
+			`{"request":"parse", "data_type":%q, "timeout":%d, "parser":%q, "max_tokens":%d}`,
+			dataType,
 			*opt_t,
 			*opt_p,
 			*opt_n)
@@ -242,14 +253,14 @@ Q#%s|skipped|??|????
 			x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
 		}
 		maxinterval := response.Interval
-		totallines := response.Lines
+		totallines := response.Number_of_lines
 		id := response.Id
 		if !*opt_q {
 			if response.Timeout > 0 {
 				fmt.Printf("timeout: %ds\n", response.Timeout)
 			}
-			if response.Maxtokens > 0 {
-				fmt.Printf("maxtokens: %d\n", response.Maxtokens)
+			if response.Max_tokens > 0 {
+				fmt.Printf("max tokens: %d\n", response.Max_tokens)
 			}
 			fmt.Println(totallines)
 		}
@@ -305,9 +316,9 @@ Q#%s|skipped|??|????
 				}
 			}
 			for _, line := range response.Batch {
-				if line.Status == "ok" {
+				if line.Error == 0 {
 					if line.Label == "" {
-						line.Label = fmt.Sprint(line.Lineno)
+						line.Label = fmt.Sprint(line.Line_number)
 					}
 					filename := filepath.Join(*opt_d, line.Label+".xml")
 					dirname := filepath.Dir(filename)
@@ -317,18 +328,22 @@ Q#%s|skipped|??|????
 					}
 					fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
 					x(err)
-					fmt.Fprintln(fp, line.Xml)
+					fmt.Fprintln(fp, line.Alpino_ds)
 					fp.Close()
 				} else {
+					status := "skipped"
+					if line.Error == 2 {
+						status = "fail"
+					}
 					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
 %s
 Q#%s|%s|%s|??|????
 **** parsed %s (line number %d)
 `,
-						line.Label, line.Lineno,
+						line.Label, line.Line_number,
 						line.Log,
-						line.Label, line.Sentence, line.Status,
-						line.Label, line.Lineno)
+						line.Label, line.Sentence, status,
+						line.Label, line.Line_number)
 				}
 			}
 
