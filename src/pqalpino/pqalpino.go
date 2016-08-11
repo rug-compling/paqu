@@ -33,7 +33,7 @@ type Response struct {
 }
 
 type Line struct {
-	Error       int
+	Line_status string
 	Line_number int
 	Label       string
 	Sentence    string
@@ -316,7 +316,7 @@ Q#%s|skipped|??|????
 				}
 			}
 			for _, line := range response.Batch {
-				if line.Error == 0 {
+				if line.Line_status == "ok" {
 					if line.Label == "" {
 						line.Label = fmt.Sprint(line.Line_number)
 					}
@@ -331,10 +331,6 @@ Q#%s|skipped|??|????
 					fmt.Fprintln(fp, line.Alpino_ds)
 					fp.Close()
 				} else {
-					status := "skipped"
-					if line.Error == 2 {
-						status = "fail"
-					}
 					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
 %s
 Q#%s|%s|%s|??|????
@@ -342,7 +338,7 @@ Q#%s|%s|%s|??|????
 `,
 						line.Label, line.Line_number,
 						line.Log,
-						line.Label, line.Sentence, status,
+						line.Label, line.Sentence, line.Line_status,
 						line.Label, line.Line_number)
 				}
 			}
@@ -354,8 +350,8 @@ Q#%s|%s|%s|??|????
 				incr = false
 				interval *= totallines - seen
 				interval /= len(response.Batch)
-				if interval < 10 {
-					interval = 10
+				if interval < 2 {
+					interval = 2
 				}
 			}
 			if incr {
