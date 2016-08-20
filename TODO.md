@@ -37,6 +37,7 @@ Zie ook: TODO in diverse bestanden
       - Kleinere timeout
       - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
         - Optie `application_type=qa` vóór de optie `-parse`
+    - Commentaren en labels herkennen (en lijsten?) in invoer van doorlopende tekst, net als in partok
   - pqtexter verwijderen, inbouwen in pqserve met gebruik van flexgo
     i.p.v. flex
   - pqinit verwijderen, en inbouwen in pqbuild?
