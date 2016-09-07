@@ -416,6 +416,35 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				}
 			}
 
+			// verwijderen van commentaren en labels zonder tekst
+			if params == "run" || strings.HasPrefix(params, "line") {
+				var fpin, fpout *os.File
+				fpin, err = os.Open(data + ".tmp")
+				if err != nil {
+					return
+				}
+				fpout, err = os.Create(data + ".tmp2")
+				if err != nil {
+					fpin.Close()
+					return
+				}
+				rd := util.NewReader(fpin)
+				for {
+					line, e := rd.ReadLineString()
+					if e != nil {
+						break
+					}
+					if strings.TrimSpace(line) == "" || line[0] == '%' || reRunLabel.MatchString(line) {
+						continue
+					}
+					fmt.Fprintln(fpout, line)
+				}
+				fpout.Close()
+				fpin.Close()
+				os.Remove(data + ".tmp")
+				os.Rename(data+".tmp2", data+".tmp")
+			}
+
 			// ontdubbelen van labels
 			if strings.HasPrefix(params, "folia") || strings.HasPrefix(params, "tei") || strings.Contains(params, "-lbl") {
 				var fpin, fpout *os.File

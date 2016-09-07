@@ -302,36 +302,44 @@ Keuzes voor het soort document. Zie ook <a href="info.html#corpora" target="_bla
 <dt>Doorlopende tekst
 <dd>Een bestand met platte tekst, met zinnen die doorlopen over regeleindes. Voorbeeld:
 <pre>
+  % commentaar
+  label |
   Dit is de eerste zin. Dit is
   de tweede zin. Dit is zin nummer drie.
 </pre>
+Commentaar en label worden genegeerd.
 <dt>Een zin per regel
 <dd>Een bestand met platte tekst, met één zin per regel. Voorbeeld:
 <pre>
+  % commentaar
   Dit is de eerste zin.
   Dit is de tweede zin.
 </pre>
+Commentaar wordt genegeerd.
 <dt>Een zin per regel, met labels
 <dd>Als boven, met labels toegevoegd. Label wordt van zin gescheiden door verticale streep, zonder spaties aan weerszijde. Voorbeeld:
 <pre>
+  % commentaar
   zin 1|Dit is de eerste zin.
   zin 2|Dit is de tweede zin.
 </pre>
+Commentaar wordt genegeerd.
 <dt>Een zin per regel, getokeniseerd
 <dd>Tekst die al getokeniseerd is, één zin per regel. Voorbeeld:
 <pre>
+  % commentaar
   Dit is de eerste zin .
   Dit is de tweede zin .
 </pre>
-Als tekst al getokeniseerd is worden sommige tekens speciaal behandeld. Zie:
-<a href="http://www.let.rug.nl/vannoord/alp/Alpino/AlpinoUserGuide.html#_special_symbols_in_the_input" target="_blank">Special
-symbols in the input</a>.
+Commentaar wordt genegeerd.
 <dt>Een zin per regel, met labels, getokeniseerd
 <dd>Tekst die al getokeniseerd is, en waar labels aan de zinnen is toegevoegd. Voorbeeld:
 <pre>
+  % commentaar
   zin 1|Dit is de eerste zin .
   zin 2|Dit is de tweede zin .
 </pre>
+Commentaar wordt genegeerd.
 </dl>
 <b>Andere formaten</b> die automatisch worden herkend:
 <ul>

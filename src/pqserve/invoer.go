@@ -29,6 +29,7 @@ var (
 		"tei-arch":     "TEI-bestanden in zip/tar-bestand",
 	}
 
+	reRunLabel = regexp.MustCompile(`^[^|]*\|\s*$`)
 	reEndPoint = regexp.MustCompile(`[.!?]\s*$`)
 	reMidPoint = regexp.MustCompile(`\pL\pL\pP*[.!?]\s+\S`)
 )
@@ -92,7 +93,11 @@ func invoersoort(db *sql.DB, data, id string) (string, error) {
 		}
 		line = strings.ToUpper(line)
 		line = strings.Replace(line, "\000", "", -1) // utf-16, utf-32, grove methode
-		if strings.TrimSpace(line) == "" || strings.HasPrefix(line, "##PAQU") || strings.HasPrefix(line, "##META") {
+		if strings.TrimSpace(line) == "" ||
+			strings.HasPrefix(line, "##PAQU") ||
+			strings.HasPrefix(line, "##META") ||
+			line[0] == '%' ||
+			reRunLabel.MatchString(line) {
 			i--
 		} else {
 			lines = append(lines, line)

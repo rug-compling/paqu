@@ -10,8 +10,6 @@ Zie ook: TODO in diverse bestanden
     - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
       kiezen welke onderdelen hij wil zien. Al getoonde tellingen
       inklapbaar maken.
-    - Commentaren en labels in invoer van doorlopende tekst negeren. Documenteren.
-      - LET OP: ook pqserve/invoer.go aanpassen
     - Expert-opties bij invoer nieuw corpus, met eventueel:
       - Escapen van invoer die al getokeniseerd is: none/half/full
       - Maximaal aantal tokens per zin

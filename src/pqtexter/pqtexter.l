@@ -48,6 +48,8 @@ int
     run = 0,
     lbl = 0,
     inlbl = 0,
+    inlbl1 = 0,
+    incmt = 0,
     nl = 0,
     bol = 1,
     hex = 0,
@@ -72,8 +74,6 @@ int
 %option 8bit batch
 %option noyywrap nounput noinput
 %option outfile="pqtexter.c"
-
-SPC	([ \t\n\r\f]+)
 
 %Start _u0001 _u1000 _u01 _u10 _u8 _win _b4u0001 _b4u1000 _b2u01 _b2u10 _b3u8
 
@@ -398,7 +398,28 @@ void out (long unsigned c) {
 
 void out1 (unsigned c) {
     if (bol) {
+	if (c == '%')
+	    incmt = 1;
+	else
+	    incmt = 0;
 	start_lbl ();
+    }
+    if (run) {
+	if (c == 124) {
+	    inlbl1 = 1;
+	} else if (c == 10 || c == 12) {
+	    if (inlbl1) {
+		putchar (10);
+		inlbl1 = 0;
+		incmt = 0;
+		nl = 0;
+		bol = 1;
+		hex = 0;
+		return;
+	    }
+	} else if (c != 32 && c != 9) {
+	    inlbl1 = 0;
+	}
     }
     if (inlbl) {
 	if (c == 124) {
@@ -409,7 +430,16 @@ void out1 (unsigned c) {
 	}
 	return;
     }
-    if (! run) {
+    if (run) {
+	if (incmt && (c == 10 || c == 12)) {
+	    putchar (10);
+	    incmt = 0;
+	    nl = 0;
+	    bol = 1;
+	    hex = 0;
+	    return;
+	}
+    } else {
 	bol = 0;
 	if (c == 10 || c == 12) {
 	    putchar (10);
