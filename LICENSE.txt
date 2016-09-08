@@ -22,8 +22,8 @@ Date:   Mon Sep 17 15:53:55 2012 +0200
 
 _vendor/src/github.com/go-sql-driver/mysql/LICENSE
 Source: https://github.com/go-sql-driver/mysql
-Commit: 9a7aa3606b82e2081a13a008ada88dfdb96c20fd
-Date:   Sat Nov 2 07:16:43 2013 -0700
+Commit: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
+Date:   Tue Aug 2 13:38:42 2016 +0200
 
 _vendor/src/github.com/pebbe/compactcorpus/LICENSE.txt
 Source: https://github.com/pebbe/compactcorpus
