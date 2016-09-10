@@ -7,6 +7,8 @@ Zie ook: TODO in diverse bestanden
   - Adminhandleiding
     - Alpino Treebank als alternatief voor Lassy Klein
   - pqserve:
+    - Path naar pqbugtest
+    - Zoeken met Xpath: pagina blijft na laatste zin even hangen
     - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
       kiezen welke onderdelen hij wil zien. Al getoonde tellingen
       inklapbaar maken.
