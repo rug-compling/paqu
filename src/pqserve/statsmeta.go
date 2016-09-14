@@ -1,11 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"database/sql"
-	"errors"
 	"fmt"
-	"html"
 	"math"
 	"net/http"
 	"strings"
@@ -21,58 +17,12 @@ type Statline struct {
 
 func statsmeta(q *Context) {
 
-	var errval error
 	var download bool
-	defer func() {
-		if errval != nil {
-			updateError(q, errval, !download)
-		}
-		completedmeta(q, download)
-		if !download {
-			fmt.Fprintln(q.w, "</body>\n</html>")
-		}
-	}()
 
 	now := time.Now()
 
 	if first(q.r, "d") != "" {
 		download = true
-	}
-
-	if download {
-		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
-		cache(q)
-	} else {
-		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		cache(q)
-		fmt.Fprint(q.w, `<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-<script type="text/javascript"><!--
-function setvalue(n) {
-    window.parent._fn.setmetaval(n);
-}
-function setmetavars(idx, lbl, fl, max, ac, bc) {
-    window.parent._fn.setmetavars(idx, lbl, fl, max, ac, bc);
-}
-function setmetalines(idx, a, b) {
-    window.parent._fn.setmetalines(idx, a, b);
-}
-function makemetatable(idx) {
-    window.parent._fn.makemetatable(idx);
-}
-function f(s) {
-    window.parent._fn.updatemeta(s);
-}
-//--></script>
-</head>
-<body">
-<script type="text/javascript">
-window.parent._fn.startedmeta();
-</script>
-`)
 	}
 
 	option := make(map[string]string)
@@ -81,18 +31,32 @@ window.parent._fn.startedmeta();
 	}
 	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" &&
 		option["hpostag"] == "" && option["hword"] == "" && option["meta"] == "" {
-		updateError(q, errors.New("Query ontbreekt"), !download)
+		http.Error(q.w, "Query ontbreekt", http.StatusPreconditionFailed)
 		return
 	}
 
 	prefix := first(q.r, "db")
 	if prefix == "" {
-		updateError(q, errors.New("Geen corpus opgegeven"), !download)
+		http.Error(q.w, "Geen corpus opgegeven", http.StatusPreconditionFailed)
 		return
 	}
 	if !q.prefixes[prefix] {
-		updateError(q, errors.New("Ongeldig corpus"), !download)
+		http.Error(q.w, "Ongeldig corpus", http.StatusPreconditionFailed)
 		return
+	}
+
+	var jserr, jsclose string
+	if download {
+		q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
+		cache(q)
+	} else {
+		q.w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		cache(q)
+		fmt.Fprintln(q.w, "{")
+		defer func() {
+			fmt.Fprintf(q.w, "\n%s\n\"err\":%q\n}\n", jsclose, jserr)
+		}()
 	}
 
 	metas := getMeta(q, prefix)
@@ -104,14 +68,13 @@ window.parent._fn.startedmeta();
 		chClose = make(<-chan bool)
 	}
 
-	var query, joins string
-	var usererr error
-	query, joins, usererr, errval = makeQuery(q, prefix, "", chClose)
-	if logerr(errval) {
+	query, joins, usererr, syserr := makeQuery(q, prefix, "", chClose)
+	if logerr(syserr) {
+		jserr = jsError(q, syserr, !download)
 		return
 	}
 	if usererr != nil {
-		errval = usererr
+		jserr = jsError(q, usererr, !download)
 		return
 	}
 
@@ -120,71 +83,51 @@ window.parent._fn.startedmeta();
 		pow10 = 10
 	}
 
-	var buf bytes.Buffer
-
 	// DEBUG: HTML-uitvoer van de query
 	if !download {
-		fmt.Fprintf(&buf, `
-<div style="font-family:monospace">%s</div>
-<p>
-<a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabellen</a>
-<p>
-`, html.EscapeString(query))
-		updateText(q, buf.String())
-		buf.Reset()
-		fmt.Fprintf(q.w, `<script type="text/javascript">
-setvalue(%d);
-</script>
-`, int(pow10))
+		fmt.Fprintf(q.w, "\"query\": %q,\n\"n\": %d,\n", query, int(pow10))
 	} else {
 		fmt.Fprintln(q.w, "# n =", int(pow10))
 	}
 
+	item := first(q.r, "item")
+
 	// Tellingen van onderdelen
-	for number, meta := range metas {
+	for _, meta := range metas {
+
+		if meta.name != item {
+			continue
+		}
 
 		// telling van metadata in matchende zinnen
 
 		values := make([]StructIS, 0)
-		rows, errval := q.db.Query(fmt.Sprintf(
+		rows, err := q.db.Query(fmt.Sprintf(
 			"SELECT `idx`,`text` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY `idx`",
 			Cfg.Prefix, prefix,
 			meta.id))
-		if logerr(errval) {
+		if logerr(err) {
+			jserr = jsError(q, err, !download)
 			return
 		}
 		for rows.Next() {
 			var i int
 			var s string
-			errval = rows.Scan(&i, &s)
-			if logerr(errval) {
+			err := rows.Scan(&i, &s)
+			if logerr(err) {
+				jserr = jsError(q, err, !download)
 				rows.Close()
 				return
 			}
 			values = append(values, StructIS{i, s})
 		}
-		errval = rows.Err()
-		if logerr(errval) {
+		err = rows.Err()
+		if logerr(err) {
+			jserr = jsError(q, err, !download)
 			return
 		}
 
 		if !download {
-			fmt.Fprintf(&buf, `
-<p>
-<b>%s</b>
-<table>
-  <tr>
-   <td>per item:
-     <table class="right" id="meta%da">
-     </table>
-   <td class="next">per zin:
-     <table class="right" id="meta%db">
-     </table>
-</table>
-`, html.EscapeString(meta.name), number, number)
-			updateText(q, buf.String())
-			buf.Reset()
-
 			fl := "right"
 			max := 99999
 			ac := 1
@@ -195,14 +138,20 @@ setvalue(%d);
 				ac = 0
 				bc = 0
 			}
-			fmt.Fprintf(q.w, `<script type="text/javascript">
-setmetavars(%d,"%s","%s",%d,%d,%d);
-setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
+			fmt.Fprintf(q.w, `"value": %q,
+"fl":%q,
+"max":%d,
+"ac":%d,
+"bc":%d,
+"lines":[
+`, meta.value, fl, max, ac, bc)
+			jsclose = "],"
 		}
 
 		for run := 0; run < 2; run++ {
 			if !download {
-				fmt.Fprint(q.w, ",[")
+				fmt.Fprint(q.w, "[")
+				jsclose = "]],"
 			}
 			seen := make(map[int]*Statline)
 			lines := make([]Statline, 0)
@@ -257,9 +206,11 @@ setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 					qu,
 					order)
 			}
-			var rows *sql.Rows
-			rows, errval = timeoutQuery(q, chClose, qu)
-			if logerr(errval) {
+			rows, err := timeoutQuery(q, chClose, qu)
+			if logerr(err) {
+				if !download {
+					jserr = jsError(q, err, !download)
+				}
 				return
 			}
 			for rows.Next() {
@@ -272,8 +223,9 @@ setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 				}
 				var idx, cnt, n int
 				var text string
-				errval = rows.Scan(&cnt, &idx, &text, &n)
-				if logerr(errval) {
+				err := rows.Scan(&cnt, &idx, &text, &n)
+				if logerr(err) {
+					jserr = jsError(q, err, !download)
 					rows.Close()
 					return
 				}
@@ -281,8 +233,9 @@ setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 				lines = append(lines, Statline{text, cnt, n, idx})
 				seen[idx] = &lines[len(lines)-1]
 			}
-			errval = rows.Err()
-			if logerr(errval) {
+			err = rows.Err()
+			if logerr(err) {
+				jserr = jsError(q, err, !download)
 				return
 			}
 			if download || (meta.mtype != "TEXT" && len(seen)*NEEDALL > len(values)) {
@@ -325,36 +278,23 @@ setmetalines(%d`, number, meta.value, fl, max, ac, bc, number)
 				}
 			} // for _, line := range lines
 			if !download {
-				fmt.Fprintln(q.w, "]")
+				if run == 0 {
+					fmt.Fprintln(q.w, "],")
+					jsclose = "[]],"
+				} else {
+					fmt.Fprintln(q.w, "]],")
+					jsclose = ""
+				}
 			}
 		} // for run := 0; run < 2; run++
-		if !download {
-			fmt.Fprintf(q.w, `);
-			   makemetatable(%d);
-			   //--></script>
-			   `, number)
-		}
 
-	} // for number_, meta := range metas
+	} // for _, meta := range metas
 
 	if !download {
-		fmt.Fprintf(&buf,
-			"<hr>tijd: %s\n<p>\n<a href=\"statsmeta?%s&amp;d=1\">download</a>\n",
+		fmt.Fprintf(q.w, "\"tijd\": %q,\n\"download\": %q,\n",
 			tijd(time.Now().Sub(now)),
-			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
-		updateText(q, buf.String())
-		buf.Reset()
+			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1)+"&amp;d=1")
 	}
-}
-
-func completedmeta(q *Context, download bool) {
-	if download {
-		return
-	}
-	fmt.Fprintf(q.w, `<script type="text/javascript">
-window.parent._fn.completedmeta();
-</script>
-`)
 }
 
 func metahelp(q *Context) {
@@ -362,7 +302,7 @@ func metahelp(q *Context) {
 <div class="submenu a9999" id="helpmeta">
 <div class="corpushelp">
 
-De tabellen bestaan uit twee delen. Het linkerdeel,
+De tabel bestaat uit twee delen. Het linkerdeel,
 <em>per item</em>, geeft het aantal matches per metadata-waarde. Dit
 is het totaal aantal matches in het corpus, en dat
 kan soms hoger zijn dan het aantal matchende zinnen
@@ -404,4 +344,12 @@ Dus, <em>absoluut</em> zijn er meer treffers voor vrouwen, maar <em>relatief</em
 </div>
 </div>
 `)
+}
+
+func jsError(q *Context, err error, is_json bool) string {
+	s := err.Error()
+	if !is_json {
+		fmt.Fprintln(q.w, "Interne fout:", s)
+	}
+	return "Interne fout: " + s
 }

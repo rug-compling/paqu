@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"html"
 	"net/http"
@@ -115,9 +114,85 @@ func (s *StatSorter) Less(i, j int) bool {
 	return false
 }
 
-func stats(q *Context) {
+func statstel(q *Context) {
 
-	var buf bytes.Buffer
+	var chClose <-chan bool
+	if f, ok := q.w.(http.CloseNotifier); ok {
+		chClose = f.CloseNotify()
+	} else {
+		chClose = make(<-chan bool)
+	}
+
+	option := make(map[string]string)
+	for _, t := range []string{"word", "postag", "rel", "hpostag", "hword", "meta"} {
+		option[t] = first(q.r, t)
+	}
+	if option["word"] == "" && option["postag"] == "" && option["rel"] == "" &&
+		option["hpostag"] == "" && option["hword"] == "" && option["meta"] == "" {
+		http.Error(q.w, "Query ontbreekt", http.StatusPreconditionFailed)
+		return
+	}
+
+	prefix := first(q.r, "db")
+	if prefix == "" {
+		http.Error(q.w, "Geen corpus opgegeven", http.StatusPreconditionFailed)
+		return
+	}
+	if !q.prefixes[prefix] {
+		http.Error(q.w, "Ongeldig corpus", http.StatusPreconditionFailed)
+		return
+	}
+
+	query, joins, usererr, syserr := makeQuery(q, prefix, "", chClose)
+	if syserr != nil {
+		http.Error(q.w, syserr.Error(), http.StatusInternalServerError)
+		logerr(syserr)
+		return
+	}
+	if usererr != nil {
+		http.Error(q.w, usererr.Error(), http.StatusPreconditionFailed)
+		return
+	}
+
+	// BEGIN UITVOER
+
+	q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	cache(q)
+
+	// Aantal zinnen die matchen met de query
+	select {
+	case <-chClose:
+		logerr(errConnectionClosed)
+		return
+	default:
+	}
+	// TODO: kan dit niet sneller, met een DISTINCT en een COUNT?
+	distinct := ""
+	if first(q.r, "t") == "2" {
+		distinct = "DISTINCT"
+	}
+	rows, err := timeoutQuery(q, chClose, "SELECT "+distinct+" `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" WHERE "+
+		query)
+	if err != nil {
+		fmt.Fprintln(q.w, html.EscapeString(err.Error()))
+		logerr(err)
+		return
+	}
+	counter := 0
+	for rows.Next() {
+		counter++
+	}
+	if err := rows.Err(); err != nil {
+		fmt.Fprintln(q.w, html.EscapeString(err.Error()))
+		logerr(err)
+		return
+	}
+
+	fmt.Fprintln(q.w, iformat(counter))
+
+}
+
+func stats(q *Context) {
 
 	var chClose <-chan bool
 	if f, ok := q.w.(http.CloseNotifier); ok {
@@ -173,78 +248,30 @@ func stats(q *Context) {
 	} else {
 		q.w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		cache(q)
-		fmt.Fprint(q.w, `<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-<script type="text/javascript"><!--
-function f(s) {
-    window.parent._fn.update(s);
-}
-//--></script>
-</head>
-<body">
-<script type="text/javascript">
-window.parent._fn.started();
-</script>
-`)
 	}
 
 	// DEBUG: HTML-uitvoer van de query
 	if !download {
-		fmt.Fprint(&buf, "<div style=\"font-family:monospace\">\n", html.EscapeString(query), "\n</div><p>\n")
-		updateText(q, buf.String())
-		buf.Reset()
-	}
-
-	// Aantal zinnen die matchen met de query
-	select {
-	case <-chClose:
-		logerr(errConnectionClosed)
-		return
-	default:
-	}
-	// TODO: kan dit niet sneller, met een DISTINCT en een COUNT?
-	rows, err := timeoutQuery(q, chClose, "SELECT DISTINCT `arch`,`file` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+joins+" WHERE "+
-		query)
-	if err != nil {
-		updateError(q, err, !download)
-		completed(q, download)
-		logerr(err)
-		return
-	}
-	counter := 0
-	for rows.Next() {
-		counter++
-	}
-	if err != nil {
-		updateError(q, err, !download)
-		completed(q, download)
-		logerr(err)
-		return
-	}
-
-	if download {
-		fmt.Fprintf(q.w, "# %d zinnen\t\n", counter)
-	} else {
-		fmt.Fprintln(&buf, "Aantal gevonden zinnen:", iformat(counter))
-		updateText(q, buf.String())
-		buf.Reset()
+		fmt.Fprint(q.w, "<!-- ", html.EscapeString(query), " -->\n")
 	}
 
 	// Tellingen van onderdelen
+	item := first(q.r, "item")
 	for i, ww := range []string{"word", "lemma", "postag", "rel", "hword", "hlemma", "hpostag"} {
+		if item != "" && "c"+ww != item {
+			continue
+		}
 		var j, count int
 		var s, p, limit string
 		if download {
 			fmt.Fprintln(q.w, "# "+ww+"\t")
 		} else {
 			if i == 0 {
-				fmt.Fprintln(&buf, "<p>"+YELLOW+"<b>word</b></span>: ")
+				fmt.Fprintln(q.w, YELLOW+"<b>word</b></span>: ")
 			} else if i == 4 {
-				fmt.Fprintln(&buf, "<p>"+GREEN+"<b>hword</b></span>: ")
+				fmt.Fprintln(q.w, GREEN+"<b>hword</b></span>: ")
 			} else {
-				fmt.Fprintln(&buf, "<p><b>"+ww+"</b>: ")
+				fmt.Fprintln(q.w, "<b>"+ww+"</b>: ")
 			}
 			limit = " LIMIT " + fmt.Sprint(WRDMAX)
 		}
@@ -258,7 +285,6 @@ window.parent._fn.started();
 			"_deprel` "+joins+" WHERE "+query+" ) `z` GROUP BY `"+ww+"` COLLATE 'utf8_bin' ORDER BY 1 DESC, 2"+limit)
 		if err != nil {
 			updateError(q, err, !download)
-			completed(q, download)
 			logerr(err)
 			return
 		}
@@ -266,7 +292,6 @@ window.parent._fn.started();
 			err := rows.Scan(&j, &s)
 			if err != nil {
 				updateError(q, err, !download)
-				completed(q, download)
 				logerr(err)
 				return
 			}
@@ -277,46 +302,30 @@ window.parent._fn.started();
 			if download {
 				fmt.Fprintf(q.w, "%d\t%s\n", j, s)
 			} else {
-				fmt.Fprint(&buf, p, iformat(j), "&times;&nbsp;", html.EscapeString(s))
-				p = ", "
+				fmt.Fprint(q.w, p, iformat(j), "&times;&nbsp;", html.EscapeString(s))
+				p = ",\n"
 				count++
 			}
 		}
 		err = rows.Err()
 		if err != nil {
 			updateError(q, err, !download)
-			completed(q, download)
 			logerr(err)
 			return
 		}
 		if !download {
 			if count == WRDMAX {
-				fmt.Fprint(&buf, ", ...")
+				fmt.Fprint(q.w, ", ...")
 			}
-			fmt.Fprint(&buf, "\n<BR>\n")
-			updateText(q, buf.String())
-			buf.Reset()
 		}
 	}
 
 	if !download {
-		fmt.Fprintf(&buf,
-			"<hr>tijd: %s\n<p>\n<a href=\"stats?%s&amp;d=1\">download</a>\n",
+		fmt.Fprintf(q.w,
+			"\n<hr>\ntijd: %s\n<p>\n<a href=\"stats?%s&amp;d=1\">download</a>\n",
 			tijd(time.Now().Sub(now)),
 			strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
-		updateText(q, buf.String())
-		completed(q, download)
 	}
-}
-
-func completed(q *Context, download bool) {
-	if download {
-		return
-	}
-	fmt.Fprintf(q.w, `<script type="text/javascript">
-window.parent._fn.completed();
-</script>
-`)
 }
 
 func statsrel(q *Context) {
@@ -537,6 +546,9 @@ func statsrel(q *Context) {
 						qword = urlencode("+" + unHigh(s))
 					case "postag":
 						qpostag = urlencode(s)
+						if qpostag == "" {
+							qpostag = "(leeg)"
+						}
 					case "rel":
 						qrel = urlencode(s)
 					case "hword":
@@ -546,7 +558,7 @@ func statsrel(q *Context) {
 					case "hpostag":
 						qhpostag = urlencode(s)
 						if qhpostag == "" {
-							qhpostag = "--LEEG--"
+							qhpostag = "(leeg)"
 						}
 					}
 				}

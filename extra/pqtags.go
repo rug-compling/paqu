@@ -115,6 +115,9 @@ func main() {
 		}
 		sort.Strings(items)
 		fmt.Print("\topt_", t, " = []string{\"\"")
+		if t != "rel" {
+			fmt.Print(", \"(leeg)\"")
+		}
 		for _, item := range items {
 			if !skip[item] {
 				fmt.Print(", \"", item, "\"")

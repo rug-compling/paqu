@@ -201,8 +201,8 @@ var (
 	reMail  = regexp.MustCompile("^[-.a-z0-9!#$%&'*+/=?^_`{|}~]+@[-.a-z0-9]+$")
 	reNoAz  = regexp.MustCompile("[^a-z]+")
 
-	opt_postag  = []string{"", "adj", "bw", "let", "lid", "mwu", "n", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
-	opt_hpostag = []string{"", "adj", "bw", "let", "lid", "mwu", "n", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
+	opt_postag  = []string{"", "(leeg)", "adj", "bw", "let", "lid", "mwu", "n", "na", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
+	opt_hpostag = []string{"", "(leeg)", "adj", "bw", "let", "lid", "mwu", "n", "na", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
 	opt_rel     = []string{"", "Aapp", "Adet", "Ahdf", "Ald", "Ame", "Amod", "Aobcomp", "Aobj1", "Aobj2", "Apc", "Apobj1",
 		"Apredc", "Apredm", "Ase", "Asu", "Asup", "Asvp", "Avc", "Bbody/cmp", "Bbody/rhd", "Bbody/whd", "Bcnj/cnj",
 		"Bcnj/crd", "Bcrd/cnj", "Bcrd/crd", "Bmod/cmp", "Bnucl/dlink", "Bobj1/su", "Bobj2/su", "Bsu/obj1", "Bsu/obj2",

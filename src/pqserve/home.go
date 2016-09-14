@@ -388,89 +388,39 @@ func home(q *Context) {
 	}
 
 	// Links naar statistieken
-	fmt.Fprintf(q.w, `<hr><p>
-		<div id="stats">
-		<div id="inner">
-		<form action="stats" target="sframe">
-		<input type="hidden" name="word" value="%s">
-		<input type="hidden" name="postag" value="%s">
-		<input type="hidden" name="rel" value="%s">
-		<input type="hidden" name="hpostag" value="%s">
-		<input type="hidden" name="hword" value="%s">
-		<input type="hidden" name="meta" value="%s">
-		<input type="hidden" name="db" value="%s">
-		<input type="submit" value="tellingen &mdash; algemeen">
-		</form>
-		</div>
-        <img src="busy.gif" id="busy" class="hide" alt="aan het werk...">
-		</div>
-		<iframe src="leeg.html" name="sframe" class="hide"></iframe>
-`,
-		html.EscapeString(first(q.r, "word")),
-		html.EscapeString(first(q.r, "postag")),
-		html.EscapeString(first(q.r, "rel")),
-		html.EscapeString(first(q.r, "hpostag")),
-		html.EscapeString(first(q.r, "hword")),
-		html.EscapeString(first(q.r, "meta")),
-		html.EscapeString(prefix))
 
 	if q.hasmeta[prefix] {
 		metahelp(q)
-		fmt.Fprintf(q.w, `<p>
-		<div id="statsmeta">
-		<div id="innermeta">
-		<form action="statsmeta" target="sframemeta">
-		<input type="hidden" name="word" value="%s">
-		<input type="hidden" name="postag" value="%s">
-		<input type="hidden" name="rel" value="%s">
-		<input type="hidden" name="hpostag" value="%s">
-		<input type="hidden" name="hword" value="%s">
-		<input type="hidden" name="meta" value="%s">
-		<input type="hidden" name="db" value="%s">
-		<input type="submit" value="tellingen &mdash; metadata">
-		</form>
-		</div>
-        <img src="busy.gif" id="busymeta" class="hide" alt="aan het werk...">
-		</div>
-		<iframe src="leeg.html" name="sframemeta" class="hide"></iframe>
-`,
-			html.EscapeString(first(q.r, "word")),
-			html.EscapeString(first(q.r, "postag")),
-			html.EscapeString(first(q.r, "rel")),
-			html.EscapeString(first(q.r, "hpostag")),
-			html.EscapeString(first(q.r, "hword")),
-			html.EscapeString(first(q.r, "meta")),
-			html.EscapeString(prefix))
 	}
 
 	fmt.Fprintf(q.w, `<p>
-		<div id="statsrel">
-		<form action="javascript:$.fn.statsrel()" name="statsrelform" id="statsrelform">
-		<input type="hidden" name="word" value="%s">
-		<input type="hidden" name="postag" value="%s">
-		<input type="hidden" name="rel" value="%s">
-		<input type="hidden" name="hpostag" value="%s">
-		<input type="hidden" name="hword" value="%s">
-		<input type="hidden" name="meta" value="%s">
-		<input type="hidden" name="db" value="%s">
-		Selecteer twee of meer elementen om ze te koppelen:
-		<p>
-		<table>
-		<tr style="vertical-align:top"><td>
-		<table>
-		<tr>
-		  <td style="background-color: yellow"><input type="checkbox" name="cword" value="1">woord
-		  <td>
-		  <td style="background-color: lightgreen"><input type="checkbox" name="chword" value="1">hoofdwoord
-		<tr>
-		  <td><input type="checkbox" name="clemma" value="1">lemma
-		  <td><input type="checkbox" name="crel" value="1">relatie
-		  <td><input type="checkbox" name="chlemma" value="1">lemma
-		<tr>
-		  <td><input type="checkbox" name="cpostag" value="1">postag
-		  <td>
-		  <td><input type="checkbox" name="chpostag" value="1">postag
-		</table>
+        <div id="statsrel">
+        <form action="javascript:$.fn.statsrel()" name="statsrelform" id="statsrelform">
+        <input type="hidden" name="word" value="%s">
+        <input type="hidden" name="postag" value="%s">
+        <input type="hidden" name="rel" value="%s">
+        <input type="hidden" name="hpostag" value="%s">
+        <input type="hidden" name="hword" value="%s">
+        <input type="hidden" name="meta" value="%s">
+        <input type="hidden" name="db" value="%s">
+        Selecteer &eacute;&eacute;n tot vijf elementen:
+        <p>
+        <table>
+        <tr style="vertical-align:top"><td>
+        <table>
+        <tr>
+          <td style="background-color: yellow"><input type="checkbox" name="cword" value="1">woord
+          <td>
+          <td style="background-color: lightgreen"><input type="checkbox" name="chword" value="1">hoofdwoord
+        <tr>
+          <td><input type="checkbox" name="clemma" value="1">lemma
+          <td><input type="checkbox" name="crel" value="1">relatie
+          <td><input type="checkbox" name="chlemma" value="1">lemma
+        <tr>
+          <td><input type="checkbox" name="cpostag" value="1">postag
+          <td>
+          <td><input type="checkbox" name="chpostag" value="1">postag
+        </table>
         <td>
 `,
 		html.EscapeString(first(q.r, "word")),
@@ -489,14 +439,37 @@ func home(q *Context) {
 
 	fmt.Fprint(q.w, `
         </table>
-		<p>
-		<input type="submit" id="statsrelsubmit" value="tellingen van combinaties">
-		</form>
-		<p>
-		<div id="statresults">
-		</div>
-		</div>
+        <p>
+        <input type="submit" id="statsrelsubmit" value="doe telling">
+        </form>
+        <p>
+        <div id="statstel" class="hide">
+            <table>
+            <tr><td>items:<td class="right" id="statstel1"><img src="busy.gif" alt="aan het werk...">
+            <tr><td>zinnen:<td class="right" id="statstel2"><img src="busy.gif" alt="aan het werk...">
+            </table>
+            </div>
+        <p>
+        <div id="statresults">
+        </div>
+        </div>
 <script type="text/javascript"><!--
+  function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+  }
+  function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "";
+  }
   function statsrelformcheck() {
     var f = document.forms["statsrelform"];
     var n = 0;
@@ -516,15 +489,29 @@ func home(q *Context) {
         }
       }
     }
-    if (n <  2) {
+    if (n < 1 || n > 5) {
       $('#statsrelsubmit').prop('disabled', true);
     } else {
       $('#statsrelsubmit').prop('disabled', false);
+      var el = $('#statsrelform input:checked');
+      var items = []
+      for (i = 0; i < el.length; i++) {
+          items.push(el[i].name);
+      }
+      setCookie("basic", items.join('}|^!!'), 14);
     }
   }
   $('#statsrelform input').on('change', function (e) {
     statsrelformcheck();
   });
+  var ck = getCookie('basic').split('}|^!!');
+  var f = document.forms["statsrelform"];
+  for (i = 0; i < ck.length; i++) {
+    try {
+        f[ck[i]].checked = true;
+    }
+    catch(err) {}
+  }
   statsrelformcheck();
 //--></script>
 `)
@@ -559,6 +546,14 @@ func make_query_string(word, postag, rel, hpostag, hword, meta, db string) strin
 //. HTML
 
 func html_header(q *Context) {
+	qs := make_query_string(
+		first(q.r, "word"),
+		first(q.r, "postag"),
+		first(q.r, "rel"),
+		first(q.r, "hpostag"),
+		first(q.r, "hword"),
+		first(q.r, "meta"),
+		first(q.r, "db"))
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
@@ -589,16 +584,16 @@ func html_header(q *Context) {
       return tbl;
   }
 
-  function fillMeta(idx) {
-    var ida = "#meta" + idx + "a";
-    var idb = "#meta" + idx + "b";
-    var fl = metavars[idx].fl;
-    var lbl = metavars[idx].lbl;
-    var max = metavars[idx].max;
-    var da = metavars[idx].a;
-    var db = metavars[idx].b;
-    var ac = metavars[idx].ac;
-    var bc = metavars[idx].bc;
+  function fillMeta() {
+    var ida = "#metaa";
+    var idb = "#metab";
+    var fl = metavars.fl;
+    var lbl = metavars.lbl;
+    var max = metavars.max;
+    var da = metavars.a;
+    var db = metavars.b;
+    var ac = metavars.ac;
+    var bc = metavars.bc;
     var ac0 = "";
     var ac1 = "";
     var bc0 = "";
@@ -635,29 +630,29 @@ func html_header(q *Context) {
        b.append('<tr><td>' + ival(db[i][0]) + '<td>' + ival(db[i][1]) + '<td class="' + fl + cl + '">' + v + '\n');
     }
     $(ida + ' td.a').on('click', function() {
-         metavars[idx].a = sortMeta(da, 0);
-         metavars[idx].ac = 0;
-         fillMeta(idx);
+         metavars.a = sortMeta(da, 0);
+         metavars.ac = 0;
+         fillMeta();
       });
     $(ida + ' td.b').on('click', function() {
-         metavars[idx].a = sortMeta(da, 1);
-         metavars[idx].ac = 1;
-         fillMeta(idx);
+         metavars.a = sortMeta(da, 1);
+         metavars.ac = 1;
+         fillMeta();
       });
     $(idb + ' td.a').on('click', function() {
-         metavars[idx].b = sortMeta(db, 0);
-         metavars[idx].bc = 0;
-         fillMeta(idx);
+         metavars.b = sortMeta(db, 0);
+         metavars.bc = 0;
+         fillMeta();
       });
     $(idb + ' td.b').on('click', function() {
-         metavars[idx].b = sortMeta(db, 1);
-         metavars[idx].bc = 1;
-         fillMeta(idx);
+         metavars.b = sortMeta(db, 1);
+         metavars.bc = 1;
+         fillMeta();
       });
     $(idb + ' td.c').on('click', function() {
-         metavars[idx].b = sortMeta(db, 2);
-         metavars[idx].bc = 2;
-         fillMeta(idx);
+         metavars.b = sortMeta(db, 2);
+         metavars.bc = 2;
+         fillMeta();
       });
   }
 
@@ -670,56 +665,11 @@ func html_header(q *Context) {
     f.meta.value = "";
   }
 
-  var result;
-  var resultmeta;
-  var busy;
-  var busymeta;
   var metadn = 0;
-  var metavars = [];
-
-  window._fn = {
-    update: function(data) {
-      result.append(data);
-    },
-    started: function() {
-      result.html('');
-      busy.removeClass('hide');
-    },
-    completed: function() {
-      busy.addClass('hide');
-    },
-    setmetaval: function(value) {
-      metadn = value;
-    },
-    setmetavars: function(idx, lbl, fl, max, ac, bc) {
-      metavars[idx] = {};
-      metavars[idx].lbl = lbl;
-      metavars[idx].fl = fl;
-      metavars[idx].max = max;
-      metavars[idx].ac = ac;
-      metavars[idx].bc = bc;
-    },
-    setmetalines: function(idx, a, b) {
-      metavars[idx].a = a;
-      metavars[idx].b = b;
-    },
-    makemetatable: function(idx) {
-      fillMeta(idx);
-    },
-    updatemeta: function(data) {
-      resultmeta.append(data);
-    },
-    startedmeta: function() {
-      resultmeta.html('');
-      busymeta.removeClass('hide');
-    },
-    completedmeta: function() {
-      busymeta.addClass('hide');
-    }
-  }
-
+  var metavars = {};
   var metavisible = false;
   var queryvisible = false;
+
   function metahelp() {
     var e = $("#helpmeta");
     e.show();
@@ -769,6 +719,7 @@ func html_header(q *Context) {
   var lastcall = null;
   var statsreldata;
   var statsrelcol = 0;
+  var firsttime = true;
   $.fn.statsrel = function() {
     if (lastcall) {
       try {
@@ -776,13 +727,82 @@ func html_header(q *Context) {
       }
       catch(err) {}
     }
+    if (firsttime) {
+        firsttime = false;
+        $('#statstel').removeClass('hide');
+        $.ajax("statstel?t=1&`+qs+`")
+          .done(function(data) {
+            $("#statstel1").html(data);
+          }).fail(function(e) {
+            $("#statstel1").html(escapeHtml(e.responseText));
+          });
+        $.ajax("statstel?t=2&`+qs+`")
+          .done(function(data) {
+            $("#statstel2").html(data);
+          }).fail(function(e) {
+            $("#statstel2").html(escapeHtml(e.responseText));
+          });
+    }
     $("#statresults").html('<img src="busy.gif">');
-    lastcall = $.ajax("statsrel?" + $(document.statsrelform).serialize())
+    if ($('#statsrelform input:checked').length == 1) {
+      if ($('#statsrelform input[name=cmeta]:checked').length == 1) {
+        var val = $('#statsrelform input[name=cmeta]:checked')[0].value;
+        lastcall = $.ajax("statsmeta?item=" + val + "&" + $(document.statsrelform).serialize())
+        .done(function(data) {
+          var e = $("#statresults");
+          if (data.err != "") {
+            $("#statresults").html('<div class="error">Fout: ' + escapeHtml(data.err) + '</div>');
+            return;
+          }
+          e.html('<!-- <div style="font-family:monospace">' + escapeHtml(data.query) + '</div> -->\n' +
+            '<p>\n' +
+            '<b>' + escapeHtml(val) + '</b>' +
+            ' &mdash; <a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting</a>\n' +
+            '<p>\n' +
+            '<table>\n' +
+            '  <tr>\n' +
+            '   <td>per item:\n' +
+            '     <table class="right" id="metaa">\n' +
+            '     </table>\n' +
+            '   <td class="next">per zin:\n' +
+            '     <table class="right" id="metab">\n' +
+            '     </table>\n' +
+            '</table>\n' +
+            '<hr>tijd: ' + data.tijd + '<p><a href="statsmeta?' + data.download + '">download</a>\n');
+          metadn = data.n;
+          metavars.lbl = data.value;
+          metavars.fl = data.fl;
+          metavars.max = data.max;
+          metavars.ac = data.ac;
+          metavars.bc = data.bc;
+          metavars.a = data.lines[0];
+          metavars.b = data.lines[1];
+          fillMeta();
+        }).fail(function(e) {
+          $("#statresults").html('<div class="error">Fout: ' + escapeHtml(e.responseText) + '</div>');
+        })
+        .always(function() {
+          lastcall = null;
+        });
+      } else {
+        var val = $('#statsrelform input:checked')[0].name;
+        lastcall = $.ajax("stats?item=" + val + "&" + $(document.statsrelform).serialize())
+        .done(function(data) {
+          $("#statresults").html(data);
+        }).fail(function(e) {
+          $("#statresults").html('<div class="error">Fout: ' + escapeHtml(e.responseText) + '</div>');
+        })
+        .always(function() {
+          lastcall = null;
+        });
+      }
+    } else {
+      lastcall = $.ajax("statsrel?" + $(document.statsrelform).serialize())
       .done(function(data) {
         statsreldata = data;
         var e = $("#statresults");
-        e.html('<div style="font-family:monospace">' + data.query +
-          '</div><p><table class="breed"></table>');
+        e.html('<!-- <div style="font-family:monospace">' + data.query +
+          '</div> --> <p><table class="breed"></table>');
         if (data.toomany) {
             e.append('<div class="warning">Te veel treffers. Bij het sorteren kunnen treffers met lagere aantallen ontbreken.</div>');
         }
@@ -796,6 +816,7 @@ func html_header(q *Context) {
       .always(function() {
         lastcall = null;
       });
+    }
   }
 
   function statrelset(c) {
@@ -822,26 +843,26 @@ func html_header(q *Context) {
         }
         for (i in statsreldata.isint) {
             if (i == c) { continue; }
-	        if (i == 0) {
-	            var r = b[0][1] - a[0][1];
-	            if (r != 0) { return r; }
-	        } else if (statsreldata.isint[i]) {
-	            var r = a[i][1] - b[i][1];
-	            if (r != 0) { return r; }
-	        } else {
-	            if (a[i][0] == "" && b[i][0] != "") {
-	                return 1;
-	            }
-	            if (a[i][0] != "" && b[i][0] == "") {
-	                return -1;
-	            }
-	            if (a[i][0] < b[i][0]) {
-	                return -1;
-	            }
-	            if (a[i][0] > b[i][0]) {
-	                return 1;
-	            }
-	        }
+            if (i == 0) {
+                var r = b[0][1] - a[0][1];
+                if (r != 0) { return r; }
+            } else if (statsreldata.isint[i]) {
+                var r = a[i][1] - b[i][1];
+                if (r != 0) { return r; }
+            } else {
+                if (a[i][0] == "" && b[i][0] != "") {
+                    return 1;
+                }
+                if (a[i][0] != "" && b[i][0] == "") {
+                    return -1;
+                }
+                if (a[i][0] < b[i][0]) {
+                    return -1;
+                }
+                if (a[i][0] > b[i][0]) {
+                    return 1;
+                }
+            }
         }
         return 0;
     });
@@ -902,13 +923,6 @@ func html_header(q *Context) {
     }
   }
 
-  $(document).ready(function() {
-    result = $('#inner');
-    busy = $('#busy');
-    resultmeta = $('#innermeta');
-    busymeta = $('#busymeta');
-  });
-
   //--></script>
 `)
 }
@@ -959,37 +973,37 @@ corpus: <select name="db">
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
 	}
 	fmt.Fprintf(q.w, `<p><table class="home">
-	   <tr>
-		 <td style="background-color: yellow">woord
-		 <td>
-		 <td style="background-color: lightgreen">hoofdwoord
-	   <tr>
-		 <td><input type="text" name="word" size="12" value="%s">
-	   `, html.EscapeString(first(q.r, "word")))
+       <tr>
+         <td style="background-color: yellow">woord
+         <td>
+         <td style="background-color: lightgreen">hoofdwoord
+       <tr>
+         <td><input type="text" name="word" size="12" value="%s">
+       `, html.EscapeString(first(q.r, "word")))
 	fmt.Fprint(q.w, `
-		 <td>
-		   <select name="rel">
-	   `)
+         <td>
+           <select name="rel">
+       `)
 	html_opts(q, opt_rel, first(q.r, "rel"), "relatie")
 	fmt.Fprintf(q.w, `
-		   </select>
-		 <td><input type="text" name="hword" size="12" value="%s">
-	   `, html.EscapeString(first(q.r, "hword")))
+           </select>
+         <td><input type="text" name="hword" size="12" value="%s">
+       `, html.EscapeString(first(q.r, "hword")))
 	fmt.Fprint(q.w, `
-	   <tr>
-		 <td>
-		   <select name="postag" style="width: 100%">
-	   `)
+       <tr>
+         <td>
+           <select name="postag" style="width: 100%">
+       `)
 	html_opts(q, opt_postag, first(q.r, "postag"), "postag")
 	fmt.Fprint(q.w, `
-		   </select>
-		 <td>
-		 <td>
-		   <select name="hpostag" style="width:100%" >
-	   `)
+           </select>
+         <td>
+         <td>
+           <select name="hpostag" style="width:100%" >
+       `)
 	html_opts(q, opt_hpostag, first(q.r, "hpostag"), "postag")
 	fmt.Fprint(q.w, `
-		   </select>
+           </select>
        <tr>
          <td colspan="3"><span class="ie">Metadata:<br></span>
            <textarea rows="3" cols="40" name="meta" placeholder="metadata">`+first(q.r, "meta")+`</textarea><br>
@@ -1006,15 +1020,15 @@ corpus: <select name="db">
 	}
 	fmt.Fprint(q.w, `
          </select>
-	   <tr>
-		 <td style="padding-top:1em">
-		   <input type="button" value="help" onClick="javascript:window.open('info.html')">
-		 <td colspan="2" class="right" style="padding-top:1em">
-		   <input type="submit" value="Zoeken">
-		   <input type="button" value="Wissen" onClick="javascript:formclear(form)">
-		   <input type="reset" value="Reset">
-	   </table>
-	   </form>
+       <tr>
+         <td style="padding-top:1em">
+           <input type="button" value="help" onClick="javascript:window.open('info.html')">
+         <td colspan="2" class="right" style="padding-top:1em">
+           <input type="submit" value="Zoeken">
+           <input type="button" value="Wissen" onClick="javascript:formclear(form)">
+           <input type="reset" value="Reset">
+       </table>
+       </form>
 <div class="submenu a9999" id="helpquery">
 <div class="queryhelp">
 <b>Voorbeelden van zoeken met metadata</b>
@@ -1050,7 +1064,7 @@ corpus: <select name="db">
 </div>
 </div>
 
-	   `)
+       `)
 
 	return
 }

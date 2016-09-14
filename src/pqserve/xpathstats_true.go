@@ -145,7 +145,7 @@ function init(s) {
 }
 //--></script>
 </head>
-<body">
+<body>
 `)
 	}
 
@@ -167,13 +167,18 @@ function init(s) {
 		chClose = make(<-chan bool)
 	}
 
-	attr := make([]string, 3)
-	attr[0], attr[1], attr[2] = first(q.r, "attr1"), first(q.r, "attr2"), first(q.r, "attr3")
-	if attr[1] == "" {
-		attr[1], attr[2] = attr[2], ""
+	attr := make([]string, 5)
+	attr[0], attr[1], attr[2], attr[3], attr[4] =
+		first(q.r, "attr1"), first(q.r, "attr2"), first(q.r, "attr3"), first(q.r, "attr4"), first(q.r, "attr5")
+	j := 0
+	for i := 0; i < 5; i++ {
+		if attr[i] != "" {
+			attr[j] = attr[i]
+			j++
+		}
 	}
-	if attr[0] == "" {
-		attr[0], attr[1], attr[2] = attr[1], attr[2], ""
+	for ; j < 5; j++ {
+		attr[j] = ""
 	}
 	if attr[0] == "" {
 		if download {
@@ -186,23 +191,23 @@ function init(s) {
 	}
 
 	nAttr := 0
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		if attr[i] != "" {
 			nAttr = i + 1
 		}
 	}
 
-	var isMeta [3]bool
-	var isInt [3]bool
-	var isFloat [3]bool
-	var isDate [3]bool
-	var isDateTime [3]bool
-	var iranges [3]*irange
-	var franges [3]*frange
-	var dranges [3]*drange
-	var isidx [3]bool
-	var aligns [3]string
-	for i := 0; i < 3; i++ {
+	var isMeta [5]bool
+	var isInt [5]bool
+	var isFloat [5]bool
+	var isDate [5]bool
+	var isDateTime [5]bool
+	var iranges [5]*irange
+	var franges [5]*frange
+	var dranges [5]*drange
+	var isidx [5]bool
+	var aligns [5]string
+	for i := 0; i < 5; i++ {
 		aligns[i] = "left"
 		if attr[i] != "" && attr[i][0] == ':' {
 			isMeta[i] = true
@@ -395,7 +400,7 @@ init({
 
 	queryparts := strings.Split(query, "+|+")
 
-	sums := make(map[[3]StructIS]int)
+	sums := make(map[[5]StructIS]int)
 	count := 0
 	tooMany := false
 	var seen uint64
@@ -504,11 +509,11 @@ init({
 				return
 			}
 
-			var mm [3][]StructIS
-			for i := 0; i < 3; i++ {
+			var mm [5][]StructIS
+			for i := 0; i < 5; i++ {
 				mm[i] = make([]StructIS, 0, 4)
 			}
-			for i := 0; i < 3; i++ {
+			for i := 0; i < 5; i++ {
 				if isMeta[i] {
 					name := attr[i][1:]
 					for _, m := range alpino.Meta {
@@ -552,43 +557,53 @@ init({
 					}
 				}
 			}
-			for i := 0; i < 3; i++ {
+			for i := 0; i < 5; i++ {
 				if len(mm[i]) == 0 {
 					mm[i] = append(mm[i], StructIS{2147483647, ""})
 				}
 			}
 
-			var at [3]StructIS
+			var at [5]StructIS
 			for _, at[0] = range mm[0] {
 				for _, at[1] = range mm[1] {
 					for _, at[2] = range mm[2] {
-						for _, match := range matches {
-							alp := Alpino_ds{}
-							err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+						for _, at[3] = range mm[3] {
+							for _, at[4] = range mm[4] {
+								for _, match := range matches {
+									alp := Alpino_ds{}
+									err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+match+`
 </alpino_ds>`), &alp)
-							if err != nil {
-								updateError(q, err, !download)
-								logerr(err)
-								docs.Close()
-								db.Close()
-								return
-							}
-							if nAttr > 0 && attr[0][0] != ':' {
-								at[0] = StructIS{0, getFullAttr(attr[0], alp.Node0, alpino.Node0)}
-							}
-							if nAttr > 1 && attr[1][0] != ':' {
-								at[1] = StructIS{0, getFullAttr(attr[1], alp.Node0, alpino.Node0)}
-							}
-							if nAttr > 2 && attr[2][0] != ':' {
-								at[2] = StructIS{0, getFullAttr(attr[2], alp.Node0, alpino.Node0)}
-							}
-							sums[at]++
-							count++
-							if len(sums) >= 100000 {
-								tooMany = true
-								docs.Close()
+									if err != nil {
+										updateError(q, err, !download)
+										logerr(err)
+										docs.Close()
+										db.Close()
+										return
+									}
+									if nAttr > 0 && attr[0][0] != ':' {
+										at[0] = StructIS{0, getFullAttr(attr[0], alp.Node0, alpino.Node0)}
+									}
+									if nAttr > 1 && attr[1][0] != ':' {
+										at[1] = StructIS{0, getFullAttr(attr[1], alp.Node0, alpino.Node0)}
+									}
+									if nAttr > 2 && attr[2][0] != ':' {
+										at[2] = StructIS{0, getFullAttr(attr[2], alp.Node0, alpino.Node0)}
+									}
+									if nAttr > 3 && attr[3][0] != ':' {
+										at[3] = StructIS{0, getFullAttr(attr[3], alp.Node0, alpino.Node0)}
+									}
+									if nAttr > 4 && attr[4][0] != ':' {
+										at[4] = StructIS{0, getFullAttr(attr[4], alp.Node0, alpino.Node0)}
+									}
+									sums[at]++
+									count++
+									if len(sums) >= 100000 {
+										tooMany = true
+										docs.Close()
+									}
+								}
 							}
 						}
 					}
@@ -618,9 +633,9 @@ init({
 
 }
 
-func xpathout(q *Context, sums map[[3]StructIS]int, attr []string, isidx [3]bool, count int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
+func xpathout(q *Context, sums map[[5]StructIS]int, attr []string, isidx [5]bool, count int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
 	nAttr := 0
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		if attr[i] != "" {
 			nAttr = i + 1
 		}

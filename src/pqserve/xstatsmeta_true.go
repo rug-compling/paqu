@@ -65,6 +65,8 @@ func xstatsmeta(q *Context) {
 		download = true
 	}
 
+	itemselect := first(q.r, "item")
+
 	if download {
 		contentType(q, "text/plain; charset=utf-8")
 		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
@@ -100,7 +102,7 @@ function c(i, j) {
 }
 //--></script>
 </head>
-<body">
+<body>
 <script type="text/javascript">
 window.parent._fn.startedmeta();
 c("0", "0");
@@ -432,14 +434,6 @@ c("0", "0");
 	}
 
 	if !download {
-		fmt.Fprintf(&buf, `
-<div style="font-family:monospace">%s</div>
-<p>
-<a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabellen</a>
-<p>
-`, html.EscapeString(query))
-		updateTextTop(q, buf.String())
-		buf.Reset()
 		fmt.Fprintf(q.w, `<script type="text/javascript">
 setvalue(%d);
 </script>
@@ -482,9 +476,19 @@ setvalue(%d);
 		}
 
 		if !download {
+			var hide string
+			if itemselect != meta.name {
+				hide = " hide"
+			}
+			var hex string
+			for _, c := range meta.name {
+				hex += fmt.Sprintf("%04x", uint16(c))
+			}
 			fmt.Fprintf(&buf, `
+<div class="metasub%s" id="meta%s">
 <p>
-<b>%s</b>
+<b>%s</b> &mdash; <a href="javascript:void(0)" onclick="javascript:metahelp()">toelichting bij tabel</a>
+<p>
 <table>
   <tr>
    <td>per item:
@@ -494,7 +498,8 @@ setvalue(%d);
      <table class="right" id="meta%db">
      </table>
 </table>
-`, html.EscapeString(meta.name), number, number)
+</div>
+`, hide, hex, html.EscapeString(meta.name), number, number)
 			updateText(q, buf.String())
 			buf.Reset()
 
@@ -672,4 +677,14 @@ f1(%q);
 	if ff, ok := q.w.(http.Flusher); ok {
 		ff.Flush()
 	}
+}
+
+func completedmeta(q *Context, download bool) {
+	if download {
+		return
+	}
+	fmt.Fprintf(q.w, `<script type="text/javascript">
+window.parent._fn.completedmeta();
+</script>
+`)
 }

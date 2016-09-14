@@ -163,6 +163,7 @@ func main() {
 	handleFunc("dl", homedl)
 	handleFunc("tree", tree)
 	handleFunc("stats", stats)
+	handleFunc("statstel", statstel)
 	handleFunc("statsmeta", statsmeta)
 	handleFunc("statsrel", statsrel)
 
