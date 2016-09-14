@@ -454,6 +454,24 @@ func home(q *Context) {
         </div>
         </div>
 <script type="text/javascript"><!--
+  hexEncode = function(s) {
+    var hex, i;
+    var result = "";
+    for (i = 0; i < s.length; i++) {
+      hex = s.charCodeAt(i).toString(16);
+      result += ("000"+hex).slice(-4);
+    }
+    return result;
+  }
+  hexDecode = function(s) {
+    var j;
+    var hexes = s.match(/.{1,4}/g) || [];
+    var back = "";
+    for(j = 0; j < hexes.length; j++) {
+      back += String.fromCharCode(parseInt(hexes[j], 16));
+    }
+    return back;
+  }
   function setCookie(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -496,19 +514,19 @@ func home(q *Context) {
       var el = $('#statsrelform input:checked');
       var items = []
       for (i = 0; i < el.length; i++) {
-          items.push(el[i].name);
+          items.push(hexEncode(el[i].name));
       }
-      setCookie("basic", items.join('}|^!!'), 14);
+      setCookie("paqu-basic", items.join('|'), 14);
     }
   }
   $('#statsrelform input').on('change', function (e) {
     statsrelformcheck();
   });
-  var ck = getCookie('basic').split('}|^!!');
+  var ck = getCookie('paqu-basic').split('|');
   var f = document.forms["statsrelform"];
   for (i = 0; i < ck.length; i++) {
     try {
-        f[ck[i]].checked = true;
+        f[hexDecode(ck[i])].checked = true;
     }
     catch(err) {}
   }

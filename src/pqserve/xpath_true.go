@@ -592,6 +592,15 @@ func html_xpath_header(q *Context) {
     }
     return result.toLowerCase();
   }
+  hexDecode = function(s) {
+    var j;
+    var hexes = s.match(/.{1,4}/g) || [];
+    var back = "";
+    for(j = 0; j < hexes.length; j++) {
+      back += String.fromCharCode(parseInt(hexes[j], 16));
+    }
+    return back;
+  }
 
   var metarun = true;
   $.fn.xpathstats = function() {
@@ -607,11 +616,11 @@ func html_xpath_header(q *Context) {
       alert("Geen attribuut geselecteerd");
       return;
     }
-    setCookie("xpattr1", at1.value, 14);
-    setCookie("xpattr2", at2.value, 14);
-    setCookie("xpattr3", at3.value, 14);
-    setCookie("xpattr4", at4.value, 14);
-    setCookie("xpattr5", at5.value, 14);
+    setCookie("paqu-xpattr1", hexEncode(at1.value), 14);
+    setCookie("paqu-xpattr2", hexEncode(at2.value), 14);
+    setCookie("paqu-xpattr3", hexEncode(at3.value), 14);
+    setCookie("paqu-xpattr4", hexEncode(at4.value), 14);
+    setCookie("paqu-xpattr5", hexEncode(at5.value), 14);
 
     if (n == 1 && val.substring(0, 1) == ":") {
         val = val.substring(1)
@@ -1003,11 +1012,11 @@ func html_xpath_header(q *Context) {
       alert("Geen attribuut geselecteerd");
       return false;
     }
-    setCookie("xpattr1", at1.value, 14);
-    setCookie("xpattr2", at2.value, 14);
-    setCookie("xpattr3", at3.value, 14);
-    setCookie("xpattr4", at4.value, 14);
-    setCookie("xpattr5", at5.value, 14);
+    setCookie("paqu-xpattr1", hexEncode(at1.value), 14);
+    setCookie("paqu-xpattr2", hexEncode(at2.value), 14);
+    setCookie("paqu-xpattr3", hexEncode(at3.value), 14);
+    setCookie("paqu-xpattr4", hexEncode(at4.value), 14);
+    setCookie("paqu-xpattr5", hexEncode(at5.value), 14);
     return true;
   }
   function setForm() {
@@ -1017,33 +1026,33 @@ func html_xpath_header(q *Context) {
     at4.selectedIndex = 0;
     at5.selectedIndex = 0;
     try {
-      var a = getCookie("xpattr1");
+      var a = getCookie("paqu-xpattr1");
       if (a != "" ) {
-          at1.value = a;
+          at1.value = hexDecode(a);
       }
     } catch (e) { }
     try {
-      var a = getCookie("xpattr2");
+      var a = getCookie("paqu-xpattr2");
       if (a != "" ) {
-          at2.value = a;
+          at2.value = hexDecode(a);
       }
     } catch (e) { }
     try {
-      var a = getCookie("xpattr3");
+      var a = getCookie("paqu-xpattr3");
       if (a != "" ) {
-          at3.value = a;
+          at3.value = hexDecode(a);
       }
     } catch (e) { }
     try {
-      var a = getCookie("xpattr4");
+      var a = getCookie("paqu-xpattr4");
       if (a != "" ) {
-          at4.value = a;
+          at4.value = hexDecode(a);
       }
     } catch (e) { }
     try {
-      var a = getCookie("xpattr5");
+      var a = getCookie("paqu-xpattr5");
       if (a != "" ) {
-          at5.value = a;
+          at5.value = hexDecode(a);
       }
     } catch (e) { }
   }
