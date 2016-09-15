@@ -426,8 +426,11 @@ $('#loading span').html('%.1f%%');
 			done <- true
 			return
 		}
-		if n, err := db.Size(); err == nil {
-			seen += n
+
+		if len(dactfiles) > 1 {
+			if n, err := db.Size(); err == nil {
+				seen += n
+			}
 		}
 		db.Close()
 		db = nil
