@@ -22,6 +22,7 @@ import (
 )
 
 var (
+	pqbugtest  string
 	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
 	keyTags    = make(map[string]bool)
 	xpathNames = map[string]bool{
@@ -1591,7 +1592,26 @@ $('#loading').addClass('hide');
 var reBugtest = regexp.MustCompile(`\[err:[A-Z]+[0-9]+\]`)
 
 func bugtest(filename, xpath string) error {
-	b, err := exec.Command(filepath.Dir(os.Args[0])+"/pqbugtest", filename, xpath).CombinedOutput()
+
+	if pqbugtest == "" {
+		for _, d := range strings.Split(Cfg.Path, string(filepath.ListSeparator)) {
+			bt := filepath.Join(d, "pqbugtest")
+			fi, err := os.Stat(bt)
+			if err != nil {
+				continue
+			}
+			if (fi.Mode() | 0111) != 0 {
+				pqbugtest = bt
+				break
+			}
+		}
+		if pqbugtest == "" {
+			chLog <- "ERROR: Geen path naar pqbugtest"
+			pqbugtest = "pqbugtest"
+		}
+	}
+
+	b, err := exec.Command(pqbugtest, filename, xpath).CombinedOutput()
 	if err != nil {
 		return err
 	}
