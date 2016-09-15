@@ -304,6 +304,10 @@ func xpath(q *Context) {
 		default:
 		}
 
+		if curno > offset+xpathmax {
+			break
+		}
+
 		if seen > 0 {
 			fmt.Fprintf(q.w, `<script type="text/javascript"><!--
 $('#loading span').html('%.1f%%');
@@ -359,6 +363,10 @@ $('#loading span').html('%.1f%%');
 				}
 				if len(queryparts) == 1 {
 					curno++
+					if curno > offset+xpathmax {
+						docs.Close()
+						continue
+					}
 				}
 				curdac = dactfile
 				filename = name
