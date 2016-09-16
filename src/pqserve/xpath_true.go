@@ -980,9 +980,9 @@ func html_xpath_header(q *Context) {
       isidx = o.isidx;
       result.html(
 '<table>\n' +
-'<tr><td>Matches:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
-'<tr><td>Combinaties:<td class="right" id="resultcombis">0\n' +
-'<tr><td>Tijd:<td class="right" id="resulttijd">0s\n' +
+'<tr><td>matches:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
+'<tr><td>combinaties:<td class="right" id="resultcombis">0\n' +
+'<tr><td>tijd:<td class="right" id="resulttijd">0s\n' +
 '</table>\n' +
 '<p>\n' +
 '<table class="breed" id="resultlines">\n' +
