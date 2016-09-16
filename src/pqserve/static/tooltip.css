@@ -13,6 +13,7 @@ table.attr tr {
 table.attr tr td {
     margin: 0px;
     padding: 0px;
+    vertical-align: top;
 }
 
 table.attr tr td.lbl {
