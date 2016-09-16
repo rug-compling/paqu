@@ -1140,7 +1140,11 @@ func do_data(archname, filename string, data []byte) {
 // Multi-word units "ineenvouwen".
 // Grotendeels dezelfde code als in lassytree.go. Zie dat bestand voor beschrijving van verschillen.
 func mwu(node *Node) {
-	if node.Cat == "mwu" {
+	for _, n := range node.NodeList {
+		mwu(n)
+	}
+
+	if topcat := node.Cat; topcat == "mwu" || (node.Rel == "mwp" && node.Word == "" && node.Index == 0) {
 		/*
 			Voorwaardes:
 			- De dochters moeten op elkaar aansluiten, en heel het bereik van de parentnode beslaan.
@@ -1162,7 +1166,7 @@ func mwu(node *Node) {
 		}
 		if ok && p1 == p2 {
 			node.Cat = ""
-			node.Postag = "mwu"
+			node.Postag = topcat
 			words := make([]string, 0, node.End-node.Begin)
 			lemmas := make([]string, 0, node.End-node.Begin)
 			roots := make([]string, 0, node.End-node.Begin)
@@ -1177,10 +1181,6 @@ func mwu(node *Node) {
 			node.NodeList = node.NodeList[0:0]
 		}
 	}
-	for _, n := range node.NodeList {
-		mwu(n)
-	}
-
 }
 
 // Zoek alle referenties. Dit zijn nodes met een attribuut "index".

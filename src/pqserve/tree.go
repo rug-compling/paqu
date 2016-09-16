@@ -438,12 +438,16 @@ func tree(q *Context) {
 
 //. Multi-word units "ineenvouwen".
 
-// Deze code verschilt aan die in wordrel.go doordat hier niet alleen 'node' wordt
+// Deze code verschilt aan die in pqbuild.go doordat hier niet alleen 'node' wordt
 // aangepast, maar ook de globale variabele 'words'
 // Hier wordt node.Root niet aangepast, omdat Root niet gebruikt wordt.
 // Verder worden hier postags verzameld voor de tooltip, waarbij Lemma leeg gemaakt wordt.
 func mwu(ctx *TreeContext, node *Node) {
-	if node.Cat == "mwu" {
+	for _, n := range node.NodeList {
+		mwu(ctx, n)
+	}
+
+	if topcat := node.Cat; topcat == "mwu" || (node.Rel == "mwp" && node.Word == "" && node.Index == "") {
 		/*
 			Voorwaardes:
 			- De dochters moeten op elkaar aansluiten, en heel het bereik van de parentnode beslaan.
@@ -465,12 +469,16 @@ func mwu(ctx *TreeContext, node *Node) {
 		}
 		if ok && p1 == p2 {
 			node.Cat = ""
-			node.Pt = "mwu"
+			node.Pt = topcat
 			wrds := make([]string, 0, node.End-node.Begin) // not 'words' !
 			postags := make([]string, 0, node.End-node.Begin)
 			for _, n := range node.NodeList {
 				wrds = append(wrds, n.Word)
-				postags = append(postags, fmt.Sprintf("%s:%s", n.Lemma, n.Postag))
+				if n.Lemma == "" {
+					postags = append(postags, n.Postag)
+				} else {
+					postags = append(postags, fmt.Sprintf("%s:%s", n.Lemma, n.Postag))
+				}
 			}
 			node.Word = strings.Join(wrds, " ")
 			node.Lemma = ""
@@ -484,10 +492,6 @@ func mwu(ctx *TreeContext, node *Node) {
 			}
 		}
 	}
-	for _, n := range node.NodeList {
-		mwu(ctx, n)
-	}
-
 }
 
 //. Genereren van dot
