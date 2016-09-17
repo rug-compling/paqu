@@ -224,6 +224,12 @@ die xml-bestanden na verwerking comprimeren met `gzip`:
 
     find ~/corpora/LassySmall/Treebank -name '*.xml' | xargs gzip
 
+### Alpino Treebank ###
+
+Kun je Lassy Klein niet installeren, installeer dan het kleinere corpus
+Alpino Treebank, te vinden als `cdb.dact` in
+[corpora.tar.gz](http://www.let.rug.nl/alfa/docker/paqu/corpora.tar.gz).
+
 ----------------------------------------------------------------
 
 ## Werken met PaQu ##

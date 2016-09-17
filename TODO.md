@@ -4,12 +4,7 @@
 
 Zie ook: TODO in diverse bestanden
 
-  - Adminhandleiding
-    - Alpino Treebank als alternatief voor Lassy Klein
   - pqserve:
-    - Bij tellingen die uit meerdere onderdelen bestaan, gebruiker laten
-      kiezen welke onderdelen hij wil zien. Al getoonde tellingen
-      inklapbaar maken.
     - Expert-opties bij invoer nieuw corpus, met eventueel:
       - Escapen van invoer die al getokeniseerd is: none/half/full
       - Maximaal aantal tokens per zin
