@@ -2,7 +2,11 @@
 
 ## Te doen ##
 
-Zie ook: TODO in diverse bestanden
+Niets meer.
+
+## Suggesties en ideeën ##
+
+Dingen die we misschien later nog eens kunnen doen.
 
   - pqserve:
     - Expert-opties bij invoer nieuw corpus, met eventueel:
@@ -12,7 +16,4 @@ Zie ook: TODO in diverse bestanden
       - Alternatieve parser voor corpus dat voornamelijk uit vragen bestaat
         - Optie `application_type=qa` vóór de optie `-parse`
       - Door gebruiker andere labels laten kiezen voor `paqu.path1`, `paqu.path2`, etc
-
-## Suggesties ##
-
   - API voor enkele onderdelen: zoeken, tellen...
