@@ -58,5 +58,4 @@ vztype
 wh
 wk
 word
-wordid
 wvorm
