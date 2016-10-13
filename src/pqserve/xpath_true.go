@@ -535,12 +535,12 @@ $('#loading span').html('%.1f%%');
 		<input type="submit" value="doe telling">
 		</form>
 		<p>
-        <iframe src="leeg.html" name="xframe" class="hide"></iframe>
+        <iframe src="leeg.html" id="xframe" class="hide"></iframe>
         <div id="result" class="hide"></div>
 `)
 	if q.hasmeta[prefix] {
 		metahelp(q)
-		fmt.Fprintf(q.w, `<p>
+		fmt.Fprintln(q.w, `<p>
             <div id="statsmeta" class="hide">
             <div id="innermetatop"></div>
             <div id="metacount" class="hide">
@@ -549,17 +549,9 @@ $('#loading span').html('%.1f%%');
             <tr><td>zinnen:<td class="right" id="metacount2">
             </table>
             </div>
-            <div id="innermeta">
-            <form action="xstatsmeta" target="sframemeta">
-            <input type="hidden" name="xpath" value="%s">
-            <input type="hidden" name="db" value="%s">
-            <input type="submit" value="tellingen &mdash; metadata">
-            </form>
-            </div>
+            <div id="innermeta"></div>
             <img src="busy.gif" id="busymeta" class="hide" alt="aan het werk..." style="margin-top:1em">
-            </div>`,
-			html.EscapeString(query),
-			html.EscapeString(prefix))
+            </div>`)
 	}
 	fmt.Fprintln(q.w, "</div>")
 
@@ -642,7 +634,7 @@ func html_xpath_header(q *Context) {
         }
         $('#statsmeta').removeClass('hide');
         if (metarun) {
-            document.xframe.location.assign("xstatsmeta?item=" + val + "&" + $(document.xstatsform).serialize());
+            $('#xframe').attr('src', "xstatsmeta?item=" + val + "&" + $(document.xstatsform).serialize());
         } else {
             $('#meta' + hexEncode(val)).removeClass('hide');
         }
@@ -650,7 +642,7 @@ func html_xpath_header(q *Context) {
         $('#statsmeta').addClass('hide');
         $('#result').html('');
         $('#result').removeClass('hide');
-        document.xframe.location.assign("xpathstats?" + $(document.xstatsform).serialize());
+        $('#xframe').attr('src', "xpathstats?" + $(document.xstatsform).serialize());
     }
 
   }
