@@ -34,3 +34,4 @@ endif
 	make -C pqstatus
 	make -C pqtexter
 	make -C pqupgrade
+	make -C pqxok

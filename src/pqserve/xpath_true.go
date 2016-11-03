@@ -23,6 +23,7 @@ import (
 
 var (
 	pqbugtest  string
+	pqxok      string
 	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
 	keyTags    = make(map[string]bool)
 	xpathNames = map[string]bool{
@@ -83,6 +84,25 @@ var (
 )
 
 func xpathcheck(q *Context) {
+
+	if pqxok == "" {
+		for _, d := range strings.Split(Cfg.Path, string(filepath.ListSeparator)) {
+			xok := filepath.Join(d, "pqxok")
+			fi, err := os.Stat(xok)
+			if err != nil {
+				continue
+			}
+			if (fi.Mode() | 0111) != 0 {
+				pqxok = xok
+				break
+			}
+		}
+		if pqxok == "" {
+			chLog <- "ERROR: Geen path naar pqxok"
+			pqxok = "pqxok"
+		}
+	}
+
 	contentType(q, "text/plain")
 
 	query := first(q.r, "xpath")
@@ -101,20 +121,25 @@ func xpathcheck(q *Context) {
 		})
 	}
 
+	parts := make([]string, 0)
+	for _, part := range strings.Split(query, "+|+") {
+		part = strings.TrimSpace(part)
+		if part == "" || part == "." || part == "/" {
+			fmt.Fprintln(q.w, "2")
+			return
+		} else {
+			parts = append(parts, part)
+		}
+	}
+	t, e := exec.Command(pqxok, parts...).Output()
+	if e != nil || strings.TrimSpace(string(t)) != "OK" {
+		fmt.Fprintln(q.w, "2")
+		return
+	}
+
 	lvl := 0
 PARTLOOP:
 	for _, part := range strings.Split(query, "+|+") {
-
-		if strings.TrimSpace(part) == "" {
-			fmt.Fprintln(q.w, "2")
-			return
-		}
-
-		// syntactisch fout -> 2
-		if part == "." || part == "/" || dbxml.Check(part) != nil {
-			fmt.Fprintln(q.w, "2")
-			return
-		}
 
 		// geen resultaat -> 1
 		for _, s := range reXpath.FindAllString(part, -1) {
@@ -132,7 +157,7 @@ PARTLOOP:
 					continue
 				}
 				lvl = 1
-				continue PARTLOOP
+				break PARTLOOP
 			}
 
 			if strings.HasSuffix(s, "(") {
@@ -140,7 +165,7 @@ PARTLOOP:
 			}
 			if !xpathNames[s] {
 				lvl = 1
-				continue PARTLOOP
+				break PARTLOOP
 			}
 		}
 
