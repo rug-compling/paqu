@@ -513,15 +513,21 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 	idx := ""
 	style := ""
 
-	// Als dit een node met inhoud EN index is, dan in vierkant zetten.
+	// Als dit een node met index is, dan in vierkant zetten.
 	// Als de node gemarkeerd is, dan in zwart, anders in lichtgrijs.
 	// Index als nummer in label zetten.
-	if (len(node.NodeList) > 0 || node.Word != "") && node.Index != "" {
-		idx = fmt.Sprintf("%s\\n", node.Index)
-		if !ctx.refs[node.Index] {
-			style += ", color=\"#d3d3d3\""
-		} else {
+	if node.Index != "" {
+		idx = fmt.Sprintf("\\n%s", node.Index)
+		black := false
+		if ctx.marks[node.Id] {
+			black = true
+		} else if ctx.refs[node.Index] && (len(node.NodeList) != 0 || node.Word != "") {
+			black = true
+		}
+		if black {
 			style += ", color=\"#000000\""
+		} else {
+			style += ", color=\"#d3d3d3\""
 		}
 		if ctx.mnodes[node.Id] {
 			style += ", style=filled, fillcolor=\"#7FCDBB\""
@@ -542,14 +548,18 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 	}
 	tooltip.WriteString("</table>")
 
-	lbl := dotquote(node.Rel)
-	if node.Cat != "" && node.Cat != node.Rel {
-		lbl += "\\n" + dotquote(node.Cat)
-	} else if node.Pt != "" && node.Pt != node.Rel {
-		lbl += "\\n" + dotquote(node.Pt)
+	lbl := dotquote(node.Rel) + idx
+
+	// als dit geen lege index-node is, dan attributen toevoegen
+	if !(node.Index != "" && len(node.NodeList) == 0 && node.Word == "") {
+		if node.Cat != "" && node.Cat != node.Rel {
+			lbl += "\\n" + dotquote(node.Cat)
+		} else if node.Pt != "" && node.Pt != node.Rel {
+			lbl += "\\n" + dotquote(node.Pt)
+		}
 	}
 
-	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v%v\"%s, tooltip=\"%s\"];\n", node.Id, idx, lbl, style, dotquote2(tooltip.String())))
+	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v\"%s, tooltip=\"%s\"];\n", node.Id, lbl, style, dotquote2(tooltip.String())))
 	for _, d := range node.NodeList {
 		print_nodes(q, ctx, d)
 	}
@@ -593,11 +603,6 @@ func print_terms(ctx *TreeContext, node *Node) []string {
 			}
 		} else {
 			// Een lege node met index
-			col := ""
-			if ctx.marks[node.Id] {
-				col = ", color=black"
-			}
-			ctx.graph.WriteString(fmt.Sprintf("    t%v [fontname=\"Helvetica\", label=\"%s\", style=solid%s];\n", node.Id, node.Index, col))
 		}
 	} else {
 		for _, d := range node.NodeList {
@@ -614,12 +619,16 @@ func print_edges(ctx *TreeContext, node *Node) {
 			// Extra: Onzichtbare edge naar extra onzichtbare terminal
 			ctx.graph.WriteString(fmt.Sprintf("    n%v -- e%v [style=invis];\n", node.Id, node.Id))
 		}
-		if ctx.marks[node.Id] || (ctx.refs[node.Index] && node.Word != "") {
-			// Vette edge naar terminal
-			ctx.graph.WriteString(fmt.Sprintf("    n%v -- t%v [color=black];\n", node.Id, node.Id))
-		} else {
-			// Gewone edge naar terminal
-			ctx.graph.WriteString(fmt.Sprintf("    n%v -- t%v;\n", node.Id, node.Id))
+
+		// geen edge voor lege indexen
+		if node.Index == "" || node.Word != "" {
+			if ctx.marks[node.Id] || (ctx.refs[node.Index] && node.Word != "") {
+				// Vette edge naar terminal
+				ctx.graph.WriteString(fmt.Sprintf("    n%v -- t%v [color=black];\n", node.Id, node.Id))
+			} else {
+				// Gewone edge naar terminal
+				ctx.graph.WriteString(fmt.Sprintf("    n%v -- t%v;\n", node.Id, node.Id))
+			}
 		}
 	} else {
 		// Edges naar dochters
