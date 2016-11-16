@@ -29,6 +29,7 @@ npagr
 ntype
 num
 numtype
+other_id
 pb
 pdtype
 per

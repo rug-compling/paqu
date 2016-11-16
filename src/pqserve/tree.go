@@ -265,6 +265,8 @@ func tree(q *Context) {
 		return
 	}
 
+	unexpand(alpino.Node0)
+
 	title := html.EscapeString(alpino.Sentence)
 	ctx.words = strings.Fields(title)
 
@@ -669,4 +671,17 @@ func indexes(s string) map[int]bool {
 		}
 	}
 	return m
+}
+
+func unexpand(node *Node) {
+	if node.OtherId != "" {
+		node.Word = ""
+		node.NodeList = node.NodeList[0:0]
+		node.Cat = ""
+		node.Pt = ""
+	} else {
+		for _, n := range node.NodeList {
+			unexpand(n)
+		}
+	}
 }
