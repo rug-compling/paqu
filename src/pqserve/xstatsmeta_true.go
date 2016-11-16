@@ -311,6 +311,7 @@ c("0", "0");
 			return
 		}
 		filename := ""
+		var seenId map[string]bool
 	NEXTDOC:
 		for docs.Next() {
 			if !download && time.Now().Sub(now2) > 2*time.Second {
@@ -319,13 +320,30 @@ c("0", "0");
 			}
 			matches := 0
 			if len(queryparts) == 1 {
-				matches = 1
+				name := docs.Name()
+				if name != filename {
+					filename = name
+					seenId = make(map[string]bool)
+				}
+				alp := Alpino_ds{}
+				errval = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+<alpino_ds version="1.3">
+`+docs.Match()+`
+</alpino_ds>`), &alp)
+				if logerr(errval) {
+					return
+				}
+				if !seenId[alp.Node0.Id] {
+					matches = 1
+					seenId[alp.Node0.Id] = true
+				}
 			} else {
 				name := docs.Name()
 				if name == filename {
 					continue
 				}
 				filename = name
+				seenId = make(map[string]bool)
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", filename)
 				for i := 1; i < len(queryparts)-1; i++ {
 					docs2, errval = db.Query(doctxt + queryparts[i])
@@ -345,7 +363,18 @@ c("0", "0");
 					return
 				}
 				for docs2.Next() {
-					matches++
+					alp := Alpino_ds{}
+					errval = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+<alpino_ds version="1.3">
+`+docs2.Match()+`
+</alpino_ds>`), &alp)
+					if logerr(errval) {
+						return
+					}
+					if !seenId[alp.Node0.Id] {
+						seenId[alp.Node0.Id] = true
+						matches++
+					}
 				}
 				docs2 = nil
 			}

@@ -450,6 +450,7 @@ init({
 			return
 		}
 		filename := ""
+		var seenId map[string]bool
 	NEXTDOC:
 		for docs.Next() {
 			if !download && time.Now().Sub(now2) > 2*time.Second {
@@ -460,12 +461,18 @@ init({
 			matches := make([]string, 0)
 			if len(queryparts) == 1 {
 				matches = append(matches, docs.Match())
+				name := docs.Name()
+				if name != filename {
+					filename = name
+					seenId = make(map[string]bool)
+				}
 			} else {
 				name := docs.Name()
 				if name == filename {
 					continue
 				}
 				filename = name
+				seenId = make(map[string]bool)
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", name)
 				for i := 1; i < len(queryparts)-1; i++ {
 					docs2, err := db.Query(doctxt + queryparts[i])
@@ -564,24 +571,28 @@ init({
 			}
 
 			var at [5]StructIS
-			for _, at[0] = range mm[0] {
-				for _, at[1] = range mm[1] {
-					for _, at[2] = range mm[2] {
-						for _, at[3] = range mm[3] {
-							for _, at[4] = range mm[4] {
-								for _, match := range matches {
-									alp := Alpino_ds{}
-									err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			for _, match := range matches {
+				alp := Alpino_ds{}
+				err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+match+`
 </alpino_ds>`), &alp)
-									if err != nil {
-										updateError(q, err, !download)
-										logerr(err)
-										docs.Close()
-										db.Close()
-										return
-									}
+				if err != nil {
+					updateError(q, err, !download)
+					logerr(err)
+					docs.Close()
+					db.Close()
+					return
+				}
+				if seenId[alp.Node0.Id] {
+					continue
+				}
+				seenId[alp.Node0.Id] = true
+				for _, at[0] = range mm[0] {
+					for _, at[1] = range mm[1] {
+						for _, at[2] = range mm[2] {
+							for _, at[3] = range mm[3] {
+								for _, at[4] = range mm[4] {
 									if nAttr > 0 && attr[0][0] != ':' {
 										at[0] = StructIS{0, getFullAttr(attr[0], alp.Node0, alpino.Node0)}
 									}
