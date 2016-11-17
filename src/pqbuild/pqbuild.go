@@ -43,6 +43,7 @@ type MetaT struct {
 }
 
 type Node struct {
+	OtherId  string  `xml:"other_id,attr"`
 	Id       string  `xml:"id,attr"`
 	Word     string  `xml:"word,attr"`
 	Lemma    string  `xml:"lemma,attr"`
@@ -1032,6 +1033,7 @@ func do_data(archname, filename string, data []byte) {
 	alpino := Alpino_ds{}
 	err := xml.Unmarshal(data, &alpino)
 	util.CheckErr(err)
+	unexpand(alpino.Node0)
 
 	for _, m := range alpino.Meta {
 		if m.Type != "text" && m.Type != "int" && m.Type != "float" && m.Type != "date" && m.Type != "datetime" {
@@ -1895,4 +1897,17 @@ func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
 		bs = bs[3:]
 	}
 	return toml.Decode(string(bs), v)
+}
+
+func unexpand(node *Node) {
+	if node.OtherId != "" {
+		node.Word = ""
+		node.NodeList = node.NodeList[0:0]
+		node.Cat = ""
+		node.Pos = ""
+	} else {
+		for _, n := range node.NodeList {
+			unexpand(n)
+		}
+	}
 }
