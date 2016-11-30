@@ -333,9 +333,12 @@ c("0", "0");
 				if logerr(errval) {
 					return
 				}
-				sid := alp.Node0.Id
-				if alp.Node0.OtherId != "" {
-					sid = alp.Node0.OtherId
+				sid := ""
+				if alp.Node0 != nil {
+					sid = alp.Node0.Id
+					if alp.Node0.OtherId != "" {
+						sid = alp.Node0.OtherId
+					}
 				}
 				if !seenId[sid] {
 					matches = 1
@@ -375,9 +378,12 @@ c("0", "0");
 					if logerr(errval) {
 						return
 					}
-					sid := alp.Node0.Id
-					if alp.Node0.OtherId != "" {
-						sid = alp.Node0.OtherId
+					sid := ""
+					if alp.Node0 != nil {
+						sid = alp.Node0.Id
+						if alp.Node0.OtherId != "" {
+							sid = alp.Node0.OtherId
+						}
 					}
 					if !seenId[sid] {
 						seenId[sid] = true

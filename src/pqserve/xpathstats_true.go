@@ -588,12 +588,15 @@ init({
 					db.Close()
 					return
 				}
-				sid := alp.Node0.Id
-				if alp.Node0.OtherId != "" {
-					sid = alp.Node0.OtherId
-				}
-				if wantRel {
-					sid = sid + " " + alp.Node0.Rel
+				sid := ""
+				if alp.Node0 != nil {
+					sid := alp.Node0.Id
+					if alp.Node0.OtherId != "" {
+						sid = alp.Node0.OtherId
+					}
+					if wantRel {
+						sid = sid + " " + alp.Node0.Rel
+					}
 				}
 				if seenId[sid] {
 					continue

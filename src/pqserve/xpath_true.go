@@ -1516,7 +1516,6 @@ init();
 
 func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlparts []string, prefix string, global bool) {
 	seen := make(map[string]bool)
-	seenw := make(map[string]bool)
 	alpino := Alpino_ds{}
 	err := xml.Unmarshal([]byte(xmlall), &alpino)
 	if err != nil {
@@ -1539,19 +1538,21 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			return
 		}
 		if alp.Node0 != nil {
-			if !seen[alp.Node0.Id] {
-				seen[alp.Node0.Id] = true
-				ids[i] = alp.Node0.Id
-				sid := alp.Node0.Id
-				if alp.Node0.OtherId != "" {
-					sid = alp.Node0.OtherId
-				}
-				if !seenw[sid] {
-					seenw[sid] = true
-					lvl1 := make([]int, len(woorden)+1)
-					alpscan(alp.Node0, alpino.Node0, lvl1)
-					for j, n := range lvl1 {
-						lvl[j] += n
+			ids[i] = alp.Node0.Id
+			if i, err := strconv.Atoi(alp.Node0.Index); err == nil && alp.Node0.Word == "" && len(alp.Node0.NodeList) == 0 {
+				alp.Node0 = alpindex(i, alpino.Node0)
+			}
+			sid := alp.Node0.Id
+			if alp.Node0.OtherId != "" {
+				sid = alp.Node0.OtherId
+			}
+			if !seen[sid] {
+				seen[sid] = true
+				lvl1 := make([]bool, len(woorden)+1)
+				alpscan(alp.Node0, alpino.Node0, lvl1)
+				for j, n := range lvl1 {
+					if n && lvl[j] < 5 {
+						lvl[j]++
 					}
 				}
 			}
@@ -1592,13 +1593,13 @@ $('ol').append(%q);
 	}
 }
 
-// zet de teller voor alle woorden onder node 1 hoger
-func alpscan(node, node0 *Node, lvl1 []int) {
+// zet de waarde voor alle woorden onder node op true
+func alpscan(node, node0 *Node, lvl1 []bool) {
 	if node == nil {
 		return
 	}
 	if strings.TrimSpace(node.Word) != "" {
-		lvl1[node.Begin] = 1
+		lvl1[node.Begin] = true
 	}
 	if idx, err := strconv.Atoi(node.Index); err == nil && strings.TrimSpace(node.Word) == "" && len(node.NodeList) == 0 {
 		alpscan(alpindex(idx, node0), node0, lvl1)
