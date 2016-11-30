@@ -205,6 +205,10 @@ func loadMacros(q *Context) {
 			if rule == macros.rules[key] {
 				break
 			}
+			if len(rule) > 100000 {
+				macros.rules[key] = "RECURSIONLIMIT"
+				break
+			}
 			macros.rules[key] = rule
 		}
 	}
