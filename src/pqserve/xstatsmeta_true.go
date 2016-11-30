@@ -333,9 +333,13 @@ c("0", "0");
 				if logerr(errval) {
 					return
 				}
-				if !seenId[alp.Node0.Id] {
+				sid := alp.Node0.Id
+				if alp.Node0.OtherId != "" {
+					sid = alp.Node0.OtherId
+				}
+				if !seenId[sid] {
 					matches = 1
-					seenId[alp.Node0.Id] = true
+					seenId[sid] = true
 				}
 			} else {
 				name := docs.Name()
@@ -371,8 +375,12 @@ c("0", "0");
 					if logerr(errval) {
 						return
 					}
-					if !seenId[alp.Node0.Id] {
-						seenId[alp.Node0.Id] = true
+					sid := alp.Node0.Id
+					if alp.Node0.OtherId != "" {
+						sid = alp.Node0.OtherId
+					}
+					if !seenId[sid] {
+						seenId[sid] = true
 						matches++
 					}
 				}

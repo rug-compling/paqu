@@ -1516,6 +1516,7 @@ init();
 
 func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlparts []string, prefix string, global bool) {
 	seen := make(map[string]bool)
+	seenw := make(map[string]bool)
 	alpino := Alpino_ds{}
 	err := xml.Unmarshal([]byte(xmlall), &alpino)
 	if err != nil {
@@ -1541,10 +1542,17 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			if !seen[alp.Node0.Id] {
 				seen[alp.Node0.Id] = true
 				ids[i] = alp.Node0.Id
-				lvl1 := make([]int, len(woorden)+1)
-				alpscan(alp.Node0, alpino.Node0, lvl1)
-				for j, n := range lvl1 {
-					lvl[j] += n
+				sid := alp.Node0.Id
+				if alp.Node0.OtherId != "" {
+					sid = alp.Node0.OtherId
+				}
+				if !seenw[sid] {
+					seenw[sid] = true
+					lvl1 := make([]int, len(woorden)+1)
+					alpscan(alp.Node0, alpino.Node0, lvl1)
+					for j, n := range lvl1 {
+						lvl[j] += n
+					}
 				}
 			}
 		}

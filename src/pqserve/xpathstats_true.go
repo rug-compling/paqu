@@ -170,11 +170,15 @@ function init(s) {
 	attr := make([]string, 5)
 	attr[0], attr[1], attr[2], attr[3], attr[4] =
 		first(q.r, "attr1"), first(q.r, "attr2"), first(q.r, "attr3"), first(q.r, "attr4"), first(q.r, "attr5")
+	wantRel := false
 	j := 0
 	for i := 0; i < 5; i++ {
 		if attr[i] != "" {
 			attr[j] = attr[i]
 			j++
+			if attr[i] == "rel" {
+				wantRel = true
+			}
 		}
 	}
 	for ; j < 5; j++ {
@@ -584,10 +588,17 @@ init({
 					db.Close()
 					return
 				}
-				if seenId[alp.Node0.Id] {
+				sid := alp.Node0.Id
+				if alp.Node0.OtherId != "" {
+					sid = alp.Node0.OtherId
+				}
+				if wantRel {
+					sid = sid + " " + alp.Node0.Rel
+				}
+				if seenId[sid] {
 					continue
 				}
-				seenId[alp.Node0.Id] = true
+				seenId[sid] = true
 				for _, at[0] = range mm[0] {
 					for _, at[1] = range mm[1] {
 						for _, at[2] = range mm[2] {
