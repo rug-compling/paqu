@@ -541,14 +541,18 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 	}
 
 	// attributen
-	var tooltip bytes.Buffer
-	tooltip.WriteString("<table class=\"attr\">")
-	for _, attr := range NodeTags {
-		if value := getAttr(attr, &node.FullNode); value != "" {
-			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", html.EscapeString(attr), html.EscapeString(value)))
+	var tt bytes.Buffer
+	var tooltip = ""
+	if !(node.Index != "" && len(node.NodeList) == 0 && node.Word == "") {
+		tt.WriteString("<table class=\"attr\">")
+		for _, attr := range NodeTags {
+			if value := getAttr(attr, &node.FullNode); value != "" {
+				tt.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", html.EscapeString(attr), html.EscapeString(value)))
+			}
 		}
+		tt.WriteString("</table>")
+		tooltip = `, tooltip="` + dotquote2(tt.String()) + `"`
 	}
-	tooltip.WriteString("</table>")
 
 	lbl := dotquote(node.Rel) + idx
 
@@ -561,7 +565,7 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 		}
 	}
 
-	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v\"%s, tooltip=\"%s\"];\n", node.Id, lbl, style, dotquote2(tooltip.String())))
+	ctx.graph.WriteString(fmt.Sprintf("    n%v [label=\"%v\"%s%s];\n", node.Id, lbl, style, tooltip))
 	for _, d := range node.NodeList {
 		print_nodes(q, ctx, d)
 	}
@@ -677,8 +681,6 @@ func unexpand(node *Node) {
 	if node.OtherId != "" {
 		node.Word = ""
 		node.NodeList = node.NodeList[0:0]
-		node.Cat = ""
-		node.Pt = ""
 	} else {
 		for _, n := range node.NodeList {
 			unexpand(n)
