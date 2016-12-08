@@ -128,7 +128,7 @@ je PATH, of voeg de directory toe aan PATH.
 ### Configuratie ###
 
 Voordat je de programma's kunt draaien moet je een configuratiebestand
-maken. Kopieer het bestand `~/paqu/setup-example.toml` naar
+maken. Kopieer het bestand `~/paqu/run/setup-example.toml` naar
 `~/.paqu/setup.toml` en pas het aan door de instructies in het bestand
 op te volgen. Geef het bestand de rechten 600 zodat andere gebruikers op
 je computer de wachtwoorden niet kunnen lezen:
