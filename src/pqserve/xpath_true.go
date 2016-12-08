@@ -504,7 +504,7 @@ $('#loading span').html('%.1f%%');
 	}
 
 	// Links naar volgende en vorige pagina's met resultaten
-	qs := "xpath=" + urlencode(query)
+	qs := "xpath=" + urlencode(query) + "&amp;mt=" + methode
 	if offset > 0 || curno > offset+xpathmax {
 		if offset > 0 {
 			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">vorige</a>", qs, offset-xpathmax)
