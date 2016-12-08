@@ -7,6 +7,7 @@ import (
 
 	"archive/zip"
 	"compress/gzip"
+	"encoding/xml"
 	"fmt"
 	"html"
 	"net/http"
@@ -328,6 +329,12 @@ func xsavez2(q *Context) {
 				if hErr(q, err) {
 					return
 				}
+				if methode == "dx" {
+					data, err = unexpandDact(data)
+					if hErr(q, err) {
+						return
+					}
+				}
 				_, err = f.Write(data)
 				if hErr(q, err) {
 					return
@@ -358,4 +365,45 @@ func xsavez2(q *Context) {
 	}
 	newCorpus(q, q.db, dirname, title, s, protected, hErr, true)
 	okall = true
+}
+
+func unexpandDact(data []byte) ([]byte, error) {
+	alpino := Alpino_ds_complete{}
+	err := xml.Unmarshal(data, &alpino)
+	if err != nil {
+		return nil, err
+	}
+	for strings.HasPrefix(alpino.Version, "X-") {
+		alpino.Version = alpino.Version[2:]
+	}
+	unexpandDactNode(alpino.Node0)
+	b, err := xml.Marshal(alpino)
+	if err != nil {
+		return nil, err
+	}
+	return []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		strings.Replace(
+			strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
+			"  <comments></comments>\n", "", 1) + "\n"), nil
+}
+
+func unexpandDactNode(node *Node) {
+	if node.NodeList == nil {
+		return
+	}
+	for i, n := range node.NodeList {
+		if n.OtherId == "" {
+			unexpandDactNode(n)
+		} else {
+			node.NodeList[i] = &Node{
+				FullNode: FullNode{
+					Begin: n.Begin,
+					End:   n.End,
+					Id:    n.Id,
+					Index: n.Index,
+					Rel:   n.Rel,
+				},
+			}
+		}
+	}
 }
