@@ -241,7 +241,10 @@ func dactExpand(data []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + string(b) + "\n", nil
+	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		strings.Replace(
+			strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
+			"  <comments></comments>\n", "", 1) + "\n", nil
 }
 
 func getIndexed(node *Node, nodes map[string]*Node) {

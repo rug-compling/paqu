@@ -184,7 +184,7 @@ func tree(q *Context) {
 
 	// xml-bestand inlezen
 	if archive != "" {
-		if strings.HasSuffix(archive, ".dact") {
+		if strings.HasSuffix(archive, ".dact") || strings.HasSuffix(archive, ".dactx") {
 			var err error
 			data, err = get_dact(archive, filename)
 			if err != nil {

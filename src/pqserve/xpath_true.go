@@ -186,6 +186,11 @@ func xpath(q *Context) {
 
 	xpathmax := getxpathmax(q)
 
+	methode := first(q.r, "mt")
+	if methode != "dx" {
+		methode = "std"
+	}
+
 	var errval error
 	var db *dbxml.Db
 	var docs *dbxml.Docs
@@ -322,12 +327,26 @@ func xpath(q *Context) {
 	queryparts := strings.Split(fullquery, "+|+")
 
 	var seen uint64
-	for _, dactfile := range dactfiles {
+	for i, dactfile := range dactfiles {
 		select {
 		case <-chClose:
 			logerr(errConnectionClosed)
 			return
 		default:
+		}
+
+		if Cfg.Dactx && methode == "dx" {
+			if i == 0 {
+				if _, err := os.Stat(dactfile + "x"); err != nil {
+					methode = "std"
+					fmt.Fprintln(q.w, `<script type="text/javascript"><!--
+$('#ol').before('<div class="warning">Geen ge&euml;xpandeerde indexnodes beschikbaar voor dit corpus.<br>De standaardmethode wordt gebruikt.</div>');
+//--></script>`)
+				}
+			}
+			if methode == "dx" {
+				dactfile += "x"
+			}
 		}
 
 		if curno > offset+xpathmax {
@@ -505,11 +524,13 @@ $('#loading span').html('%.1f%%');
 <form action="xsavez" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
 <input type="hidden" name="xpath" value="%s">
 <input type="hidden" name="db" value="%s">
+<input type="hidden" name="mt" value="%s">
 <input type="submit" value="nieuw corpus maken op basis van deze zoekopdracht">
 </form>
 `,
 			html.EscapeString(first(q.r, "xpath")),
-			html.EscapeString(prefix))
+			html.EscapeString(prefix),
+			methode)
 	}
 
 	fmt.Fprintln(q.w, "<hr><small>tijd:", tijd(time.Now().Sub(now)), "</small>")
@@ -532,9 +553,10 @@ $('#loading span').html('%.1f%%');
 		<form action="javascript:$.fn.xpathstats()" name="xstatsform">
 		<input type="hidden" name="xpath" value="%s">
 		<input type="hidden" name="db" value="%s">
+		<input type="hidden" name="mt" value="%s">
 		Selecteer &eacute;&eacute;n tot vijf attributen:
         <p>
-`, html.EscapeString(query), html.EscapeString(prefix))
+`, html.EscapeString(query), html.EscapeString(prefix), methode)
 
 	for i := 1; i <= 5; i++ {
 
@@ -1232,6 +1254,7 @@ func html_xpath_form(q *Context, xpathmax int) (has_query bool) {
 	if first(q.r, "xpath") == "" {
 		has_query = false
 	}
+	methode := first(q.r, "mt")
 
 	if q.auth {
 		macros := ""
@@ -1279,8 +1302,19 @@ corpus: <select name="db">
 		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">voorbeelden</a>):<br>
 		<textarea name="xpath" rows="6" cols="80" maxlength="1200" id="xquery">%s</textarea>
 		<p>
-		aantal: <select name="xn">
 		`, html.EscapeString(first(q.r, "xpath")))
+	if Cfg.Dactx {
+		selected := ""
+		if methode == "dx" {
+			selected = " selected"
+		}
+		fmt.Fprintf(q.w, `methode: <select name="mt">
+			<option value="std">standaard</option>
+			<option value="dx"%s>ge&euml;xpandeerde indexnodes</option>
+			</select>
+			<p>`, selected)
+	}
+	fmt.Fprintln(q.w, `aantal: <select name="xn">`)
 	for _, i := range []int{10, 20, 50, 100, 200, 500} {
 		if i == xpathmax {
 			fmt.Fprintf(q.w, "<option selected>%d</option>\n", i)

@@ -9,6 +9,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Alpino_ds struct {
@@ -64,7 +65,10 @@ Syntax: %s infile.dact outfile.xdact
 		if expand(&alpino) {
 			b, err := xml.MarshalIndent(&alpino, "", "  ")
 			x(err)
-			content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + string(b) + "\n"
+			content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				strings.Replace(
+					strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
+					"  <comments></comments>\n", "", 1) + "\n"
 		}
 		x(db2.PutXml(name, content, false))
 	}

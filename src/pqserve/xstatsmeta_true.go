@@ -67,6 +67,11 @@ func xstatsmeta(q *Context) {
 
 	itemselect := first(q.r, "item")
 
+	methode := first(q.r, "mt")
+	if methode != "dx" {
+		methode = "std"
+	}
+
 	if download {
 		contentType(q, "text/plain; charset=utf-8")
 		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
@@ -283,6 +288,9 @@ c("0", "0");
 			logerr(errConnectionClosed)
 			return
 		default:
+		}
+		if Cfg.Dactx && methode == "dx" {
+			dactfile += "x"
 		}
 		db, errval = dbxml.Open(dactfile)
 		if logerr(errval) {

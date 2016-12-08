@@ -122,6 +122,11 @@ func xpathstats(q *Context) {
 		download = true
 	}
 
+	methode := first(q.r, "mt")
+	if methode != "dx" {
+		methode = "std"
+	}
+
 	if download {
 		contentType(q, "text/plain; charset=utf-8")
 		q.w.Header().Set("Content-Disposition", "attachment; filename=telling.txt")
@@ -422,6 +427,9 @@ init({
 			return
 		default:
 		}
+		if Cfg.Dactx && methode == "dx" {
+			dactfile += "x"
+		}
 		db, err := dbxml.Open(dactfile)
 		if err != nil {
 			updateError(q, err, !download)
@@ -590,7 +598,7 @@ init({
 				}
 				sid := ""
 				if alp.Node0 != nil {
-					sid := alp.Node0.Id
+					sid = alp.Node0.Id
 					if alp.Node0.OtherId != "" {
 						sid = alp.Node0.OtherId
 					}

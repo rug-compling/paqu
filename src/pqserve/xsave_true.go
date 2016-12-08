@@ -93,10 +93,11 @@ Maximum aantal zinnen (%s):<br>
 
 	fmt.Fprintf(q.w, `<p>
 <input type="hidden" name="xpath" value="%s">
+<input type="hidden" name="mt" value="%s">
 <input type="submit" value="nieuw corpus maken" id="subbut">
 <span id="subsp" class="hide">Even geduld...</span>
 `,
-		html.EscapeString(firstf(q.form, "xpath")))
+		html.EscapeString(firstf(q.form, "xpath")), firstf(q.form, "mt"))
 
 	fmt.Fprint(q.w, `
 </body>
@@ -145,6 +146,11 @@ func xsavez2(q *Context) {
 	if !q.auth {
 		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
 		return
+	}
+
+	methode := firstf(q.form, "mt")
+	if methode != "dx" {
+		methode = "std"
 	}
 
 	corpora := make([]string, 0, len(q.form.Value["db"]))
@@ -247,6 +253,9 @@ func xsavez2(q *Context) {
 		for _, dactfile := range dactfiles {
 			if linecount == maxdup && maxdup > 0 {
 				break
+			}
+			if Cfg.Dactx && methode == "dx" {
+				dactfile += "x"
 			}
 			var data []byte
 			dact, err = dbxml.Open(dactfile)
