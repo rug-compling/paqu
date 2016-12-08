@@ -233,9 +233,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			if f == data && (params == "dact" || strings.HasPrefix(params, "xmlzip")) {
 				continue
 			}
-			if f == dact && !Cfg.Dact {
-				continue
-			}
 			logerr(gz(f))
 		}
 		fnames, e := filenames2(xml, false)
@@ -281,6 +278,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		err = do_quotum(db, task.id, user, tokens, nlines)
 		if err != nil {
 			os.Remove(dact)
+			os.Remove(dact + "x")
 			os.Remove(data + ".lines")
 			os.Remove(stderr)
 			os.RemoveAll(xml)

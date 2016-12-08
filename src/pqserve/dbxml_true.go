@@ -43,6 +43,16 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 	}
 	defer db.Close()
 
+	var dbx *dbxml.Db
+	if Cfg.Dactx {
+		os.Remove(dact + "x")
+		dbx, err = dbxml.Open(dact + "x")
+		if err != nil {
+			return err
+		}
+		defer dbx.Close()
+	}
+
 	for _, name := range files {
 
 		select {
@@ -66,6 +76,20 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 		if err != nil {
 			return err
 		}
+
+		if Cfg.Dactx {
+			content, err := dactExpand(data)
+			if err != nil {
+				return err
+			}
+			if content == "" {
+				content = string(data)
+			}
+			err = dbx.PutXml(name, content, false)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -81,6 +105,16 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 			dbxml_version_major())
 	}
 	defer dc.Close()
+
+	var dbx *dbxml.Db
+	if Cfg.Dactx {
+		os.Remove(dact + "x")
+		dbx, err = dbxml.Open(dact + "x")
+		if err != nil {
+			return 0, 0, err
+		}
+		defer dbx.Close()
+	}
 
 	docs, err := dc.All()
 	if err != nil {
@@ -156,6 +190,19 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 				}
 			}
 		}
+		if Cfg.Dactx {
+			content, err := dactExpand(data)
+			if err != nil {
+				return 0, 0, err
+			}
+			if content == "" {
+				content = string(data)
+			}
+			err = dbx.PutXml(docs.Name(), content, false)
+			if err != nil {
+				return 0, 0, err
+			}
+		}
 	}
 
 	return tokens, nline, nil
@@ -169,4 +216,67 @@ func dbxml_version() string {
 func dbxml_version_major() int {
 	x, _, _ := dbxml.Version()
 	return x
+}
+
+func dactExpand(data []byte) (string, error) {
+	alpino := Alpino_ds_complete{}
+	err := xml.Unmarshal(data, &alpino)
+	if err != nil {
+		return "", err
+	}
+
+	refs := make(map[string]*Node)
+	getIndexed(alpino.Node0, refs)
+	if len(refs) == 0 {
+		return "", nil
+	}
+	err = expandNode(alpino.Node0, refs)
+	if err != nil {
+		return "", err
+	}
+
+	alpino.Version = "X-" + alpino.Version
+
+	b, err := xml.MarshalIndent(&alpino, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + string(b) + "\n", nil
+}
+
+func getIndexed(node *Node, nodes map[string]*Node) {
+	if node.Index != "" && (node.NodeList != nil || node.Word != "") {
+		nodes[node.Index] = node
+	}
+	if node.NodeList != nil {
+		for _, n := range node.NodeList {
+			getIndexed(n, nodes)
+		}
+	}
+}
+
+func expandNode(n *Node, nodes map[string]*Node) error {
+	if n.NodeList != nil {
+		for _, node := range n.NodeList {
+			err := expandNode(node, nodes)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if n.Index == "" || n.NodeList != nil || n.Word != "" {
+		return nil
+	}
+
+	o, ok := nodes[n.Index]
+	if !ok {
+		return fmt.Errorf("Expanding Dact: Missing index node")
+	}
+
+	n.OtherId = o.Id
+
+	copyNodeOnEmpty(n, o)
+
+	return nil
 }

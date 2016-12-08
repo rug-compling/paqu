@@ -20,6 +20,6 @@ killall -KILL pqserve
 sleep 2
 echo Restarting pqserve
 cat pqserve.out
-bin/pqserve &> pqserve.out &
+../bin/pqserve &> pqserve.out &
 
 rm -f lock

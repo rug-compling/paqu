@@ -33,6 +33,7 @@ type Config struct {
 	Maxwrd int  `toml:"maxwrd"`
 	Maxdup int  `toml:"maxdup"`
 	Dact   bool `toml:"dact"`
+	DactX  bool `toml:"dactx"`
 
 	Sh           string `toml:"sh"`
 	Path         string `toml:"path"`

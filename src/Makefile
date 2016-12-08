@@ -20,18 +20,23 @@ ifneq "$(findstring paqu/_vendor, $(GOPATH))" ""
 	go install github.com/robertkrimen/otto
 endif
 	mkdir -p ../bin
+	make -C pqserve
 	make -C pqalpino
 	make -C pqbugtest
 	make -C pqbuild
 	make -C pqclean
 	make -C pqconfig
+	make -C pqdactx
 	make -C pqfolia
 	make -C pqinit
 	make -C pqrmcorpus
 	make -C pqrmuser
-	make -C pqserve
 	make -C pqsetquota
 	make -C pqstatus
 	make -C pqtexter
 	make -C pqupgrade
 	make -C pqxok
+
+# pqserve moet als eerste gecompileerd worden omdat
+# sommige andere programma's ervan afhankelijk zijn.
+

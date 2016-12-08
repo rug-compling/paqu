@@ -194,11 +194,13 @@ eerst in te hoeven loggen en hun eigen corpus aan te hoeven maken.
 
 Het is raadzaam om het corpus
 [Lassy Klein](http://tst-centrale.org/producten/corpora/lassy-klein-corpus/6-66)
-te installeren, omdat alle voorbeelden die de gebruiker in de informatie ziet werken op dat corpus.
+te installeren, omdat alle voorbeelden die de gebruiker in de informatie
+ziet werken op dat corpus.
 
 Als je dit corpus hebt geïnstalleerd in `~/corpora/LassySmall` kun je
 het zo opnemen in PaQu:
 
+	pqdactx ~/corpora/LassySmall/lassy.dact ~/corpora/LassySmall/lassy.dactx
 	echo ~/corpora/LassySmall/lassy.dact | \
 	    pqbuild -w -p '.*/corpora/LassySmall/' lassysmall 'Lassy Klein' none 1
 
@@ -237,13 +239,13 @@ Alpino Treebank, te vinden als `cdb.dact` in
 ### De server starten ###
 
 Je kunt PaQu nu heel simpel starten met `pqserve`. Maar dat is wellicht
-niet de beste methode. Beter is het om het script `~/paqu/run.sh` aan te
-passen aan je wensen, en regelmatig (bijvoorbeeld elk kwartier) aan te
-roepen vanuit `cron`. Dit script test of de server nog reageert
+niet de beste methode. Beter is het om het script `~/paqu/run/run.sh`
+aan te passen aan je wensen, en regelmatig (bijvoorbeeld elk kwartier)
+aan te roepen vanuit `cron`. Dit script test of de server nog reageert
 (daarvoor gebruikt het de link `/up` op de server), en start het opnieuw
 mocht dit niet zo zijn. Het print dan ook eventuele foutmeldingen van de
-vorige run van pqserve, en als je `MAILTO` goed hebt gezet in
-`crontab -e`, dan worden die foutmeldingen naar je toegestuurd.
+vorige run van pqserve, en als je `MAILTO` goed hebt gezet in `crontab
+-e`, dan worden die foutmeldingen naar je toegestuurd.
 
 ### Log-bestanden ###
 

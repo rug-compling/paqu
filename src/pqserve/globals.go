@@ -36,6 +36,7 @@ type Config struct {
 	Maxwrd int
 	Maxdup int
 	Dact   bool
+	Dactx  bool
 
 	Secret string
 
@@ -99,6 +100,20 @@ type Sentence struct {
 	items []Row    // alle matchende dependency relations voor deze zin
 }
 
+type Alpino_ds_complete struct {
+	XMLName  xml.Name `xml:"alpino_ds"`
+	Version  string   `xml:"version,attr,omitempty"`
+	Metadata []MetaT  `xml:"metadata>meta,omitempty"`
+	Node0    *Node    `xml:"node,omitempty"`
+	Sentence SentT    `xml:"sentence,omitempty"`
+	Comments []string `xml:"comments>comment,omitempty"`
+}
+
+type SentT struct {
+	Sent   string `xml:",chardata"`
+	SentId string `xml:"sentid,attr,omitempty"`
+}
+
 type Alpino_ds struct {
 	XMLName  xml.Name `xml:"alpino_ds"`
 	Meta     []MetaT  `xml:"metadata>meta"`
@@ -118,9 +133,9 @@ type Alpino_ds_no_node struct {
 }
 
 type MetaT struct {
-	Type  string `xml:"type,attr"`
-	Name  string `xml:"name,attr"`
-	Value string `xml:"value,attr"`
+	Type  string `xml:"type,attr,omitempty"`
+	Name  string `xml:"name,attr,omitempty"`
+	Value string `xml:"value,attr,omitempty"`
 }
 
 type CommentType struct {

@@ -30,10 +30,12 @@ type FullNode struct {
 	for _, attrib := range attribs {
 		up := upper(attrib)
 		typ := "string"
+		omit := ",omitempty"
 		if attrib == "begin" || attrib == "end" {
 			typ = "int   "
+			omit = ""
 		}
-		fmt.Printf("\t%-12s %s `xml:\"%s,attr\"`\n", up, typ, attrib)
+		fmt.Printf("\t%-12s %s `xml:\"%s,attr%s\"`\n", up, typ, attrib, omit)
 	}
 	fmt.Print(`}
 
@@ -59,6 +61,22 @@ func getAttr(attr string, n *FullNode) string {
 	}
 	fmt.Print(`	}
 	return ""
+}
+
+func copyNodeOnEmpty(dst, src *Node) {
+`)
+	for _, attrib := range attribs {
+		up := upper(attrib)
+		null := `""`
+		if attrib == "begin" || attrib == "end" {
+			null = `0`
+		}
+		fmt.Printf("\tif dst.%s == %s {\n\t\tdst.%s = src.%s\n\t}\n", up, null, up, up)
+	}
+	fmt.Println(`
+	if dst.NodeList == nil {
+		dst.NodeList = src.NodeList
+	}
 }
 `)
 }
