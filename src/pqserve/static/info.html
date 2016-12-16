@@ -553,19 +553,20 @@ macro's te kunnen uploaden en/of te bewerken.
 Stel, je zoekt naar
 <a href="xpath?db=_default&amp;xpath=%2F%2Fnode%5B%40rel%3D&quot;su&quot;+and+%28%40lemma%3D&quot;kind&quot;+or+.%2F%2Fnode%5B%40lemma%3D&quot;kind&quot;%5D%29%5D" target="_blank">onderwerpen
 die het lemma <em>kind</em> bevatten</a>.
-Met de standaard zoekmethode zul de zin hiernaast niet vinden, want de
-node met het onderwerp is leeg.
+Met de standaard zoekmethode zul je de zin hiernaast niet vinden, want de
+node met het onderwerp (<code>rel=&quot;su&quot;</code>) is leeg.
 <p>
 <pre>
     //node[ @rel = &quot;su&quot; and
        ( @lemma = &quot;kind&quot; or .//node[ @lemma = &quot;kind&quot; ] )
     ]
 </pre>
-De node met <code>rel=&quot;su&quot;</code> is leeg, maar bevat een
-index nummer dat verwijst naar een andere node met hetzelfde nummer die
-wel attributen en dochters bevat. Wanneer je zoekt met geëxpandeerde
-indexnodes, dan zijn de gegevens van die andere node gekopieerd naar de
-lege node, en daardoor geeft de XPath-expressie toch een match.
+De lege node bevat een indexnummer dat verwijst naar een andere node met
+hetzelfde nummer die wel attributen en dochters bevat. Wanneer je zoekt
+met geëxpandeerde indexnodes, dan zijn de gegevens van alle lege
+indexnodes aangevuld met de gegevens &mdash; attributen en dochters
+&mdash; van de corresponderende niet-lege node. Hierdoor krijg je in dit
+geval toch een match.
 
 </div>
 
