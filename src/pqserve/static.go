@@ -36,6 +36,12 @@ func static_clarinnl_png(q *Context) {
 	fmt.Fprint(q.w, file__clarinnl__png)
 }
 
+func static_expanded_png(q *Context) {
+	contentType(q, "image/png")
+	cache(q)
+	fmt.Fprint(q.w, file__expanded__png)
+}
+
 func static_favicon_ico(q *Context) {
 	contentType(q, "image/x-icon")
 	cache(q)

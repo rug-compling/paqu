@@ -29,6 +29,9 @@ Inhoud:
   <li><a href="#woorden" target="_self">Woorden en lemma's</a>
   </ul>
 <li class="dbxml"><a href="#xpath" target="_self" class="dbxml">Zoeken met XPath</a>
+<ul class="dbxml">
+  <li class="dbxml"><a href="#expanded" target="_self" class="dbxml">Zoeken met geëxpandeerde indexnodes</a>
+</ul class="dbxml">
 <li><a href="#corpora" target="_self">Corpora</a>
 <ul>
   <li><a href="#corplat" target="_self">Platte tekst</a>
@@ -543,7 +546,30 @@ macro's te kunnen uploaden en/of te bewerken.
   <a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">Dact Cookbook</a>
 </div>
 
-<hr>
+<h3 id="expanded" class="dbxml">Zoeken met geëxpandeerde indexnodes</h3>
+<div class="dbxml">
+<img src="expanded.png" alt="su" class="left maxwidth">
+
+Stel, je zoekt naar
+<a href="xpath?db=_default&amp;xpath=%2F%2Fnode%5B%40rel%3D&quot;su&quot;+and+%28%40lemma%3D&quot;kind&quot;+or+.%2F%2Fnode%5B%40lemma%3D&quot;kind&quot;%5D%29%5D" target="_blank">onderwerpen
+die het lemma <em>kind</em> bevatten</a>.
+Met de standaard zoekmethode zul de zin hiernaast niet vinden, want de
+node met het onderwerp is leeg.
+<p>
+<pre>
+    //node[ @rel = &quot;su&quot; and
+       ( @lemma = &quot;kind&quot; or .//node[ @lemma = &quot;kind&quot; ] )
+    ]
+</pre>
+De node met <code>rel=&quot;su&quot;</code> is leeg, maar bevat een
+index nummer dat verwijst naar een andere node met hetzelfde nummer die
+wel attributen en dochters bevat. Wanneer je zoekt met geëxpandeerde
+indexnodes, dan zijn de gegevens van die andere node gekopieerd naar de
+lege node, en daardoor geeft de XPath-expressie toch een match.
+
+</div>
+
+<hr style="clear:both">
     <h2 id="corpora">Corpora</h2>
 
 Als je bent ingelogd kun je onder de tab <em>Corpora</em> je eigen

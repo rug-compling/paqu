@@ -5,6 +5,7 @@ DEPS = \
 	busy.gif \
 	clariah.png \
 	clarinnl.png \
+	expanded.png \
 	favicon.ico \
 	foliahelp0.html \
 	foliahelp1.html \

@@ -1311,7 +1311,7 @@ corpus: <select name="db">
 		fmt.Fprintf(q.w, `methode: <select name="mt">
 			<option value="std">standaard</option>
 			<option value="dx"%s>ge&euml;xpandeerde indexnodes</option>
-			</select>
+			</select> (<a href="info.html#expanded" target="_blank">uitleg</a>)
 			<p>`, selected)
 	}
 	fmt.Fprintln(q.w, `aantal: <select name="xn">`)

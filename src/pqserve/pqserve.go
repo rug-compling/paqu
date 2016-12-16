@@ -207,6 +207,7 @@ func main() {
 	handleFunc("relhead.png", static_relhead_png)
 	handleFunc("relnone.png", static_relnone_png)
 	handleFunc("relother.png", static_relother_png)
+	handleFunc("expanded.png", static_expanded_png)
 
 	handleFunc("folia", foliatool)
 	handleFunc("foliah0", static_foliahelp0_html)
