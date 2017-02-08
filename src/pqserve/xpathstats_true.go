@@ -411,11 +411,12 @@ init({
 
 	sums := make(map[[5]StructIS]int)
 	count := 0
+	linecount := 0
 	tooMany := false
 	var seen uint64
 	for _, dactfile := range dactfiles {
 		if !download && time.Now().Sub(now2) > 2*time.Second {
-			xpathout(q, sums, attr, isidx, count, tooMany, now, download, seen, nlines, false)
+			xpathout(q, sums, attr, isidx, count, linecount, tooMany, now, download, seen, nlines, false)
 			now2 = time.Now()
 		}
 		if tooMany {
@@ -466,7 +467,7 @@ init({
 	NEXTDOC:
 		for docs.Next() {
 			if !download && time.Now().Sub(now2) > 2*time.Second {
-				xpathout(q, sums, attr, isidx, count, tooMany, now, download, seen, nlines, false)
+				xpathout(q, sums, attr, isidx, count, linecount, tooMany, now, download, seen, nlines, false)
 				now2 = time.Now()
 			}
 
@@ -476,6 +477,7 @@ init({
 				name := docs.Name()
 				if name != filename {
 					filename = name
+					linecount++
 					seenId = make(map[string]bool)
 				}
 			} else {
@@ -509,8 +511,13 @@ init({
 					db.Close()
 					return
 				}
+				first := true
 				for docs2.Next() {
 					matches = append(matches, docs2.Match())
+					if first {
+						first = false
+						linecount++
+					}
 				}
 			}
 
@@ -658,7 +665,7 @@ init({
 		}
 	}
 
-	xpathout(q, sums, attr, isidx, count, tooMany, now, download, 0, 0, true)
+	xpathout(q, sums, attr, isidx, count, linecount, tooMany, now, download, 0, 0, true)
 
 	if !download {
 		fmt.Fprintln(q.w, "</body>\n</html>")
@@ -666,7 +673,7 @@ init({
 
 }
 
-func xpathout(q *Context, sums map[[5]StructIS]int, attr []string, isidx [5]bool, count int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
+func xpathout(q *Context, sums map[[5]StructIS]int, attr []string, isidx [5]bool, count int, linecount int, tooMany bool, now time.Time, download bool, seen, total uint64, final bool) {
 	nAttr := 0
 	for i := 0; i < 5; i++ {
 		if attr[i] != "" {
@@ -717,12 +724,14 @@ f({
 "toomany": %v,
 "final": %v,
 "matches": "%s",
+"linecount": "%s",
 "combis": "%s",
 "tijd": "%s",
 `,
 			tooMany,
 			final,
 			iformat(count),
+			iformat(linecount),
 			iformat(len(data.lines)),
 			tijd(time.Now().Sub(now)))
 		if seen > 0 {

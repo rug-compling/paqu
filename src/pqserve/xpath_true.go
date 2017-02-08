@@ -923,6 +923,7 @@ func html_xpath_header(q *Context) {
          data.toomany = false;
      }
      $('#resultmatches').html(data.matches);
+     $('#resultlinecount').html(data.linecount);
      $('#resultcombis').html(data.combis);
      $('#resulttijd').html(data.tijd);
      if (data.final) {
@@ -935,7 +936,7 @@ func html_xpath_header(q *Context) {
      var t = $('#resultlines');
      var em
      if (curcol == 0) { em = ' em'; } else { em = ""; }
-     var s = '<tr class="odd"><th id="c0" class="link' + em + '">aantal<th>';
+     var s = '<tr class="odd"><th id="c0" class="link' + em + '">items<th>';
      var i;
      for (i = 1; i < aligns.length; i++) {
          if (curcol == i) { em = ' em'; } else { em = ""; }
@@ -1020,7 +1021,8 @@ func html_xpath_header(q *Context) {
       isidx = o.isidx;
       result.html(
 '<table>\n' +
-'<tr><td>matches:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
+'<tr><td>items:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
+'<tr><td>zinnen:<td class="right" id="resultlinecount">0\n' +
 '<tr><td>combinaties:<td class="right" id="resultcombis">0\n' +
 '<tr><td>tijd:<td class="right" id="resulttijd">0s\n' +
 '</table>\n' +
