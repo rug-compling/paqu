@@ -189,15 +189,17 @@ function init(s) {
 	for ; j < 5; j++ {
 		attr[j] = ""
 	}
-	if attr[0] == "" {
-		if download {
-			fmt.Fprintln(q.w, "Geen attribuut gekozen")
-		} else {
-			updateJsonErr(q, "Geen attribuut gekozen")
-			fmt.Fprintln(q.w, "</body>\n</html>")
+	/*
+		if attr[0] == "" {
+			if download {
+				fmt.Fprintln(q.w, "Geen attribuut gekozen")
+			} else {
+				updateJsonErr(q, "Geen attribuut gekozen")
+				fmt.Fprintln(q.w, "</body>\n</html>")
+			}
+			return
 		}
-		return
-	}
+	*/
 
 	nAttr := 0
 	for i := 0; i < 5; i++ {
@@ -386,7 +388,7 @@ init({
 		for i := 0; i < nAttr; i++ {
 			fmt.Fprint(q.w, `,"`, aligns[i], `"`)
 		}
-		fmt.Fprint(q.w, "],\n\"labels\": [\"aantal\"")
+		fmt.Fprint(q.w, "],\n\"labels\": [\"items\"")
 		for i := 0; i < nAttr; i++ {
 			a := attr[i]
 			if a[0] == ':' {
@@ -717,7 +719,7 @@ func xpathout(q *Context, sums map[[5]StructIS]int, attr []string, isidx [5]bool
 		if tooMany {
 			fmt.Fprintln(q.w, "# ONDERBROKEN VANWEGE TE VEEL COMBINATIES")
 		}
-		fmt.Fprintf(q.w, "# %d matches in %d combinaties\n", count, len(data.lines))
+		fmt.Fprintf(q.w, "# %d zinnen met %d items in %d combinaties\n", linecount, count, len(data.lines))
 	} else {
 		fmt.Fprintf(q.w, `<script type="text/javascript">
 f({

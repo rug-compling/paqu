@@ -554,7 +554,7 @@ $('#loading span').html('%.1f%%');
 		<input type="hidden" name="xpath" value="%s">
 		<input type="hidden" name="db" value="%s">
 		<input type="hidden" name="mt" value="%s">
-		Selecteer &eacute;&eacute;n tot vijf attributen:
+		Selecteer nul tot vijf attributen:
         <p>
 `, html.EscapeString(query), html.EscapeString(prefix), methode)
 
@@ -664,10 +664,12 @@ func html_xpath_header(q *Context) {
     if (at3.selectedIndex > 0) { n++; val = at3.value;  }
     if (at4.selectedIndex > 0) { n++; val = at4.value;  }
     if (at5.selectedIndex > 0) { n++; val = at5.value;  }
+    /*
     if (n < 1) {
       alert("Geen attribuut geselecteerd");
       return;
     }
+    */
     setCookie("paqu-xpattr1", hexEncode(at1.value), 14);
     setCookie("paqu-xpattr2", hexEncode(at2.value), 14);
     setCookie("paqu-xpattr3", hexEncode(at3.value), 14);
@@ -850,6 +852,7 @@ func html_xpath_header(q *Context) {
   var isidx;
   var data;
   var curcol;
+  var hasattribs;
 
   var entityMap = {
     "&": "&amp;",
@@ -924,7 +927,9 @@ func html_xpath_header(q *Context) {
      }
      $('#resultmatches').html(data.matches);
      $('#resultlinecount').html(data.linecount);
-     $('#resultcombis').html(data.combis);
+     if (hasattribs) {
+         $('#resultcombis').html(data.combis);
+     }
      $('#resulttijd').html(data.tijd);
      if (data.final) {
          $('#resultbusy').html('');
@@ -932,6 +937,9 @@ func html_xpath_header(q *Context) {
          if (typeof data.perc !== 'undefined') {
              $('#resultbusy').html('<img src="busy.gif" alt="aan het werk..."> ' + data.perc);
          }
+     }
+     if (!hasattribs) {
+         return;
      }
      var t = $('#resultlines');
      var em
@@ -1019,7 +1027,16 @@ func html_xpath_header(q *Context) {
       aligns = o.aligns;
       labels = o.labels;
       isidx = o.isidx;
-      result.html(
+      hasattribs = (labels.length > 1);
+      if (!hasattribs) {
+        result.html(
+'<table>\n' +
+'<tr><td>items:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
+'<tr><td>zinnen:<td class="right" id="resultlinecount">0\n' +
+'<tr><td>tijd:<td class="right" id="resulttijd">0s\n' +
+'</table>\n');
+      } else {
+        result.html(
 '<table>\n' +
 '<tr><td>items:<td class="right" id="resultmatches">0<td rowspan="3" id="resultbusy"><img src="busy.gif" alt="aan het werk...">\n' +
 '<tr><td>zinnen:<td class="right" id="resultlinecount">0\n' +
@@ -1030,6 +1047,7 @@ func html_xpath_header(q *Context) {
 '<table class="breed" id="resultlines">\n' +
 '</table>\n' +
 '<hr><a href="xpathstats?' + o.download + '">download</a>\n');
+      }
     },
     update: function(o) {
         data = o;
@@ -1062,10 +1080,12 @@ func html_xpath_header(q *Context) {
     if (at3.selectedIndex > 0) { n++; }
     if (at4.selectedIndex > 0) { n++; }
     if (at5.selectedIndex > 0) { n++; }
+    /*
     if (n < 1) {
       alert("Geen attribuut geselecteerd");
       return false;
     }
+    */
     setCookie("paqu-xpattr1", hexEncode(at1.value), 14);
     setCookie("paqu-xpattr2", hexEncode(at2.value), 14);
     setCookie("paqu-xpattr3", hexEncode(at3.value), 14);
