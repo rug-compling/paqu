@@ -6,6 +6,9 @@ import (
 	"fmt"
 )
 
+func extension_menu(q *Context, tab int) {
+}
+
 func extension(q *Context) {
 	contentType(q, "text/plain; charset=utf-8")
 	nocache(q)

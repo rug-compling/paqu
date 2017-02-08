@@ -155,7 +155,9 @@ func writeHead(q *Context, title string, tab int) {
 	}
 
 	var t [6]string
-	t[tab] = " class=\"selected\""
+	if tab < 6 {
+		t[tab] = " class=\"selected\""
+	}
 	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\""+t[1]+">Zoeken</a>")
 	if has_dbxml {
 		fmt.Fprintln(q.w, "<a href=\"xpath\""+t[2]+">XPath</a>")
@@ -166,7 +168,9 @@ func writeHead(q *Context, title string, tab int) {
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[4]+">Corpora</a>")
 	}
-	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[5]+">Info</a>\n</div>\n")
+	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[5]+">Info</a>")
+	extension_menu(q, tab)
+	fmt.Fprintln(q.w, "</div>\n")
 }
 
 func writeHtml(q *Context, title, msg string) {
