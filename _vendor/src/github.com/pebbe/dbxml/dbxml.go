@@ -58,6 +58,7 @@ var (
 	errqueryclosed = errors.New("Query is closed")
 	errempty       = errors.New("Query is empty")
 	errbrackets    = errors.New("Query starts with '('")
+	lock           sync.Mutex
 )
 
 //. Open & Close
@@ -66,6 +67,8 @@ var (
 //
 // Call db.Close() to ensure all write operations to the database are finished, before terminating the program.
 func Open(filename string) (*Db, error) {
+	lock.Lock()
+	defer lock.Unlock()
 	db := &Db{
 		queries: make(map[uint64]*Query),
 	}
