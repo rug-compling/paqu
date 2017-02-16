@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/dbxml"
 
 	"bytes"
+	"crypto/md5"
 	"database/sql"
 	"encoding/xml"
 	"errors"
@@ -317,11 +318,13 @@ func xpath(q *Context) {
 	xmlparts := make([]string, 0)
 	query := first(q.r, "xpath")
 	fullquery := query
+	var hash string
 	if strings.Contains(query, "%") {
 		rules := getMacrosRules(q)
 		fullquery = macroKY.ReplaceAllStringFunc(query, func(s string) string {
 			return rules[s[1:len(s)-1]]
 		})
+		hash = fmt.Sprintf("%x", md5.Sum([]byte(fullquery)))
 	}
 
 	queryparts := strings.Split(fullquery, "+|+")
@@ -551,12 +554,13 @@ $('#loading span').html('%.1f%%');
         <p>
 		<div id="xstats">
 		<form action="javascript:$.fn.xpathstats()" name="xstatsform">
+        <input type="hidden" name="hash" value="%s">
 		<input type="hidden" name="xpath" value="%s">
 		<input type="hidden" name="db" value="%s">
 		<input type="hidden" name="mt" value="%s">
 		Selecteer nul tot vijf attributen:
         <p>
-`, html.EscapeString(query), html.EscapeString(prefix), methode)
+`, hash, html.EscapeString(query), html.EscapeString(prefix), methode)
 
 	for i := 1; i <= 5; i++ {
 
