@@ -24,8 +24,9 @@ type Macros struct {
 }
 
 var (
-	macroRE = regexp.MustCompile(`([a-zA-Z][_a-zA-Z0-9]*)\s*=\s*"""((?s:.*?))"""`)
-	macroKY = regexp.MustCompile(`%[a-zA-Z][_a-zA-Z0-9]*%`)
+	macroRE  = regexp.MustCompile(`([a-zA-Z][_a-zA-Z0-9]*)\s*=\s*"""((?s:.*?))"""`)
+	macroKY  = regexp.MustCompile(`%[a-zA-Z][_a-zA-Z0-9]*%`)
+	macroCOM = regexp.MustCompile(`(?m:^\s*#.*)`)
 
 	macroLock sync.Mutex
 	macroMap  = make(map[string]Macros)
@@ -43,7 +44,7 @@ func downloadmacros(q *Context) {
 	}
 
 	contentType(q, "text/plain")
-	q.w.Header().Set("Content-Disposition", "attachment; filename=macros.txt")
+	q.w.Header().Set("Content-Disposition", "attachment; filename=usermacros.txt")
 	nocache(q)
 
 	rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
@@ -73,6 +74,8 @@ func savemacros(q *Context) {
 	macros = strings.Replace(macros, "\n\r", "\n", -1)
 	macros = strings.Replace(macros, "\r", "\n", -1)
 
+	sysmacros := macroCOM.ReplaceAllLiteralString(file__macros__txt, "")
+
 	result := MacroResult{Keys: make([]string, 0)}
 
 MACROLOOP:
@@ -87,14 +90,23 @@ MACROLOOP:
 			break
 		}
 
-		s := macroRE.ReplaceAllLiteralString(macros, "")
+		mm := macroCOM.ReplaceAllLiteralString(macros, "")
+		s := macroRE.ReplaceAllLiteralString(mm, "")
 		if t := strings.TrimSpace(s); t != "" {
 			result.Err = fmt.Sprintf("Overgebleven tekst %q", t)
 			break
 		}
 
 		rules := make(map[string]string)
-		for _, set := range macroRE.FindAllStringSubmatch(macros, -1) {
+		for _, set := range macroRE.FindAllStringSubmatch(sysmacros, -1) {
+			rules[set[1]] = set[2]
+		}
+
+		for _, set := range macroRE.FindAllStringSubmatch(mm, -1) {
+			if strings.HasPrefix(set[1], "PQ_") {
+				result.Err = "Namen van macro's mogen niet met PQ_ beginnen"
+				break MACROLOOP
+			}
 			rules[set[1]] = set[2]
 		}
 		for key := range rules {
@@ -128,7 +140,10 @@ MACROLOOP:
 		}
 
 		result.Macros = macros
-		for _, set := range macroRE.FindAllStringSubmatch(macros, -1) {
+		for _, set := range macroRE.FindAllStringSubmatch(sysmacros, -1) {
+			result.Keys = append(result.Keys, set[1])
+		}
+		for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(macros, ""), -1) {
 			result.Keys = append(result.Keys, set[1])
 		}
 		sort.Strings(result.Keys)
@@ -182,10 +197,12 @@ func loadMacros(q *Context) {
 	}
 
 	text := ""
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
-	if err == nil && rows.Next() {
-		rows.Scan(&text)
-		rows.Close()
+	if q.auth {
+		rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+		if err == nil && rows.Next() {
+			rows.Scan(&text)
+			rows.Close()
+		}
 	}
 
 	macros := Macros{
@@ -193,7 +210,11 @@ func loadMacros(q *Context) {
 		time:  time.Now(),
 	}
 
-	for _, set := range macroRE.FindAllStringSubmatch(text, -1) {
+	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file__macros__txt, ""), -1) {
+		macros.rules[set[1]] = set[2]
+	}
+
+	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(text, ""), -1) {
 		macros.rules[set[1]] = set[2]
 	}
 
@@ -220,7 +241,6 @@ func loadMacros(q *Context) {
 	sort.Strings(macros.keys)
 
 	macroMap[q.user] = macros
-
 }
 
 func getMacrosKeys(q *Context) []string {
@@ -246,11 +266,6 @@ func getMacrosRules(q *Context) map[string]string {
 func macroExpand(q *Context) {
 	contentType(q, "text/plain; charset=utf-8")
 	nocache(q)
-
-	if !q.auth {
-		fmt.Fprintln(q.w, "Je bent niet ingelogd")
-		return
-	}
 
 	query := first(q.r, "xpath")
 	query = strings.Replace(query, "\r\n", "\n", -1)

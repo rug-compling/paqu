@@ -16,6 +16,7 @@ DEPS = \
 	info.html \
 	jquery.js \
 	jquery.textcomplete.js \
+	macros.txt \
 	paqu.css \
 	paqu.png \
 	relhead.png \

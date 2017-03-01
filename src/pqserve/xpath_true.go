@@ -1325,7 +1325,9 @@ corpus: <select name="db">
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
 	}
 	fmt.Fprintf(q.w, `<p>
-		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">voorbeelden</a>):<br>
+		XPATH query (<a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">voorbeelden</a>)
+(<a href="macros.txt" target="_blank">ingebouwde macro's</a>):
+<br>
 		<textarea name="xpath" rows="6" cols="80" maxlength="1200" id="xquery">%s</textarea>
 		<p>
 		`, html.EscapeString(first(q.r, "xpath")))
@@ -1563,8 +1565,8 @@ $('#xquery').textcomplete([
     context: outText
 }],
 {
-    maxCount: 100,
-    debounce: 100,
+    maxCount: 200,
+    debounce: 300,
 });
 
 init();

@@ -109,6 +109,12 @@ func static_leeg_html(q *Context) {
 	fmt.Fprintln(q.w, "<!DOCTYPE html>\n<html><head><title></title></head><body></body></html>")
 }
 
+func static_macros_txt(q *Context) {
+	contentType(q, "text/plain")
+	cache(q)
+	fmt.Fprintln(q.w, file__macros__txt)
+}
+
 func static_paqu_css(q *Context) {
 	contentType(q, "text/css")
 	cache(q)

@@ -228,6 +228,7 @@ func main() {
 	handleStatic("jquery.js", static_jquery_js)
 	handleStatic("jquery.textcomplete.js", static_jquery_textcomplete_js)
 	handleStatic("leeg.html", static_leeg_html)
+	handleStatic("macros.txt", static_macros_txt)
 	handleStatic("paqu.css", static_paqu_css)
 	handleStatic("paqu.png", static_paqu_png)
 	handleStatic("robots.txt", static_robots_txt)
