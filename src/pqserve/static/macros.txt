@@ -2,6 +2,12 @@
 ## mostly by Gertjan van Noord
 ## comments welcome at g.j.m.van.noord@rug.nl
 ##
+## any macro definition that is a conjunction or disjunction
+## should be placed in () brackets in order to avoid counter-intuitive
+## results
+##
+## any macro definition that starts with //node should not
+## have outer () brackets
 
 PQ_b = """number(@begin)"""
 PQ_e = """number(@end)"""
@@ -165,6 +171,10 @@ PQ_verb_in_verbcluster = """
               ]"""
 
 ## omdat ik jou gezien heb
+##
+## this query is slightly too permissive in that it will
+## find topicalized participles as well
+## (cases such as "Gestart zal worden met een introductie")
 PQ_groen = """
         //node[@rel="hd"
                and
@@ -177,6 +187,18 @@ PQ_groen = """
                     ../../@cat="sv1"
                   )
               ]"""
+
+## verwacht werd dat hij komt
+PQ_topicalized_participle = """
+        //node[@wvorm="vd"
+               and
+               @rel="hd"
+               and
+               ../@rel="vc"
+               and
+               %PQ_b% = ancestor::node[@cat="smain"]/%PQ_b%
+              ]"""
+
 
 ## omdat ik jou heb gezien
 PQ_rood = """
@@ -192,6 +214,10 @@ PQ_rood = """
                   )
               ]"""
 
+## this query depends on co-indexing and therefore
+## does not work for the CGN treebank
+##
+## "dat hij hen hun eigen graf zag graven"
 PQ_cross_serial_verbcluster = """
         //node[%PQ_dep_node_in_verbcluster%
                and
@@ -201,6 +227,8 @@ PQ_cross_serial_verbcluster = """
               ]"""
 
 ## only personal passives
+## this query depends on co-indexing and therefore
+## does not work for the CGN treebank
 PQ_passive = """
         ( @rel="vc"
           and
@@ -214,28 +242,62 @@ PQ_passive = """
 
 ## only impersonal passives
 ## "in Rotterdam wordt gefeest"
+##
+## does not work for the CGN treebank
+## does not work well for manually corrected treebanks
 PQ_impersonal_passive = """
+       (  (  %PQ_impersonal_passive_man%
+              or
+              %PQ_impersonal_passive_aut%
+            )
+        and
+        parent::node[not(node[@rel="su"])
+                     and
+                     ( @cat="smain"
+                       or
+                       @cat="ssub"
+                       or
+                       @cat="sv1"
+                     )
+                    ]
+        )"""
+
+PQ_impersonal_passive_aut = """
         ( @rel="vc"
           and
-          ( @cat="ppart"
-            or
-            @cat="ti"
+          ../node[@rel="hd"
+                  and
+                  (  @sc="passive"
+                     or
+                     @sc="te_passive"
+                  )
+                 ]
+        )"""
+
+
+PQ_impersonal_passive_man = """
+        ( @rel="vc"
+          and
+          ../node[@rel="hd"
+                  and
+                  @pt="ww"
+                 ]
+          and
+          ( ( @cat="ppart"
+              and
+              not(node[@rel="obj1"])
+              and
+              not(node[@rel="su"])
+            )
+          or
+            ( @cat="ti"
+              and
+              not(node[@rel="body"]/node[@rel="obj1"])
+              and
+              not(node[@rel="body"]/node[@rel="su"])
+            )
           )
-          and
-          not(node[@rel="obj1"])
-          and
-          not(node[@rel="su"])
-          and
-          parent::node[not(node[@rel="su"])
-                       and
-                       ( @cat="smain"
-                         or
-                         @cat="ssub"
-                         or
-                         @cat="sv1"
-                       )
-                      ]
-       )"""
+        )"""
 
 PQ_laag_ev = """
         ( ../@cat="np"
@@ -838,7 +900,7 @@ PQ_ingebedde_vraagzinnen = """
               ]"""
 
 PQ_vorfeld_np_subject = """
-        //node[        %PQ_vorfeld%
+        //node[ %PQ_vorfeld%
                 and
                 ( @rel="su"
                   or
@@ -849,7 +911,7 @@ PQ_vorfeld_np_subject = """
               ]"""
 
 PQ_vorfeld_np_no_subject = """
-        //node[        %PQ_vorfeld%
+        //node[ %PQ_vorfeld%
                 and
                 not(@rel="su"
                     or
@@ -908,7 +970,7 @@ PQ_minimal_s_dominating_vorfeld = """
         )"""
 
 PQ_vorfeld_non_local = """
-        //node[        %PQ_minimal_s_dominating_vorfeld%
+        //node[ %PQ_minimal_s_dominating_vorfeld%
                 and
                 @cat="ssub"
               ]"""
