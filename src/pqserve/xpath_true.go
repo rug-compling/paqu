@@ -1238,6 +1238,11 @@ func html_xpath_header(q *Context) {
     });
     $('#btExpand').on('click', macroExpand);
     $('#btClose').on('click', function() { $('#macroOuter').slideUp(200); });
+    $('#btXCopy').on('click', function() {
+        $('#xquery').val($('#macroInner').text());
+        $('#macroOuter').slideUp(200);
+        $('#btExpand').hide(200);
+    });
   }
 
   $(document).ready(function() {
@@ -1361,6 +1366,7 @@ corpus: <select name="db">
        <div id="macroOuter" style="display:none">
        <div id="macroInner"></div>
        <button id="btClose">Sluiten</button>
+       <button id="btXCopy">Kopieer naar invoer</button>
        </div>
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
