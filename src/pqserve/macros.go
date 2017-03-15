@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -214,13 +215,19 @@ func loadMacros(q *Context) {
 	}
 
 	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file__macros__txt, ""), -1) {
-		macros.rules[set[1]] = set[2]
-		macros.raw[set[1]] = set[2]
+		s := strings.Replace(set[2], "\r\n", "\n", -1)
+		s = strings.Replace(s, "\n\r", "\n", -1)
+		s = strings.Replace(s, "\r", "\n", -1)
+		macros.rules[set[1]] = s
+		macros.raw[set[1]] = untabify(s)
 	}
 
 	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(text, ""), -1) {
-		macros.rules[set[1]] = set[2]
-		macros.raw[set[1]] = set[2]
+		s := strings.Replace(set[2], "\r\n", "\n", -1)
+		s = strings.Replace(s, "\n\r", "\n", -1)
+		s = strings.Replace(s, "\r", "\n", -1)
+		macros.rules[set[1]] = s
+		macros.raw[set[1]] = untabify(s)
 	}
 
 	for key := range macros.rules {
@@ -286,21 +293,85 @@ func macroExpand(q *Context) {
 	query = strings.Replace(query, "\r\n", "\n", -1)
 	query = strings.Replace(query, "\n\r", "\n", -1)
 	query = strings.Replace(query, "\r", "\n", -1)
+
+	query = untabify(query)
+
 	level, err := strconv.Atoi(first(q.r, "lvl"))
 	if err != nil {
 		level = 1
 	}
 	rules := getMacrosRaw(q)
-	for i := 0; i < level; i++ {
-		query = macroKY.ReplaceAllStringFunc(
-			query,
-			func(s string) string {
-				if s2, ok := rules[s[1:len(s)-1]]; ok {
-					return s2
-				} else {
-					return s[:len(s)-1] + "|ONBEKEND%"
+	for lvl := 0; lvl < level; lvl++ {
+		matches := macroKY.FindAllStringIndex(query, -1)
+		if matches == nil || len(matches) == 0 {
+			break
+		}
+		for i := len(matches) - 1; i >= 0; i-- {
+			from := matches[i][0]
+			to := matches[i][1]
+			s, ok := rules[query[from+1:to-1]]
+			if !ok {
+				s = query[from:to-1] + "|UNKNOWN%"
+			} else {
+
+				lines := strings.Split(s, "\n")
+				for len(lines) > 0 && strings.TrimSpace(lines[0]) == "" {
+					lines = lines[1:]
 				}
-			})
+				for n := len(lines) - 1; n >= 0 && strings.TrimSpace(lines[n]) == ""; n-- {
+					lines = lines[:n]
+				}
+				if len(lines) < 2 {
+					s = strings.TrimSpace(s)
+				} else {
+					n := 100000
+					p := strings.LastIndex(query[:from], "\n") + 1
+					prefix := strings.Repeat(" ", from-p)
+					for j, line := range lines {
+						line := strings.TrimRight(line, " ")
+						lines[j] = line
+						if len(line) > 0 {
+							d := len(line) - len(strings.TrimLeft(line, " "))
+							if d < n {
+								n = d
+							}
+						}
+					}
+					for j, line := range lines {
+						if len(line) >= n {
+							if j == 0 {
+								lines[0] = line[n:]
+							} else {
+								lines[j] = prefix + line[n:]
+							}
+						}
+					}
+					s = strings.Join(lines, "\n")
+				}
+			}
+			query = query[:from] + s + query[to:]
+		}
 	}
 	fmt.Fprintln(q.w, query)
+}
+
+func untabify(s string) string {
+	var b bytes.Buffer
+	i := 0
+	for _, chr := range s {
+		i++
+		if chr == '\n' {
+			i = 0
+			b.WriteRune('\n')
+		} else if chr == '\t' {
+			b.WriteRune(' ')
+			for (i % 8) != 0 {
+				i++
+				b.WriteRune(' ')
+			}
+		} else {
+			b.WriteRune(chr)
+		}
+	}
+	return b.String()
 }
