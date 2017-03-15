@@ -1174,14 +1174,29 @@ func html_xpath_header(q *Context) {
       });
   }
 
-  function macroExpand() {
-    $.ajax("macroexpand?" + xquery.serialize())
+  var expandLvl = 1;
+  var macroOri = "";
+  function macroExpand(reset) {
+    if (reset) {
+        expandLvl = 1;
+        macroOri = xquery.serialize();
+    } else {
+        expandLvl++;
+    }
+    $('#macroOuter').slideUp(200);
+    $.ajax("macroexpand?lvl=" + expandLvl + "&" + macroOri)
       .done(function(data) {
          $("#macroInner").text(data);
+         $('#macroOuter').slideDown(400);
+         if (reMacro.test(data)) {
+           $('#btExpandNxt').show(400);
+         } else {
+           $('#btExpandNxt').hide(200);
+         }
       }).fail(function(e) {
          $("#macroInner").text(e.responseText);
+         $('#macroOuter').slideDown(400);
       })
-      $('#macroOuter').slideUp(200).slideDown(400);
   }
 
   var macroIsOpen = false;
@@ -1236,7 +1251,8 @@ func html_xpath_header(q *Context) {
     $('#macrofilesave').on('click', function() {
           $('#macrofilesave').removeClass('bold');
     });
-    $('#btExpand').on('click', macroExpand);
+    $('#btExpand').on('click', function() { macroExpand(true) });
+    $('#btExpandNxt').on('click', function() { macroExpand(false) });
     $('#btClose').on('click', function() { $('#macroOuter').slideUp(200); });
     $('#btXCopy').on('click', function() {
         var txt = $('#macroInner').text();
@@ -1245,7 +1261,9 @@ func html_xpath_header(q *Context) {
         } else {
             $('#xquery').val(txt);
             $('#macroOuter').slideUp(200);
-            $('#btExpand').hide(200);
+            if (!reMacro.test(txt)) {
+              $('#btExpand').hide(200);
+            }
         }
     });
   }
@@ -1371,6 +1389,7 @@ corpus: <select name="db">
        <div id="macroOuter" style="display:none">
        <div id="macroInner"></div>
        <button id="btClose">Sluiten</button>
+       <button id="btExpandNxt" style="display:none">Toon verdere macro-expansie</button>
        <button id="btXCopy">Kopieer naar invoer</button>
        </div>
 <script type="text/javascript" src="jquery.textcomplete.js"></script>

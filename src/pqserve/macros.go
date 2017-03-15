@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -19,6 +20,7 @@ type MacroResult struct {
 
 type Macros struct {
 	rules map[string]string
+	raw   map[string]string
 	keys  []string
 	time  time.Time
 }
@@ -207,15 +209,18 @@ func loadMacros(q *Context) {
 
 	macros := Macros{
 		rules: make(map[string]string),
+		raw:   make(map[string]string),
 		time:  time.Now(),
 	}
 
 	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file__macros__txt, ""), -1) {
 		macros.rules[set[1]] = set[2]
+		macros.raw[set[1]] = set[2]
 	}
 
 	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(text, ""), -1) {
 		macros.rules[set[1]] = set[2]
+		macros.raw[set[1]] = set[2]
 	}
 
 	for key := range macros.rules {
@@ -263,6 +268,16 @@ func getMacrosRules(q *Context) map[string]string {
 	return map[string]string{}
 }
 
+func getMacrosRaw(q *Context) map[string]string {
+	loadMacros(q)
+	macroLock.Lock()
+	defer macroLock.Unlock()
+	if m, ok := macroMap[q.user]; ok {
+		return m.raw
+	}
+	return map[string]string{}
+}
+
 func macroExpand(q *Context) {
 	contentType(q, "text/plain; charset=utf-8")
 	nocache(q)
@@ -271,14 +286,21 @@ func macroExpand(q *Context) {
 	query = strings.Replace(query, "\r\n", "\n", -1)
 	query = strings.Replace(query, "\n\r", "\n", -1)
 	query = strings.Replace(query, "\r", "\n", -1)
-	rules := getMacrosRules(q)
-	fmt.Fprintln(q.w, macroKY.ReplaceAllStringFunc(
-		query,
-		func(s string) string {
-			if s2, ok := rules[s[1:len(s)-1]]; ok {
-				return s2
-			} else {
-				return s[:len(s)-1] + "|ONBEKEND%"
-			}
-		}))
+	level, err := strconv.Atoi(first(q.r, "lvl"))
+	if err != nil {
+		level = 1
+	}
+	rules := getMacrosRaw(q)
+	for i := 0; i < level; i++ {
+		query = macroKY.ReplaceAllStringFunc(
+			query,
+			func(s string) string {
+				if s2, ok := rules[s[1:len(s)-1]]; ok {
+					return s2
+				} else {
+					return s[:len(s)-1] + "|ONBEKEND%"
+				}
+			})
+	}
+	fmt.Fprintln(q.w, query)
 }
