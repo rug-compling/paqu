@@ -1239,9 +1239,14 @@ func html_xpath_header(q *Context) {
     $('#btExpand').on('click', macroExpand);
     $('#btClose').on('click', function() { $('#macroOuter').slideUp(200); });
     $('#btXCopy').on('click', function() {
-        $('#xquery').val($('#macroInner').text());
-        $('#macroOuter').slideUp(200);
-        $('#btExpand').hide(200);
+        var txt = $('#macroInner').text();
+        if (txt.length > 1200) {
+            alert("De tekst is te lang voor het invoerveld");
+        } else {
+            $('#xquery').val(txt);
+            $('#macroOuter').slideUp(200);
+            $('#btExpand').hide(200);
+        }
     });
   }
 
