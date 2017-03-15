@@ -244,9 +244,8 @@ PQ_passive = """
 ## "in Rotterdam wordt gefeest"
 ##
 ## does not work for the CGN treebank
-## does not work well for manually corrected treebanks
 PQ_impersonal_passive = """
-       (  (  %PQ_impersonal_passive_man%
+        (  (  %PQ_impersonal_passive_man%
               or
               %PQ_impersonal_passive_aut%
             )
@@ -257,7 +256,10 @@ PQ_impersonal_passive = """
                        or
                        @cat="ssub"
                        or
-                       @cat="sv1"
+                       ( @cat="sv1"
+                         and
+                         not(%PQ_imperatieven%)
+                       )
                      )
                     ]
         )"""
@@ -288,6 +290,8 @@ PQ_impersonal_passive_man = """
               not(node[@rel="obj1"])
               and
               not(node[@rel="su"])
+              and
+              not(node[@rel="vc"])
             )
           or
             ( @cat="ti"
@@ -295,6 +299,8 @@ PQ_impersonal_passive_man = """
               not(node[@rel="body"]/node[@rel="obj1"])
               and
               not(node[@rel="body"]/node[@rel="su"])
+              and
+              not(node[@rel="body"]/node[@rel="vc"])
             )
           )
         )"""
@@ -970,7 +976,7 @@ PQ_minimal_s_dominating_vorfeld = """
         )"""
 
 PQ_vorfeld_non_local = """
-        //node[ %PQ_minimal_s_dominating_vorfeld%
+        //node[ @cat="ssub"
                 and
-                @cat="ssub"
+                %PQ_minimal_s_dominating_vorfeld%
               ]"""
