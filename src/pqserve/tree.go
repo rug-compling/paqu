@@ -430,6 +430,10 @@ func tree(q *Context) {
 	}
 	// EIND: svg nabewerken en printen
 
+	if alpino.Parser.Cats != "" || alpino.Parser.Skips != "" {
+		fmt.Fprintf(q.w, "<p>\ncats: %s<br>\nskips: %s\n<p>\n", html.EscapeString(alpino.Parser.Cats), html.EscapeString(alpino.Parser.Skips))
+	}
+
 	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
 
 	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", q.r.URL.RawQuery, html.EscapeString(label))

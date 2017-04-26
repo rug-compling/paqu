@@ -9,9 +9,9 @@
 ## any macro definition that starts with //node should not
 ## have outer () brackets
 
-PQ_b = """number(@begin)"""
-PQ_e = """number(@end)"""
-PQ_i = """number(@index)"""
+PQ_b = """ number(@begin) """
+PQ_e = """ number(@end) """
+PQ_i = """ number(@index) """
 
 PQ_headrel = """
         ( @rel="hd"
@@ -44,19 +44,19 @@ PQ_precedes_head_of_smain = """
               and
               not(node[%PQ_headrel%])
            )
-        )"""
+        ) """
 
 PQ_vorfeld = """
         ( %PQ_precedes_head_of_smain%
           and
           not(parent::node[%PQ_precedes_head_of_smain%])
-        )"""
+        ) """
 
 PQ_single_name = """
         ( @ntype = 'eigen'
           or
           @postag='SPEC(deeleigen)'
-        )"""
+        ) """
 
 PQ_multi_name = """
         ( @cat='mwu'
@@ -64,14 +64,14 @@ PQ_multi_name = """
           node[@rel='mwp'
                and
                %PQ_single_name%
-              ]
-        )"""
+          ]
+        ) """
 
 PQ_name = """
         ( %PQ_single_name%
           or
           %PQ_multi_name%
-        )"""
+        ) """
 
 PQ_name_phrase=  """
         ( %PQ_name%
@@ -79,8 +79,8 @@ PQ_name_phrase=  """
           node[@rel="hd"
                and
                %PQ_name%
-              ]
-        )"""
+          ]
+        ) """
 
 PQ_vp = """
         ( @cat="inf"
@@ -92,7 +92,7 @@ PQ_vp = """
           @cat="oti"
           or
           @cat="ppart"
-        )"""
+        ) """
 
 PQ_s = """
         ( %PQ_vp%
@@ -100,7 +100,7 @@ PQ_s = """
           @cat="smain"
           or
           @cat="sv1"
-        )"""
+        ) """
 
 PQ_follows_head_of_vp = """
         ( not(@cat="inf" or @cat="ppart" or @rel="hd" or @rel="svp")
@@ -109,7 +109,7 @@ PQ_follows_head_of_vp = """
             or
             ancestor::node[%PQ_vp%]/node[@rel="hd"]/%PQ_b% < %PQ_b% and not(node[%PQ_headrel%])
           )
-        )"""
+        ) """
 
 PQ_nachfeld = """
         ( %PQ_follows_head_of_vp%
@@ -129,8 +129,8 @@ PQ_dep_node_in_verbcluster = """
                                 @pt="ww"
                                 and
                                 not(../@cat="smain" or ../@cat="sv1")
-                               ]/%PQ_b%
-        )"""
+          ]/%PQ_b%
+        ) """
 
 PQ_dep_verb_in_verbcluster = """
         ( ( @rel="hd"
@@ -151,24 +151,24 @@ PQ_dep_verb_in_verbcluster = """
             @pt="ww"
             and parent::node[parent::node[%PQ_dep_node_in_verbcluster%]]
           )
-        )"""
+        ) """
 
 PQ_head_verb_in_verbcluster = """
         ( not(../@cat="smain"
               or
               ../@cat="sv1"
-             )
+          )
           and
           @rel="hd"
           and
           ../node[%PQ_dep_node_in_verbcluster%]
-        )"""
+        ) """
 
 PQ_verb_in_verbcluster = """
         //node[%PQ_dep_verb_in_verbcluster%
                or
                %PQ_head_verb_in_verbcluster%
-              ]"""
+        ] """
 
 ## omdat ik jou gezien heb
 ##
@@ -185,8 +185,8 @@ PQ_groen = """
                not( ../../@cat="smain"
                     or
                     ../../@cat="sv1"
-                  )
-              ]"""
+               )
+        ] """
 
 ## verwacht werd dat hij komt
 PQ_topicalized_participle = """
@@ -197,8 +197,7 @@ PQ_topicalized_participle = """
                ../@rel="vc"
                and
                %PQ_b% = ancestor::node[@cat="smain"]/%PQ_b%
-              ]"""
-
+        ] """
 
 ## omdat ik jou heb gezien
 PQ_rood = """
@@ -211,8 +210,8 @@ PQ_rood = """
                not( ../../@cat="smain"
                     or
                     ../../@cat="sv1"
-                  )
-              ]"""
+               )
+        ] """
 
 ## this query depends on co-indexing and therefore
 ## does not work for the CGN treebank
@@ -224,7 +223,7 @@ PQ_cross_serial_verbcluster = """
                @cat="inf"
                and
                ../node[@rel="obj1"]/%PQ_i% = node[@rel="su"]/%PQ_i%
-              ]"""
+        ] """
 
 ## only personal passives
 ## this query depends on co-indexing and therefore
@@ -238,7 +237,7 @@ PQ_passive = """
           )
           and
           node[@rel="obj1"]/%PQ_i% = ../../node[@rel="su"]/%PQ_i%
-        )"""
+        ) """
 
 ## only impersonal passives
 ## "in Rotterdam wordt gefeest"
@@ -248,21 +247,21 @@ PQ_impersonal_passive = """
         (  (  %PQ_impersonal_passive_man%
               or
               %PQ_impersonal_passive_aut%
-            )
-        and
-        parent::node[not(node[@rel="su"])
-                     and
-                     ( @cat="smain"
-                       or
-                       @cat="ssub"
-                       or
-                       ( @cat="sv1"
-                         and
-                         not(%PQ_imperatieven%)
-                       )
-                     )
-                    ]
-        )"""
+           )
+           and
+           parent::node[not(node[@rel="su"])
+                        and
+                        ( @cat="smain"
+                          or
+                          @cat="ssub"
+                          or
+                          ( @cat="sv1"
+                            and
+                            not(%PQ_imperatieven%)
+                          )
+                        )
+           ]
+        ) """
 
 PQ_impersonal_passive_aut = """
         ( @rel="vc"
@@ -273,9 +272,8 @@ PQ_impersonal_passive_aut = """
                      or
                      @sc="te_passive"
                   )
-                 ]
-        )"""
-
+          ]
+        ) """
 
 PQ_impersonal_passive_man = """
         ( @rel="vc"
@@ -283,7 +281,7 @@ PQ_impersonal_passive_man = """
           ../node[@rel="hd"
                   and
                   @pt="ww"
-                 ]
+          ]
           and
           ( ( @cat="ppart"
               and
@@ -293,7 +291,7 @@ PQ_impersonal_passive_man = """
               and
               not(node[@rel="vc"])
             )
-          or
+            or
             ( @cat="ti"
               and
               not(node[@rel="body"]/node[@rel="obj1"])
@@ -303,7 +301,7 @@ PQ_impersonal_passive_man = """
               not(node[@rel="body"]/node[@rel="vc"])
             )
           )
-        )"""
+        ) """
 
 PQ_laag_ev = """
         ( ../@cat="np"
@@ -313,7 +311,7 @@ PQ_laag_ev = """
           @genus
           and
           string(@genus)
-            =
+          =
           ../node[@rel="mod"
                   and
                   @cat="pp"]/node[@rel="obj1"
@@ -323,11 +321,11 @@ PQ_laag_ev = """
                                   node[@rel="mod"
                                        and
                                        @cat="rel"
-                                      ]
-                                 ]/node[@rel="hd"
-                                        and
-                                        @genus]/string(@genus)
-        )"""
+                                  ]
+          ]/node[@rel="hd"
+                 and
+                 @genus]/string(@genus)
+        ) """
 
 PQ_laag_mv = """
         ( ../@cat="np"
@@ -345,16 +343,16 @@ PQ_laag_mv = """
                                   node[@rel="mod"
                                        and
                                        @cat="rel"
-                                      ]
-                                 ]/node[@rel="hd"
-                                        and
-                                        @getal="mv"
-                                       ]
-        )"""
+                                  ]
+          ]/node[@rel="hd"
+                 and
+                 @getal="mv"
+          ]
+        ) """
 
 ## relatieve bijzin die laag is aangehecht (dus er is een hogere
 ## noun waar de bijzin eventueel ook bij had kunnen worden aangehect)
-PQ_laag = """( %PQ_laag_ev% or %PQ_laag_mv% ) """
+PQ_laag = """ ( %PQ_laag_ev% or %PQ_laag_mv% ) """
 
 PQ_hoog_ev = """
         ( ../@cat="np"
@@ -363,7 +361,7 @@ PQ_hoog_ev = """
           and
           @genus and
           string(@genus)
-            =
+          =
           ../node[@cat="pp"]/node[@cat="np"]/node[@rel="hd"
                                                   and
                                                   @genus]/string(@genus)
@@ -371,8 +369,8 @@ PQ_hoog_ev = """
           ../node[@rel="mod"
                   and
                   @cat="rel"
-                 ]
-        )"""
+          ]
+        ) """
 
 PQ_hoog_mv = """
         ( ../@cat="np"
@@ -388,12 +386,12 @@ PQ_hoog_mv = """
           ../node[@rel="mod"
                   and
                   @cat="rel"
-                 ]
-        )"""
+          ]
+        ) """
 
 ## relatieve bijzin die hoog is aangehecht, maar waar er dus ook een
 ## kandidaat is voor een eventuele lagere aanhechting
-PQ_hoog = """( %PQ_hoog_ev% or %PQ_hoog_mv% )"""
+PQ_hoog = """ ( %PQ_hoog_ev% or %PQ_hoog_mv% ) """
 
 PQ_np_zonder_lidwoord = """
         ( ( @cat="np"
@@ -403,7 +401,7 @@ PQ_np_zonder_lidwoord = """
                  @pt="n"
                  and
                  @ntype="soort"
-                ]
+            ]
             and
             not(node[@rel="det"])
           )
@@ -430,7 +428,7 @@ PQ_onbepaald_lidwoord = """
           @lemma="zo'n"
           or
           @lemma="enkel"
-        )"""
+        ) """
 
 PQ_np_onbepaald_lidwoord = """
         ( @cat="np"
@@ -438,13 +436,13 @@ PQ_np_onbepaald_lidwoord = """
           node[@rel="det"
                and
                %PQ_onbepaald_lidwoord%]
-        )"""
+        ) """
 
 PQ_onbepaalde_np = """
         ( %PQ_np_zonder_lidwoord%
           or
           %PQ_np_onbepaald_lidwoord%
-        )"""
+        ) """
 
 PQ_bepaalde_np = """
         ( @cat="np"
@@ -452,15 +450,15 @@ PQ_bepaalde_np = """
           node[@rel="hd"
                and
                @ntype="soort"
-              ]
+          ]
           and
           node[@rel="det"
                and
                @lemma
                and
                not(%PQ_onbepaald_lidwoord%)
-              ]
-        )"""
+          ]
+        ) """
 
 PQ_mwdet_np = """
         ( @cat="np"
@@ -468,13 +466,13 @@ PQ_mwdet_np = """
           node[@rel="hd"
                and
                @ntype="soort"
-              ]
+          ]
           and
           node[@rel="det"
                and
                @cat
-              ]
-        )"""
+          ]
+        ) """
 
 PQ_eigen = """
         ( @cat="mwu"
@@ -485,16 +483,16 @@ PQ_eigen = """
           )
           or
           @pt="spec"
-        )"""
+        ) """
 
 PQ_eigen_p = """
         ( node[@rel="hd"
                and
                %PQ_eigen%
-              ]
+          ]
           or
           %PQ_eigen%
-        )"""
+        ) """
 
 PQ_pron = """ @pt="vnw" """
 
@@ -502,10 +500,10 @@ PQ_pron_p = """
         ( node[@rel="hd"
                and
                %PQ_pron%
-              ]
+          ]
           or
           %PQ_pron%
-        )"""
+        ) """
 
 PQ_adj = """ @pt="adj" """
 
@@ -513,10 +511,10 @@ PQ_adj_p = """
         ( node[@rel="hd"
                and
                %PQ_adj%
-              ]
+          ]
           or
           %PQ_adj%
-        )"""
+        ) """
 
 PQ_ww = """ @pt="ww" """
 
@@ -524,10 +522,10 @@ PQ_ww_p = """
         ( node[@rel="hd"
                and
                %PQ_ww%
-              ]
+          ]
           or
           %PQ_ww%
-        )"""
+        ) """
 
 PQ_tw = """ @pt="tw" """
 
@@ -535,10 +533,10 @@ PQ_tw_p = """
         ( node[@rel="hd"
                and
                %PQ_tw%
-              ]
+          ]
           or
           %PQ_tw%
-        )"""
+        ) """
 
 PQ_negatielemma = """
         ( @lemma="niet"
@@ -550,7 +548,7 @@ PQ_negatielemma = """
           @lemma="nergens"
           or
           @lemma="niemand"
-        )"""
+        ) """
 
 PQ_s_met_negatie = """
         ( %PQ_s%
@@ -559,19 +557,19 @@ PQ_s_met_negatie = """
             or
             node/node[%PQ_negatielemma%]
           )
-        )"""
+        ) """
 
 PQ_pp_keten = """
         ( @cat="pp"
           and
           count(.//node[@cat="pp"])>2
-        )"""
+        ) """
 
 PQ_max_pp_keten = """
         //node[%PQ_pp_keten%
                and
                not(ancestor::node[%PQ_pp_keten%])
-              ]"""
+        ] """
 
 PQ_su_op_zijn_lexical = """
         ( @rel="su"
@@ -581,13 +579,13 @@ PQ_su_op_zijn_lexical = """
           ../node[@rel="hd"
                   and
                   @lemma="zijn"
-                 ]
+          ]
           and
           ../node[@rel="predc"
                   and
                   @lemma="op"
-                 ]
-        )"""
+          ]
+        ) """
 
 PQ_su_op_zijn_non_lex = """
         ( @rel="hd"
@@ -599,12 +597,12 @@ PQ_su_op_zijn_non_lex = """
           ../../node[@rel="hd"
                      and
                      @lemma="zijn"
-                    ]
+          ]
           and
           ../../node[@rel="predc"
                      and
                      @lemma="op"
-                    ]
+          ]
         ) """
 
 PQ_su_op_zijn_nloc_lex= """
@@ -615,16 +613,16 @@ PQ_su_op_zijn_nloc_lex= """
                           ../node[@rel="hd"
                                   and
                                   @lemma="zijn"
-                                 ]
+                          ]
                           and
                           ../node[@rel="predc"
                                   and
                                   @lemma="op"
-                                 ]
-                         ]/%PQ_i%
+                          ]
+          ]/%PQ_i%
         ) """
 
-PQ_su_op_zijn_nloc_nlex="""
+PQ_su_op_zijn_nloc_nlex= """
         ( @rel="hd"
           and
           @word
@@ -634,13 +632,13 @@ PQ_su_op_zijn_nloc_nlex="""
                              ../node[@rel="hd"
                                      and
                                      @lemma="zijn"
-                                    ]
+                             ]
                              and
                              ../node[@rel="predc"
                                      and
                                      @lemma="op"
-                                    ]
-                            ]/%PQ_i%
+                             ]
+          ]/%PQ_i%
         ) """
 
 PQ_su_op_zijn = """
@@ -657,14 +655,14 @@ PQ_vv_bigram = """
         //node[@pt="ww"
                and
                %PQ_e%=//node[@pt="ww"]/%PQ_b%
-              ]"""
+        ] """
 
 PQ_vv_trigram_ssub = """
         //node[@cat="ssub"
                and
                ( some $x in .//node[@pt="ww"],
-                      $y in .//node[@pt="ww"],
-                      $z in .//node[@pt="ww"]
+                     $y in .//node[@pt="ww"],
+                     $z in .//node[@pt="ww"]
 
                  satisfies
                  (  $x/%PQ_e% = $y/%PQ_b%
@@ -672,15 +670,15 @@ PQ_vv_trigram_ssub = """
                     $y/%PQ_e% = $z/%PQ_b%
                  )
                )
-              ]"""
+        ] """
 
 PQ_vv_fourgram_ssub = """
         //node[@cat="ssub"
                and
                ( some $x in .//node[@pt="ww"],
-                      $y in .//node[@pt="ww"],
-                      $z in .//node[@pt="ww"],
-                      $w in .//node[@pt="ww"]
+                     $y in .//node[@pt="ww"],
+                     $z in .//node[@pt="ww"],
+                     $w in .//node[@pt="ww"]
 
                  satisfies
 
@@ -691,7 +689,7 @@ PQ_vv_fourgram_ssub = """
                     $z/%PQ_e% = $w/%PQ_b%
                  )
                )
-              ]"""
+        ] """
 
 PQ_lcatnp = """
         ( @lcat="np"
@@ -699,12 +697,12 @@ PQ_lcatnp = """
           not(@rel="hd")
           and
           not(@rel="mwp")
-        )"""
+        ) """
 
 PQ_barenp = """
         ( @pt="n"
           and not (@rel="hd")
-        )"""
+        ) """
 
 PQ_pronnp = """
         ( @pt="vnw"
@@ -712,7 +710,7 @@ PQ_pronnp = """
           @pdtype="pron"
           and
           not(@rel="hd")
-        )"""
+        ) """
 
 PQ_mwunp = """
         ( @cat="mwu"
@@ -727,7 +725,7 @@ PQ_mwunp = """
             or
             @rel="app"
           )
-        )"""
+        ) """
 
 PQ_basenp = """
         ( @cat="np"
@@ -739,7 +737,7 @@ PQ_basenp = """
           %PQ_pronnp%
           or
           %PQ_mwunp%
-        )"""
+        ) """
 
 PQ_np = """
         ( %PQ_basenp%
@@ -747,9 +745,9 @@ PQ_np = """
           ( @cat="conj"
             and node[%PQ_basenp%]
           )
-        )"""
+        ) """
 
-PQ_npnode="""//node[%PQ_np%]"""
+PQ_npnode= """ //node[%PQ_np%] """
 
 PQ_finiete_zin = """
         ( @cat="smain"
@@ -830,11 +828,11 @@ PQ_janee_vragen = """
                         @stype
                         and
                         not(@stype='ynquestion')
-                       ]
-                  )
+                   ]
+               )
                and
                number(@end) < //node[@word='?']/number(@end)
-              ]"""
+        ] """
 
 PQ_imperatieven = """
         //node[@cat='sv1'
@@ -846,8 +844,8 @@ PQ_imperatieven = """
                         @stype
                         and
                         not( @stype="imparative" )
-                       ]
-                  )
+                   ]
+               )
                and
                not(node[@rel='hd'
                         and
@@ -857,9 +855,9 @@ PQ_imperatieven = """
                           or
                           @pvagr='met-t'
                         )
-                       ]
-                  )
-              ]"""
+                   ]
+               )
+        ] """
 
 PQ_ssub = """
         ( @cat="ssub"
@@ -869,14 +867,14 @@ PQ_ssub = """
             node[@rel="cnj"
                  and
                  @cat="ssub"
-                ]
+            ]
           )
           or
           ( @cat="du"
             and
             node[@cat="ssub"]
           )
-        )"""
+        ) """
 
 PQ_relatieve_bijzinnen = """
         //node[@cat='rel'
@@ -884,8 +882,8 @@ PQ_relatieve_bijzinnen = """
                node[@rel='body'
                     and
                     %PQ_ssub%
-                   ]
-              ]"""
+               ]
+        ] """
 
 PQ_free_relatives = """
         //node[@cat='whrel'
@@ -893,8 +891,8 @@ PQ_free_relatives = """
                node[@rel='body'
                     and
                     %PQ_ssub%
-                   ]
-              ]"""
+               ]
+        ] """
 
 PQ_ingebedde_vraagzinnen = """
         //node[@cat='whsub'
@@ -902,8 +900,8 @@ PQ_ingebedde_vraagzinnen = """
                node[@rel='body'
                     and
                     %PQ_ssub%
-                   ]
-              ]"""
+               ]
+        ] """
 
 PQ_vorfeld_np_subject = """
         //node[ %PQ_vorfeld%
@@ -914,7 +912,7 @@ PQ_vorfeld_np_subject = """
                 )
                 and
                 %PQ_np%
-              ]"""
+        ] """
 
 PQ_vorfeld_np_no_subject = """
         //node[ %PQ_vorfeld%
@@ -922,15 +920,15 @@ PQ_vorfeld_np_no_subject = """
                 not(@rel="su"
                     or
                     @rel="sup"
-                   )
+                )
                 and
                 %PQ_np%
-              ]"""
+        ] """
 
 PQ_non_local_coindex = """
         ( %PQ_i% = ..//node[@cat="ssub"]//node[@cat="ssub"
-          and
-          not(../@rel="obcomp")]//node/%PQ_i%
+                                               and
+                                               not(../@rel="obcomp")]//node/%PQ_i%
         ) """
 
 PQ_non_local_extraction = """
@@ -940,7 +938,7 @@ PQ_non_local_extraction = """
                )
                and
                %PQ_non_local_coindex%
-              ]"""
+        ] """
 
 PQ_local_extraction = """
         //node[( @rel="whd"
@@ -949,7 +947,7 @@ PQ_local_extraction = """
                )
                and
                not(%PQ_non_local_coindex%)
-              ]"""
+        ] """
 
 PQ_local_extraction = """
         //node[( @rel="whd"
@@ -958,25 +956,25 @@ PQ_local_extraction = """
                )
                and
                not(%PQ_non_local_coindex%)
-              ]"""
+        ] """
 
 PQ_s_dominating_vorfeld = """
         ( ( @cat="ssub"
             or
             @cat="smain"
           )
-         and
-         .//node[%PQ_vorfeld%]
+          and
+          .//node[%PQ_vorfeld%]
         ) """
 
 PQ_minimal_s_dominating_vorfeld = """
         ( %PQ_s_dominating_vorfeld%
           and
           not(.//node[%PQ_s_dominating_vorfeld%])
-        )"""
+        ) """
 
 PQ_vorfeld_non_local = """
         //node[ @cat="ssub"
                 and
                 %PQ_minimal_s_dominating_vorfeld%
-              ]"""
+        ] """

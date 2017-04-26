@@ -72,6 +72,7 @@ var (
 		"of":                   true,
 		"only":                 true,
 		"or":                   true,
+		"parser":               true,
 		"precedes":             true,
 		"return":               true,
 		"satisfies":            true,
@@ -155,7 +156,7 @@ PARTLOOP:
 				if keyTags[s[1:]] {
 					continue
 				}
-				if s == "@type" || s == "@name" || s == "@value" || s == "@sentid" {
+				if s == "@type" || s == "@name" || s == "@value" || s == "@sentid" || s == "@cats" || s == "@skips" {
 					continue
 				}
 				lvl = 1
@@ -1394,8 +1395,8 @@ corpus: <select name="db">
        </div>
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
-var begin = ['//node', '/alpino_ds/node', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]'];
-var other = ['/node', '/meta[@name="" and @value=""]'`)
+var begin = ['//node', '/alpino_ds/node', '/alpino_ds[parser/@cats=""]', '/alpino_ds[parser/@skips=""]', '/alpino_ds[parser/@cats="" and parser/@skips=""]', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]', '//parser[@cats=""]', '//parser[@skips=""]', '//parser[@cats="" and @skips=""]'];
+var other = ['/node', '/meta[@name="" and @value=""]', '/parser[@cats=""]', '/parser[@skips=""]', '/parser[@cats="" and @skips=""]'`)
 	for _, a := range NodeTags {
 		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
 	}

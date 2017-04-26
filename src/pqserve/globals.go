@@ -117,6 +117,7 @@ type SentT struct {
 type Alpino_ds struct {
 	XMLName  xml.Name `xml:"alpino_ds"`
 	Meta     []MetaT  `xml:"metadata>meta"`
+	Parser   ParserT  `xml:"parser,omitempty"`
 	Node0    *Node    `xml:"node"`
 	Sentence string   `xml:"sentence"`
 }
@@ -136,6 +137,11 @@ type MetaT struct {
 	Type  string `xml:"type,attr,omitempty"`
 	Name  string `xml:"name,attr,omitempty"`
 	Value string `xml:"value,attr,omitempty"`
+}
+
+type ParserT struct {
+	Cats  string `xml:"cats,attr,omitempty"`
+	Skips string `xml:"skips,attr,omitempty"`
 }
 
 type CommentType struct {
