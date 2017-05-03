@@ -44,7 +44,7 @@ var (
 func main() {
 	if len(os.Args) != 3 {
 		fmt.Printf(`
-Syntax: %s infile.dact outfile.xdact
+Syntax: %s infile.dact outfile.dactx
 
 `, os.Args[0])
 		return
