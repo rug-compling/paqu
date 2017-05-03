@@ -336,6 +336,10 @@ func tree(q *Context) {
 		}
 	}
 
+	if alpino.Parser.Cats != "" || alpino.Parser.Skips != "" {
+		fmt.Fprintf(q.w, "cats: %s<br>\nskips: %s\n<p>\n", html.EscapeString(alpino.Parser.Cats), html.EscapeString(alpino.Parser.Skips))
+	}
+
 	// BEGIN: definitie van dot-bestand aanmaken.
 
 	ctx.graph.WriteString(`strict graph gr {
@@ -429,10 +433,6 @@ func tree(q *Context) {
 		fmt.Fprint(q.w, line)
 	}
 	// EIND: svg nabewerken en printen
-
-	if alpino.Parser.Cats != "" || alpino.Parser.Skips != "" {
-		fmt.Fprintf(q.w, "<p>\ncats: %s<br>\nskips: %s\n<p>\n", html.EscapeString(alpino.Parser.Cats), html.EscapeString(alpino.Parser.Skips))
-	}
 
 	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
 
