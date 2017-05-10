@@ -16,6 +16,7 @@ type Alpino_ds struct {
 	XMLName  xml.Name `xml:"alpino_ds"`
 	Version  string   `xml:"version,attr,omitempty"`
 	Metadata []MetaT  `xml:"metadata>meta,omitempty"`
+	Parser   ParserT  `xml:"parser,omitempty"`
 	Node0    *Node    `xml:"node,omitempty"`
 	Sentence SentT    `xml:"sentence,omitempty"`
 	Comments []string `xml:"comments>comment,omitempty"`
@@ -30,6 +31,11 @@ type MetaT struct {
 	Type  string `xml:"type,attr,omitempty"`
 	Name  string `xml:"name,attr,omitempty"`
 	Value string `xml:"value,attr,omitempty"`
+}
+
+type ParserT struct {
+	Cats  string `xml:"cat,attr,omitempty"`
+	Skips string `xml:"skips,attr,omitempty"`
 }
 
 type Node struct {
@@ -67,8 +73,10 @@ Syntax: %s infile.dact outfile.dactx
 			x(err)
 			content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 				strings.Replace(
-					strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
-					"  <comments></comments>\n", "", 1) + "\n"
+					strings.Replace(
+						strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
+						"  <comments></comments>\n", "", 1),
+					"  <parser></parser>\n", "", 1) + "\n"
 		}
 		x(db2.PutXml(name, content, false))
 	}
