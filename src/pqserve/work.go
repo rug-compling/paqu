@@ -795,7 +795,10 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 		xt := string(xb)
 		mt := strings.Split(strings.TrimSpace(string(mb)), "\n")
-		i := strings.Index(xt, "<node")
+		i := strings.Index(xt, "<parser")
+		if i < 0 {
+			i = strings.Index(xt, "<node")
+		}
 		fmt.Fprint(fp, xt[:i], "<metadata>\n")
 		for _, m := range mt {
 			mm := strings.Split(m, "\t")
