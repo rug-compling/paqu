@@ -33,6 +33,7 @@ id
 iets
 index
 infl
+is_word
 lcat
 lemma
 lwtype

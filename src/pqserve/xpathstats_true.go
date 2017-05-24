@@ -74,7 +74,15 @@ func getFullAttr(attr string, n, top *Node) string {
 		return ""
 	}
 
+	is_word := attr == "is_word"
+	if is_word {
+		attr = "word"
+	}
+
 	if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
+		if is_word {
+			return "j"
+		}
 		return s
 	}
 	values := make([]*ValueItem, 0)
@@ -98,6 +106,9 @@ func getFullAttr(attr string, n, top *Node) string {
 	p := -1
 	q := 0
 	for _, v := range values {
+		if is_word {
+			v.value = "j"
+		}
 		if v.begin > p {
 			p = v.begin
 			if v.begin > q && len(s) > 0 {
