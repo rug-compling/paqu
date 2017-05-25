@@ -81,7 +81,7 @@ func getFullAttr(attr string, n, top *Node) string {
 
 	if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
 		if is_word {
-			return "j"
+			return "+"
 		}
 		return s
 	}
@@ -107,7 +107,7 @@ func getFullAttr(attr string, n, top *Node) string {
 	q := 0
 	for _, v := range values {
 		if is_word {
-			v.value = "j"
+			v.value = "+"
 		}
 		if v.begin > p {
 			p = v.begin
