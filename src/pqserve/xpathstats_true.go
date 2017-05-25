@@ -74,7 +74,7 @@ func getFullAttr(attr string, n, top *Node) string {
 		return ""
 	}
 
-	is_word := attr == "is_word"
+	is_word := attr == "is_word_"
 	if is_word {
 		attr = "word"
 	}

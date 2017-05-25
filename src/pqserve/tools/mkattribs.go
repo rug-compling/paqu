@@ -42,7 +42,9 @@ type FullNode struct {
 var NodeTags = []string{
 `)
 	for _, attrib := range attribs {
-		fmt.Printf("\t\"%s\",\n", attrib)
+		if !strings.HasSuffix(attrib, "_") {
+			fmt.Printf("\t\"%s\",\n", attrib)
+		}
 	}
 	fmt.Print(`}
 
