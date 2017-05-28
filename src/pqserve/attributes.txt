@@ -33,7 +33,6 @@ id
 iets
 index
 infl
-is_word_
 lcat
 lemma
 lwtype
@@ -75,4 +74,5 @@ vztype
 wh
 wk
 word
+word_is_
 wvorm
