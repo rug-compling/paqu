@@ -106,6 +106,7 @@ func main() {
 
 	logf("DbXML: %v", dbxml_version())
 
+	mariadb := false
 	db, err := dbopen()
 	util.CheckErr(err)
 	rows, err := db.Query("SELECT VERSION()")
@@ -113,6 +114,7 @@ func main() {
 	if rows.Next() {
 		util.CheckErr(rows.Scan(&versionstring))
 		rows.Close()
+		mariadb = strings.Contains(strings.ToLower(versionstring), "mariadb")
 		r := regexp.MustCompile("[0-9]+").FindAllString(versionstring, 3)
 		if r != nil {
 			if len(r) > 0 {
@@ -128,7 +130,7 @@ func main() {
 	}
 	db.Close()
 
-	if minversion(5, 7, 7) {
+	if !mariadb && minversion(5, 7, 7) {
 		hasMaxExecutionTime = true
 	}
 	logf("MySQL server-versie: %v (%s)", version, versionstring)
