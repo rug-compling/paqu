@@ -241,6 +241,7 @@ var (
 	version       [3]int
 
 	hasMaxExecutionTime bool
+	hasMaxStatementTime bool
 
 	taskWaitNr int
 	taskWorkNr int

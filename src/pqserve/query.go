@@ -155,6 +155,10 @@ func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, err
 		query = strings.Replace(query, " ", t, 1)
 		timeout = false // laat timeout door MySQL-server doen
 	}
+	if Cfg.Querytimeout > 0 && hasMaxStatementTime {
+		query = fmt.Sprintf("SET STATEMENT max_statement_time=%d FOR %s", Cfg.Querytimeout, query)
+		timeout = false // laat timeout door MariaDB-server doen
+	}
 
 	chFinished := make(chan bool)
 	defer close(chFinished)

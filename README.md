@@ -31,7 +31,7 @@ Momenteel draait dit op de volgende site: http://www.let.rug.nl/alfa/paqu
 Een 64-bit Linux-machine (amd64), ruim voldoende geheugen en
 schijfruimte, het liefst veel processoren...
 
-Je hebt een account op een MySQL-server nodig.
+Je hebt een account op een MySQL-server of MariaDB-server nodig.
 
 ----------------------------------------------------------------
 
@@ -270,13 +270,14 @@ op de server:
 Met het programma `pqclean` verwijder je automatisch alle gebruikers
 zonder corpora die twee maanden niet actief geweest zijn.
 
-Met het programma `pqrmcorpus` kun je een corpus uit de MySQL-database
-verwijderen. Is het een corpus dat door een gebruiker is ge-upload, dan
-worden de bijbehorende bestanden ook van schijf verwijderd.
+Met het programma `pqrmcorpus` kun je een corpus uit de
+MySQL/MariaDB-database verwijderen. Is het een corpus dat door een
+gebruiker is ge-upload, dan worden de bijbehorende bestanden ook van
+schijf verwijderd.
 
 Met het programma `pqrmuser` kun je een gebruiker verwijderen, inclusief
 alle data die door die gebruiker is opgeslagen, zowel van schijf als uit
-de MySQL-database.
+de MySQL/MariaDB-database.
 
 Met het programma `pqsetquota` kun je het quotum voor een of meer
 gebruikers aanpassen.

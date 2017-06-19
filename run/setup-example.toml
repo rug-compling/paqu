@@ -50,7 +50,7 @@ smtpserv = "smtp.domain.nl:25"
 smtpuser = ""
 smtppass = ""
 
-# De login-string waarmee verbinding gemaakt wordt met de MySQL server.
+# De login-string waarmee verbinding gemaakt wordt met de MySQL/MariaDB-server.
 # In de voorbeelden is 'paqu' de naam van de database van de gebruiker.
 # Voorbeeld met server op een andere machine, met poortnummer:
 # login = "username:password@tcp(www.myserver.nl:3306)/paqu"
@@ -59,7 +59,7 @@ login = "username:password@/paqu"
 # Als dit een dollarteken is gevolg door de naam van een environment
 # variabele dan wordt de waarde van die variabele later ingelezen.
 
-# Elke table in MySQL krijgt dit als prefix, gevolgd door een
+# Elke table in MySQL/MariaDB krijgt dit als prefix, gevolgd door een
 # underscore, om conflicten met andere toepassingen in dezelfde database
 # te vermijden.
 prefix = "pq"

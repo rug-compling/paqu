@@ -133,7 +133,14 @@ func main() {
 	if !mariadb && minversion(5, 7, 7) {
 		hasMaxExecutionTime = true
 	}
-	logf("MySQL server-versie: %v (%s)", version, versionstring)
+	if mariadb && minversion(10, 1, 2) {
+		hasMaxStatementTime = true
+	}
+	if mariadb {
+		logf("MariaDB server-versie: %v (%s)", version, versionstring)
+	} else {
+		logf("MySQL server-versie: %v (%s)", version, versionstring)
+	}
 
 	maxjobs := Cfg.Maxjob
 	if Cfg.Alpinoserver != "" {
