@@ -34,8 +34,6 @@ const (
 const (
 	SPOD_X_NONE = iota
 	SPOD_X_PARSER
-	SPOD_X_PARSER_CATS
-	SPOD_X_PARSER_SKIPS
 	SPOD_X_HIS
 )
 
@@ -381,7 +379,7 @@ var (
 			SPOD_STD,
 			"cats0",
 			"geen enkel deel is geparst",
-			SPOD_X_PARSER_CATS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -389,7 +387,7 @@ var (
 			SPOD_STD,
 			"cats1",
 			"parse bestaat uit één deel",
-			SPOD_X_PARSER_CATS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -397,7 +395,7 @@ var (
 			SPOD_STD,
 			"cats2",
 			"parse bestaat uit twee losse delen",
-			SPOD_X_PARSER_CATS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -405,7 +403,7 @@ var (
 			SPOD_STD,
 			"cats3",
 			"parse bestaat uit drie losse delen",
-			SPOD_X_PARSER_CATS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -413,7 +411,7 @@ var (
 			SPOD_STD,
 			"cats4",
 			"parse bestaat uit vier of meer losse delen",
-			SPOD_X_PARSER_CATS,
+			SPOD_X_PARSER,
 		},
 		{
 			"parser success: overgeslagen woorden",
@@ -421,7 +419,7 @@ var (
 			SPOD_STD,
 			"skips0",
 			"geen enkel woord is overgeslagen",
-			SPOD_X_PARSER_SKIPS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -429,7 +427,7 @@ var (
 			SPOD_STD,
 			"skips1",
 			"een van de woorden is overgeslagen",
-			SPOD_X_PARSER_SKIPS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -437,7 +435,7 @@ var (
 			SPOD_STD,
 			"skips2",
 			"twee van de woorden zijn overgeslagen",
-			SPOD_X_PARSER_SKIPS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -445,7 +443,7 @@ var (
 			SPOD_STD,
 			"skips3",
 			"drie van de woorden zijn overgeslagen",
-			SPOD_X_PARSER_SKIPS,
+			SPOD_X_PARSER,
 		},
 		{
 			"",
@@ -453,7 +451,7 @@ var (
 			SPOD_STD,
 			"skips4",
 			"vier of meer van de woorden zijn overgeslagen",
-			SPOD_X_PARSER_SKIPS,
+			SPOD_X_PARSER,
 		},
 		{
 			"Onbekende woorden -- werkt niet met Alpino Treebank, Corpus Gesproken Nederlands, Lassy Klein",
@@ -952,7 +950,6 @@ window.onclick = function(event) {
 	wordtitles := make([]string, 0)
 	header := ""
 	spod_in_use := make(map[string]bool)
-	hiscount := -1
 
 	use_his := false
 	for i, spod := range spods {
@@ -984,19 +981,10 @@ window.onclick = function(event) {
 					fmt.Fprint(q.w, "#", err)
 				}
 			} else if done {
-				if spod.lbl == "his" {
-					hiscount = items
-				}
 				if doHtml {
-					if spod.special == SPOD_X_PARSER || spod.special == SPOD_X_PARSER_CATS || spod.special == SPOD_X_PARSER_SKIPS {
+					if spod.special == SPOD_X_PARSER {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.2f%%",
 							lines, float64(lines)/float64(nlines)*100.0)
-						if spod.special == SPOD_X_PARSER {
-							fmt.Fprint(q.w, "<td><td><td>")
-						} else {
-							fmt.Fprintf(q.w, "<td><td><td><span style=\"display:inline-block;width:100px;height:1em;background-color:white\"><span style=\"display:inline-block;width:%dpx;height:1em;background-color:blue\"></span></span>",
-								int(float64(lines)/float64(nlines)*100.0+0.5))
-						}
 					} else if spod.special == SPOD_X_HIS {
 						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">%d",
 							items)
@@ -1011,7 +999,7 @@ window.onclick = function(event) {
 			} else {
 				wcount = "NA"
 				if doHtml {
-					if spod.special == SPOD_X_PARSER || spod.special == SPOD_X_PARSER_CATS || spod.special == SPOD_X_PARSER_SKIPS {
+					if spod.special == SPOD_X_PARSER {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">NA<td class=\"right\">NA<td><td><td>")
 					} else if spod.special == SPOD_X_HIS {
 						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">NA")
@@ -1024,8 +1012,8 @@ window.onclick = function(event) {
 				allDone = false
 			}
 			if doHtml {
-				if spod.special == SPOD_X_PARSER || spod.special == SPOD_X_PARSER_CATS || spod.special == SPOD_X_PARSER_SKIPS {
-					fmt.Fprintf(q.w, " %s\n", html.EscapeString(spod.text))
+				if spod.special == SPOD_X_PARSER {
+					fmt.Fprintf(q.w, "<td><td><td>%s\n", html.EscapeString(spod.text))
 				} else {
 					counts := strings.Split(wcount, ",")
 					sum := 0
@@ -1048,12 +1036,6 @@ window.onclick = function(event) {
 					} else {
 						fmt.Fprintf(q.w, "<td class=\"right\"><a href=\"javascript:wg(%d)\">%.1f</a><td>\n",
 							len(worddata), float64(sum)/float64(n))
-
-						if spod.special == SPOD_X_HIS && hiscount > 0 {
-							fmt.Fprintf(q.w, "<span style=\"display:inline-block;width:100px;height:1em;background-color:white\"><span style=\"display:inline-block;width:%dpx;height:1em;background-color:blue\"></span></span> %.1f%% ",
-								int(float64(items)/float64(hiscount)*100.0+0.5),
-								float64(items)/float64(hiscount)*100.0)
-						}
 
 						fmt.Fprintf(q.w, "%s\n", html.EscapeString(spod.text))
 
