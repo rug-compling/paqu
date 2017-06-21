@@ -526,3 +526,7 @@ code {
     padding: 1em;
     max-width: 960px;
 }
+
+.center {
+    text-align: center;
+}

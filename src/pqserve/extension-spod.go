@@ -31,19 +31,13 @@ const (
 	SPOD_DX  = "dx"
 )
 
-const (
-	SPOD_X_NONE = iota
-	SPOD_X_PARSER
-	SPOD_X_HIS
-)
-
 type Spod struct {
 	header  string
 	xpath   string
 	method  string
 	lbl     string
 	text    string
-	special int
+	special string
 }
 
 type spod_writer struct {
@@ -53,13 +47,30 @@ type spod_writer struct {
 
 var (
 	spods = []Spod{
+		// hidden objecten moeten aan het begin, omdat anderen ervan afhankelijk zijn
+		{
+			"",
+			"//parser [@cats and @skips]", // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"has_parser",
+			"has <parser>",
+			"hidden",
+		},
+		{
+			"",
+			"//node [@his]", // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"has_his",
+			"has @his",
+			"hidden",
+		},
 		{
 			"Hoofdzinnen",
 			`//node[@cat="smain"]`,
 			SPOD_STD,
 			"smain",
 			"mededelende hoofdzinnen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -67,7 +78,7 @@ var (
 			SPOD_STD,
 			"whq",
 			"vraagzinnen (wh)",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -75,7 +86,7 @@ var (
 			SPOD_STD,
 			"janee",
 			"ja/nee vragen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -83,7 +94,7 @@ var (
 			SPOD_STD,
 			"imp",
 			"imperatieven",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"Bijzinnen",
@@ -91,7 +102,7 @@ var (
 			SPOD_STD,
 			"whsub",
 			"ingebedde vraagzinnen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -99,7 +110,7 @@ var (
 			SPOD_STD,
 			"ssub",
 			"finiete bijzinnen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -107,7 +118,7 @@ var (
 			SPOD_STD,
 			"ssubdat",
 			"finiete bijzinnen met \"dat\"",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -115,7 +126,7 @@ var (
 			SPOD_STD,
 			"ssubof",
 			"finiete bijzinnen met \"of\"",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -123,7 +134,7 @@ var (
 			SPOD_STD,
 			"ssubcmp",
 			"finiete bijzinnen met andere voegwoorden",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -131,7 +142,7 @@ var (
 			SPOD_STD,
 			"oti",
 			"infiniete bijzinnen met \"om\"",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -139,7 +150,7 @@ var (
 			SPOD_STD,
 			"tite",
 			"infiniete bijzinnen met alleen \"te\"",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -147,7 +158,7 @@ var (
 			SPOD_STD,
 			"ti",
 			"infiniete bijzinnen met ander voorzetsel",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -155,7 +166,7 @@ var (
 			SPOD_STD,
 			"relssub",
 			"relatieve bijzinnen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -163,7 +174,7 @@ var (
 			SPOD_STD,
 			"whrel",
 			"free relatives",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"Woordgroepen",
@@ -171,7 +182,7 @@ var (
 			SPOD_STD,
 			"np",
 			"np",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -179,7 +190,7 @@ var (
 			SPOD_STD,
 			"pp",
 			"pp",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -187,7 +198,7 @@ var (
 			SPOD_STD,
 			"ap",
 			"ap",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -195,7 +206,7 @@ var (
 			SPOD_STD,
 			"advp",
 			"advp",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"Werkwoorden",
@@ -203,7 +214,7 @@ var (
 			SPOD_STD,
 			"vwuit",
 			"vaste werkwoordelijke uitdrukkingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -211,7 +222,7 @@ var (
 			SPOD_STD,
 			"groen",
 			"groene werkwoordsvolgorde",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -219,7 +230,7 @@ var (
 			SPOD_STD,
 			"rood",
 			"rode werkwoordsvolgorde",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -227,7 +238,7 @@ var (
 			SPOD_STD,
 			"wwclus",
 			"werkwoordsclusters",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -235,7 +246,7 @@ var (
 			SPOD_STD,
 			"accinf",
 			"accusativus cum infinitivo -- werkt niet met Corpus Gesproken Nederlands",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -243,7 +254,7 @@ var (
 			SPOD_STD,
 			"passive",
 			"passief -- werkt niet met Corpus Gesproken Nederlands",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -251,7 +262,7 @@ var (
 			SPOD_STD,
 			"nppas",
 			"niet-persoonlijke passief -- werkt niet met Corpus Gesproken Nederlands",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"Inbedding",
@@ -259,7 +270,7 @@ var (
 			SPOD_STD,
 			"inb0",
 			"geen inbedding",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -267,7 +278,7 @@ var (
 			SPOD_STD,
 			"inb1",
 			"minstens 1 finiete zinsinbedding",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -275,7 +286,7 @@ var (
 			SPOD_STD,
 			"inb2",
 			"minstens 2 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -283,7 +294,7 @@ var (
 			SPOD_STD,
 			"inb3",
 			"minstens 3 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -291,7 +302,7 @@ var (
 			SPOD_STD,
 			"inb4",
 			"minstens 4 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -299,7 +310,7 @@ var (
 			SPOD_STD,
 			"inb5",
 			"minstens 5 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -307,7 +318,7 @@ var (
 			SPOD_STD,
 			"inb6",
 			"minstens 6 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -315,7 +326,7 @@ var (
 			SPOD_STD,
 			"inb7",
 			"minstens 7 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -323,7 +334,7 @@ var (
 			SPOD_STD,
 			"inb8",
 			"minstens 8 finiete zinsinbeddingen",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"Topicalizatie en Extractie",
@@ -331,7 +342,7 @@ var (
 			SPOD_STD,
 			"nptsub",
 			"np-topic is subject",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -339,7 +350,7 @@ var (
 			SPOD_STD,
 			"nptnsub",
 			"np-topic is geen subject",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -347,7 +358,7 @@ var (
 			SPOD_STD,
 			"tnonloc",
 			"topic is niet lokaal",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -355,7 +366,7 @@ var (
 			SPOD_STD,
 			"locext",
 			"lokale extractie",
-			SPOD_X_NONE,
+			"",
 		},
 		{
 			"",
@@ -363,15 +374,15 @@ var (
 			SPOD_STD,
 			"nlocext",
 			"niet-lokale extractie",
-			SPOD_X_NONE,
+			"",
 		},
 		{
-			"Parser succes -- werkt niet met Alpino Treebank, Corpus Gesproken Nederlands, Lassy Klein",
+			"Parser succes",
 			`//parser[@cats="1" and @skips="0"]`,
 			SPOD_STD,
 			"ok",
 			"volledige parse",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"Parser succes: geparste delen",
@@ -379,7 +390,7 @@ var (
 			SPOD_STD,
 			"cats0",
 			"geen enkel deel is geparst",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -387,7 +398,7 @@ var (
 			SPOD_STD,
 			"cats1",
 			"parse bestaat uit één deel",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -395,7 +406,7 @@ var (
 			SPOD_STD,
 			"cats2",
 			"parse bestaat uit twee losse delen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -403,7 +414,7 @@ var (
 			SPOD_STD,
 			"cats3",
 			"parse bestaat uit drie losse delen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -411,7 +422,7 @@ var (
 			SPOD_STD,
 			"cats4",
 			"parse bestaat uit vier of meer losse delen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"parser success: overgeslagen woorden",
@@ -419,7 +430,7 @@ var (
 			SPOD_STD,
 			"skips0",
 			"geen enkel woord is overgeslagen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -427,7 +438,7 @@ var (
 			SPOD_STD,
 			"skips1",
 			"een van de woorden is overgeslagen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -435,7 +446,7 @@ var (
 			SPOD_STD,
 			"skips2",
 			"twee van de woorden zijn overgeslagen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -443,7 +454,7 @@ var (
 			SPOD_STD,
 			"skips3",
 			"drie van de woorden zijn overgeslagen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
 			"",
@@ -451,15 +462,15 @@ var (
 			SPOD_STD,
 			"skips4",
 			"vier of meer van de woorden zijn overgeslagen",
-			SPOD_X_PARSER,
+			"parser",
 		},
 		{
-			"Onbekende woorden -- werkt niet met Alpino Treebank, Corpus Gesproken Nederlands, Lassy Klein",
+			"Onbekende woorden",
 			`//node[@his]`,
 			SPOD_STD,
 			"his",
-			"nodes met attribuut @his",
-			SPOD_X_HIS,
+			"\"alle\" woorden (nodes met attribuut @his)",
+			"his",
 		},
 		{
 			"",
@@ -467,7 +478,7 @@ var (
 			SPOD_STD,
 			"normal",
 			"woorden uit het woordenboek of de namenlijst",
-			SPOD_X_HIS,
+			"his",
 		},
 		{
 			"",
@@ -475,7 +486,7 @@ var (
 			SPOD_STD,
 			"onbeken",
 			"woorden niet direct uit het woordenboek",
-			SPOD_X_HIS,
+			"his",
 		},
 		{
 			"",
@@ -483,7 +494,7 @@ var (
 			SPOD_STD,
 			"compoun",
 			"woorden herkend als samenstelling",
-			SPOD_X_HIS,
+			"his",
 		},
 		{
 			"",
@@ -491,7 +502,7 @@ var (
 			SPOD_STD,
 			"name",
 			"woorden herkend als naam (maar niet uit namenlijst)",
-			SPOD_X_HIS,
+			"his",
 		},
 		{
 			"",
@@ -499,7 +510,7 @@ var (
 			SPOD_STD,
 			"noun",
 			"onbekende woorden die niet als samenstelling of naam werden herkend",
-			SPOD_X_HIS,
+			"his",
 		},
 	}
 	spodMu        sync.Mutex
@@ -611,11 +622,22 @@ corpus: <select name="db">
 <a href="javascript:omkeren(0, %d)">omkeren</a>
 `, len(spods), len(spods), len(spods))
 
+	inTable := false
 	for i, spod := range spods {
+		if spod.special == "hidden" {
+			fmt.Fprintf(q.w, `
+<input type="hidden" name="i%d" value="t">
+`,
+				i)
+			continue
+		}
 		if spod.header != "" {
-			if i > 0 {
+			if inTable {
 				fmt.Fprintln(q.w, "</table>")
+			} else {
+				inTable = true
 			}
+
 			var j int
 			for j = i + 1; j < len(spods); j++ {
 				if spods[j].header != "" {
@@ -632,10 +654,12 @@ corpus: <select name="db">
 				i, j, i, j, i, j)
 		}
 		fmt.Fprintf(q.w, `<tr>
-  <td><input type="checkbox" name="i%d" value="t">
+  <td><input type="checkbox" name="i%d" id="i%d" value="t">
   <td><a href="javascript:vb(%d)" target="_blank">vb</a>
-  <td>%s
+  <td><label for="i%d">%s</label>
 `,
+			i,
+			i,
 			i,
 			i,
 			html.EscapeString(spod.text))
@@ -676,6 +700,10 @@ func extension_spod_form(q *Context) {
 	if !q.prefixes[db] {
 		fmt.Fprintln(q.w, "Ongeldig corpus:", db)
 		return
+	}
+
+	available := map[string]bool{
+		"": true,
 	}
 
 	dbase, err := dbopen()
@@ -951,19 +979,30 @@ window.onclick = function(event) {
 	header := ""
 	spod_in_use := make(map[string]bool)
 
-	use_his := false
-	for i, spod := range spods {
-		if spod.special == SPOD_X_HIS && first(q.r, fmt.Sprintf("i%d", i)) == "t" {
-			use_his = true
-		}
-	}
-
 	for i, spod := range spods {
 		spod_in_use[spod_fingerprint(i)] = true
+
+		if spod.special == "hidden" {
+			lines, _, _, done, err := spod_get(q, db, i)
+			if err != nil {
+				if doHtml {
+					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b></tr>\n", html.EscapeString(err.Error()))
+
+				} else {
+					fmt.Fprint(q.w, "#", err)
+				}
+			} else {
+				if done {
+					available[strings.Split(spod.lbl, "_")[1]] = lines > 0
+				}
+			}
+			continue
+		}
+
 		if spod.header != "" {
 			header = spod.header
 		}
-		if (use_his && spod.lbl == "his") || first(q.r, fmt.Sprintf("i%d", i)) == "t" {
+		if first(q.r, fmt.Sprintf("i%d", i)) == "t" {
 			if header != "" {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><th colspan=\"4\"><th class=\"left\">%s</tr>\n", html.EscapeString(header))
@@ -972,7 +1011,22 @@ window.onclick = function(event) {
 				}
 				header = ""
 			}
-			lines, items, wcount, done, err := spod_get(q, db, i)
+			avail, ok := available[spod.special]
+			if ok && !avail {
+				if doHtml {
+					fmt.Fprintf(q.w, "<tr><td colspan=\"4\" class=\"center\"><em>niet voor dit corpus</em><td>%s</tr>\n", spod.text)
+				} else {
+					fmt.Fprintf(q.w, "### niet voor dit corpus\t%s\n", spod.text)
+				}
+				continue
+			}
+			var lines, items int
+			var wcount string
+			var done bool
+			var err error
+			if avail {
+				lines, items, wcount, done, err = spod_get(q, db, i)
+			}
 			if err != nil {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b></tr>\n", html.EscapeString(err.Error()))
@@ -980,12 +1034,12 @@ window.onclick = function(event) {
 				} else {
 					fmt.Fprint(q.w, "#", err)
 				}
-			} else if done {
+			} else if done && available[spod.special] {
 				if doHtml {
-					if spod.special == SPOD_X_PARSER {
+					if spod.special == "parser" {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.2f%%",
 							lines, float64(lines)/float64(nlines)*100.0)
-					} else if spod.special == SPOD_X_HIS {
+					} else if spod.special == "his" {
 						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">%d",
 							items)
 					} else {
@@ -999,9 +1053,9 @@ window.onclick = function(event) {
 			} else {
 				wcount = "NA"
 				if doHtml {
-					if spod.special == SPOD_X_PARSER {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">NA<td class=\"right\">NA<td><td><td>")
-					} else if spod.special == SPOD_X_HIS {
+					if spod.special == "parser" {
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">NA<td class=\"right\">NA")
+					} else if spod.special == "his" {
 						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">NA")
 					} else {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">NA<td class=\"right\">NA<td class=\"right\">NA")
@@ -1012,7 +1066,7 @@ window.onclick = function(event) {
 				allDone = false
 			}
 			if doHtml {
-				if spod.special == SPOD_X_PARSER {
+				if spod.special == "parser" {
 					fmt.Fprintf(q.w, "<td><td><td>%s\n", html.EscapeString(spod.text))
 				} else {
 					counts := strings.Split(wcount, ",")
@@ -1445,6 +1499,9 @@ func extension_spod_list(q *Context) {
 	nocache(q)
 
 	for _, spod := range spods {
+		if spod.special == "hidden" {
+			continue
+		}
 		if spod.header != "" {
 			fmt.Fprint(q.w, "\n\n", spod.header, "\n", strings.Repeat("=", len(spod.header)), "\n\n")
 		}
