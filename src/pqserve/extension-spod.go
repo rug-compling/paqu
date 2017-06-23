@@ -54,7 +54,7 @@ var (
 			SPOD_STD,
 			"has_parser",
 			"has <parser>",
-			"hidden",
+			"hidden1",
 		},
 		{
 			"",
@@ -62,7 +62,7 @@ var (
 			SPOD_STD,
 			"has_his",
 			"has @his",
-			"hidden",
+			"hidden1",
 		},
 		{
 			"Hoofdzinnen",
@@ -624,7 +624,7 @@ corpus: <select name="db">
 
 	inTable := false
 	for i, spod := range spods {
-		if spod.special == "hidden" {
+		if strings.HasPrefix(spod.special, "hidden") {
 			fmt.Fprintf(q.w, `
 <input type="hidden" name="i%d" value="t">
 `,
@@ -982,7 +982,7 @@ window.onclick = function(event) {
 	for i, spod := range spods {
 		spod_in_use[spod_fingerprint(i)] = true
 
-		if spod.special == "hidden" {
+		if strings.HasPrefix(spod.special, "hidden") {
 			lines, _, _, done, err := spod_get(q, db, i)
 			if err != nil {
 				if doHtml {
@@ -1231,14 +1231,21 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 		<-spodSemaphore
 	}()
 
-	r, err := http.NewRequest(
-		"GET",
-		fmt.Sprintf(
-			"http://localhost/?db=%s&xpath=%s&mt=%s&attr1=word_is_&d=1",
+	var u string
+	onlyone := spods[item].special == "hidden1"
+	if onlyone {
+		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&xn=1",
 			db,
 			url.QueryEscape(spods[item].xpath),
-			spods[item].method),
-		nil)
+			spods[item].method)
+	} else {
+		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=word_is_&d=1",
+			db,
+			url.QueryEscape(spods[item].xpath),
+			spods[item].method)
+	}
+
+	r, err := http.NewRequest("GET", u, nil)
 	if sysErr(err) {
 		return
 	}
@@ -1272,12 +1279,24 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 		params:     q.params,
 		form:       nil,
 	}
-	xpathstats(&myQ)
 
 	fp, err := os.Create(filename)
 	if sysErr(err) {
 		return
 	}
+
+	if onlyone {
+		xpath(&myQ)
+		if strings.Contains(w.buffer.String(), "<!--NOMATCH-->") {
+			fmt.Fprintf(fp, "%s\t0\t0\t\n", spods[item].lbl)
+		} else {
+			fmt.Fprintf(fp, "%s\t1\t1\t1:1\n", spods[item].lbl)
+		}
+		fp.Close()
+		return
+	}
+
+	xpathstats(&myQ)
 
 	scanner := bufio.NewScanner(&w.buffer)
 
@@ -1499,7 +1518,7 @@ func extension_spod_list(q *Context) {
 	nocache(q)
 
 	for _, spod := range spods {
-		if spod.special == "hidden" {
+		if strings.HasPrefix(spod.special, "hidden") {
 			continue
 		}
 		if spod.header != "" {

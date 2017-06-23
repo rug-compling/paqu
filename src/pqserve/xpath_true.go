@@ -504,7 +504,8 @@ $('#loading span').html('%.1f%%');
 	loading = false
 
 	if curno == 0 {
-		fmt.Fprintf(q.w, "geen match gevonden")
+		// commentaar voor SPOD
+		fmt.Fprintln(q.w, "<!--NOMATCH-->\ngeen match gevonden")
 	}
 
 	// Links naar volgende en vorige pagina's met resultaten
