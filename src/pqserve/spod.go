@@ -1444,7 +1444,7 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 
 	if len(archnames) > 0 {
 		for _, archname := range archnames {
-			db, err := dbxml.Open(archname)
+			db, err := dbxml.OpenRead(archname)
 			if xx(err) {
 				return
 			}

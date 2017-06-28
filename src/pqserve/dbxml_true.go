@@ -18,7 +18,7 @@ const (
 )
 
 func get_dact(archive, filename string) ([]byte, error) {
-	reader, err := dbxml.Open(archive)
+	reader, err := dbxml.OpenRead(archive)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -37,7 +37,7 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 	}
 
 	os.Remove(dact)
-	db, err := dbxml.Open(dact)
+	db, err := dbxml.OpenReadWrite(dact)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 	var dbx *dbxml.Db
 	if Cfg.Dactx {
 		os.Remove(dact + "x")
-		dbx, err = dbxml.Open(dact + "x")
+		dbx, err = dbxml.OpenReadWrite(dact + "x")
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 
 	os.Mkdir(xmldir, 0777)
 
-	dc, err := dbxml.Open(dact)
+	dc, err := dbxml.OpenRead(dact)
 	if err != nil {
 		return 0, 0, fmt.Errorf(
 			"Openen mislukt. PaQu kan geen dact-bestanden lezen die gemaakt zijn met DbXml nieuwer dan versie %d",
@@ -109,7 +109,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 	var dbx *dbxml.Db
 	if Cfg.Dactx {
 		os.Remove(dact + "x")
-		dbx, err = dbxml.Open(dact + "x")
+		dbx, err = dbxml.OpenReadWrite(dact + "x")
 		if err != nil {
 			return 0, 0, err
 		}

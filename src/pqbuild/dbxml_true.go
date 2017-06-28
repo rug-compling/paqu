@@ -14,7 +14,7 @@ const (
 )
 
 func do_dact(filename string) {
-	reader, err := dbxml.Open(filename)
+	reader, err := dbxml.OpenRead(filename)
 	util.CheckErr(err)
 	fmt.Println(">>>", filename)
 	docs, err := reader.All()

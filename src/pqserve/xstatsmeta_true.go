@@ -292,7 +292,7 @@ c("0", "0");
 		if Cfg.Dactx && methode == "dx" {
 			dactfile += "x"
 		}
-		db, errval = dbxml.Open(dactfile)
+		db, errval = dbxml.OpenRead(dactfile)
 		if logerr(errval) {
 			return
 		}

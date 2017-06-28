@@ -259,7 +259,7 @@ func xsavez2(q *Context) {
 				dactfile += "x"
 			}
 			var data []byte
-			dact, err = dbxml.Open(dactfile)
+			dact, err = dbxml.OpenRead(dactfile)
 			if hErr(q, err) {
 				dact = nil
 				return

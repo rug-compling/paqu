@@ -55,9 +55,9 @@ Syntax: %s infile.dact outfile.dactx
 `, os.Args[0])
 		return
 	}
-	db1, err := dbxml.Open(os.Args[1])
+	db1, err := dbxml.OpenRead(os.Args[1])
 	x(err)
-	db2, err := dbxml.Open(os.Args[2])
+	db2, err := dbxml.OpenReadWrite(os.Args[2])
 	x(err)
 	docs, err := db1.All()
 	x(err)

@@ -444,7 +444,7 @@ init({
 		if Cfg.Dactx && methode == "dx" {
 			dactfile += "x"
 		}
-		db, err := dbxml.Open(dactfile)
+		db, err := dbxml.OpenRead(dactfile)
 		if err != nil {
 			updateError(q, err, !download)
 			logerr(err)

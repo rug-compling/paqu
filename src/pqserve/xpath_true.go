@@ -372,7 +372,7 @@ $('#loading span').html('%.1f%%');
 			return
 		}
 
-		db, errval = dbxml.Open(dactfile)
+		db, errval = dbxml.OpenRead(dactfile)
 		if logerr(errval) {
 			return
 		}

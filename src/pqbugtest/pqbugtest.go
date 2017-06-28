@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	db, err := dbxml.Open(os.Args[1])
+	db, err := dbxml.OpenRead(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		return

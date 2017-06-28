@@ -28,7 +28,7 @@ func saveOpenDact(q *Context, prefix string, arch int) (interface{}, string) {
 		return nil, ""
 	}
 
-	db, err := dbxml.Open(filename)
+	db, err := dbxml.OpenRead(filename)
 	if doErr(q, err) {
 		return nil, ""
 	}
