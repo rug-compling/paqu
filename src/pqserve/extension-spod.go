@@ -26,7 +26,6 @@ import (
 )
 
 const (
-	SPOD_MAX = 8 // maximaal aantal processen
 	SPOD_STD = "std"
 	SPOD_DX  = "dx"
 )
@@ -514,11 +513,15 @@ var (
 		},
 	}
 	spodMu        sync.Mutex
-	spodSemaphore = make(chan bool, SPOD_MAX)
+	spodSemaphore chan bool
 	spodWorking   = make(map[string]bool)
 	spodRE        = regexp.MustCompile(`([0-9]+)[^0-9]+([0-9]+)`)
 	spodREerr     = regexp.MustCompile(`\[err:`)
 )
+
+func spod_init() {
+	spodSemaphore = make(chan bool, Cfg.Maxspodjob)
+}
 
 func extension_menu(q *Context, tab int) {
 	s := ""
@@ -530,18 +533,29 @@ func extension_menu(q *Context, tab int) {
 
 func extension(q *Context) {
 
-	for i, db := range q.opt_db {
-		dbs := strings.Fields(db)
-		if dbs[0] == "Alassywiki" || dbs[0] == "Zlassywiki" { // wel/niet ingelogd
-			if i == len(q.opt_db)-1 {
-				q.opt_db = q.opt_db[:i]
-			} else {
-				q.opt_db = append(q.opt_db[:i], q.opt_db[i+1:]...)
+	if Cfg.Maxspodlines > 0 {
+		remove := make([]string, 0)
+		for prefix := range q.prefixes {
+			if q.lines[prefix] > Cfg.Maxspodlines {
+				remove = append(remove, prefix)
 			}
-			break
+		}
+		for _, prefix := range remove {
+			delete(q.prefixes, prefix)
+			for i, db := range q.opt_db {
+				fmt.Println(q.opt_db)
+				dbs := strings.Fields(db)
+				if dbs[0][1:] == prefix {
+					if i == len(q.opt_db)-1 {
+						q.opt_db = q.opt_db[:i]
+					} else {
+						q.opt_db = append(q.opt_db[:i], q.opt_db[i+1:]...)
+					}
+					break
+				}
+			}
 		}
 	}
-	delete(q.prefixes, "lassywiki")
 
 	switch first(q.r, "ext") {
 	case "spod":

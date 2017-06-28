@@ -32,11 +32,13 @@ type Config struct {
 	Login  string
 	Prefix string
 
-	Maxjob int
-	Maxwrd int
-	Maxdup int
-	Dact   bool
-	Dactx  bool
+	Maxjob       int
+	Maxwrd       int
+	Maxdup       int
+	Dact         bool
+	Dactx        bool
+	Maxspodlines int
+	Maxspodjob   int
 
 	Secret string
 

@@ -69,6 +69,13 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Fout in", tom, ": onbekend :", un)
 		return
 	}
+	if Cfg.Maxjob < 1 {
+		Cfg.Maxdup = 1
+	}
+	if Cfg.Maxspodjob < 1 {
+		Cfg.Maxspodjob = 1
+	}
+	spod_init()
 
 	go func() {
 		wgLogger.Add(1)

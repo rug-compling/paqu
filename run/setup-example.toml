@@ -100,6 +100,13 @@ dact = true
 # ruimte in.
 dactx = true
 
+# Maximum aantal zinnen in een corpus dat beschikbaar is in het onderdeel SPOD.
+# Als de waarde 0 is geldt er geen limiet.
+maxspodlines = 1000000
+
+# Maximum aantal jobs dat gelijktijdig uitgevoerd kan worden voor het onderdeel SPOD.
+maxspodjob = 2
+
 # De shell binary, inclusief path
 sh = "/bin/sh"
 

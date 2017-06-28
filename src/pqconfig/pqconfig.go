@@ -29,11 +29,13 @@ type Config struct {
 	Login  string `toml:"login"`
 	Prefix string `toml:"prefix"`
 
-	Maxjob int  `toml:"maxjob"`
-	Maxwrd int  `toml:"maxwrd"`
-	Maxdup int  `toml:"maxdup"`
-	Dact   bool `toml:"dact"`
-	DactX  bool `toml:"dactx"`
+	Maxjob       int  `toml:"maxjob"`
+	Maxwrd       int  `toml:"maxwrd"`
+	Maxdup       int  `toml:"maxdup"`
+	Dact         bool `toml:"dact"`
+	DactX        bool `toml:"dactx"`
+	MaxSpodLines int  `toml:"maxspodlines"`
+	MaxSpodJob   int  `toml:"maxspodjob"`
 
 	Sh           string `toml:"sh"`
 	Path         string `toml:"path"`
