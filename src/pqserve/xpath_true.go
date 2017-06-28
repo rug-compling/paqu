@@ -214,7 +214,7 @@ func xpath(q *Context) {
 	}()
 
 	// HTML-uitvoer van begin van de pagina
-	writeHead(q, "", 2)
+	writeHead(q, "XPath", 2)
 	html_xpath_header(q)
 
 	// HTML-uitvoer van het formulier

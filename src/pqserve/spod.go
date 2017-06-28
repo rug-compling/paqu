@@ -47,6 +47,14 @@ var (
 		// hidden objecten moeten aan het begin, omdat anderen ervan afhankelijk zijn
 		{
 			"",
+			`//node [@pos="verb"]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"has_pos_verb",
+			"has @pos=verb",
+			"hidden1",
+		},
+		{
+			"",
 			"//parser [@cats and @skips]", // spatie i.v.m. mogelijk duplicaat
 			SPOD_STD,
 			"has_parser",
@@ -242,24 +250,24 @@ var (
 			`%PQ_cross_serial_verbcluster%`,
 			SPOD_STD,
 			"accinf",
-			"accusativus cum infinitivo -- werkt niet met Corpus Gesproken Nederlands",
-			"",
+			"accusativus cum infinitivo",
+			"pos",
 		},
 		{
 			"",
 			`//node[%PQ_passive%]`,
 			SPOD_STD,
 			"passive",
-			"passief -- werkt niet met Corpus Gesproken Nederlands",
-			"",
+			"passief",
+			"pos",
 		},
 		{
 			"",
 			`//node[%PQ_impersonal_passive%]`,
 			SPOD_STD,
 			"nppas",
-			"niet-persoonlijke passief -- werkt niet met Corpus Gesproken Nederlands",
-			"",
+			"niet-persoonlijke passief",
+			"pos",
 		},
 		{
 			"Inbedding",
@@ -648,7 +656,7 @@ func spod_form(q *Context) {
 	doHtml := first(q.r, "out") == "html"
 
 	if doHtml {
-		writeHead(q, "SPOD", 0)
+		writeHead(q, "SPOD -- Resultaat", 0)
 		defer func() {
 			fmt.Fprintf(q.w, "</body>\n</html>\n")
 		}()
@@ -945,17 +953,8 @@ window.onclick = function(event) {
 
 		if strings.HasPrefix(spod.special, "hidden") {
 			lines, _, _, done, err := spod_get(q, db, i)
-			if err != nil {
-				if doHtml {
-					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b></tr>\n", html.EscapeString(err.Error()))
-
-				} else {
-					fmt.Fprint(q.w, "#", err)
-				}
-			} else {
-				if done {
-					available[strings.Split(spod.lbl, "_")[1]] = lines > 0
-				}
+			if err == nil && done {
+				available[strings.Split(spod.lbl, "_")[1]] = lines > 0
 			}
 			continue
 		}
@@ -990,11 +989,12 @@ window.onclick = function(event) {
 			}
 			if err != nil {
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b></tr>\n", html.EscapeString(err.Error()))
+					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b>", html.EscapeString(err.Error()))
 
 				} else {
 					fmt.Fprint(q.w, "#", err)
 				}
+				allDone = false
 			} else if done && available[spod.special] {
 				if doHtml {
 					if spod.special == "parser" {
@@ -1075,7 +1075,7 @@ window.onclick = function(event) {
 	}
 	if !allDone {
 		if doHtml {
-			fmt.Fprintln(q.w, "<div class=\"info\"><button type=\"button\" onClick=\"location.reload(true)\">Herladen</button> &mdash; Herlaad de pagina om de ontbrekende resultaten te krijgen</div>")
+			fmt.Fprintln(q.w, "<div class=\"footspace\"></div><div id=\"spodinfo\" class=\"info\"><button type=\"button\" onClick=\"location.reload(true)\">Herladen</button> &mdash; Herlaad de pagina om de ontbrekende resultaten te krijgen</div>")
 		} else {
 			fmt.Fprintln(q.w, "#\n#  -->  HERLAAD DE PAGINA OM DE ONTBREKENDE RESULTATEN TE KRIJGEN  <--\n#")
 		}
@@ -1159,6 +1159,7 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 		}
 		if len(a) == 4 {
 			if a[0] != spods[item].lbl {
+				os.Remove(filename)
 				return 0, 0, "", false, fmt.Errorf("ERROR: invalid label %q", a[0])
 			}
 			lines, err := strconv.Atoi(a[1])
@@ -1171,6 +1172,7 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 			}
 			return lines, items, a[3], true, nil
 		} else {
+			os.Remove(filename)
 			return 0, 0, "", false, fmt.Errorf("ERROR: invalid data %q", string(data))
 		}
 	}

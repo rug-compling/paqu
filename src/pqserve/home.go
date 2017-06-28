@@ -23,7 +23,7 @@ func home(q *Context) {
 	zinmax := getzinmax(q)
 
 	// HTML-uitvoer van begin van de pagina
-	writeHead(q, "", 1)
+	writeHead(q, "Zoeken", 1)
 	html_header(q)
 
 	// HTML-uitvoer van het formulier

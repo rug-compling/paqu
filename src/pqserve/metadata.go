@@ -23,7 +23,7 @@ func metadata(q *Context) {
 	}
 
 	// HTML-uitvoer van begin van de pagina
-	writeHead(q, "", 3)
+	writeHead(q, "Metadata", 3)
 
 	fmt.Fprint(q.w, `
 <form action="metadata" method="get" accept-charset="utf-8">

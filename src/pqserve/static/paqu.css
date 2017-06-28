@@ -530,3 +530,16 @@ code {
 .center {
     text-align: center;
 }
+
+#spodinfo {
+    z-index: 2;
+    position: fixed;
+    bottom: 0px;
+    -webkit-box-shadow: 0 -6px 20px 0 rgba(0,0,0,0.19);
+    -moz-box-shadow: 0 -6px 20px 0 rgba(0,0,0,0.19);
+    box-shadow: 0 -6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.footspace {
+    padding: 2em 0px;
+}
