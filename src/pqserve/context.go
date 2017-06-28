@@ -14,25 +14,27 @@ import (
 // The context acts as global store for a single request
 
 type Context struct {
-	w          http.ResponseWriter
-	r          *http.Request
-	user       string
-	auth       bool
-	sec        string
-	quotum     int
-	db         *sql.DB
-	opt_db     []string
-	opt_dbmeta []string
-	ignore     map[string]bool
-	prefixes   map[string]bool
-	myprefixes map[string]bool
-	protected  map[string]bool
-	hasmeta    map[string]bool
-	desc       map[string]string
-	lines      map[string]int
-	shared     map[string]string
-	params     map[string]string
-	form       *multipart.Form
+	w            http.ResponseWriter
+	r            *http.Request
+	user         string
+	auth         bool
+	sec          string
+	quotum       int
+	db           *sql.DB
+	opt_db       []string
+	opt_dbmeta   []string
+	opt_dbspod   []string
+	ignore       map[string]bool
+	prefixes     map[string]bool
+	spodprefixes map[string]bool
+	myprefixes   map[string]bool
+	protected    map[string]bool
+	hasmeta      map[string]bool
+	desc         map[string]string
+	lines        map[string]int
+	shared       map[string]string
+	params       map[string]string
+	form         *multipart.Form
 }
 
 // Wrap handler in minimale context, net genoeg voor afhandelen statische pagina's
@@ -65,18 +67,20 @@ func handleFunc(url string, handler func(*Context)) {
 			}
 
 			q := &Context{
-				w:          w,
-				r:          r,
-				opt_db:     make([]string, 0),
-				opt_dbmeta: make([]string, 0),
-				prefixes:   make(map[string]bool),
-				myprefixes: make(map[string]bool),
-				protected:  make(map[string]bool),
-				hasmeta:    make(map[string]bool),
-				desc:       make(map[string]string),
-				lines:      make(map[string]int),
-				shared:     make(map[string]string),
-				params:     make(map[string]string),
+				w:            w,
+				r:            r,
+				opt_db:       make([]string, 0),
+				opt_dbmeta:   make([]string, 0),
+				opt_dbspod:   make([]string, 0),
+				prefixes:     make(map[string]bool),
+				myprefixes:   make(map[string]bool),
+				spodprefixes: make(map[string]bool),
+				protected:    make(map[string]bool),
+				hasmeta:      make(map[string]bool),
+				desc:         make(map[string]string),
+				lines:        make(map[string]int),
+				shared:       make(map[string]string),
+				params:       make(map[string]string),
 			}
 
 			// Maak verbinding met database
@@ -186,12 +190,21 @@ func handleFunc(url string, handler func(*Context)) {
 							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen",
 								id, desc, displayEmail(owner), iformat(zinnen)))
 						}
+						if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
+							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen",
+								id, desc, displayEmail(owner), iformat(zinnen)))
+							q.spodprefixes[id] = true
+						}
 					}
 				} else if q.auth || owner == "none" {
 					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
 					q.prefixes[id] = true
 					if hasmeta > 0 {
 						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
+					}
+					if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
+						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
+						q.spodprefixes[id] = true
 					}
 				}
 				q.desc[id] = desc

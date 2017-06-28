@@ -154,8 +154,8 @@ func writeHead(q *Context, title string, tab int) {
 		}
 	}
 
-	var t [6]string
-	if tab < 6 {
+	var t [7]string
+	if tab < 7 {
 		t[tab] = " class=\"selected\""
 	}
 	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\""+t[1]+">Zoeken</a>")
@@ -168,7 +168,8 @@ func writeHead(q *Context, title string, tab int) {
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpora\""+t[4]+">Corpora</a>")
 	}
-	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[5]+">Info</a>")
+	fmt.Fprintln(q.w, "<a href=\"spod\""+t[5]+">SPOD</a>")
+	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[6]+">Info</a>")
 	extension_menu(q, tab)
 	fmt.Fprintln(q.w, "</div>\n")
 }

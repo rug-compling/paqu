@@ -233,6 +233,10 @@ func main() {
 	handleFunc("foliah4", static_foliahelp4_html)
 	handleFunc("foliah5", static_foliahelp5_html)
 
+	handleFunc("spod", spod_main)
+	handleFunc("spodform", spod_form)
+	handleFunc("spodlist", spod_list)
+
 	handleFunc("ext", extension)
 
 	handleStatic("debug/env", environment)

@@ -49,7 +49,7 @@ func static_favicon_ico(q *Context) {
 }
 
 func static_info_html(q *Context) {
-	writeHead(q, "Info", 5)
+	writeHead(q, "Info", 6)
 	s := "<div>\n"
 	if !has_dbxml {
 		s = "<div class=\"nodbxml\">\n"

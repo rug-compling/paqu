@@ -1,5 +1,3 @@
-// +build extension
-
 package main
 
 import (
@@ -523,59 +521,9 @@ func spod_init() {
 	spodSemaphore = make(chan bool, Cfg.Maxspodjob)
 }
 
-func extension_menu(q *Context, tab int) {
-	s := ""
-	if tab == 6 {
-		s = " class=\"selected\""
-	}
-	fmt.Fprintln(q.w, "<a href=\"ext?ext=spod\""+s+">SPOD</a>")
-}
+func spod_main(q *Context) {
 
-func extension(q *Context) {
-
-	if Cfg.Maxspodlines > 0 {
-		remove := make([]string, 0)
-		for prefix := range q.prefixes {
-			if q.lines[prefix] > Cfg.Maxspodlines {
-				remove = append(remove, prefix)
-			}
-		}
-		for _, prefix := range remove {
-			delete(q.prefixes, prefix)
-			for i, db := range q.opt_db {
-				fmt.Println(q.opt_db)
-				dbs := strings.Fields(db)
-				if dbs[0][1:] == prefix {
-					if i == len(q.opt_db)-1 {
-						q.opt_db = q.opt_db[:i]
-					} else {
-						q.opt_db = append(q.opt_db[:i], q.opt_db[i+1:]...)
-					}
-					break
-				}
-			}
-		}
-	}
-
-	switch first(q.r, "ext") {
-	case "spod":
-		extension_spod_main(q)
-	case "spodform":
-		extension_spod_form(q)
-	case "spodlist":
-		extension_spod_list(q)
-	default:
-		contentType(q, "text/plain; charset=utf-8")
-		nocache(q)
-		fmt.Fprint(q.w, `
-Ongedefinieerde extensie.
-`)
-	}
-}
-
-func extension_spod_main(q *Context) {
-
-	writeHead(q, "Syntactic profile of Dutch", 6)
+	writeHead(q, "Syntactic profile of Dutch", 5)
 
 	fmt.Fprintln(q.w, "Syntactic profile of Dutch<p>")
 
@@ -595,33 +543,32 @@ func extension_spod_main(q *Context) {
 ];
 function vb(i) {
     var e = document.getElementById("spodform").elements
-    window.open("xpath?db=" + e[1].value + "&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
+    window.open("xpath?db=" + e[0].value + "&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
 }
 function alles(n, m) {
     var e = document.getElementById("spodform").elements
     for (var i = n; i < m; i++) {
-        e[i+2].checked = true;
+        e[i+1].checked = true;
     }
 }
 function niets(n, m) {
     var e = document.getElementById("spodform").elements
     for (var i = n; i < m; i++) {
-        e[i+2].checked = false;
+        e[i+1].checked = false;
     }
 }
 function omkeren(n, m) {
     var e = document.getElementById("spodform").elements
     for (var i = n; i < m; i++) {
-        e[i+2].checked = !e[i+2].checked;
+        e[i+1].checked = !e[i+1].checked;
     }
 }
 //--></script>
-<form id="spodform" action="ext" method="get" accept-charset="utf-8" target="_blank">
-<input type="hidden" name="ext" value="spodform">
+<form id="spodform" action="spodform" method="get" accept-charset="utf-8" target="_blank">
 corpus: <select name="db">
 `)
 
-	html_opts(q, q.opt_db, getprefix(q), "corpus")
+	html_opts(q, q.opt_dbspod, getprefix(q), "corpus")
 	fmt.Fprintln(q.w, "</select>")
 	if q.auth {
 		fmt.Fprintln(q.w, "<a href=\"corpuslijst\">meer/minder</a>")
@@ -629,7 +576,7 @@ corpus: <select name="db">
 
 	fmt.Fprintf(q.w, `
 <p>
-<a href="ext?ext=spodlist" target="_blank">lijst van queries</a>
+<a href="spodlist" target="_blank">lijst van queries</a>
 <p>
 <a href="javascript:alles(0, %d)">alles</a> &mdash;
 <a href="javascript:niets(0, %d)">niets</a> &mdash;
@@ -696,7 +643,7 @@ uitvoer: <select name="out">
 
 }
 
-func extension_spod_form(q *Context) {
+func spod_form(q *Context) {
 
 	doHtml := first(q.r, "out") == "html"
 
@@ -711,7 +658,7 @@ func extension_spod_form(q *Context) {
 	}
 
 	db := first(q.r, "db")
-	if !q.prefixes[db] {
+	if !q.spodprefixes[db] {
 		fmt.Fprintln(q.w, "Ongeldig corpus:", db)
 		return
 	}
@@ -756,7 +703,7 @@ func extension_spod_form(q *Context) {
 		fmt.Fprintf(q.w, "Corpus: %s\n<p>\n", html.EscapeString(q.desc[db]))
 		allDone = spod_stats(q, db, true)
 		if !allDone {
-			fmt.Fprintln(q.w, "NA<br>")
+			fmt.Fprintln(q.w, "???<br>")
 		}
 	} else {
 		fmt.Fprintln(q.w, "# corpus:", q.desc[db])
@@ -764,7 +711,7 @@ func extension_spod_form(q *Context) {
 		fmt.Fprintln(q.w, "## Stats")
 		allDone = spod_stats(q, db, false)
 		if !allDone {
-			fmt.Fprintln(q.w, "NA")
+			fmt.Fprintln(q.w, "???")
 		}
 	}
 	if doHtml {
@@ -881,7 +828,7 @@ func extension_spod_form(q *Context) {
       <h2 id="innerTitle"></h2>
     </div>
     <div class="modal-body"><svg width="960" height="500"></svg></div>
-    <div class="modal-footer">Corpus: `+
+    <div class="modal-footer">`+
 			html.EscapeString(q.desc[db])+`
     </div>
   </div>
@@ -1065,17 +1012,17 @@ window.onclick = function(event) {
 					fmt.Fprintf(q.w, "%d\t%-15s\t%d", lines, v, items)
 				}
 			} else {
-				wcount = "NA"
+				wcount = "???"
 				if doHtml {
 					if spod.special == "parser" {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">NA<td class=\"right\">NA")
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right\">???")
 					} else if spod.special == "his" {
-						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">NA")
+						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">???")
 					} else {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">NA<td class=\"right\">NA<td class=\"right\">NA")
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right\">???<td class=\"right\">???")
 					}
 				} else {
-					fmt.Fprint(q.w, "NA\tNA       \tNA")
+					fmt.Fprint(q.w, "???\t???       \t???")
 				}
 				allDone = false
 			}
@@ -1097,8 +1044,8 @@ window.onclick = function(event) {
 					}
 					if sum == 0 {
 						t := "&mdash;"
-						if wcount == "NA" {
-							t = "NA"
+						if wcount == "???" {
+							t = "???"
 						}
 						fmt.Fprintf(q.w, "<td class=\"right\">%s<td>%s\n", t, html.EscapeString(spod.text))
 					} else {
@@ -1273,25 +1220,26 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 	}
 	defer dbase.Close()
 	myQ := Context{
-		r:          r,
-		w:          &w,
-		user:       q.user,
-		auth:       q.auth,
-		sec:        q.sec,
-		quotum:     q.quotum,
-		db:         dbase,
-		opt_db:     q.opt_db,
-		opt_dbmeta: q.opt_dbmeta,
-		ignore:     q.ignore,
-		prefixes:   q.prefixes,
-		myprefixes: q.myprefixes,
-		protected:  q.prefixes,
-		hasmeta:    q.hasmeta,
-		desc:       q.desc,
-		lines:      q.lines,
-		shared:     q.shared,
-		params:     q.params,
-		form:       nil,
+		r:            r,
+		w:            &w,
+		user:         q.user,
+		auth:         q.auth,
+		sec:          q.sec,
+		quotum:       q.quotum,
+		db:           dbase,
+		opt_db:       q.opt_db,
+		opt_dbmeta:   q.opt_dbmeta,
+		ignore:       q.ignore,
+		prefixes:     q.prefixes,
+		myprefixes:   q.myprefixes,
+		spodprefixes: q.spodprefixes,
+		protected:    q.protected,
+		hasmeta:      q.hasmeta,
+		desc:         q.desc,
+		lines:        q.lines,
+		shared:       q.shared,
+		params:       q.params,
+		form:         nil,
 	}
 
 	fp, err := os.Create(filename)
@@ -1526,7 +1474,7 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 	fp.Close()
 }
 
-func extension_spod_list(q *Context) {
+func spod_list(q *Context) {
 
 	contentType(q, "text/plain; charset=utf-8")
 	nocache(q)
