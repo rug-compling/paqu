@@ -41,7 +41,7 @@ extern "C" {
 	std::string errstring;
     };
 
-    c_dbxml c_dbxml_open(char const *filename)
+    c_dbxml c_dbxml_open(char const *filename, int readwrite, int read)
     {
 	c_dbxml db;
 
@@ -49,6 +49,13 @@ extern "C" {
 	db->filename = filename;
 
 	for (int i = 0; i < 2; i++) {
+	    /* if both: first attempt is read+write */
+	    if (i == 0 && readwrite == 0) {
+		continue;
+	    }
+	    if (i == 1 && read == 0) {
+		continue;
+	    }
 	    try {
 		db->context = db->manager.createUpdateContext();
 		if (i == 1) {

@@ -13,7 +13,7 @@ extern "C" {
 
     typedef struct c_dbxml_query_t *c_dbxml_query;
 
-    c_dbxml c_dbxml_open(char const *filename);
+    c_dbxml c_dbxml_open(char const *filename, int, int);
     void c_dbxml_free(c_dbxml db);
 
     int c_dbxml_error(c_dbxml db);

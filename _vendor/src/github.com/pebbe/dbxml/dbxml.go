@@ -65,8 +65,26 @@ var (
 
 // Open a database.
 //
+// Attempt to open the database in read+write mode. If that fails, open in read-only mode.
+//
 // Call db.Close() to ensure all write operations to the database are finished, before terminating the program.
 func Open(filename string) (*Db, error) {
+	return open(filename, 1, 1)
+}
+
+// Open a database in read-only mode.
+func OpenRead(filename string) (*Db, error) {
+	return open(filename, 0, 1)
+}
+
+// Open a database in read+write mode.
+//
+// Call db.Close() to ensure all write operations to the database are finished, before terminating the program.
+func OpenReadWrite(filename string) (*Db, error) {
+	return open(filename, 1, 0)
+}
+
+func open(filename string, readwrite, read int) (*Db, error) {
 	lock.Lock()
 	defer lock.Unlock()
 	db := &Db{
@@ -74,7 +92,7 @@ func Open(filename string) (*Db, error) {
 	}
 	cs := C.CString(filename)
 	defer C.free(unsafe.Pointer(cs))
-	db.db = C.c_dbxml_open(cs)
+	db.db = C.c_dbxml_open(cs, C.int(readwrite), C.int(read))
 	if C.c_dbxml_error(db.db) != 0 {
 		err := errors.New(C.GoString(C.c_dbxml_errstring(db.db)))
 		C.c_dbxml_free(db.db)
