@@ -58,12 +58,13 @@ extern "C" {
 	    }
 	    try {
 		db->context = db->manager.createUpdateContext();
-		if (i == 1) {
+		if (i == 0) {
+		    db->config.setAllowCreate(true);
+		    db->config.setMode(0666);
+		} else {
 		    db->config.setReadOnly(true);
 		}
-		db->container = db->manager.existsContainer(filename) ?
-		    db->manager.openContainer(filename, db->config) :
-		    db->manager.createContainer(filename);
+		db->container = db->manager.openContainer(filename, db->config);
 		db->error = false;
 		if (!db->container.addAlias(ALIAS)) {
 		    db->errstring = "Unable to add alias \"" ALIAS "\"";
