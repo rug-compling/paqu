@@ -843,6 +843,10 @@ func spod_form(q *Context) {
 </div>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
+function vb(i) {
+    window.open("xpath?db=`+db+`&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
+}
+
 var modal = document.getElementById('myModal');
 var span = document.getElementsByClassName("close")[0];
 function wg(idx) {
@@ -948,11 +952,11 @@ window.onclick = function(event) {
 	header := ""
 	spod_in_use := make(map[string]bool)
 
-	for i, spod := range spods {
-		spod_in_use[spod_fingerprint(i)] = true
+	for idx, spod := range spods {
+		spod_in_use[spod_fingerprint(idx)] = true
 
 		if strings.HasPrefix(spod.special, "hidden") {
-			lines, _, _, done, err := spod_get(q, db, i)
+			lines, _, _, done, err := spod_get(q, db, idx)
 			if err == nil && done {
 				available[strings.Split(spod.lbl, "_")[1]] = lines > 0
 			}
@@ -962,7 +966,7 @@ window.onclick = function(event) {
 		if spod.header != "" {
 			header = spod.header
 		}
-		if first(q.r, fmt.Sprintf("i%d", i)) == "t" {
+		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
 			if header != "" {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><th colspan=\"4\"><th class=\"left\">%s</tr>\n", html.EscapeString(header))
@@ -985,7 +989,7 @@ window.onclick = function(event) {
 			var done bool
 			var err error
 			if avail {
-				lines, items, wcount, done, err = spod_get(q, db, i)
+				lines, items, wcount, done, err = spod_get(q, db, idx)
 			}
 			if err != nil {
 				if doHtml {
@@ -1028,7 +1032,10 @@ window.onclick = function(event) {
 			}
 			if doHtml {
 				if spod.special == "parser" {
-					fmt.Fprintf(q.w, "<td><td><td>%s\n", html.EscapeString(spod.text))
+					fmt.Fprintf(
+						q.w,
+						"<td><td><td><a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &nbsp; %s\n",
+						idx, html.EscapeString(spod.text))
 				} else {
 					counts := strings.Split(wcount, ",")
 					sum := 0
@@ -1047,12 +1054,20 @@ window.onclick = function(event) {
 						if wcount == "???" {
 							t = "???"
 						}
-						fmt.Fprintf(q.w, "<td class=\"right\">%s<td>%s\n", t, html.EscapeString(spod.text))
+						fmt.Fprintf(
+							q.w,
+							"<td class=\"right\">%s<td><a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &middot; %s\n",
+							t, idx, html.EscapeString(spod.text))
 					} else {
-						fmt.Fprintf(q.w, "<td class=\"right\"><a href=\"javascript:wg(%d)\">%.1f</a><td>\n",
+						fmt.Fprintf(
+							q.w,
+							"<td class=\"right\"><a href=\"javascript:wg(%d)\">%.1f</a><td>\n",
 							len(worddata), float64(sum)/float64(n))
 
-						fmt.Fprintf(q.w, "%s\n", html.EscapeString(spod.text))
+						fmt.Fprintf(
+							q.w,
+							"<a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &middot; %s\n",
+							idx, html.EscapeString(spod.text))
 
 						worddata = append(worddata, "[["+
 							strings.Replace(
@@ -1071,6 +1086,12 @@ window.onclick = function(event) {
 		fmt.Fprintln(q.w, strings.Join(worddata, ",\n"))
 		fmt.Fprintln(q.w, "];\nvar titles = [")
 		fmt.Fprintln(q.w, strings.Join(wordtitles, ",\n"))
+		fmt.Fprintln(q.w, "];\nvar xpaths = [")
+		p := ""
+		for _, spod := range spods {
+			fmt.Fprintf(q.w, "%s['%s', '%s']", p, url.QueryEscape(spod.xpath), spod.method)
+			p = ",\n"
+		}
 		fmt.Fprintln(q.w, "];</script>")
 	}
 	if !allDone {
