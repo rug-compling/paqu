@@ -107,9 +107,20 @@ func main() {
 
 	fmt.Println()
 
+	rows, err = db.Query(
+		fmt.Sprintf(
+			"SELECT `id` FROM `%s_info` WHERE `owner` = \"none\"",
+			Cfg.Prefix))
+	util.CheckErr(err)
+	globals := make(map[string]bool)
+	for rows.Next() {
+		var id string
+		util.CheckErr(rows.Scan(&id))
+		globals[id] = true
+	}
 	dirnames := make([]string, 0)
 	for id, val := range disk {
-		if val {
+		if val && !globals[id] {
 			dirnames = append(dirnames, id)
 		}
 	}
