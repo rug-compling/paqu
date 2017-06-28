@@ -126,7 +126,7 @@ extern "C" {
 	}
         try {
             DbXml::XmlInputStream *is = db->manager.createLocalFileInputStream(filename);
-            db->container.putDocument(filename, is, db->context);
+            db->container.putDocument(filename, is, db->context, DbXml::DBXML_WELL_FORMED_ONLY);
 	    r->error = false;
         } catch (DbXml::XmlException &xe) {
 	    r->result = xe.what();
