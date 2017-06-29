@@ -1056,7 +1056,7 @@ window.onclick = function(event) {
 						}
 						fmt.Fprintf(
 							q.w,
-							"<td class=\"right\">%s<td><a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &middot; %s\n",
+							"<td class=\"right\">%s<td><a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &nbsp; %s\n",
 							t, idx, html.EscapeString(spod.text))
 					} else {
 						fmt.Fprintf(
@@ -1066,7 +1066,7 @@ window.onclick = function(event) {
 
 						fmt.Fprintf(
 							q.w,
-							"<a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &middot; %s\n",
+							"<a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &nbsp; %s\n",
 							idx, html.EscapeString(spod.text))
 
 						worddata = append(worddata, "[["+

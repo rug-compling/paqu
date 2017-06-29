@@ -13,7 +13,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 //. Types
@@ -92,11 +91,8 @@ func main() {
 	util.CheckErr(err)
 	fmt.Printf("DROP TABLE IF EXISTS `%s_c_%s_*` (9): ok\n", Cfg.Prefix, corpus)
 
-	if strings.Contains(owner, "@") {
-		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "data", corpus)))
-		fmt.Printf("rm -r %s: ok\n", filepath.Join(paqudir, "data", corpus))
-	}
-
+	util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "data", corpus)))
+	fmt.Printf("rm -r %s: ok\n", filepath.Join(paqudir, "data", corpus))
 }
 
 func rijen(r sql.Result) int64 {
