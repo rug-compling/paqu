@@ -67,9 +67,9 @@ http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/down
 
 Let op dat je de software met XML in de naam downloadt.
 
-LET OP: Versies 6.0.17 en 6.0.18 hebben een ernstige bug waardoor de
-zoekresultaten met XPATH vaak verre van compleet zijn. (Versie 6.0.18 is
-op moment van schrijven de meest actuele versie.)
+LET OP: Versies 6.0.17, 6.0.18 en 6.1.4 hebben een ernstige bug waardoor
+de zoekresultaten met XPATH vaak verre van compleet zijn. (Versie 6.1.4
+is op moment van schrijven de meest actuele versie.)
 Je kunt versie 2.5.16 hier downloaden: https://github.com/rug-compling/dbxml
 
 ### Go: The Go Programming Language ###
