@@ -1,4 +1,4 @@
-A basic Go interface to [Oracle Berkeley DB XML](http://www.oracle.com/us/products/database/berkeley-db/xml/index.html)
+A basic Go interface to [Oracle Berkeley DB XML](https://www.oracle.com/database/berkeley-db/xml.html)
 
 This requires Go version 1.2
 

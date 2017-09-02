@@ -62,6 +62,7 @@ extern "C" {
 		    db->config.setAllowCreate(true);
 		    db->config.setMode(0666);
 		} else {
+		    db->config.setAllowCreate(false);
 		    db->config.setReadOnly(true);
 		}
 		db->container = db->manager.openContainer(filename, db->config);

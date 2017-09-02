@@ -1,7 +1,7 @@
 /*
 A basic Go interface to Oracle Berkeley DB XML.
 
-http://www.oracle.com/us/products/database/berkeley-db/xml/index.html
+https://www.oracle.com/database/berkeley-db/xml.html
 */
 package dbxml
 
