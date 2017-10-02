@@ -16,6 +16,8 @@ import (
 type Config struct {
 	Contact string `toml:"contact"`
 
+	Message string `toml:"message"`
+
 	Url  string `toml:"url"`
 	Port int    `toml:"port"`
 

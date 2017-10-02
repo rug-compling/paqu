@@ -23,7 +23,10 @@
 ##
 
 ## Contact-informatie die verschijnt op de helppagina van PaQu.
-contact = "Voor vragen en opmerkingen kun je contact opnemen met <a href=\"mailto:help@paqu.domain.nl\">help@paqu.domain.nl</a>."
+contact = '''
+Voor vragen en opmerkingen kun je contact opnemen met
+<a href="mailto:help@paqu.domain.nl">help@paqu.domain.nl</a>.
+'''
 
 # De url waarop de server voor de buitenwereld beschikbaar is, zonodig met poortnummer.
 url = "http://paqu.domain.nl:9876/"

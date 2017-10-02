@@ -33,6 +33,7 @@ func home(q *Context) {
 	// Als er geen query is gedefinieerd, HTML-uitvoer van korte helptekst, pagina-einde, en exit
 	if !has_query {
 		html_uitleg(q)
+		q.w.Write([]byte(Cfg.Message))
 		html_footer(q)
 		return
 	}
