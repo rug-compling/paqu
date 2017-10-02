@@ -2,7 +2,8 @@
 
 ## Te doen ##
 
-Niets meer.
+  - pqserve:
+    - Config var 'message' documenteren
 
 ## Suggesties en ideeën ##
 
