@@ -180,7 +180,7 @@ PQ_groen = """
                and
                @wvorm="vd"
                and
-               %PQ_b% < ../../node[@rel="hd" and @pt="ww"]/%PQ_b%
+               %PQ_b% < parent::node[@rel="vc"]/../node[@rel="hd"]/%PQ_b%
                and
                not( ../../@cat="smain"
                     or
