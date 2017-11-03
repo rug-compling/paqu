@@ -1518,7 +1518,12 @@ func spod_list(q *Context) {
 }
 
 func spod_fingerprint(item int) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(file__macros__txt+spods[item].xpath+spods[item].method)))
+	rules := getMacrosRules(&Context{})
+	query := macroKY.ReplaceAllStringFunc(spods[item].xpath, func(s string) string {
+		return rules[s[1:len(s)-1]]
+	})
+	query = strings.Join(strings.Fields(query), " ")
+	return fmt.Sprintf("%x", md5.Sum([]byte(query+spods[item].method)))
 }
 
 func jsstringsEscape(s string) string {
