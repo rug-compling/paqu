@@ -1034,7 +1034,7 @@ func recover() {
 	queuing := make([]string, 0)
 
 	_, err = db.Exec(
-		"UPDATE `" + Cfg.Prefix + "_info` SET `nword` = 0, `status` = \"QUEUED\" WHERE `status` = \"WORKING\"")
+		"UPDATE `" + Cfg.Prefix + "_info` SET `nword` = 0, `status` = \"QUEUED\" WHERE `status` = \"WORKING\" AND `owner` LIKE \"%@%\"")
 	util.CheckErr(err)
 
 	rows, err := db.Query("SELECT `id`,`status` FROM `" +
