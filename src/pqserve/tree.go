@@ -334,10 +334,10 @@ func tree(q *Context) {
 			}
 			fmt.Fprintln(q.w, "<p>")
 		}
-	}
 
-	if alpino.Parser.Cats != "" || alpino.Parser.Skips != "" {
-		fmt.Fprintf(q.w, "cats: %s<br>\nskips: %s\n<p>\n", html.EscapeString(alpino.Parser.Cats), html.EscapeString(alpino.Parser.Skips))
+		if alpino.Parser.Cats != "" || alpino.Parser.Skips != "" {
+			fmt.Fprintf(q.w, "cats: %s<br>\nskips: %s\n<p>\n", html.EscapeString(alpino.Parser.Cats), html.EscapeString(alpino.Parser.Skips))
+		}
 	}
 
 	// BEGIN: definitie van dot-bestand aanmaken.
