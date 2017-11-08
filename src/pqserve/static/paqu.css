@@ -543,3 +543,10 @@ code {
 .footspace {
     padding: 2em 0px;
 }
+
+.spodblock {
+    margin-top: 1em;
+}
+.spodblock > a {
+   font-weight: bold;
+}

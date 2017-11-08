@@ -70,6 +70,14 @@ var (
 			"hidden1",
 		},
 		{
+			"",
+			`//node [@word="?"]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"has_qm",
+			`has @word="?"`,
+			"hidden1",
+		},
+		{
 			"Hoofdzinnen",
 			`//node[@cat="smain"]`,
 			SPOD_STD,
@@ -91,7 +99,7 @@ var (
 			SPOD_STD,
 			"janee",
 			"ja/nee vragen",
-			"",
+			"qm",
 		},
 		{
 			"",
@@ -553,16 +561,32 @@ function vb(i) {
     var e = document.getElementById("spodform").elements
     window.open("xpath?db=" + e[0].value + "&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
 }
-function alles(n, m) {
+function alles(n, m, o) {
     var e = document.getElementById("spodform").elements
     for (var i = n; i < m; i++) {
         e[i+1].checked = true;
     }
+    if (o) {
+        var ee = document.getElementsByClassName("spodblockinner");
+        for (var i = 0; i < ee.length; i++) {
+            if (ee[i].classList.contains('hide')) {
+                ee[i].classList.remove('hide');
+            }
+        }
+    }
 }
-function niets(n, m) {
+function niets(n, m, o) {
     var e = document.getElementById("spodform").elements
     for (var i = n; i < m; i++) {
         e[i+1].checked = false;
+    }
+    if (o) {
+        var ee = document.getElementsByClassName("spodblockinner");
+        for (var i = 0; i < ee.length; i++) {
+            if (! ee[i].classList.contains('hide')) {
+                ee[i].classList.add('hide');
+            }
+        }
     }
 }
 function omkeren(n, m) {
@@ -570,6 +594,10 @@ function omkeren(n, m) {
     for (var i = n; i < m; i++) {
         e[i+1].checked = !e[i+1].checked;
     }
+}
+function hider(id) {
+    var e = document.getElementById(id);
+    e.classList.toggle("hide");
 }
 //--></script>
 <form id="spodform" action="spodform" method="get" accept-charset="utf-8" target="_blank">
@@ -586,12 +614,13 @@ corpus: <select name="db">
 <p>
 <a href="spodlist" target="_blank">lijst van queries</a>
 <p>
-<a href="javascript:alles(0, %d)">alles</a> &mdash;
-<a href="javascript:niets(0, %d)">niets</a> &mdash;
+<a href="javascript:alles(0, %d, true)">alles</a> &mdash;
+<a href="javascript:niets(0, %d, true)">niets</a> &mdash;
 <a href="javascript:omkeren(0, %d)">omkeren</a>
 `, len(spods), len(spods), len(spods))
 
 	inTable := false
+	blocknum := 0
 	for i, spod := range spods {
 		if strings.HasPrefix(spod.special, "hidden") {
 			fmt.Fprintf(q.w, `
@@ -602,7 +631,7 @@ corpus: <select name="db">
 		}
 		if spod.header != "" {
 			if inTable {
-				fmt.Fprintln(q.w, "</table>")
+				fmt.Fprintln(q.w, "</table></div></div>")
 			} else {
 				inTable = true
 			}
@@ -613,7 +642,12 @@ corpus: <select name="db">
 					break
 				}
 			}
-			fmt.Fprintln(q.w, "<p><b>"+html.EscapeString(spod.header)+"</b><br>")
+			blocknum++
+			fmt.Fprintf(q.w, `
+<div class="spodblock">
+<a href="javascript:hider('spodblock%d')">%s</a>
+<div class="spodblockinner hide" id="spodblock%d">
+`, blocknum, html.EscapeString(spod.header), blocknum)
 			fmt.Fprintf(q.w, `
 <a href="javascript:alles(%d, %d)">alles</a> &mdash;
 <a href="javascript:niets(%d, %d)">niets</a> &mdash;
@@ -634,7 +668,7 @@ corpus: <select name="db">
 			html.EscapeString(spod.text))
 	}
 
-	fmt.Fprintf(q.w, `</table>
+	fmt.Fprintf(q.w, `</table></div></div>
 <div class="spod"></div>
 <div id="spodfoot"><div id="spodinfoot">
 uitvoer: <select name="out">
