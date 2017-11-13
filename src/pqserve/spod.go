@@ -74,7 +74,15 @@ var (
 			`//node [@word="?"]`, // spatie i.v.m. mogelijk duplicaat
 			SPOD_STD,
 			"has_qm",
-			`has @word="?"`,
+			"has @word=?",
+			"hidden1",
+		},
+		{
+			"",
+			`//node [@stype="ynquestion"]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"has_yn",
+			"has @stype=ynquestion",
 			"hidden1",
 		},
 		{
@@ -99,7 +107,7 @@ var (
 			SPOD_STD,
 			"janee",
 			"ja/nee vragen",
-			"qm",
+			"qm -yn",
 		},
 		{
 			"",
@@ -1010,6 +1018,38 @@ window.onclick = function(event) {
 				header = ""
 			}
 			avail, ok := available[spod.special]
+			if specials := strings.Fields(spod.special); !ok && len(specials) > 1 {
+				allok := true
+				someavail := false
+				for _, spec := range specials {
+					neg := false
+					if spec[0] == '-' {
+						spec = spec[1:]
+						neg = true
+					}
+					av, ok := available[spec]
+					if !ok {
+						allok = false
+						continue
+					}
+					if neg {
+						av = !av
+					}
+					if av {
+						someavail = true
+						break
+					}
+				}
+				if someavail {
+					available[spod.special] = true
+					avail = true
+					ok = true
+				} else if allok {
+					available[spod.special] = false
+					avail = false
+					ok = true
+				}
+			}
 			if ok && !avail {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><td colspan=\"4\" class=\"center\"><em>niet voor dit corpus</em><td>%s</tr>\n", spod.text)
