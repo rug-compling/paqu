@@ -666,7 +666,7 @@ corpus: <select name="db">
 		}
 		fmt.Fprintf(q.w, `<tr>
   <td><input type="checkbox" name="i%d" id="i%d" value="t">
-  <td><a href="javascript:vb(%d)" target="_blank">vb</a>
+  <td><a href="javascript:vb(%d)">vb</a>
   <td><label for="i%d">%s</label>
 `,
 			i,
@@ -1108,7 +1108,7 @@ window.onclick = function(event) {
 				if spod.special == "parser" {
 					fmt.Fprintf(
 						q.w,
-						"<td><td><td><a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &nbsp; %s\n",
+						"<td><td><td><a href=\"javascript:vb(%d)\">vb</a> &nbsp; %s\n",
 						idx, html.EscapeString(spod.text))
 				} else {
 					counts := strings.Split(wcount, ",")
@@ -1130,7 +1130,7 @@ window.onclick = function(event) {
 						}
 						fmt.Fprintf(
 							q.w,
-							"<td class=\"right\">%s<td><a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &nbsp; %s\n",
+							"<td class=\"right\">%s<td><a href=\"javascript:vb(%d)\">vb</a> &nbsp; %s\n",
 							t, idx, html.EscapeString(spod.text))
 					} else {
 						fmt.Fprintf(
@@ -1140,7 +1140,7 @@ window.onclick = function(event) {
 
 						fmt.Fprintf(
 							q.w,
-							"<a href=\"javascript:vb(%d)\" target=\"_blank\">vb</a> &nbsp; %s\n",
+							"<a href=\"javascript:vb(%d)\">vb</a> &nbsp; %s\n",
 							idx, html.EscapeString(spod.text))
 
 						worddata = append(worddata, "[["+
