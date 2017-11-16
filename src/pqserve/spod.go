@@ -913,10 +913,12 @@ function wg(idx) {
 
     var step = Math.round(dat.length / 20);
     if (step > 1) {
+        var space = "";
         for (var i = 0; i < dat.length; i++) {
             if (i % step != step - 1) {
                 if (dat[i].woorden) {
-                    dat[i].woorden = " ".repeat(i);
+                    space += " ";
+                    dat[i].woorden = space;
                 }
             }
         }
