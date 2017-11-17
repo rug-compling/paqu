@@ -911,17 +911,13 @@ function wg(idx) {
         }
     }
 
+    var ticks = [];
     var step = Math.round(dat.length / 20);
-    if (step > 1) {
-        var space = "";
-        for (var i = 0; i < dat.length; i++) {
-            if (i % step != step - 1) {
-                if (dat[i].woorden) {
-                    space += " ";
-                    dat[i].woorden = space;
-                }
-            }
-        }
+    if (step < 1) {
+        step = 1;
+    }
+    for (var i = step; i <= dat.length; i += step) {
+        ticks.push(i);
     }
 
     d3.selectAll("svg > *").remove()
@@ -945,7 +941,7 @@ function wg(idx) {
     g.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x))
+        .call(d3.axisBottom(x).tickValues(ticks))
         .append("text")
         .attr("x", width / 2)
         .attr("y", 0)
