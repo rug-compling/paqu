@@ -917,7 +917,7 @@ function wg(idx) {
         step = 1;
     }
     for (var i = step; i <= dat.length; i += step) {
-        ticks.push(i);
+        ticks.push(""+i);
     }
 
     d3.selectAll("svg > *").remove()
