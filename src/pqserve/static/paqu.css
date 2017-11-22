@@ -550,3 +550,26 @@ code {
 .spodblock > a {
    font-weight: bold;
 }
+
+table.spod {
+    border: 1px solid grey;
+    border-collapse: collapse;
+}
+table.spod th.b {
+    border-bottom: 1px solid grey;
+}
+table.spod th.r,
+table.spod td.r {
+    border-right: 1px solid grey;
+}
+table.spod tr:nth-child(even) {
+    background-color: white;
+}
+table.compact {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+table.compact td {
+    padding: 0px .35em 0px 0px;
+    margin: 0px;
+}

@@ -1390,7 +1390,7 @@ window.onclick = function(event) {
     }
 }
 </script>
-<div class="max100"><table><tr><th colspan="2">zinnen<th>items<th>woorden<th></tr>
+<div class="max100"><table class="spod"><tr><th colspan="2" class="r b">zinnen<th class="r b">items<th class="r b">woorden<th><th></tr>
 `)
 	} else {
 		fmt.Fprintln(q.w, "# zinnen zinnen/totaal\titems\tlabel\tomschrijving\twoordtelling")
@@ -1417,7 +1417,7 @@ window.onclick = function(event) {
 		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
 			if header != "" {
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><th colspan=\"4\"><th class=\"left\">%s</tr>\n", html.EscapeString(header))
+					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th class=\"r\"><th class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", html.EscapeString(header))
 				} else {
 					fmt.Fprintln(q.w, "##", header)
 				}
@@ -1458,7 +1458,7 @@ window.onclick = function(event) {
 			}
 			if ok && !avail {
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><td colspan=\"4\" class=\"center\"><em>niet voor dit corpus</em><td>%s</tr>\n", spod.text)
+					fmt.Fprintf(q.w, "<tr><td colspan=\"4\" class=\"center r\"><em>niet voor dit corpus</em><td><td>%s</tr>\n", spod.text)
 				} else {
 					fmt.Fprintf(q.w, "### niet voor dit corpus\t%s\n", spod.text)
 				}
@@ -1474,7 +1474,6 @@ window.onclick = function(event) {
 			if err != nil {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b>", html.EscapeString(err.Error()))
-
 				} else {
 					fmt.Fprint(q.w, "#", err)
 				}
@@ -1482,13 +1481,13 @@ window.onclick = function(event) {
 			} else if done && available[spod.special] {
 				if doHtml {
 					if spod.special == "parser" {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.2f%%",
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right r\">%.2f%%",
 							lines, float64(lines)/float64(nlines)*100.0)
 					} else if spod.special == "his" {
-						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">%d",
+						fmt.Fprintf(q.w, "<tr><td><td class=\"r\"><td class=\"right r\">%d",
 							items)
 					} else {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right\">%.2f%%<td class=\"right\">%d",
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right r\">%.2f%%<td class=\"right r\">%d",
 							lines, float64(lines)/float64(nlines)*100.0, items)
 					}
 				} else {
@@ -1499,11 +1498,11 @@ window.onclick = function(event) {
 				wcount = "???"
 				if doHtml {
 					if spod.special == "parser" {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right\">???")
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???")
 					} else if spod.special == "his" {
-						fmt.Fprintf(q.w, "<tr><td><td><td class=\"right\">???")
+						fmt.Fprintf(q.w, "<tr><td><td class=\"r\"><td class=\"right r\">???")
 					} else {
-						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right\">???<td class=\"right\">???")
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???<td class=\"right r\">???")
 					}
 				} else {
 					fmt.Fprint(q.w, "???\t???       \t???")
@@ -1514,7 +1513,7 @@ window.onclick = function(event) {
 				if spod.special == "parser" {
 					fmt.Fprintf(
 						q.w,
-						"<td><td><td><a href=\"javascript:vb(%d)\">vb</a> &nbsp; %s\n",
+						"<td class=\"r\"><td class=\"r\"><td><a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
 						idx, html.EscapeString(spod.text))
 				} else {
 					counts := strings.Split(wcount, ",")
@@ -1536,17 +1535,17 @@ window.onclick = function(event) {
 						}
 						fmt.Fprintf(
 							q.w,
-							"<td class=\"right\">%s<td><a href=\"javascript:vb(%d)\">vb</a> &nbsp; %s\n",
+							"<td class=\"right r\">%s<td><a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
 							t, idx, html.EscapeString(spod.text))
 					} else {
 						fmt.Fprintf(
 							q.w,
-							"<td class=\"right\"><a href=\"javascript:wg(%d)\">%.1f</a><td>\n",
+							"<td class=\"right r\"><a href=\"javascript:wg(%d)\">%.1f</a><td>\n",
 							len(worddata), float64(sum)/float64(n))
 
 						fmt.Fprintf(
 							q.w,
-							"<a href=\"javascript:vb(%d)\">vb</a> &nbsp; %s\n",
+							"<a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
 							idx, html.EscapeString(spod.text))
 
 						worddata = append(worddata, "[["+
@@ -1614,13 +1613,15 @@ func spod_stats(q *Context, db string, doHtml bool) bool {
 	data, err := ioutil.ReadFile(filename)
 	if err == nil {
 		if doHtml {
+			fmt.Fprintln(q.w, "<table class=\"compact\">")
 			lines := strings.Split(string(data), "\n")
 			for _, line := range lines {
 				a := strings.Split(line, "\t")
 				if len(a) == 5 {
-					fmt.Fprintf(q.w, "%s %s<br>\n", a[0], html.EscapeString(a[4]))
+					fmt.Fprintf(q.w, "<tr><td class=\"right\">%s<td>%s\n", a[0], html.EscapeString(a[4]))
 				}
 			}
+			fmt.Fprintln(q.w, "</table><p>")
 		} else {
 			q.w.Write(data)
 		}
@@ -1968,9 +1969,13 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 
 	fp, _ := os.Create(outname)
 	fmt.Fprintf(fp,
-		"%8.4f\t\t\ttt\ttypes per tokens\n"+
+		"%8d\t\t\tzinnen\tzinnen\n"+
+			"%8d\t\t\twoorden\twoorden\n"+
+			"%8.4f\t\t\ttt\ttypes per tokens\n"+
 			"%8.4f\t\t\twz\twoorden per zin\n"+
 			"%8.4f\t\t\tlw\tletters per woord\n",
+		lineCount,
+		wordCount,
 		float64(len(tokens))/float64(wordCount),
 		float64(wordCount)/float64(lineCount),
 		float64(runeCount)/float64(wordCount))
