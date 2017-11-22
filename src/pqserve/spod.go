@@ -127,7 +127,11 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='cp' and node[@rel='body' and @cat='ssub']]`,
+			`
+//node[@cat='cp'
+       and
+       node[@rel='body' and @cat='ssub']
+]`,
 			SPOD_STD,
 			"ssub",
 			"finiete bijzinnen",
@@ -135,7 +139,13 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='cp' and node[@rel='cmp' and @lemma='dat'] and node[@rel='body' and @cat='ssub']]`,
+			`
+//node[@cat='cp'
+       and
+       node[@rel='cmp' and @lemma='dat']
+       and
+       node[@rel='body' and @cat='ssub']
+]`,
 			SPOD_STD,
 			"ssubdat",
 			"finiete bijzinnen met \"dat\"",
@@ -143,7 +153,13 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='cp' and node[@rel='cmp' and @lemma='of'] and node[@rel='body' and @cat='ssub']]`,
+			`
+//node[@cat='cp'
+       and
+       node[@rel='cmp' and @lemma='of']
+       and
+       node[@rel='body' and @cat='ssub']
+]`,
 			SPOD_STD,
 			"ssubof",
 			"finiete bijzinnen met \"of\"",
@@ -151,7 +167,16 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='cp' and node[@rel='cmp' and not(@lemma='of' or @lemma='dat')] and node[@rel='body' and @cat='ssub']]`,
+			`
+//node[@cat='cp'
+       and
+       node[@rel='cmp'
+            and
+            not(@lemma='of' or @lemma='dat')
+       ]
+       and
+       node[@rel='body' and @cat='ssub']
+]`,
 			SPOD_STD,
 			"ssubcmp",
 			"finiete bijzinnen met andere voegwoorden",
@@ -167,7 +192,11 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='ti' and not(../@cat='oti' or ../@cat='cp')]`,
+			`
+//node[@cat='ti'
+       and
+       not(../@cat='oti' or ../@cat='cp')
+]`,
 			SPOD_STD,
 			"tite",
 			"infiniete bijzinnen met alleen \"te\"",
@@ -175,7 +204,11 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='cp' and node[@rel='body' and @cat='ti']]`,
+			`
+//node[@cat='cp'
+       and
+       node[@rel='body' and @cat='ti']
+]`,
 			SPOD_STD,
 			"ti",
 			"infiniete bijzinnen met ander voorzetsel",
@@ -198,6 +231,295 @@ var (
 			"",
 		},
 		{
+			"Nevenschikkingen",
+			`//node[@cat="conj"]`,
+			SPOD_STD,
+			"conj",
+			"alle nevenschikkingen",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       not(node[@rel="crd"])
+]`,
+			SPOD_STD,
+			"crd0",
+			"nevenschikkingen zonder coördinator",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])=1
+]`,
+			SPOD_STD,
+			"crd1",
+			"nevenschikkingen met 1 coördinator",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])=1
+       and
+       node[@rel="crd" and @lemma="en"]
+]`,
+			SPOD_STD,
+			"crd1en",
+			"nevenschikkingen met 1 coördinator, en dat is \"en\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])=1
+       and
+       node[@rel="crd" and @lemma="of"]
+]`,
+			SPOD_STD,
+			"crd1of",
+			"nevenschikkingen met 1 coördinator, en dat is \"of\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])=1
+       and
+       node[@rel="crd" and @lemma="maar"]
+]`,
+			SPOD_STD,
+			"crd1maa",
+			"nevenschikkingen met 1 coördinator, en dat is \"maar\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])=1
+       and
+       node[@rel="crd"]/%PQ_e% = %PQ_e%
+]`,
+			SPOD_STD,
+			"crd1enz",
+			"nevenschikkingen met 1 coördinator, en de coordinator sluit de nevenschikking af (\"enzovoorts\")",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])=2
+]`,
+			SPOD_STD,
+			"crd2",
+			"nevenschikkingen met 2 coördinatoren",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="crd"])>2
+]`,
+			SPOD_STD,
+			"crd2p",
+			"nevenschikkingen met meer dan 2 coördinatoren",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])=1
+]`,
+			SPOD_STD,
+			"cnj1",
+			"nevenschikkingen met slechts 1 conjunct",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])=2
+]`,
+			SPOD_STD,
+			"cnj2",
+			"nevenschikkingen met 2 conjuncten",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])=3
+]`,
+			SPOD_STD,
+			"cnj3",
+			"nevenschikkingen met 3 conjuncten",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])=4
+]`,
+			SPOD_STD,
+			"cnj4",
+			"nevenschikkingen met 4 conjuncten",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])=5
+]`,
+			SPOD_STD,
+			"cnj5",
+			"nevenschikkingen met 5 conjuncten",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])=6
+]`,
+			SPOD_STD,
+			"cnj6",
+			"nevenschikkingen met 6 conjuncten",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       count(node[@rel="cnj"])>6
+]`,
+			SPOD_STD,
+			"cnj6p",
+			"nevenschikkingen met meer dan 6 conjuncten",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       node[@rel="cnj" and %PQ_np%]
+       and
+       not(node[@rel="cnj"
+                and
+                not(%PQ_np%)
+           ]
+       )
+]`,
+			SPOD_STD,
+			"cnjnp",
+			"nevenschikking van NP's",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       node[@rel="cnj" and @cat="pp"]
+       and
+       not(node[@rel="cnj"
+                and
+                not(@cat="pp")
+           ]
+       )
+]`,
+			SPOD_STD,
+			"cnjpp",
+			"nevenschikking van PP's",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       node[@rel="cnj" and @cat="smain"]
+       and
+       not(node[@rel="cnj"
+                and
+                not(@cat="smain")
+           ]
+       )
+]`,
+			SPOD_STD,
+			"cnjmain",
+			"nevenschikking van hoofdzinnen",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       node[@rel="cnj"
+            and
+            (@cat="ssub" or @cat="ti" or @cat="ppart" or @cat="inf" or @pt="ww")
+       ]
+       and
+       not(node[@rel="cnj"
+                and
+                not(@cat="ssub" or @cat="ti" or @cat="ppart" or @cat="inf" or @pt="ww")
+           ]
+       )
+]`,
+			SPOD_STD,
+			"cnjvp",
+			"nevenschikking van VP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
+       node[@rel="cnj" and @cat="cp"]
+       and
+       not(node[@rel="cnj"
+                and
+                not(@cat="cp")
+           ]
+       )
+]`,
+			SPOD_STD,
+			"cnjcp",
+			"nevenschikking van bijzinnen",
+			"",
+		},
+		{
 			"Woordgroepen",
 			`//node[%PQ_np%]`,
 			SPOD_STD,
@@ -215,7 +537,13 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='ap' or @pt='adj' and not(@rel='hd')]`,
+			`
+//node[@cat='ap'
+       or
+       @pt='adj'
+       and
+       not(@rel='hd')
+]`,
 			SPOD_STD,
 			"ap",
 			"ap",
@@ -223,7 +551,13 @@ var (
 		},
 		{
 			"",
-			`//node[@cat='advp' or @pt='bw' and not(@rel='hd')]`,
+			`
+//node[@cat='advp'
+       or
+       @pt='bw'
+       and
+       not(@rel='hd')
+]`,
 			SPOD_STD,
 			"advp",
 			"advp",
@@ -527,7 +861,11 @@ var (
 		},
 		{
 			"",
-			`//node[@his and not(@his="normal" or @his="compound" or @his="name")]`,
+			`
+//node[@his
+       and
+       not(@his="normal" or @his="compound" or @his="name")
+]`,
 			SPOD_STD,
 			"noun",
 			"onbekende woorden die niet als samenstelling of naam werden herkend",
@@ -543,6 +881,9 @@ var (
 
 func spod_init() {
 	spodSemaphore = make(chan bool, Cfg.Maxspodjob)
+	for i, spod := range spods {
+		spods[i].xpath = strings.TrimSpace(spod.xpath)
+	}
 }
 
 func spod_main(q *Context) {
