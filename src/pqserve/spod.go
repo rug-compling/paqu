@@ -1971,7 +1971,7 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 	fmt.Fprintf(fp,
 		"%8d\t\t\tzinnen\tzinnen\n"+
 			"%8d\t\t\twoorden\twoorden\n"+
-			"%8.4f\t\t\ttt\ttypes per tokens\n"+
+			"%8.4f\t\t\ttt\ttypes per token\n"+
 			"%8.4f\t\t\twz\twoorden per zin\n"+
 			"%8.4f\t\t\tlw\tletters per woord\n",
 		lineCount,
