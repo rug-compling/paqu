@@ -192,6 +192,73 @@ var (
 		},
 		{
 			"",
+			`//node[@cat="oti" and @rel="vc"]`,
+			SPOD_STD,
+			"otivc",
+			"infiniete bijzinnen met \"om\" die als complement optreden",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="oti" and @rel="mod"]`,
+			SPOD_STD,
+			"otimod",
+			"infiniete bijzinnen met \"om\" die als bepaling optreden",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="oti"
+       and
+       ../node[@rel="hd" and @pt="ww"]
+]`,
+			SPOD_STD,
+			"otiww",
+			"infiniete bijzinnen met \"om\" die als bepaling bij een werkwoord optreden",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="oti"
+       and
+       ../node[@rel="hd"
+               and
+               (@pt="n" or @pt="vnw")
+       ]
+]`,
+			SPOD_STD,
+			"otin",
+			"infiniete bijzinnen met \"om\" die als bepaling bij een zelfstandig naamwoord optreden",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="oti" and @rel="su"]`,
+			SPOD_STD,
+			"otisu",
+			"infiniete bijzinnen met \"om\" die als onderwerp fungeren",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="oti" and @rel="predc"]`,
+			SPOD_STD,
+			"otipred",
+			"infiniete bijzinnen met \"om\" die als predicaat fungeren",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="oti" and @rel="obcomp"]`,
+			SPOD_STD,
+			"otiobc",
+			"infiniete bijzinnen met \"om\" die optreden met combinaties zoals \"te ADJ; zo ADJ; genoeg ADJ; voldoende N\"",
+			"",
+		},
+		{
+			"",
 			`
 //node[@cat='ti'
        and
