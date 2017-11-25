@@ -7,6 +7,8 @@ comparative
 conjtype
 def
 dial
+dscmanual
+dscsense
 end
 frame
 gen
