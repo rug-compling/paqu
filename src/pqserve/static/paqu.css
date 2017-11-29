@@ -562,9 +562,6 @@ table.spod th.r,
 table.spod td.r {
     border-right: 1px solid grey;
 }
-table.spod tr:nth-child(even) {
-    background-color: white;
-}
 table.compact {
     border-spacing: 0;
     border-collapse: collapse;
