@@ -19,6 +19,9 @@ sleep 2
 killall -KILL pqserve
 sleep 2
 echo Restarting pqserve
+echo
+echo Old pqserve.out:
+echo
 cat pqserve.out
 ../bin/pqserve &> pqserve.out &
 
