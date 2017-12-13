@@ -134,7 +134,7 @@ var (
 ]`,
 			SPOD_STD,
 			"ssub",
-			"finiete bijzinnen",
+			"finiete bijzinnen|",
 			"",
 		},
 		{
@@ -148,7 +148,7 @@ var (
 ]`,
 			SPOD_STD,
 			"ssubdat",
-			"finiete bijzinnen met \"dat\"",
+			"finiete bijzinnen| met \"dat\"",
 			"",
 		},
 		{
@@ -162,7 +162,7 @@ var (
 ]`,
 			SPOD_STD,
 			"ssubof",
-			"finiete bijzinnen met \"of\"",
+			"finiete bijzinnen| met \"of\"",
 			"",
 		},
 		{
@@ -179,7 +179,7 @@ var (
 ]`,
 			SPOD_STD,
 			"ssubcmp",
-			"finiete bijzinnen met andere voegwoorden",
+			"finiete bijzinnen| met andere voegwoorden",
 			"",
 		},
 		{
@@ -187,7 +187,7 @@ var (
 			`//node[@cat='oti']`,
 			SPOD_STD,
 			"oti",
-			"infiniete bijzinnen met \"om\"",
+			"infiniete bijzinnen met \"om\"|",
 			"",
 		},
 		{
@@ -195,7 +195,7 @@ var (
 			`//node[@cat="oti" and @rel="vc"]`,
 			SPOD_STD,
 			"otivc",
-			"infiniete bijzinnen met \"om\" die als complement optreden",
+			"infiniete bijzinnen met \"om\"| die als complement optreden",
 			"",
 		},
 		{
@@ -203,7 +203,7 @@ var (
 			`//node[@cat="oti" and @rel="mod"]`,
 			SPOD_STD,
 			"otimod",
-			"infiniete bijzinnen met \"om\" die als bepaling optreden",
+			"infiniete bijzinnen met \"om\"| die als bepaling optreden",
 			"",
 		},
 		{
@@ -215,7 +215,7 @@ var (
 ]`,
 			SPOD_STD,
 			"otiww",
-			"infiniete bijzinnen met \"om\" die als bepaling bij een werkwoord optreden",
+			"infiniete bijzinnen met \"om\"| die als bepaling bij een werkwoord optreden",
 			"",
 		},
 		{
@@ -230,7 +230,7 @@ var (
 ]`,
 			SPOD_STD,
 			"otin",
-			"infiniete bijzinnen met \"om\" die als bepaling bij een zelfstandig naamwoord optreden",
+			"infiniete bijzinnen met \"om\"| die als bepaling bij een zelfstandig naamwoord optreden",
 			"",
 		},
 		{
@@ -238,7 +238,7 @@ var (
 			`//node[@cat="oti" and @rel="su"]`,
 			SPOD_STD,
 			"otisu",
-			"infiniete bijzinnen met \"om\" die als onderwerp fungeren",
+			"infiniete bijzinnen met \"om\"| die als onderwerp fungeren",
 			"",
 		},
 		{
@@ -246,7 +246,7 @@ var (
 			`//node[@cat="oti" and @rel="predc"]`,
 			SPOD_STD,
 			"otipred",
-			"infiniete bijzinnen met \"om\" die als predicaat fungeren",
+			"infiniete bijzinnen met \"om\"| die als predicaat fungeren",
 			"",
 		},
 		{
@@ -254,7 +254,7 @@ var (
 			`//node[@cat="oti" and @rel="obcomp"]`,
 			SPOD_STD,
 			"otiobc",
-			"infiniete bijzinnen met \"om\" die optreden met combinaties zoals \"te ADJ; zo ADJ; genoeg ADJ; voldoende N\"",
+			"infiniete bijzinnen met \"om\"| die optreden met combinaties zoals \"te ADJ; zo ADJ; genoeg ADJ; voldoende N\"",
 			"",
 		},
 		{
@@ -266,7 +266,7 @@ var (
 ]`,
 			SPOD_STD,
 			"tite",
-			"infiniete bijzinnen met alleen \"te\"",
+			"infiniete bijzinnen| met alleen \"te\"",
 			"",
 		},
 		{
@@ -278,7 +278,7 @@ var (
 ]`,
 			SPOD_STD,
 			"ti",
-			"infiniete bijzinnen met ander voorzetsel",
+			"infiniete bijzinnen| met ander voorzetsel",
 			"",
 		},
 		{
@@ -326,7 +326,7 @@ var (
 ]`,
 			SPOD_STD,
 			"crd1",
-			"nevenschikkingen met 1 coördinator",
+			"nevenschikkingen met 1 coördinator|",
 			"",
 		},
 		{
@@ -340,7 +340,7 @@ var (
 ]`,
 			SPOD_STD,
 			"crd1en",
-			"nevenschikkingen met 1 coördinator, en dat is \"en\"",
+			"nevenschikkingen met 1 coördinator|, en dat is \"en\"",
 			"",
 		},
 		{
@@ -354,7 +354,7 @@ var (
 ]`,
 			SPOD_STD,
 			"crd1of",
-			"nevenschikkingen met 1 coördinator, en dat is \"of\"",
+			"nevenschikkingen met 1 coördinator|, en dat is \"of\"",
 			"",
 		},
 		{
@@ -368,7 +368,7 @@ var (
 ]`,
 			SPOD_STD,
 			"crd1maa",
-			"nevenschikkingen met 1 coördinator, en dat is \"maar\"",
+			"nevenschikkingen met 1 coördinator|, en dat is \"maar\"",
 			"",
 		},
 		{
@@ -382,7 +382,7 @@ var (
 ]`,
 			SPOD_STD,
 			"crd1enz",
-			"nevenschikkingen met 1 coördinator, en de coordinator sluit de nevenschikking af (\"enzovoorts\")",
+			"nevenschikkingen met 1 coördinator|, en de coordinator sluit de nevenschikking af (\"enzovoorts\")",
 			"",
 		},
 		{
@@ -418,7 +418,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj1",
-			"nevenschikkingen met slechts 1 conjunct",
+			"nevenschikkingen| met slechts 1 conjunct",
 			"",
 		},
 		{
@@ -430,7 +430,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj2",
-			"nevenschikkingen met 2 conjuncten",
+			"nevenschikkingen| met 2 conjuncten",
 			"",
 		},
 		{
@@ -442,7 +442,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj3",
-			"nevenschikkingen met 3 conjuncten",
+			"nevenschikkingen| met 3 conjuncten",
 			"",
 		},
 		{
@@ -454,7 +454,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj4",
-			"nevenschikkingen met 4 conjuncten",
+			"nevenschikkingen| met 4 conjuncten",
 			"",
 		},
 		{
@@ -466,7 +466,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj5",
-			"nevenschikkingen met 5 conjuncten",
+			"nevenschikkingen| met 5 conjuncten",
 			"",
 		},
 		{
@@ -478,7 +478,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj6",
-			"nevenschikkingen met 6 conjuncten",
+			"nevenschikkingen| met 6 conjuncten",
 			"",
 		},
 		{
@@ -490,7 +490,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj6p",
-			"nevenschikkingen met meer dan 6 conjuncten",
+			"nevenschikkingen| met meer dan 6 conjuncten",
 			"",
 		},
 		{
@@ -508,7 +508,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnjnp",
-			"nevenschikking van NP's",
+			"nevenschikking| van NP's",
 			"",
 		},
 		{
@@ -526,7 +526,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnjpp",
-			"nevenschikking van PP's",
+			"nevenschikking| van PP's",
 			"",
 		},
 		{
@@ -544,7 +544,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnjmain",
-			"nevenschikking van hoofdzinnen",
+			"nevenschikking| van hoofdzinnen",
 			"",
 		},
 		{
@@ -565,7 +565,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnjvp",
-			"nevenschikking van VP",
+			"nevenschikking| van VP",
 			"",
 		},
 		{
@@ -583,7 +583,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnjcp",
-			"nevenschikking van bijzinnen",
+			"nevenschikking| van bijzinnen",
 			"",
 		},
 		{
@@ -819,7 +819,7 @@ var (
 			`//parser[@cats="1"]`,
 			SPOD_STD,
 			"cats1",
-			"parse bestaat uit één deel",
+			"parse bestaat uit| één deel",
 			"parser",
 		},
 		{
@@ -827,7 +827,7 @@ var (
 			`//parser[@cats="2"]`,
 			SPOD_STD,
 			"cats2",
-			"parse bestaat uit twee losse delen",
+			"parse bestaat uit| twee losse delen",
 			"parser",
 		},
 		{
@@ -835,7 +835,7 @@ var (
 			`//parser[@cats="3"]`,
 			SPOD_STD,
 			"cats3",
-			"parse bestaat uit drie losse delen",
+			"parse bestaat uit| drie losse delen",
 			"parser",
 		},
 		{
@@ -843,7 +843,7 @@ var (
 			`//parser[number(@cats) > 3]`,
 			SPOD_STD,
 			"cats4",
-			"parse bestaat uit vier of meer losse delen",
+			"parse bestaat uit| vier of meer losse delen",
 			"parser",
 		},
 		{
@@ -1045,6 +1045,7 @@ corpus: <select name="db">
 				i)
 			continue
 		}
+		spodtext := strings.Replace(spod.text, "|", "", 1)
 		if spod.header != "" {
 			if inTable {
 				fmt.Fprintln(q.w, "</table></div></div>")
@@ -1063,7 +1064,7 @@ corpus: <select name="db">
 <div class="spodblock">
 <a href="javascript:hider('spodblock%d')">%s</a>
 <div class="spodblockinner hide" id="spodblock%d">
-`, blocknum, html.EscapeString(spod.header), blocknum)
+`, blocknum, spodEscape(spod.header), blocknum)
 			fmt.Fprintf(q.w, `
 <a href="javascript:alles(%d, %d)">alles</a> &mdash;
 <a href="javascript:niets(%d, %d)">niets</a> &mdash;
@@ -1081,7 +1082,7 @@ corpus: <select name="db">
 			i,
 			i,
 			i,
-			html.EscapeString(spod.text))
+			spodEscape(spodtext))
 	}
 
 	fmt.Fprintf(q.w, `</table></div></div>
@@ -1102,6 +1103,8 @@ uitvoer: <select name="out">
 }
 
 func spod_form(q *Context) {
+
+	seen := ""
 
 	doHtml := first(q.r, "out") == "html"
 
@@ -1158,7 +1161,7 @@ func spod_form(q *Context) {
 
 	var allDone bool
 	if doHtml {
-		fmt.Fprintf(q.w, "Corpus: %s\n<p>\n", html.EscapeString(q.desc[db]))
+		fmt.Fprintf(q.w, "Corpus: %s\n<p>\n", spodEscape(q.desc[db]))
 		allDone = spod_stats(q, db, true)
 		if !allDone {
 			fmt.Fprintln(q.w, "???<br>")
@@ -1287,7 +1290,7 @@ func spod_form(q *Context) {
     </div>
     <div class="modal-body"><svg width="960" height="500"></svg></div>
     <div class="modal-footer">`+
-			html.EscapeString(q.desc[db])+`
+			spodEscape(q.desc[db])+`
     </div>
   </div>
 </div>
@@ -1415,9 +1418,26 @@ window.onclick = function(event) {
 			header = spod.header
 		}
 		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
+			var spodtext string
+			if doHtml {
+				a := strings.SplitN(spod.text, "|", 2)
+				if len(a) == 2 {
+					if a[0] == seen {
+						spodtext = "— " + a[1]
+					} else {
+						spodtext = spod.text
+					}
+					seen = a[0]
+				} else {
+					spodtext = spod.text
+					seen = ""
+				}
+			} else {
+				spodtext = strings.Replace(spod.text, "|", "", 1)
+			}
 			if header != "" {
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th class=\"r\"><th class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", html.EscapeString(header))
+					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th class=\"r\"><th class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", spodEscape(header))
 				} else {
 					fmt.Fprintln(q.w, "##", header)
 				}
@@ -1458,9 +1478,9 @@ window.onclick = function(event) {
 			}
 			if ok && !avail {
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><td colspan=\"4\" class=\"center r\"><em>niet voor dit corpus</em><td><td>%s</tr>\n", spod.text)
+					fmt.Fprintf(q.w, "<tr><td colspan=\"4\" class=\"center r\"><em>niet voor dit corpus</em><td><td>%s</tr>\n", spodEscape(spodtext))
 				} else {
-					fmt.Fprintf(q.w, "### niet voor dit corpus\t%s\n", spod.text)
+					fmt.Fprintf(q.w, "### niet voor dit corpus\t%s\n", spodtext)
 				}
 				continue
 			}
@@ -1473,7 +1493,7 @@ window.onclick = function(event) {
 			}
 			if err != nil {
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b>", html.EscapeString(err.Error()))
+					fmt.Fprintf(q.w, "<tr><td colspan=\"3\"><b>%s</b>", spodEscape(err.Error()))
 				} else {
 					fmt.Fprint(q.w, "#", err)
 				}
@@ -1514,7 +1534,7 @@ window.onclick = function(event) {
 					fmt.Fprintf(
 						q.w,
 						"<td class=\"r\"><td class=\"r\"><td><a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
-						idx, html.EscapeString(spod.text))
+						idx, spodEscape(spodtext))
 				} else {
 					counts := strings.Split(wcount, ",")
 					sum := 0
@@ -1536,7 +1556,7 @@ window.onclick = function(event) {
 						fmt.Fprintf(
 							q.w,
 							"<td class=\"right r\">%s<td><a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
-							t, idx, html.EscapeString(spod.text))
+							t, idx, spodEscape(spodtext))
 					} else {
 						fmt.Fprintf(
 							q.w,
@@ -1546,7 +1566,7 @@ window.onclick = function(event) {
 						fmt.Fprintf(
 							q.w,
 							"<a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
-							idx, html.EscapeString(spod.text))
+							idx, spodEscape(spodtext))
 
 						worddata = append(worddata, "[["+
 							strings.Replace(
@@ -1556,7 +1576,7 @@ window.onclick = function(event) {
 					}
 				}
 			} else {
-				fmt.Fprintf(q.w, "\t%s\t%s\t%s\n", spod.lbl, spod.text, wcount)
+				fmt.Fprintf(q.w, "\t%s\t%s\t%s\n", spod.lbl, spodtext, wcount)
 			}
 		}
 	}
@@ -1618,7 +1638,7 @@ func spod_stats(q *Context, db string, doHtml bool) bool {
 			for _, line := range lines {
 				a := strings.Split(line, "\t")
 				if len(a) == 5 {
-					fmt.Fprintf(q.w, "<tr><td class=\"right\">%s<td>%s\n", a[0], html.EscapeString(a[4]))
+					fmt.Fprintf(q.w, "<tr><td class=\"right\">%s<td>%s\n", a[0], spodEscape(a[4]))
 				}
 			}
 			fmt.Fprintln(q.w, "</table><p>")
@@ -1991,13 +2011,14 @@ func spod_list(q *Context) {
 		if strings.HasPrefix(spod.special, "hidden") {
 			continue
 		}
+		spodtext := strings.Replace(spod.text, "|", "", 1)
 		if spod.header != "" {
 			fmt.Fprint(q.w, "\n\n", spod.header, "\n", strings.Repeat("=", len(spod.header)), "\n\n")
 		}
 		fmt.Fprint(q.w,
 			"\n",
-			spod.lbl, ": ", spod.text, "\n",
-			strings.Repeat("-", len(spod.lbl)+2+len(spod.text)), "\n\n",
+			spod.lbl, ": ", spodtext, "\n",
+			strings.Repeat("-", len(spod.lbl)+2+len(spodtext)), "\n\n",
 			spod.xpath, "\n\n")
 	}
 }
@@ -2014,8 +2035,18 @@ func spod_fingerprint(item int) string {
 func jsstringsEscape(s string) string {
 	return "\"" +
 		strings.Replace(
-			strings.Replace(s, "\\", "\\\\", -1),
-			"\"", "\\\"", -1) +
+			strings.Replace(
+				strings.Replace(s, "\\", "\\\\", -1),
+				"\"", "\\\"", -1),
+			"|", "", -1) +
 		"\""
+}
 
+func spodEscape(s string) string {
+	s = html.EscapeString(s)
+	if strings.Contains(s, "|") {
+		a := strings.SplitN(s, "|", 2)
+		s = "<em>" + a[0] + "</em>" + a[1]
+	}
+	return s
 }
