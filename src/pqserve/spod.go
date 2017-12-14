@@ -134,7 +134,7 @@ var (
 ]`,
 			SPOD_STD,
 			"ssub",
-			"finiete bijzinnen|",
+			"finiete bijzinnen||",
 			"",
 		},
 		{
@@ -187,7 +187,7 @@ var (
 			`//node[@cat='oti']`,
 			SPOD_STD,
 			"oti",
-			"infiniete bijzinnen met \"om\"|",
+			"infiniete bijzinnen met \"om\"||",
 			"",
 		},
 		{
@@ -266,7 +266,7 @@ var (
 ]`,
 			SPOD_STD,
 			"tite",
-			"infiniete bijzinnen| met alleen \"te\"",
+			"infiniete bijzinnen|| met alleen \"te\"",
 			"",
 		},
 		{
@@ -326,7 +326,7 @@ var (
 ]`,
 			SPOD_STD,
 			"crd1",
-			"nevenschikkingen met 1 coördinator|",
+			"nevenschikkingen met 1 coördinator||",
 			"",
 		},
 		{
@@ -418,7 +418,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnj1",
-			"nevenschikkingen| met slechts 1 conjunct",
+			"nevenschikkingen|| met slechts 1 conjunct",
 			"",
 		},
 		{
@@ -508,7 +508,7 @@ var (
 ]`,
 			SPOD_STD,
 			"cnjnp",
-			"nevenschikking| van NP's",
+			"nevenschikking|| van NP's",
 			"",
 		},
 		{
@@ -699,7 +699,7 @@ var (
 			`//node[%PQ_finiete_inbedding1%]`,
 			SPOD_STD,
 			"inb1",
-			"minstens 1 finiete zinsinbedding",
+			"minstens|| 1 finiete zinsinbedding",
 			"",
 		},
 		{
@@ -707,7 +707,7 @@ var (
 			`//node[%PQ_finiete_inbedding2%]`,
 			SPOD_STD,
 			"inb2",
-			"minstens 2 finiete zinsinbeddingen",
+			"minstens| 2 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -715,7 +715,7 @@ var (
 			`//node[%PQ_finiete_inbedding3%]`,
 			SPOD_STD,
 			"inb3",
-			"minstens 3 finiete zinsinbeddingen",
+			"minstens| 3 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -723,7 +723,7 @@ var (
 			`//node[%PQ_finiete_inbedding4%]`,
 			SPOD_STD,
 			"inb4",
-			"minstens 4 finiete zinsinbeddingen",
+			"minstens| 4 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -731,7 +731,7 @@ var (
 			`//node[%PQ_finiete_inbedding5%]`,
 			SPOD_STD,
 			"inb5",
-			"minstens 5 finiete zinsinbeddingen",
+			"minstens| 5 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -739,7 +739,7 @@ var (
 			`//node[%PQ_finiete_inbedding6%]`,
 			SPOD_STD,
 			"inb6",
-			"minstens 6 finiete zinsinbeddingen",
+			"minstens| 6 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -747,7 +747,7 @@ var (
 			`//node[%PQ_finiete_inbedding7%]`,
 			SPOD_STD,
 			"inb7",
-			"minstens 7 finiete zinsinbeddingen",
+			"minstens| 7 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -755,7 +755,7 @@ var (
 			`//node[%PQ_finiete_inbedding8%]`,
 			SPOD_STD,
 			"inb8",
-			"minstens 8 finiete zinsinbeddingen",
+			"minstens| 8 finiete zinsinbeddingen",
 			"",
 		},
 		{
@@ -819,7 +819,7 @@ var (
 			`//parser[@cats="1"]`,
 			SPOD_STD,
 			"cats1",
-			"parse bestaat uit| één deel",
+			"parse bestaat uit|| één deel",
 			"parser",
 		},
 		{
@@ -1045,7 +1045,7 @@ corpus: <select name="db">
 				i)
 			continue
 		}
-		spodtext := strings.Replace(spod.text, "|", "", 1)
+		spodtext := strings.Replace(spod.text, "|", "", -1)
 		if spod.header != "" {
 			if inTable {
 				fmt.Fprintln(q.w, "</table></div></div>")
@@ -1417,23 +1417,22 @@ window.onclick = function(event) {
 		if spod.header != "" {
 			header = spod.header
 		}
+		spodtext := spod.text
+		if strings.Contains(spodtext, "||") || !strings.Contains(spodtext, "|") {
+			spodtext = strings.Replace(spodtext, "||", "|", 1)
+			seen = ""
+		}
 		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
-			var spodtext string
 			if doHtml {
-				a := strings.SplitN(spod.text, "|", 2)
+				a := strings.SplitN(spodtext, "|", 2)
 				if len(a) == 2 {
 					if a[0] == seen {
 						spodtext = "— " + a[1]
-					} else {
-						spodtext = spod.text
 					}
 					seen = a[0]
-				} else {
-					spodtext = spod.text
-					seen = ""
 				}
 			} else {
-				spodtext = strings.Replace(spod.text, "|", "", 1)
+				spodtext = strings.Replace(spodtext, "|", "", 1)
 			}
 			if header != "" {
 				if doHtml {
@@ -2011,7 +2010,7 @@ func spod_list(q *Context) {
 		if strings.HasPrefix(spod.special, "hidden") {
 			continue
 		}
-		spodtext := strings.Replace(spod.text, "|", "", 1)
+		spodtext := strings.Replace(spod.text, "|", "", -1)
 		if spod.header != "" {
 			fmt.Fprint(q.w, "\n\n", spod.header, "\n", strings.Repeat("=", len(spod.header)), "\n\n")
 		}
@@ -2046,7 +2045,7 @@ func spodEscape(s string) string {
 	s = html.EscapeString(s)
 	if strings.Contains(s, "|") {
 		a := strings.SplitN(s, "|", 2)
-		s = "<em>" + a[0] + "</em>" + a[1]
+		s = "<u>" + a[0] + "</u>" + a[1]
 	}
 	return s
 }
