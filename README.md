@@ -73,10 +73,6 @@ is op moment van schrijven de meest actuele versie.)
 
 Je kunt versie 2.5.16 hier downloaden: https://github.com/rug-compling/dbxml
 
-Je kunt versie 6.1.4 gebruiken als je die voor het compileren eerst
-patcht met het bestand `dbxml-6.1.4-patch_26647.txt` dat in de
-directory `extra` staat.
-
 ### Go: The Go Programming Language ###
 
 De meeste programma's zijn geschreven in de programmeertaal Go. Je hebt
