@@ -853,7 +853,29 @@ PQ_imperatieven = """
                           or
                           @pvagr='mv'
                           or
+                          @pvtijd='verl'
+                          or
                           @pvagr='met-t'
+                          or
+                          @lemma='zijn'
+                          or
+                          @lemma='kunnen'
+                          or
+                          @lemma='willen'
+                          or
+                          @lemma='moeten'
+                          or
+                          @lemma='mogen'
+                          or
+                          @lemma='zullen'
+                          or
+                          @lemma='denken'
+                          or
+                          @lemma='geloven'
+                          or
+                          @lemma='vinden'
+                          or
+                          @lemma='hebben'
                         )
                    ]
                )
