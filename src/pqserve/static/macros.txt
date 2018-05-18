@@ -755,12 +755,6 @@ PQ_finiete_zin = """
           @cat="sv1"
           or
           @cat="ssub"
-          or
-          @cat="whq"
-          or
-          @cat="whsub"
-          or
-          @cat="rel"
         ) """
 
 PQ_finiete_inbedding0 = """
