@@ -298,6 +298,620 @@ var (
 			"",
 		},
 		{
+			"Comparatief-complementen",
+			`//node[@rel="hd" and ../node[@rel="obcomp"]]`,
+			SPOD_STD,
+			"cc",
+			"woorden met een comperatief complement",
+			"",
+		},
+		{
+			"",
+			`//node[@rel="hd" and ../node[@rel="obcomp"] and @pt="adj" and @graad="comp"]`,
+			SPOD_STD,
+			"ccca",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief||",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp" and node[@rel="cmp" and @lemma="als"]]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccals",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"als\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and %PQ_np%]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccalsnp",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"als\", gevolgd door NP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+      and
+      ../node[@rel="obcomp"
+              and
+              node[@rel="cmp" and @lemma="als"]
+              and
+              node[@rel="body" and (%PQ_s% or @cat="ssub")]
+      ]
+      and
+      @pt="adj"
+      and
+      @graad="comp"
+]`,
+			SPOD_STD,
+			"ccalsvs",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"als\", gevolgd door VP of S",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and @cat="pp"]
+       ]
+       and
+       @pt="adj"
+       and @graad="comp"
+]`,
+			SPOD_STD,
+			"ccalspp",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"als\", gevolgd door PP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccalsav",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"als\", gevolgd door A of ADV",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccdan",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"dan\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and %PQ_np%]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccdannp",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"dan\", gevolgd door NP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and (%PQ_s% or @cat="ssub")]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccdanvs",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"dan\", gevolgd door VP of S",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and @cat="pp"]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccdanpp",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"dan\", gevolgd door PP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+       ]
+       and
+       @pt="adj"
+       and
+       @graad="comp"
+]`,
+			SPOD_STD,
+			"ccdanav",
+			"woorden met een comperatief complement, met als hoofd comparatief adjectief|, met \"dan\", gevolgd door A of ADV",
+			"",
+		},
+		{
+			"",
+			`//node[@rel="hd" and ../node[@rel="obcomp"] and @lemma="zo"]`,
+			SPOD_STD,
+			"cczo",
+			"woorden met een comperatief complement, met als hoofd \"zo\"",
+			"",
+		},
+		{
+			"",
+			`//node[@rel="hd" and ../node[@rel="obcomp"] and (@lemma="veel" or @lemma="minder")]`,
+			SPOD_STD,
+			"ccmm",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"||",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp" and node[@rel="cmp" and @lemma="als"]]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccma",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"als\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and %PQ_np%]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmanp",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"als\", gevolgd door NP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and (%PQ_s% or @cat="ssub")]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmavs",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"als\", gevolgd door VP of S",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and @cat="pp"]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmapp",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"als\", gevolgd door PP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmaav",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"als\", gevolgd door A of ADV",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp" and node[@rel="cmp" and @lemma="dan"]]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmd",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"dan\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and %PQ_np%]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmdnp",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door NP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and (%PQ_s% or @cat="ssub")]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmdvs",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door VP of S",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and @cat="pp"]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmdpp",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door PP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+       ]
+       and
+       (@lemma="veel" or @lemma="minder")
+]`,
+			SPOD_STD,
+			"ccmdav",
+			"woorden met een comperatief complement, met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door A of ADV",
+			"",
+		},
+		{
+			"",
+			`//node[@rel="hd" and ../node[@rel="obcomp"] and @lemma="even"]`,
+			SPOD_STD,
+			"cceven",
+			"woorden met een comperatief complement, met als hoofd \"even\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"]
+       and
+       (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccnn",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"||",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccna",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"als\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and %PQ_np%]
+       ]
+       and
+       (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccnanp",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"als\", gevolgd door NP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and (%PQ_s% or @cat="ssub")]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccnavs",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"als\", gevolgd door VP of S",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and @cat="pp"]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccnapp",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"als\", gevolgd door PP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="als"]
+               and
+               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccnaav",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"als\", gevolgd door A of ADV",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccnd",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\"",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and %PQ_np%]
+       ]
+       and
+       (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccndnp",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door NP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and (%PQ_s% or @cat="ssub")]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccndvs",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door VP of S",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and @cat="pp"]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccndpp",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door PP",
+			"",
+		},
+		{
+			"",
+			`
+//node[@rel="hd"
+       and
+       ../node[@rel="obcomp"
+               and
+               node[@rel="cmp" and @lemma="dan"]
+               and
+               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+       ]
+       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+]`,
+			SPOD_STD,
+			"ccndav",
+			"woorden met een comperatief complement, met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door A of ADV",
+			"",
+		},
+		{
 			"Nevenschikkingen",
 			`//node[@cat="conj"]`,
 			SPOD_STD,
