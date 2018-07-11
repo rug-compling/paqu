@@ -1569,7 +1569,7 @@ func spod_init() {
 
 func spod_main(q *Context) {
 
-	writeHead(q, "Syntactic profiles of Dutch", 5)
+	writeHead(q, "Syntactic profiler of Dutch", 5)
 
 	fmt.Fprintln(q.w, "Syntactic profiler of Dutch<p>")
 
