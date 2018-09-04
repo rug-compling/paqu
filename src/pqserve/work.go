@@ -25,6 +25,8 @@ import (
 
 var (
 	LeegArchief = errors.New("Leeg zipbestand of tarbestand")
+
+	reTrailingSpace = regexp.MustCompile(">( |\t)*(\r\n|\n\r|\r|\n)")
 )
 
 func quote(s string) string {
@@ -1168,6 +1170,12 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 		if len(bindata) == 0 {
 			continue
 		}
+
+		// sanitize (bug on https://webservices-lst.science.ru.nl/portal/ )
+		bindata = reTrailingSpace.ReplaceAll(bindata, []byte(">\000"))
+		bindata = bytes.Replace(bindata, []byte("\r"), []byte(""), -1)
+		bindata = bytes.Replace(bindata, []byte("\n"), []byte(""), -1)
+		bindata = bytes.Replace(bindata, []byte(">\000"), []byte(">\n"), -1)
 
 		nline++
 
