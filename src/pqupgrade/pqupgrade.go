@@ -171,7 +171,10 @@ func main() {
 	for _, table := range tables {
 		tb := Cfg.Prefix + "_c_" + table + "_file"
 		rows, err = db.Query("SELECT `id`,`file` FROM `" + tb + "`")
-		util.CheckErr(err)
+		if util.WarnErr(err) != nil {
+			// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
+			continue
+		}
 		for rows.Next() {
 			var id, filename string
 			util.CheckErr(rows.Scan(&id, &filename))
