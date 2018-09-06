@@ -197,7 +197,7 @@ func main() {
 			fmt.Println("Upgrade prefix in tabel", tb, "...")
 			if util.WarnErr(err) == nil {
 				// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
-				p := "data/" + table + "/xml"
+				p := "/data/" + table + "/xml"
 				ln := len(p)
 				for rows.Next() {
 					var id, filename string
