@@ -28,8 +28,7 @@ type Config struct {
 }
 
 var (
-	DefaultPaquDir string
-	Cfg            Config
+	Cfg Config
 )
 
 //. Main
@@ -41,15 +40,7 @@ func main() {
 		return
 	}
 
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
-	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	db, err := dbopen()
@@ -96,7 +87,7 @@ func main() {
 		util.CheckErr(err)
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 		util.CheckErr(err)
-		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "folia", hex.EncodeToString([]byte(user)))))
+		util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "folia", hex.EncodeToString([]byte(user)))))
 	}
 }
 

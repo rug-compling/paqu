@@ -18,10 +18,6 @@ type Config struct {
 	Prefix string
 }
 
-var (
-	DefaultPaquDir string
-)
-
 func main() {
 
 	db_overwrite := false
@@ -44,16 +40,8 @@ Syntax: %s [-w]
 		return
 	}
 
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
 	var Cfg Config
-	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
@@ -93,6 +81,7 @@ Syntax: %s [-w]
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
         protected   boolean      NOT NULL DEFAULT 0,
         hasmeta     boolean      NOT NULL DEFAULT 0,
+		version     int          NOT NULL DEFAULT 0,
 		UNIQUE INDEX (id),
 		INDEX (description),
 		INDEX (owner),

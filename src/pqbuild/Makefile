@@ -1,7 +1,7 @@
 
 include ../Makefile.cfg
 
-SRC = dbxml_false.go dbxml_true.go ranges_generated.go pqbuild.go
+SRC = dbxml_false.go dbxml_true.go ranges_generated.go directories_generated.go version_generated.go pqbuild.go
 
 IS=${if ${shell sh -c 'case `go version` in go1.[01234].*) ;; *) echo yes; ;; esac'},=, }
 
@@ -16,3 +16,17 @@ ranges_generated.go: ../pqserve/ranges.go
 	echo >> ranges_generated.go
 	cat ../pqserve/ranges.go >> ranges_generated.go
 	chmod 444 ranges_generated.go
+
+directories_generated.go: ../pqserve/directories.go
+	rm -f directories_generated.go
+	echo '// GENERATED FILE. DO NOT EDIT.' > directories_generated.go
+	echo >> directories_generated.go
+	cat ../pqserve/directories.go >> directories_generated.go
+	chmod 444 directories_generated.go
+
+version_generated.go: ../pqserve/version.go
+	rm -f version_generated.go
+	echo '// GENERATED FILE. DO NOT EDIT.' > version_generated.go
+	echo >> version_generated.go
+	cat ../pqserve/version.go >> version_generated.go
+	chmod 444 version_generated.go

@@ -181,9 +181,15 @@ func tree(q *Context) {
 			rows.Close()
 		}
 	}
+	if strings.HasPrefix(filename, "$$") {
+		filename = paqudatadir + filename[2:]
+	}
 
 	// xml-bestand inlezen
 	if archive != "" {
+		if strings.HasPrefix(archive, "$$") {
+			archive = paqudatadir + archive[2:]
+		}
 		if strings.HasSuffix(archive, ".dact") || strings.HasSuffix(archive, ".dactx") {
 			var err error
 			data, err = get_dact(archive, filename)

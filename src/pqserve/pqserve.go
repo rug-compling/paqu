@@ -34,10 +34,6 @@ type AlpinoLimits struct {
 	Jobs int `json:"jobs"`
 }
 
-var (
-	DefaultPaquDir string
-)
-
 func init() {
 	expvar.Publish("tasks", ProcessMap(processes))
 	expvar.Publish("info", expvar.Func(GetInfo))
@@ -54,15 +50,7 @@ func main() {
 		}
 	}
 
-	paqudir = os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
-	tom := filepath.Join(paqudir, "setup.toml")
+	tom := filepath.Join(paquconfigdir, "setup.toml")
 	md, err := TomlDecodeFile(tom, &Cfg)
 	util.CheckErr(err)
 	if un := md.Undecoded(); len(un) > 0 {
@@ -268,7 +256,7 @@ func main() {
 	if !Cfg.Https && !Cfg.Httpdual {
 		errserve = http.ListenAndServe(addr, Log(http.DefaultServeMux))
 	} else if Cfg.Https && !Cfg.Httpdual {
-		errserve = http.ListenAndServeTLS(addr, filepath.Join(paqudir, "cert.pem"), filepath.Join(paqudir, "key.pem"), Log(http.DefaultServeMux))
+		errserve = http.ListenAndServeTLS(addr, filepath.Join(paquconfigdir, "cert.pem"), filepath.Join(paquconfigdir, "key.pem"), Log(http.DefaultServeMux))
 	} else {
 
 		// De ingewikkelde oplossing: acepteer zowel http als https.
@@ -278,7 +266,7 @@ func main() {
 			tlsConfig.NextProtos = []string{"http/1.1"}
 		}
 		tlsConfig.Certificates = make([]tls.Certificate, 1)
-		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(filepath.Join(paqudir, "cert.pem"), filepath.Join(paqudir, "key.pem"))
+		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(filepath.Join(paquconfigdir, "cert.pem"), filepath.Join(paquconfigdir, "key.pem"))
 		util.CheckErr(err)
 		ln, err := net.Listen("tcp", addr)
 		util.CheckErr(err)

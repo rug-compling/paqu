@@ -50,8 +50,8 @@ func remove(q *Context) {
 	kill(id)
 
 	go func() {
-		p := filepath.Join(paqudir, "data", id)
-		p2 := filepath.Join(paqudir, "data", "_invalid_"+id+"_"+rand16())
+		p := filepath.Join(paqudatadir, "data", id)
+		p2 := filepath.Join(paqudatadir, "data", "_invalid_"+id+"_"+rand16())
 		err := os.Rename(p, p2)
 		if err != nil {
 			logf("os.Rename(%q, %q) error: %v", p, p2, err)

@@ -23,10 +23,6 @@ type Config struct {
 	Prefix string
 }
 
-var (
-	DefaultPaquDir string
-)
-
 func main() {
 
 	if len(os.Args) < 3 {
@@ -35,15 +31,7 @@ func main() {
 	}
 
 	var Cfg Config
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
-	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {

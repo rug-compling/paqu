@@ -2215,7 +2215,7 @@ window.onclick = function(event) {
 	}
 
 	// oude varianten verwijderen
-	dirpath := filepath.Join(paqudir, "data", db, "spod")
+	dirpath := filepath.Join(paqudatadir, "data", db, "spod")
 	files, err := ioutil.ReadDir(dirpath)
 	if sysErr(err) {
 		return
@@ -2239,7 +2239,7 @@ func spod_stats(q *Context, db string, doHtml bool) bool {
 		return false
 	}
 
-	dirpath := filepath.Join(paqudir, "data", db, "spod")
+	dirpath := filepath.Join(paqudatadir, "data", db, "spod")
 	os.MkdirAll(dirpath, 0700)
 	filename := filepath.Join(dirpath, "stats")
 
@@ -2281,7 +2281,7 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 		return 0, 0, "", false, nil
 	}
 
-	dirpath := filepath.Join(paqudir, "data", db, "spod")
+	dirpath := filepath.Join(paqudatadir, "data", db, "spod")
 	os.MkdirAll(dirpath, 0700)
 
 	fingerprint := spod_fingerprint(item)

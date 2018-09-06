@@ -204,7 +204,6 @@ const (
 //. Variabelen
 
 var (
-	paqudir    string
 	cookiepath string
 
 	tlsConfig = &tls.Config{}

@@ -357,7 +357,7 @@ function init(s) {
 
 	dactfiles := make([]string, 0)
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, filepath.Join(paqudir, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
 	} else {
 		rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if err != nil {

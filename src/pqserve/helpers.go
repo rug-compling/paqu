@@ -249,12 +249,16 @@ func iformat0(i int) string {
 func shell(format string, a ...interface{}) *exec.Cmd {
 	cmd := exec.Command(Cfg.Sh, "-c", fmt.Sprintf(format, a...))
 	cmd.Env = []string{
-		"PAQU=" + paqudir,
 		"ALPINO_HOME=" + Cfg.Alpino,
 		"PATH=" + Cfg.Path,
 		"LANG=en_US.utf8",
 		"LANGUAGE=en_US.utf8",
 		"LC_ALL=en_US.utf8",
+	}
+	for _, e := range []string{"HOME", "PAQU", "XDG_DATA_HOME", "XDG_CONFIG_HOME"} {
+		if p := os.Getenv(e); p != "" {
+			cmd.Env = append(cmd.Env, e+"="+p)
+		}
 	}
 	if Cfg.Login[0] == '$' {
 		cmd.Env = append(cmd.Env, Cfg.Login[1:]+"="+os.Getenv(Cfg.Login[1:]))

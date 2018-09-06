@@ -638,7 +638,7 @@ Type = %q
 }
 
 func foliadir(q *Context) string {
-	return filepath.Join(paqudir, "folia", hex.EncodeToString([]byte(q.user)))
+	return filepath.Join(paqudatadir, "folia", hex.EncodeToString([]byte(q.user)))
 }
 
 func foliamax(settings *FoliaSettings) (int, int) {
@@ -847,7 +847,7 @@ func foliaErr(q *Context, err error) bool {
 }
 
 func foliaclean() {
-	fdir := filepath.Join(paqudir, "folia")
+	fdir := filepath.Join(paqudatadir, "folia")
 	for {
 		// clean up
 		then := time.Now().AddDate(0, 0, -Cfg.Foliadays)

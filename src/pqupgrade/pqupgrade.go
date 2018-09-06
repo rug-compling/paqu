@@ -19,22 +19,10 @@ type Config struct {
 	Prefix string
 }
 
-var (
-	DefaultPaquDir string
-)
-
 func main() {
 
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
 	var Cfg Config
-	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
@@ -49,9 +37,23 @@ func main() {
 	////////////////////////////////////////////////////////////////
 
 	// tabel <prefix>_info
+	// veld `version` toevoegen
+
+	rows, err := db.Query("SELECT `version` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+	if err == nil {
+		rows.Close()
+	} else {
+		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `version` int NOT NULL DEFAULT '0'")
+		util.CheckErr(err)
+		changed = true
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// tabel <prefix>_info
 	// veld `protected` toevoegen
 
-	rows, err := db.Query("SELECT `protected` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+	rows, err = db.Query("SELECT `protected` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
 	if err == nil {
 		rows.Close()
 	} else {
@@ -141,6 +143,47 @@ func main() {
 			continue
 		}
 		changed = true
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// 1. upgrade naar version 2
+	// 2. prefix van filename vervangen door $$ voor user-corpora
+
+	tables = make([]string, 0)
+	rows, err = db.Query("SELECT `id`,`owner`,`version` FROM `" + Cfg.Prefix + "_info`")
+	util.CheckErr(err)
+	for rows.Next() {
+		var id, o string
+		var v int
+		util.CheckErr(rows.Scan(&id, &o, &v))
+		if v < 2 {
+			changed = true
+			_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `version` = 2 WHERE `id` = %q", Cfg.Prefix, id))
+			util.CheckErr(err)
+			if strings.Contains(o, "@") {
+				tables = append(tables, id)
+			}
+		}
+	}
+	util.CheckErr(rows.Err())
+
+	for _, table := range tables {
+		tb := Cfg.Prefix + "_c_" + table + "_file"
+		rows, err = db.Query("SELECT `id`,`file` FROM `" + tb + "`")
+		util.CheckErr(err)
+		for rows.Next() {
+			var id, filename string
+			util.CheckErr(rows.Scan(&id, &filename))
+			i := strings.Index(filename, "paqu/data/"+table+"/xml")
+			if i < 0 {
+				continue
+			}
+			name := "$$" + filename[i+4:]
+			_, err = db.Exec(fmt.Sprintf("UPDATE `%s` SET `file` = %q WHERE `id` = %q", tb, name, id))
+			util.CheckErr(err)
+		}
+		util.CheckErr(rows.Err())
 	}
 
 	////////////////////////////////////////////////////////////////

@@ -100,8 +100,6 @@ const (
 //. Variabelen
 
 var (
-	DefaultPaquDir string
-
 	db *sql.DB
 
 	lineno = 0
@@ -212,15 +210,7 @@ Opties:
 	owner = strings.TrimSpace(os.Args[3])
 	public = strings.TrimSpace(os.Args[4])
 
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
-	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if desc == "" {
@@ -330,7 +320,8 @@ Opties:
 		share = "PUBLIC"
 	}
 
-	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");", Cfg.Prefix, prefix)) // negeer fout
+	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`,`version`) VALUES (%q,\"\",\"\",\"\",%d);",
+		Cfg.Prefix, prefix, paquversion)) // negeer fout
 	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q WHERE `id` = %q",
 		Cfg.Prefix, desc, owner, share, prefix))
 	util.CheckErr(err)
@@ -1531,6 +1522,9 @@ func word_buf_put(woord string, lemmas []string) {
 // Zet een archiefnaam in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func arch_buf_put(name string, n int) {
+	if strings.HasPrefix(name, paqudatadir+"/") {
+		name = strings.Replace(name, paqudatadir, "$$", 1)
+	}
 	komma := ","
 	if !buf_has_data[ARCH] {
 		komma = ""
@@ -1546,6 +1540,9 @@ func arch_buf_put(name string, n int) {
 // Zet een xml-filenaam in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func file_buf_put(name string, n int) {
+	if strings.HasPrefix(name, paqudatadir+"/") {
+		name = strings.Replace(name, paqudatadir, "$$", 1)
+	}
 	komma := ","
 	if !buf_has_data[FILE] {
 		komma = ""

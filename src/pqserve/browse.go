@@ -42,7 +42,7 @@ func browse(q *Context) {
 		return
 	}
 
-	datadir := filepath.Join(paqudir, "data", id)
+	datadir := filepath.Join(paqudatadir, "data", id)
 	fp, err := os.Open(filepath.Join(datadir, "summary.txt.gz"))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
@@ -269,7 +269,7 @@ func browserr(q *Context) {
 
 	contentType(q, "text/plain; charset=utf-8")
 
-	datadir := filepath.Join(paqudir, "data", db)
+	datadir := filepath.Join(paqudatadir, "data", db)
 
 	fp, err := os.Open(filepath.Join(datadir, "stderr.txt.gz"))
 	if err != nil {

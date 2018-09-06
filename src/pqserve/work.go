@@ -73,7 +73,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		}
 	}
 
-	dirname := filepath.Join(paqudir, "data", task.id)
+	dirname := filepath.Join(paqudatadir, "data", task.id)
 	data := filepath.Join(dirname, "data")
 	xml := filepath.Join(dirname, "xml")
 	dact := filepath.Join(dirname, "data.dact")
@@ -1058,8 +1058,8 @@ func recover() {
 		util.CheckErr(err)
 	}
 	for _, corpus := range queuing {
-		util.CheckErr(os.RemoveAll(filepath.Join(paqudir, "data", corpus)))
-		logf("QUEUING: rm -r %s: ok", filepath.Join(paqudir, "data", corpus))
+		util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "data", corpus)))
+		logf("QUEUING: rm -r %s: ok", filepath.Join(paqudatadir, "data", corpus))
 	}
 
 	db.Close()

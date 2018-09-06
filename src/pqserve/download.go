@@ -49,7 +49,7 @@ func download(q *Context) {
 		return
 	}
 
-	datadir := filepath.Join(paqudir, "data", id)
+	datadir := filepath.Join(paqudatadir, "data", id)
 	var filename string
 	switch dl {
 	case "summary":

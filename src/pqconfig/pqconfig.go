@@ -73,25 +73,14 @@ type AccessType struct {
 	Mail  []string
 }
 
-var (
-	DefaultPaquDir string
-)
-
 //. Main
 
 func main() {
 
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
+	fmt.Printf("data dir: %s\nconfig dir: %s\n\n", paqudatadir, paquconfigdir)
 
 	cfg := Config{}
-	md, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &cfg)
+	md, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &cfg)
 	util.CheckErr(err)
 
 	for _, un := range md.Undecoded() {

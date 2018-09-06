@@ -107,14 +107,32 @@ sneller zijn dan wanneer je Alpino lokaal gebruikt.
 
 ## Installatie ##
 
-PaQu maakt gebruik van een directory voor het opslaan van gegevens. De
-default is `$HOME/.paqu`, of een waarde die bij het compileren is
-gedefinieerd, maar je kunt dit veranderen door de environment-variabele
-`PAQU` te zetten. Voor de onderstaande beschrijving gaan we ervan uit
-dat je de default gebruikt.
+PaQu maakt gebruik van een directory voor het opslaan van gegevens, en
+een voor het configuratiebestand.
 
-Verder gaan we ervan uit dat je PaQu in `$HOME/paqu` hebt geplaatst
-(zonder punt ervoor).
+Voor de bepaling van deze directory's wordt eerst gekeken naar de
+environment variable PAQU. Als die gedefinieerd is:
+
+   data:   $PAQU
+   config: $PAQU
+
+Als die niet gedefinieerd is, dan wordt gekeken naar de waarde die bij
+het compileren is gedefineerd.
+
+Als deze ook niet is gedefineerd, dan gelden de volgende waardes:
+
+   data:   $XDG_DATA_HOME/paqu
+   config: $XDG_CONFIG_HOME/paqu
+
+Als de environment variabelen XDG_DATA_HOME of XDG_CONFIG_HOME niet
+zijn gedefinieerd, dan gelden de volgende waardes:
+
+   data:   $HOME/.local/share/paqu
+   config: $HOME/.config/paqu
+
+Hieronder worden deze waardes gesymboliseerd door {data} en {config}.
+
+Verder gaan we ervan uit dat je PaQu in `$HOME/paqu` hebt geplaatst.
 
 ### Compileren ###
 
@@ -130,11 +148,11 @@ je PATH, of voeg de directory toe aan PATH.
 
 Voordat je de programma's kunt draaien moet je een configuratiebestand
 maken. Kopieer het bestand `~/paqu/run/setup-example.toml` naar
-`~/.paqu/setup.toml` en pas het aan door de instructies in het bestand
+`{config}/setup.toml` en pas het aan door de instructies in het bestand
 op te volgen. Geef het bestand de rechten 600 zodat andere gebruikers op
 je computer de wachtwoorden niet kunnen lezen:
 
-    chmod 600 ~/.paqu/setup.toml
+    chmod 600 {config}/setup.toml
 
 Dit voorkomt ook dat anderen de programma's kunnen draaien en daarmee
 zomaar corpora van willekeurig wie kunnen verwijderen, bijvoorbeeld.
@@ -157,14 +175,14 @@ niet kan bezoeken.
 Stel dat je server voor gebruikers toegankelijk is via
 `paqu.myserver.nl`, geef dan de volgende commando's:
 
-    cd ~/.paqu
+    cd {config}
     go run `go env GOROOT`/src/crypto/tls/generate_cert.go -host=paqu.myserver.nl
 
 Krijg je een foutmelding `no such file or directory`, doe dan:
 
     go run `go env GOROOT`/src/pkg/crypto/tls/generate_cert.go -host=paqu.myserver.nl
 
-Er staan nu twee nieuwe bestanden in `~/.paqu`: `cert.pem` en `key.pem`
+Er staan nu twee nieuwe bestanden in `{config}`: `cert.pem` en `key.pem`
 
 #### HTTPS: Ondertekenen van certificaat ####
 
@@ -250,7 +268,7 @@ vorige run van pqserve, en als je `MAILTO` goed hebt gezet in `crontab
 
 ### Log-bestanden ###
 
-Het programma `pqserve` maakt logbestanden aan in directory `~/.paqu`.
+Het programma `pqserve` maakt logbestanden aan in directory `{data}`.
 Deze bestanden worden automatisch geroteerd als ze te groot worden, dus
 je hoeft geen `logrotate` te gebruiken.
 

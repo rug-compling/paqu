@@ -29,25 +29,16 @@ type Config struct {
 }
 
 var (
-	DefaultPaquDir string
-	Cfg            Config
+	Cfg Config
 )
 
 //. Main
 
 func main() {
-	paqudir := os.Getenv("PAQU")
-	if paqudir == "" {
-		if DefaultPaquDir != "" {
-			paqudir = DefaultPaquDir
-		} else {
-			paqudir = filepath.Join(os.Getenv("HOME"), ".paqu")
-		}
-	}
-	_, err := TomlDecodeFile(filepath.Join(paqudir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
-	util.CheckErr(os.Chdir(filepath.Join(paqudir, "data")))
+	util.CheckErr(os.Chdir(filepath.Join(paqudatadir, "data")))
 
 	disk := make(map[string]bool)
 	files, err := ioutil.ReadDir(".")
@@ -133,7 +124,7 @@ func main() {
 		fmt.Println()
 	}
 
-	if os.Chdir(filepath.Join(paqudir, "folia")) != nil {
+	if os.Chdir(filepath.Join(paqudatadir, "folia")) != nil {
 		return
 	}
 	dirnames = dirnames[0:0]

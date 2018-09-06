@@ -48,7 +48,7 @@ func logerrfrag(q *Context, err error) bool {
 
 func logger() {
 
-	logfile := filepath.Join(paqudir, "pqserve.log")
+	logfile := filepath.Join(paqudatadir, "pqserve.log")
 
 	rotate := func() {
 		for i := 4; i > 1; i-- {

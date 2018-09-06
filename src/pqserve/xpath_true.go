@@ -274,7 +274,7 @@ func xpath(q *Context) {
 	dactfiles := make([]string, 0)
 	global := false
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, filepath.Join(paqudir, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
 	} else {
 		global = true
 		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
@@ -1669,6 +1669,10 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			fmt.Fprint(&buf, "</span>")
 		}
 		fmt.Fprint(&buf, " ")
+	}
+
+	if strings.HasPrefix(dactfile, paqudatadir+"/") {
+		dactfile = strings.Replace(dactfile, paqudatadir, "$$", 1)
 	}
 
 	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",

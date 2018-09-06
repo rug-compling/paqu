@@ -267,7 +267,7 @@ function rm(idx) {
 					strings.HasPrefix(corpus.params, "line") ||
 					strings.HasPrefix(corpus.params, "folia") ||
 					strings.HasPrefix(corpus.params, "tei")) {
-					files := countXML(filepath.Join(paqudir, "data", corpus.id, "xml"))
+					files := countXML(filepath.Join(paqudatadir, "data", corpus.id, "xml"))
 					p := 1 + int(float64(files)/float64(corpus.nline)*98+.5)
 					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 				}
@@ -512,16 +512,17 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, errCheck func(*Context
 		dirname = d
 		break
 	}
-	fulldirname = filepath.Join(paqudir, "data", dirname)
+	fulldirname = filepath.Join(paqudatadir, "data", dirname)
 	err := os.Mkdir(fulldirname, 0700)
 	if errCheck(q, err) {
 		return
 	}
 
 	_, err = db.Exec(fmt.Sprintf(
-		"INSERT %s_info (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
+		"INSERT %s_info (`id`,`description`,`msg`,`params`,`version`) VALUES (%q,\"\",\"\",\"\",%d);",
 		Cfg.Prefix,
-		dirname))
+		dirname,
+		paquversion))
 
 	if errCheck(q, err) {
 		return
