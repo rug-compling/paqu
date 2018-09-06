@@ -13,6 +13,10 @@ import (
 	"path/filepath"
 )
 
+const (
+	VERSION = 3
+)
+
 type Config struct {
 	Login  string
 	Prefix string
@@ -117,7 +121,7 @@ Syntax: %s [-w]
 
 	_, err = db.Exec("CREATE TABLE " + Cfg.Prefix + "_version (id int NOT NULL, version int NOT NULL DEFAULT 0, UNIQUE INDEX (id))")
 	util.CheckErr(err)
-	_, err = db.Exec(fmt.Sprintf("INSERT `%s_version` (`id`,`version`) VALUES (1,%d);", Cfg.Prefix, paquversion))
+	_, err = db.Exec(fmt.Sprintf("INSERT `%s_version` (`id`,`version`) VALUES (1,%d);", Cfg.Prefix, int(VERSION)))
 	util.CheckErr(err)
 
 }
