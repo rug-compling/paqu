@@ -52,8 +52,8 @@ Syntax: %s [-w]
 	defer db.Close()
 
 	if db_overwrite {
-		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_corpora`, `%s_info`, `%s_ignore`, `%s_users`, `%s_macros`; ",
-			Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix))
+		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s_corpora`, `%s_info`, `%s_ignore`, `%s_users`, `%s_macros`, `%s_version`; ",
+			Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix, Cfg.Prefix))
 		util.CheckErr(err)
 	}
 
@@ -81,7 +81,6 @@ Syntax: %s [-w]
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
         protected   boolean      NOT NULL DEFAULT 0,
         hasmeta     boolean      NOT NULL DEFAULT 0,
-		version     int          NOT NULL DEFAULT 0,
 		UNIQUE INDEX (id),
 		INDEX (description),
 		INDEX (owner),
@@ -115,6 +114,12 @@ Syntax: %s [-w]
 		UNIQUE INDEX (user))
 		DEFAULT CHARACTER SET utf8;`)
 	util.CheckErr(err)
+
+	_, err = db.Exec("CREATE TABLE " + Cfg.Prefix + "_version (id int NOT NULL, version int NOT NULL DEFAULT 0, UNIQUE INDEX (id))")
+	util.CheckErr(err)
+	_, err = db.Exec(fmt.Sprintf("INSERT `%s_version` (`id`,`version`) VALUES (1,%d);", Cfg.Prefix, paquversion))
+	util.CheckErr(err)
+
 }
 
 func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {

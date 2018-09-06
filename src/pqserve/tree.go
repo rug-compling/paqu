@@ -182,7 +182,7 @@ func tree(q *Context) {
 		}
 	}
 	if strings.HasPrefix(filename, "$$") {
-		filename = paqudatadir + filename[2:]
+		filename = paqudatadir + "/data/" + prefix + "/xml" + filename[2:]
 	}
 
 	// xml-bestand inlezen

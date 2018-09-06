@@ -36,14 +36,22 @@ func main() {
 
 	////////////////////////////////////////////////////////////////
 
-	// tabel <prefix>_info
-	// veld `version` toevoegen
+	// tabel <prefix>_version aanmaken
 
-	rows, err := db.Query("SELECT `version` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+	version := 0
+
+	rows, err := db.Query("SELECT `version` FROM `" + Cfg.Prefix + "_version` WHERE `id` = 1 LIMIT 0, 1")
 	if err == nil {
-		rows.Close()
+		if rows.Next() {
+			util.CheckErr(rows.Scan(&version))
+			rows.Close()
+		} else {
+			util.CheckErr(fmt.Errorf("Missing row"))
+		}
 	} else {
-		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `version` int NOT NULL DEFAULT '0'")
+		_, err = db.Exec("CREATE TABLE " + Cfg.Prefix + "_version (id int NOT NULL, version int NOT NULL DEFAULT 0, UNIQUE INDEX (id))")
+		util.CheckErr(err)
+		_, err = db.Exec("INSERT `" + Cfg.Prefix + "_version` (`id`,`version`) VALUES (1,0);")
 		util.CheckErr(err)
 		changed = true
 	}
@@ -53,13 +61,17 @@ func main() {
 	// tabel <prefix>_info
 	// veld `protected` toevoegen
 
-	rows, err = db.Query("SELECT `protected` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
-	if err == nil {
-		rows.Close()
-	} else {
-		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `protected` BOOLEAN NOT NULL DEFAULT '0'")
-		util.CheckErr(err)
-		changed = true
+	if version < 3 {
+
+		rows, err = db.Query("SELECT `protected` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+		if err == nil {
+			rows.Close()
+		} else {
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `protected` BOOLEAN NOT NULL DEFAULT '0'")
+			util.CheckErr(err)
+			changed = true
+		}
+
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -67,13 +79,17 @@ func main() {
 	// tabel <prefix>_info
 	// veld `hasmeta` toevoegen
 
-	rows, err = db.Query("SELECT `hasmeta` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
-	if err == nil {
-		rows.Close()
-	} else {
-		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `hasmeta` BOOLEAN NOT NULL DEFAULT '0'")
-		util.CheckErr(err)
-		changed = true
+	if version < 3 {
+
+		rows, err = db.Query("SELECT `hasmeta` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+		if err == nil {
+			rows.Close()
+		} else {
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `hasmeta` BOOLEAN NOT NULL DEFAULT '0'")
+			util.CheckErr(err)
+			changed = true
+		}
+
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -81,22 +97,26 @@ func main() {
 	// tabel <prefix>_info
 	// optie "QUEUING" toevoegen aan veld `status`, en default maken
 
-	ok := false
-	rows, err = db.Query("SELECT `COLUMN_TYPE`,`COLUMN_DEFAULT` FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME` = \"" +
-		Cfg.Prefix + "_info\" AND `COLUMN_NAME` = \"status\"")
-	util.CheckErr(err)
-	for rows.Next() {
-		var tp, def string
-		util.CheckErr(rows.Scan(&tp, &def))
-		if def == "QUEUING" && strings.Contains(tp, "QUEUING") {
-			ok = true
-		}
-	}
-	if !ok {
-		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix +
-			"_info` CHANGE `status` `status` ENUM('QUEUED', 'WORKING', 'FINISHED', 'FAILED', 'QUEUING') NOT NULL DEFAULT 'QUEUING'")
+	if version < 3 {
+
+		ok := false
+		rows, err = db.Query("SELECT `COLUMN_TYPE`,`COLUMN_DEFAULT` FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME` = \"" +
+			Cfg.Prefix + "_info\" AND `COLUMN_NAME` = \"status\"")
 		util.CheckErr(err)
-		changed = true
+		for rows.Next() {
+			var tp, def string
+			util.CheckErr(rows.Scan(&tp, &def))
+			if def == "QUEUING" && strings.Contains(tp, "QUEUING") {
+				ok = true
+			}
+		}
+		if !ok {
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix +
+				"_info` CHANGE `status` `status` ENUM('QUEUED', 'WORKING', 'FINISHED', 'FAILED', 'QUEUING') NOT NULL DEFAULT 'QUEUING'")
+			util.CheckErr(err)
+			changed = true
+
+		}
 
 	}
 
@@ -105,12 +125,16 @@ func main() {
 	// tabel <prefix>_info
 	// veld `attr` verwijderen
 
-	rows, err = db.Query("SELECT `attr` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
-	if err == nil {
-		rows.Close()
-		_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` DROP `attr`")
-		util.CheckErr(err)
-		changed = true
+	if version < 3 {
+
+		rows, err = db.Query("SELECT `attr` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+		if err == nil {
+			rows.Close()
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` DROP `attr`")
+			util.CheckErr(err)
+			changed = true
+		}
+
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -118,75 +142,97 @@ func main() {
 	// tabellen *_deprel
 	// veld `idd` toevoegen
 
-	tables := make([]string, 0)
-	rows, err = db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info`")
-	util.CheckErr(err)
-	for rows.Next() {
-		var t string
-		util.CheckErr(rows.Scan(&t))
-		tables = append(tables, t)
-	}
-	util.CheckErr(rows.Err())
+	if version < 3 {
 
-	for _, table := range tables {
-		tb := Cfg.Prefix + "_c_" + table + "_deprel"
-		rows, err = db.Query("SELECT `idd` FROM `" + tb + "`")
-		if err == nil {
-			rows.Close()
-			continue
+		tables := make([]string, 0)
+		rows, err = db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info`")
+		util.CheckErr(err)
+		for rows.Next() {
+			var t string
+			util.CheckErr(rows.Scan(&t))
+			tables = append(tables, t)
 		}
-		fmt.Print("Toevoegen van kolom `idd` aan tabel ", tb, "...")
-		_, err := db.Exec("ALTER TABLE `" + tb + "` ADD `idd` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST")
-		fmt.Println()
-		if util.WarnErr(err) != nil {
-			// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
-			continue
+		util.CheckErr(rows.Err())
+
+		for _, table := range tables {
+			tb := Cfg.Prefix + "_c_" + table + "_deprel"
+			rows, err = db.Query("SELECT `idd` FROM `" + tb + "`")
+			if err == nil {
+				rows.Close()
+				continue
+			}
+			fmt.Print("Toevoegen van kolom `idd` aan tabel ", tb, "...")
+			_, err := db.Exec("ALTER TABLE `" + tb + "` ADD `idd` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST")
+			fmt.Println()
+			if util.WarnErr(err) != nil {
+				// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
+				continue
+			}
+			changed = true
 		}
-		changed = true
+
 	}
 
 	////////////////////////////////////////////////////////////////
 
-	// 1. upgrade naar version 2
-	// 2. prefix van filename vervangen door $$ voor user-corpora
+	// prefix van filename vervangen door $$ voor user-corpora
 
-	tables = make([]string, 0)
-	rows, err = db.Query("SELECT `id`,`owner`,`version` FROM `" + Cfg.Prefix + "_info`")
-	util.CheckErr(err)
-	for rows.Next() {
-		var id, o string
-		var v int
-		util.CheckErr(rows.Scan(&id, &o, &v))
-		if v < 2 {
-			changed = true
-			_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `version` = 2 WHERE `id` = %q", Cfg.Prefix, id))
-			util.CheckErr(err)
+	if version < 3 {
+
+		tables := make([]string, 0)
+		rows, err = db.Query("SELECT `id`,`owner` FROM `" + Cfg.Prefix + "_info`")
+		util.CheckErr(err)
+		for rows.Next() {
+			var id, o string
+			util.CheckErr(rows.Scan(&id, &o))
 			if strings.Contains(o, "@") {
 				tables = append(tables, id)
 			}
 		}
-	}
-	util.CheckErr(rows.Err())
-
-	for _, table := range tables {
-		tb := Cfg.Prefix + "_c_" + table + "_file"
-		rows, err = db.Query("SELECT `id`,`file` FROM `" + tb + "`")
-		if util.WarnErr(err) != nil {
-			// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
-			continue
-		}
-		for rows.Next() {
-			var id, filename string
-			util.CheckErr(rows.Scan(&id, &filename))
-			i := strings.Index(filename, "paqu/data/"+table+"/xml")
-			if i < 0 {
-				continue
-			}
-			name := "$$" + filename[i+4:]
-			_, err = db.Exec(fmt.Sprintf("UPDATE `%s` SET `file` = %q WHERE `id` = %q", tb, name, id))
-			util.CheckErr(err)
-		}
 		util.CheckErr(rows.Err())
+
+		for _, table := range tables {
+			tb := Cfg.Prefix + "_c_" + table + "_file"
+			rows, err = db.Query("SELECT `id`,`file` FROM `" + tb + "`")
+			fmt.Println("Upgrade prefix in tabel", tb, "...")
+			if util.WarnErr(err) == nil {
+				// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
+				p := "data/" + table + "/xml"
+				ln := len(p)
+				for rows.Next() {
+					var id, filename string
+					util.CheckErr(rows.Scan(&id, &filename))
+					i := strings.Index(filename, p)
+					if i >= 0 {
+						name := "$$" + filename[i+ln:]
+						_, err = db.Exec(fmt.Sprintf("UPDATE `%s` SET `file` = %q WHERE `id` = %q", tb, name, id))
+						util.CheckErr(err)
+						changed = true
+					}
+				}
+				util.CheckErr(rows.Err())
+			}
+		}
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// upgrade naar versie 3
+
+	if version < 3 {
+
+		fmt.Printf("Upgrade from version %d to 3\n", version)
+
+		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 3 WHERE `id` = 1", Cfg.Prefix))
+		util.CheckErr(err)
+		n, err := result.RowsAffected()
+		util.CheckErr(err)
+		if n < 1 {
+			util.CheckErr(fmt.Errorf("Version update failed"))
+		}
+
+		version = 3
+		changed = true
 	}
 
 	////////////////////////////////////////////////////////////////

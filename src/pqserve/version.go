@@ -1,3 +1,3 @@
 package main
 
-var paquversion = 2
+var paquversion = 3

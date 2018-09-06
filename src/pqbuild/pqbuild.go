@@ -1522,9 +1522,6 @@ func word_buf_put(woord string, lemmas []string) {
 // Zet een archiefnaam in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func arch_buf_put(name string, n int) {
-	if strings.HasPrefix(name, paqudatadir+"/") {
-		name = strings.Replace(name, paqudatadir, "$$", 1)
-	}
 	komma := ","
 	if !buf_has_data[ARCH] {
 		komma = ""
@@ -1540,8 +1537,9 @@ func arch_buf_put(name string, n int) {
 // Zet een xml-filenaam in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func file_buf_put(name string, n int) {
-	if strings.HasPrefix(name, paqudatadir+"/") {
-		name = strings.Replace(name, paqudatadir, "$$", 1)
+	p := paqudatadir + "/data/" + prefix + "/xml"
+	if strings.HasPrefix(name, p) {
+		name = strings.Replace(name, p, "$$", 1)
 	}
 	komma := ","
 	if !buf_has_data[FILE] {
