@@ -320,8 +320,8 @@ Opties:
 		share = "PUBLIC"
 	}
 
-	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`,`version`) VALUES (%q,\"\",\"\",\"\",%d);",
-		Cfg.Prefix, prefix, paquversion)) // negeer fout
+	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
+		Cfg.Prefix, prefix)) // negeer fout
 	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q WHERE `id` = %q",
 		Cfg.Prefix, desc, owner, share, prefix))
 	util.CheckErr(err)
