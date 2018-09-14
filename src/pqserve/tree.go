@@ -314,6 +314,7 @@ func tree(q *Context) {
 <body>
 <em>%s</em>
 <p>
+<div style="overflow-x:auto">
 `, title, strings.Join(ctx.words, " "))
 
 		if len(alpino.Meta) > 0 {
@@ -440,7 +441,7 @@ func tree(q *Context) {
 	}
 	// EIND: svg nabewerken en printen
 
-	fmt.Fprintf(q.w, "<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
+	fmt.Fprintf(q.w, "</div>\n<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
 
 	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", q.r.URL.RawQuery, html.EscapeString(label))
 
