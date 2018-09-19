@@ -2531,6 +2531,9 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 				rows.Close()
 				return
 			}
+			if strings.HasPrefix(s, "$$/") {
+				s = filepath.Join(paqudatadir, "data", dbname, "xml", s[3:])
+			}
 			filenames = append(filenames, s)
 		}
 		if xx(rows.Err()) {
