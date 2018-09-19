@@ -39,6 +39,7 @@ type Config struct {
 	Maxdup       int
 	Dact         bool
 	Dactx        bool
+	Conllu       bool
 	Maxspodlines int
 	Maxspodjob   int
 

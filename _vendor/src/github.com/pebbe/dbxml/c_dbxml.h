@@ -56,7 +56,7 @@ extern "C" {
     char const * c_dbxml_docs_content(c_dbxml_docs docs);
     char const * c_dbxml_docs_match(c_dbxml_docs docs);
     void c_dbxml_docs_free(c_dbxml_docs docs);
-    c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query);
+    c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query, char const **namespaces);
     c_dbxml_docs c_dbxml_run_query(c_dbxml_query query);
     void c_dbxml_cancel_query(c_dbxml_query query);
     void c_dbxml_query_free(c_dbxml_query query);
@@ -65,7 +65,7 @@ extern "C" {
 
     /**** CHECK ****/
 
-    c_dbxml_result c_dbxml_check(char const *query);
+    c_dbxml_result c_dbxml_check(char const *query, char const **namespaces);
 
     void c_dbxml_version(int *major, int *minor, int *patch);
 

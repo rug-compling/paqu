@@ -51,6 +51,12 @@ type Query struct {
 	lock   sync.Mutex
 }
 
+// Namespaces for queries
+type Namespace struct {
+	Prefix string
+	Uri    string
+}
+
 //. Variables
 
 var (
@@ -296,8 +302,8 @@ func (db *Db) All() (*Docs, error) {
 //              fmt.Println(err)
 //          }
 //      }
-func (db *Db) Query(query string) (*Docs, error) {
-	q, err := db.Prepare(query)
+func (db *Db) Query(query string, namespaces ...Namespace) (*Docs, error) {
+	q, err := db.Prepare(query, namespaces...)
 	if err != nil {
 		return &Docs{}, err
 	}
@@ -307,7 +313,7 @@ func (db *Db) Query(query string) (*Docs, error) {
 // Prepare an XPATH query.
 //
 // The query can be run multiple times, and a running query can be cancelled by query.Cancel()
-func (db *Db) Prepare(query string) (*Query, error) {
+func (db *Db) Prepare(query string, namespaces ...Namespace) (*Query, error) {
 	q := &Query{}
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -317,7 +323,20 @@ func (db *Db) Prepare(query string) (*Query, error) {
 	}
 	cs := C.CString(query)
 	defer C.free(unsafe.Pointer(cs))
-	q.query = C.c_dbxml_prepare_query(db.db, cs)
+
+	ns := make([]*_Ctype_char, 2*len(namespaces)+1)
+	for i, n := range namespaces {
+		ns[2*i] = C.CString(n.Prefix)
+		ns[2*i+1] = C.CString(n.Uri)
+	}
+
+	q.query = C.c_dbxml_prepare_query(db.db, cs, &ns[0])
+
+	for i := range namespaces {
+		C.free(unsafe.Pointer(ns[2*i]))
+		C.free(unsafe.Pointer(ns[2*i+1]))
+	}
+
 	if C.c_dbxml_get_prepared_error(q.query) != 0 {
 		defer C.c_dbxml_query_free(q.query)
 		return q, errors.New(C.GoString(C.c_dbxml_get_prepared_errstring(q.query)))
@@ -459,7 +478,7 @@ func (query *Query) Close() {
 //. Check
 
 // Check if query is valid without opening a database.
-func Check(query string) error {
+func Check(query string, namespaces ...Namespace) error {
 	query = strings.TrimSpace(query)
 	if query == "" {
 		return errempty
@@ -469,7 +488,20 @@ func Check(query string) error {
 	}
 	cs := C.CString(query)
 	defer C.free(unsafe.Pointer(cs))
-	r := C.c_dbxml_check(cs)
+
+	ns := make([]*_Ctype_char, 2*len(namespaces)+1)
+	for i, n := range namespaces {
+		ns[2*i] = C.CString(n.Prefix)
+		ns[2*i+1] = C.CString(n.Uri)
+	}
+
+	r := C.c_dbxml_check(cs, &ns[0])
+
+	for i := range namespaces {
+		C.free(unsafe.Pointer(ns[2*i]))
+		C.free(unsafe.Pointer(ns[2*i+1]))
+	}
+
 	defer C.c_dbxml_result_free(r)
 	if C.c_dbxml_result_error(r) != 0 {
 		return errors.New(C.GoString(C.c_dbxml_result_string(r)))

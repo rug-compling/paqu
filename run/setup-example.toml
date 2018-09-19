@@ -103,6 +103,11 @@ dact = true
 # ruimte in.
 dactx = true
 
+# Universal Dependencies maken?
+# Hiervoor is het programma pqudep nodig, dat niet gecompileerd kan
+# worden als DbXml niet aanwezig is.
+conllu = true
+
 # Maximum aantal zinnen in een corpus dat beschikbaar is in het onderdeel SPOD.
 # Als de waarde 0 is geldt er geen limiet.
 maxspodlines = 1000000

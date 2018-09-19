@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import sys
+
+sys.stdout.write('''//
+// THIS IS A GENERATED FILE. DO NOT EDIT.
+//
+
+package main
+
+''')
+
+state = 0
+for line in sys.stdin:
+    if state == 0:
+        if line.startswith('type FullNode'):
+            sys.stdout.write(line)
+            state = 1
+    elif state == 1:
+        sys.stdout.write(line)
+        if line.startswith('}'):
+            state = 2

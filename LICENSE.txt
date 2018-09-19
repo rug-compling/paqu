@@ -32,8 +32,8 @@ Date:   Sat Jul 12 14:40:36 2014 +0200
 
 _vendor/src/github.com/pebbe/dbxml/LICENSE.txt
 Source: https://github.com/pebbe/dbxml
-Commit: d534d4329eab07883a8e843ab2856b574afa7acd
-Date:   Sat Sep 2 14:36:42 2017 +0200
+Commit: 7297cedf8c07e1fc764b0bc7a8d324276d05f824
+Date:   Tue Sep 18 12:32:13 2018 +0200
 
 _vendor/src/github.com/pebbe/util/LICENSE.txt
 Source: https://github.com/pebbe/util
@@ -53,7 +53,7 @@ Date:   Tue May 31 11:25:40 2016 +0300
 ================================================================
 For all other stuff:
 
-Copyright (c) 2014-2017, Peter Kleiweg
+Copyright (c) 2014-2018, Peter Kleiweg
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

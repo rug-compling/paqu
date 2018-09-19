@@ -36,6 +36,7 @@ type Config struct {
 	Maxdup       int  `toml:"maxdup"`
 	Dact         bool `toml:"dact"`
 	DactX        bool `toml:"dactx"`
+	Conllu       bool `toml:"conllu"`
 	MaxSpodLines int  `toml:"maxspodlines"`
 	MaxSpodJob   int  `toml:"maxspodjob"`
 
