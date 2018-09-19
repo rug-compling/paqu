@@ -701,7 +701,7 @@ PQ_lcatnp = """
 
 PQ_barenp = """
         ( @pt="n"
-          and not (@rel="hd")
+          and not(@rel="hd")
         ) """
 
 PQ_pronnp = """
@@ -993,4 +993,25 @@ PQ_vorfeld_non_local = """
         //node[ @cat="ssub"
                 and
                 %PQ_minimal_s_dominating_vorfeld%
+        ] """
+
+PQ_hoe_langer = """
+        ( node[ @lemma="hoe"
+                or
+                node[@lemma="des"]
+                and
+                node[@lemma="te"]
+          ] and
+          node[ @graad="comp"]
+        ) """
+
+PQ_corr_comp = """
+        ( @cat="du"
+          and count(.//node[ %PQ_hoe_langer% ])>1
+        ) """
+
+PQ_minimal_corr_comp = """
+        //node[%PQ_corr_comp%
+               and
+               not(.//node[%PQ_corr_comp%])
         ] """

@@ -298,6 +298,14 @@ var (
 			"",
 		},
 		{
+			"Correlatieve comparatieven",
+			`%PQ_minimal_corr_comp%`,
+			SPOD_STD,
+			"corc",
+			"totaal",
+			"",
+		},
+		{
 			"Woorden met een comparatief complement",
 			`//node[@rel="hd" and ../node[@rel="obcomp"]]`,
 			SPOD_STD,
