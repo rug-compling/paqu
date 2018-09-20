@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"database/sql"
+	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
@@ -482,4 +483,49 @@ func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
 		bs = bs[3:]
 	}
 	return toml.Decode(string(bs), v)
+}
+
+func format(alpino Alpino_ds_complete) (string, error) {
+
+	minifyNode(alpino.Node0)
+
+	b, err := xml.MarshalIndent(&alpino, "", "  ")
+	if err != nil {
+		return "", nil
+	}
+	s := "<?xml version=\"1.0\"?>\n" + string(b)
+
+	// shorten
+	for _, v := range []string{"meta", "parser", "node", "dep"} {
+		s = strings.Replace(s, "></"+v+">", "/>", -1)
+	}
+
+	// namespace
+	s = strings.Replace(s, "<alpino_ds", "<alpino_ds xmlns:ud=\"http://www.let.rug.nl/alfa/unidep/\"", 1)
+	for _, v := range []string{"ud", "dep", "conllu"} {
+		s = strings.Replace(s, "<"+v, "<ud:"+v, -1)
+		s = strings.Replace(s, "</"+v, "</ud:"+v, -1)
+	}
+
+	return s, nil
+}
+
+func minifyNode(node *Node) {
+	if node == nil {
+		return
+	}
+	if node.Ud != nil {
+		if node.Ud.Id == "" {
+			node.Ud = nil
+		} else {
+			if len(node.Ud.Dep) == 0 {
+				node.Ud.Dep = nil
+			}
+		}
+	}
+	if node.NodeList != nil {
+		for _, n := range node.NodeList {
+			minifyNode(n)
+		}
+	}
 }

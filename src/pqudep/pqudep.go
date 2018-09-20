@@ -78,6 +78,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -132,10 +133,10 @@ type UdType struct {
 	Upos  string `xml:"upos,attr,omitempty"`
 	Xpos  string `xml:"xpos,attr,omitempty"`
 	FeatsType
-	Head   string     `xml:"head,attr,omitempty"`
-	Deprel string     `xml:"deprel,attr,omitempty"`
-	Deps   []DepsType `xml:"deps,omitempty"`
-	Misc   string     `xml:"misc,attr,omitempty"`
+	Head   string    `xml:"head,attr,omitempty"`
+	Deprel string    `xml:"deprel,attr,omitempty"`
+	Dep    []DepType `xml:"dep,omitempty"`
+	Misc   string    `xml:"misc,attr,omitempty"`
 }
 
 type FeatsType struct {
@@ -153,7 +154,7 @@ type FeatsType struct {
 	VerbForm string `xml:"VerbForm,attr,omitempty"`
 }
 
-type DepsType struct {
+type DepType struct {
 	Id     string `xml:"id,attr,omitempty"`
 	Head   string `xml:"head,attr,omitempty"`
 	Deprel string `xml:"deprel,attr,omitempty"`
@@ -168,14 +169,27 @@ type ConlluType struct {
 var (
 	x     = util.CheckErr
 	opt_l = flag.String("l", "", "filelist")
+	opt_o = flag.Bool("o", false, "overwrite")
+	opt_p = flag.String("p", "", "prefix")
 )
 
 func usage() {
+	p := filepath.Base(os.Args[0])
 	fmt.Printf(`
-Usage: %s [-l filelist] [file.(xml|dact)]...
+Usage, examples:
+
+  %s file.(xml|dact)...
+  %s -l filelist
+  find . -name '*.xml' | %s
 
   -l: file with list of names of xml and/or dact files
-`)
+
+Other options:
+
+  -o : overwrite original file (default: save with .tmp)
+  -p prefix : remove prefix from filename in stderr
+
+`, p, p, p)
 }
 
 func main() {
@@ -183,7 +197,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if flag.NArg() == 0 && *opt_l == "" {
+	if flag.NArg() == 0 && *opt_l == "" && util.IsTerminal(os.Stdin) {
 		usage()
 		return
 	}
@@ -193,6 +207,17 @@ func main() {
 		x(fmt.Errorf("C.init: %d", e))
 	}
 	C.free(unsafe.Pointer(cs))
+
+	if !util.IsTerminal(os.Stdin) {
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			filename := strings.TrimSpace(scanner.Text())
+			if filename != "" {
+				doFile(filename)
+			}
+		}
+		x(scanner.Err())
+	}
 
 	if *opt_l != "" {
 		fp, err := os.Open(*opt_l)
@@ -217,17 +242,15 @@ func doFile(filename string) {
 	if strings.HasSuffix(filename, ".dact") {
 		db1, err := dbxml.OpenRead(filename)
 		x(err)
+		os.Remove(filename + ".tmp")
 		db2, err := dbxml.OpenReadWrite(filename + ".tmp")
 		x(err)
 		docs, err := db1.All()
 		for docs.Next() {
 			f := docs.Name()
 			xml := docs.Content()
-			fmt.Printf("%s - %-8s\r", filename, f)
-			result, err := doXml(xml, f)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s - %s: %v\n", filename, f, err)
-			}
+			fmt.Printf("%s / %-8s\r", filename, f)
+			result := doXml(xml, filename, f)
 			x(db2.PutXml(f, result, false))
 		}
 		db2.Close()
@@ -236,20 +259,22 @@ func doFile(filename string) {
 		fmt.Printf("%s%8s\r", filename, "")
 		b, err := ioutil.ReadFile(filename)
 		x(err)
-		result, err := doXml(string(b), filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %v\n", filename, err)
-		}
+		result := doXml(string(b), "", filename)
 		fp, err := os.Create(filename + ".tmp")
 		x(err)
 		fmt.Fprintln(fp, result)
 		fp.Close()
 	}
+	if *opt_o {
+		os.Rename(filename+".tmp", filename)
+	}
 }
 
-func doXml(document, filename string) (result string, err error) {
+func doXml(document, archname, filename string) (result string) {
 
 	var alpino Alpino_ds
+	var lineno int
+	var err error
 	lines := make([]string, 0)
 
 	defer func() {
@@ -257,9 +282,36 @@ func doXml(document, filename string) (result string, err error) {
 		if err == nil {
 			alpino.Conllu.Status = "OK"
 		} else {
-			// alpino.Conllu.Conllu = "\n" + strings.Join(lines, "\n") + "\n"
+			if *opt_p != "" {
+				if archname == "" {
+					filename = strings.Replace(filename, *opt_p, "", 1)
+				} else {
+					archname = strings.Replace(archname, *opt_p, "", 1)
+				}
+			}
+			if archname == "" {
+				fmt.Fprintln(os.Stderr, ">>>", filename)
+			} else {
+				fmt.Fprintln(os.Stderr, ">>>", archname, "/", filename)
+			}
+			if id := alpino.Sentence.SentId; id != "" {
+				fmt.Fprintln(os.Stderr, "# sent_id =", id)
+			}
+			if t := alpino.Sentence.Sent; t != "" {
+				fmt.Fprintln(os.Stderr, "# text =", t)
+			}
+			if lineno == 0 {
+				fmt.Fprintln(os.Stderr, "^^^", err)
+			}
+			for i, line := range lines {
+				fmt.Fprintln(os.Stderr, line)
+				if i+1 == lineno {
+					fmt.Fprintln(os.Stderr, "^^^", err)
+				}
+			}
+			fmt.Fprintln(os.Stderr)
 			alpino.Conllu.Status = "error"
-			alpino.Conllu.Error = err.Error()
+			alpino.Conllu.Error = fmt.Sprintf("Line %d: %v", lineno, err)
 			clean(alpino.Node)
 		}
 		minify(alpino)
@@ -268,6 +320,7 @@ func doXml(document, filename string) (result string, err error) {
 
 	err = xml.Unmarshal([]byte(document), &alpino)
 	if err != nil {
+		lineno = 0
 		return
 	}
 	reset(alpino.Node)
@@ -277,12 +330,14 @@ func doXml(document, filename string) (result string, err error) {
 	e := C.parse(cs)
 	C.free(unsafe.Pointer(cs))
 	if e != 0 {
-		err = fmt.Errorf("C.parse %s: %d", filename, e)
+		err = fmt.Errorf("C.parse: %d", e)
+		lineno = 0
 		return
 	}
 	for {
 		if e := C.next(); e != 0 {
-			err = fmt.Errorf("C.next %s: %d", filename, e)
+			err = fmt.Errorf("C.next: %d", e)
+			lineno = len(lines)
 			return
 		}
 		if C.done != 0 {
@@ -297,7 +352,8 @@ func doXml(document, filename string) (result string, err error) {
 	for i, line := range lines {
 		a := strings.Split(line, "\t")
 		if len(a) != 10 {
-			err = fmt.Errorf("Line %d: Wrong number of fields", i+1)
+			err = fmt.Errorf("Wrong number of fields")
+			lineno = i + 1
 			return
 		}
 		valid[a[0]] = true
@@ -308,6 +364,7 @@ func doXml(document, filename string) (result string, err error) {
 	}
 
 	for i, line := range lines {
+		lineno = i + 1
 		a := strings.Split(line, "\t")
 		if strings.Contains(a[0], "-") {
 			continue
@@ -321,26 +378,26 @@ func doXml(document, filename string) (result string, err error) {
 		e, _ := strconv.Atoi(es)
 		node := getNode(alpino.Node, e)
 		if node == nil {
-			err = fmt.Errorf("Line %d: Node '%s' not found", i+1, es)
+			err = fmt.Errorf("Node '%s' not found", es)
 			return
 		}
 
 		if a[8] != "_" {
-			node.Ud.Deps = make([]DepsType, 0)
+			node.Ud.Dep = make([]DepType, 0)
 			for _, deps := range strings.Split(a[8], "|") {
-				b := strings.SplitN(deps, ":", 2)
-				if len(b) != 2 {
-					err = fmt.Errorf("Line %d: Not a valid dependency: %s", i+1, deps)
+				dep := strings.SplitN(deps, ":", 2)
+				if len(dep) != 2 {
+					err = fmt.Errorf("Not a valid dependency: %s", dep)
 					return
 				}
-				if !valid[b[0]] {
-					err = fmt.Errorf("Line %d: Not a valid head: %s", i+1, b[0])
+				if !valid[dep[0]] {
+					err = fmt.Errorf("Not a valid head: %s", dep[0])
 					return
 				}
-				node.Ud.Deps = append(node.Ud.Deps, DepsType{
+				node.Ud.Dep = append(node.Ud.Dep, DepType{
 					Id:     a[0],
-					Head:   b[0],
-					Deprel: b[1],
+					Head:   dep[0],
+					Deprel: dep[1],
 				})
 			}
 		}
@@ -350,7 +407,7 @@ func doXml(document, filename string) (result string, err error) {
 		}
 
 		if !valid[a[6]] {
-			err = fmt.Errorf("Line %d: Not a valid head: %s", i+1, a[6])
+			err = fmt.Errorf("Not a valid head: %s", a[6])
 			return
 		}
 
@@ -387,13 +444,13 @@ func format(alpino Alpino_ds) string {
 	s := "<?xml version=\"1.0\"?>\n" + string(b)
 
 	// shorten
-	for _, v := range []string{"meta", "parser", "node", "deps"} {
+	for _, v := range []string{"meta", "parser", "node", "dep"} {
 		s = strings.Replace(s, "></"+v+">", "/>", -1)
 	}
 
 	// namespace
 	s = strings.Replace(s, "<alpino_ds", "<alpino_ds xmlns:ud=\"http://www.let.rug.nl/alfa/unidep/\"", 1)
-	for _, v := range []string{"ud", "deps", "conllu"} {
+	for _, v := range []string{"ud", "dep", "conllu"} {
 		s = strings.Replace(s, "<"+v, "<ud:"+v, -1)
 		s = strings.Replace(s, "</"+v, "</ud:"+v, -1)
 	}
@@ -460,8 +517,8 @@ func minifyNode(node *NodeType) {
 		if node.Ud.Id == "" {
 			node.Ud = nil
 		} else {
-			if len(node.Ud.Deps) == 0 {
-				node.Ud.Deps = nil
+			if len(node.Ud.Dep) == 0 {
+				node.Ud.Dep = nil
 			}
 		}
 	}
@@ -489,7 +546,7 @@ func clean(node *NodeType) {
   - init als nog niet aanwezig
 */
 func reset(node *NodeType) {
-	node.Ud = &UdType{Deps: make([]DepsType, 0)}
+	node.Ud = &UdType{Dep: make([]DepType, 0)}
 	for _, n := range node.NodeList {
 		reset(n)
 	}

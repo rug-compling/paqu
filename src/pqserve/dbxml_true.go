@@ -30,7 +30,7 @@ func get_dact(archive, filename string) ([]byte, error) {
 	return []byte(d), nil
 }
 
-func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
+func makeDact(dact, conllu, xml string, stripchar string, chKill chan bool) error {
 	files, err := filenames2(xml, false)
 	if err != nil {
 		return err
@@ -94,7 +94,20 @@ func makeDact(dact, xml string, stripchar string, chKill chan bool) error {
 	return nil
 }
 
-func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nline int, err error) {
+func unpackDact(data, xmldir, dact, conllu, stderr string, chKill chan bool) (tokens, nline int, err error) {
+
+	if Cfg.Conllu {
+		cmd := shell(
+			`pqudep -p %s/data/ -o %s > /dev/null 2> %s.err`,
+			paqudatadir, dact, conllu)
+		err = run(cmd, chKill, nil)
+		if err != nil {
+			return 0, 0, err
+		}
+		if cu, _ := os.Stat(conllu + ".err"); cu.Size() != 0 {
+			sysErr(fmt.Errorf("CONLLU error(s) in %s.err", conllu))
+		}
+	}
 
 	os.Mkdir(xmldir, 0777)
 
@@ -190,6 +203,7 @@ func unpackDact(data, xmldir, dact, stderr string, chKill chan bool) (tokens, nl
 				}
 			}
 		}
+
 		if Cfg.Dactx {
 			content, err := dactExpand(data)
 			if err != nil {
@@ -237,14 +251,7 @@ func dactExpand(data []byte) (string, error) {
 
 	alpino.Version = "X-" + alpino.Version
 
-	b, err := xml.MarshalIndent(&alpino, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		strings.Replace(
-			strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
-			"  <comments></comments>\n", "", 1) + "\n", nil
+	return format(alpino)
 }
 
 func getIndexed(node *Node, nodes map[string]*Node) {

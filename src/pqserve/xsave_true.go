@@ -265,7 +265,7 @@ func xsavez2(q *Context) {
 				return
 			}
 
-			qu, err := dact.Prepare(queryparts[0])
+			qu, err := dact.Prepare(queryparts[0], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
 			if hErr(q, err) {
 				return
 			}
@@ -292,7 +292,7 @@ func xsavez2(q *Context) {
 				} else {
 					doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", filename)
 					for i := 1; i < len(queryparts)-1; i++ {
-						docs2, err := dact.Query(doctxt + queryparts[i])
+						docs2, err := dact.Query(doctxt+queryparts[i], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
 						if hErr(q, err) {
 							return
 						}
@@ -301,7 +301,7 @@ func xsavez2(q *Context) {
 						}
 						docs2.Close()
 					}
-					docs2, err := dact.Query(doctxt + queryparts[len(queryparts)-1])
+					docs2, err := dact.Query(doctxt+queryparts[len(queryparts)-1], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
 					if hErr(q, err) {
 						return
 					}

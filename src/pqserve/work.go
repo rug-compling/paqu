@@ -80,6 +80,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	stdout := filepath.Join(dirname, "stdout.txt")
 	stderr := filepath.Join(dirname, "stderr.txt")
 	summary := filepath.Join(dirname, "summary.txt")
+	conllu := filepath.Join(dirname, "conllu")
 
 	// gzip
 	var fp *os.File
@@ -273,7 +274,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	if params == "dact" {
 		var tokens, nlines int
-		tokens, nlines, err = unpackDact(data, xml, dact, stderr, task.chKill)
+		tokens, nlines, err = unpackDact(data, xml, dact, conllu, stderr, task.chKill)
 		if err != nil {
 			return
 		}
@@ -816,6 +817,19 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		os.Remove(m)
 	}
 
+	if params != "dact" && Cfg.Conllu {
+		cmd := shell(
+			`find %s -name '*.xml' | sort > %s.list; pqudep -p %s/data/ -l %s.list -o > /dev/null 2> %s.err; rm %s.list`,
+			dirname, conllu, paqudatadir, conllu, conllu, conllu)
+		err = run(cmd, task.chKill, nil)
+		if err != nil {
+			return
+		}
+		if cu, _ := os.Stat(conllu + ".err"); cu.Size() != 0 {
+			sysErr(fmt.Errorf("CONLLU error(s) in %s.err", conllu))
+		}
+	}
+
 	cmd := shell(
 		// optie -w i.v.m. recover()
 		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
@@ -834,7 +848,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		} else if strings.HasPrefix(params, "xmlzip") {
 			p = "/"
 		}
-		err = makeDact(dact, xml, p, task.chKill)
+		err = makeDact(dact, conllu, xml, p, task.chKill)
 		if err != nil {
 			return
 		}
@@ -1172,10 +1186,10 @@ func unpackXml(data, xmldir, stderr string, chKill chan bool) (tokens, nline int
 		}
 
 		// sanitize (bug on https://webservices-lst.science.ru.nl/portal/ )
-		bindata = reTrailingSpace.ReplaceAll(bindata, []byte(">\000"))
+		//bindata = reTrailingSpace.ReplaceAll(bindata, []byte(">\000"))
 		bindata = bytes.Replace(bindata, []byte("\r"), []byte(""), -1)
-		bindata = bytes.Replace(bindata, []byte("\n"), []byte(""), -1)
-		bindata = bytes.Replace(bindata, []byte(">\000"), []byte(">\n"), -1)
+		//bindata = bytes.Replace(bindata, []byte("\n"), []byte(""), -1)
+		//bindata = bytes.Replace(bindata, []byte(">\000"), []byte(">\n"), -1)
 
 		nline++
 

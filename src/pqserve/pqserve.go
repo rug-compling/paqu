@@ -180,6 +180,7 @@ func main() {
 
 	handleFunc("browse", browse)
 	handleFunc("browserr", browserr)
+	handleFunc("browserrud", browserrud)
 
 	handleFunc("xpath", xpath)
 	handleFunc("xpathcheck", xpathcheck)

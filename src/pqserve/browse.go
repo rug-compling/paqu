@@ -111,6 +111,89 @@ Er waren problemen met %d van de %d zinnen:
 		fmt.Fprint(q.w, "</table>\n<p>\n")
 	}
 
+	fp, err = os.Open(filepath.Join(datadir, "conllu.err"))
+	if err == nil {
+		errlines := make([]string, 0)
+		rd := util.NewReader(fp)
+		var filename, text string
+		for {
+			line, e := rd.ReadLineString()
+			if e != nil {
+				break
+			}
+			if strings.HasPrefix(line, ">>>") {
+				filename = strings.Replace(line[4:], id+"/", "", 1)
+				if strings.HasPrefix(filename, "xml/") {
+					filename = filename[4:]
+				}
+			} else if strings.HasPrefix(line, "# text = ") {
+				text = line[9:]
+			} else if strings.HasPrefix(line, "^^^") {
+				errlines = append(errlines, filename+"\t"+line[4:]+"\t"+text)
+			}
+		}
+		fp.Close()
+		nerr := len(errlines)
+		if nerr > 0 {
+
+			var params string
+			rows, err := q.db.Query(
+				fmt.Sprintf(
+					"SELECT `params` FROM `%s_info` WHERE `id` = %q",
+					Cfg.Prefix,
+					id))
+			if err == nil {
+				for rows.Next() {
+					rows.Scan(&params)
+				}
+			}
+
+			fmt.Fprintf(q.w, `
+Er waren problemen met Universal Dependencies voor %d zinnen:
+<p>
+<table class="corpora">
+<tr><th>Label<th>Fout<th>Zin</tr>
+`, nerr)
+			lineno := 0
+			for _, errline := range errlines {
+				lineno++
+				a := strings.SplitN(errline, "\t", 4)
+				eo := "even"
+				if lineno%2 == 1 {
+					eo = "odd"
+				}
+				if lineno == 1 {
+					eo += " first"
+				}
+				if lineno == nerr {
+					eo += " last"
+				}
+				dact := ""
+				filename := a[0]
+				if i := strings.Index(filename, " / "); i > 0 {
+					filename = filename[i+3:]
+					dact = "1"
+				}
+				label := filename
+				if strings.HasSuffix(label, ".xml") {
+					label = label[:len(label)-4]
+				}
+				if strings.HasPrefix(params, "xmlzip") {
+					if i := strings.Index(label, "/"); i > 0 {
+						label = decode_filename(label[i+1:])
+					}
+				} else if i := strings.Index(label, "-"); i > 0 {
+					label = decode_filename(label[i+1:])
+				}
+				fmt.Fprintf(q.w, "<tr class=\"%s\"><td class=\"odd first\"><b><a href=\"browserrud?db=%s&amp;s=%s&amp;d=%s\" target=\"_blank\">%s</a></b><td class=\"even\">%s<td class=\"odd\">%s",
+					eo,
+					id, html.EscapeString(filename), dact, html.EscapeString(label),
+					html.EscapeString(a[1]), html.EscapeString(a[2]))
+			}
+			fmt.Fprint(q.w, "</table>\n<p>\n")
+		}
+	}
+
 	// HTML-uitvoer van het formulier
 	fmt.Fprintf(q.w, `
 <form action="browse" method="get" accept-charset="utf-8">
@@ -322,6 +405,69 @@ func browserr(q *Context) {
 			if strings.HasPrefix(line, "****") {
 				break
 			}
+		}
+	}
+}
+
+func browserrud(q *Context) {
+
+	if !q.auth {
+		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
+		return
+	}
+
+	db := first(q.r, "db")
+	if !q.myprefixes[db] {
+		http.Error(q.w, "Dat is niet je corpus", http.StatusUnauthorized)
+		return
+	}
+
+	filename := first(q.r, "s")
+	if filename == "" {
+		http.Error(q.w, "Bestandsnaam ontbreekt", http.StatusPreconditionFailed)
+		return
+	}
+	filename = html.UnescapeString(filename)
+
+	dact := first(q.r, "d") != ""
+
+	contentType(q, "text/plain; charset=utf-8")
+
+	var fullname string
+	if dact {
+		fullname = filepath.Join(db, "data.dact / ") + filename
+	} else {
+		fullname = filepath.Join(db, "xml", filename)
+	}
+
+	fp, err := os.Open(filepath.Join(paqudatadir, "data", db, "conllu.err"))
+	if err != nil {
+		sysErr(err)
+		fmt.Fprintln(q.w, err)
+		return
+	}
+	defer fp.Close()
+	rd := util.NewReader(fp)
+	state := 0
+	for {
+		line, err := rd.ReadLineString()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			sysErr(err)
+			fmt.Fprintln(q.w, err)
+			return
+		}
+		if state == 0 {
+			if strings.HasPrefix(line, ">>> ") && line[4:] == fullname {
+				state = 1
+			}
+		} else {
+			if line == "" {
+				break
+			}
+			fmt.Fprintln(q.w, line)
 		}
 	}
 }

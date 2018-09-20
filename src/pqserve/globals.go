@@ -106,12 +106,18 @@ type Sentence struct {
 }
 
 type Alpino_ds_complete struct {
-	XMLName  xml.Name `xml:"alpino_ds"`
-	Version  string   `xml:"version,attr,omitempty"`
-	Metadata []MetaT  `xml:"metadata>meta,omitempty"`
-	Node0    *Node    `xml:"node,omitempty"`
-	Sentence SentT    `xml:"sentence,omitempty"`
-	Comments []string `xml:"comments>comment,omitempty"`
+	XMLName  xml.Name      `xml:"alpino_ds"`
+	Version  string        `xml:"version,attr,omitempty"`
+	Metadata *MetadataType `xml:"metadata,omitempty"`
+	Parser   *ParserT      `xml:"parser,omitempty"`
+	Node0    *Node         `xml:"node,omitempty"`
+	Sentence *SentT        `xml:"sentence,omitempty"`
+	Comments *CommentsType `xml:"comments,omitempty"`
+	Conllu   *ConlluType   `xml:"conllu,omitempty"`
+}
+
+type MetadataType struct {
+	Meta []MetaType `xml:"meta,omitempty"`
 }
 
 type SentT struct {
@@ -149,14 +155,59 @@ type ParserT struct {
 	Skips string `xml:"skips,attr,omitempty"`
 }
 
+type CommentsType struct {
+	Comment []string `xml:"comment,omitempty"`
+}
+
 type CommentType struct {
 	Comment string `xml:"comment"`
 }
 
+type ConlluType struct {
+	Conllu string `xml:",cdata"`
+	Status string `xml:"status,attr,omitempty"`
+	Error  string `xml:"error,attr,omitempty"`
+}
+
 type Node struct {
 	FullNode
+	Ud       *UdType `xml:"ud,omitempty"`
 	NodeList []*Node `xml:"node"`
 	skip     bool
+}
+
+type UdType struct {
+	Id    string `xml:"id,attr,omitempty"`
+	Form  string `xml:"form,attr,omitempty"`
+	Lemma string `xml:"lemma,attr,omitempty"`
+	Upos  string `xml:"upos,attr,omitempty"`
+	Xpos  string `xml:"xpos,attr,omitempty"`
+	FeatsType
+	Head   string    `xml:"head,attr,omitempty"`
+	Deprel string    `xml:"deprel,attr,omitempty"`
+	Dep    []DepType `xml:"dep,omitempty"`
+	Misc   string    `xml:"misc,attr,omitempty"`
+}
+
+type FeatsType struct {
+	Abbr     string `xml:"Abbr,attr,omitempty"`
+	Case     string `xml:"Case,attr,omitempty"`
+	Definite string `xml:"Definite,attr,omitempty"`
+	Degree   string `xml:"Degree,attr,omitempty"`
+	Foreign  string `xml:"Foreign,attr,omitempty"`
+	Gender   string `xml:"Gender,attr,omitempty"`
+	Number   string `xml:"Number,attr,omitempty"`
+	Person   string `xml:"Person,attr,omitempty"`
+	PronType string `xml:"PronType,attr,omitempty"`
+	Reflex   string `xml:"Reflex,attr,omitempty"`
+	Tense    string `xml:"Tense,attr,omitempty"`
+	VerbForm string `xml:"VerbForm,attr,omitempty"`
+}
+
+type DepType struct {
+	Id     string `xml:"id,attr,omitempty"`
+	Head   string `xml:"head,attr,omitempty"`
+	Deprel string `xml:"deprel,attr,omitempty"`
 }
 
 type TreeContext struct {

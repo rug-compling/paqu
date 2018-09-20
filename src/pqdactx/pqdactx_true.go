@@ -13,34 +13,85 @@ import (
 )
 
 type Alpino_ds struct {
-	XMLName  xml.Name `xml:"alpino_ds"`
-	Version  string   `xml:"version,attr,omitempty"`
-	Metadata []MetaT  `xml:"metadata>meta,omitempty"`
-	Parser   ParserT  `xml:"parser,omitempty"`
-	Node0    *Node    `xml:"node,omitempty"`
-	Sentence SentT    `xml:"sentence,omitempty"`
-	Comments []string `xml:"comments>comment,omitempty"`
+	XMLName  xml.Name      `xml:"alpino_ds"`
+	Version  string        `xml:"version,attr,omitempty"`
+	Metadata *MetadataType `xml:"metadata,omitempty"`
+	Parser   *ParserType   `xml:"parser,omitempty"`
+	Node     *Node         `xml:"node,omitempty"`
+	Sentence *SentType     `xml:"sentence,omitempty"`
+	Comments *CommentsType `xml:"comments,omitempty"`
+	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
-type SentT struct {
+type MetadataType struct {
+	Meta []MetaType `xml:"meta,omitempty"`
+}
+
+type CommentsType struct {
+	Comment []string `xml:"comment,omitempty"`
+}
+
+type SentType struct {
 	Sent   string `xml:",chardata"`
 	SentId string `xml:"sentid,attr,omitempty"`
 }
 
-type MetaT struct {
+type MetaType struct {
 	Type  string `xml:"type,attr,omitempty"`
 	Name  string `xml:"name,attr,omitempty"`
 	Value string `xml:"value,attr,omitempty"`
 }
 
-type ParserT struct {
-	Cats  string `xml:"cat,attr,omitempty"`
+type ParserType struct {
+	Cats  string `xml:"cats,attr,omitempty"`
 	Skips string `xml:"skips,attr,omitempty"`
 }
 
 type Node struct {
 	FullNode
+	Ud       *UdType `xml:"ud,omitempty"`
 	NodeList []*Node `xml:"node"`
+	skip     bool
+}
+
+type UdType struct {
+	Id    string `xml:"id,attr,omitempty"`
+	Form  string `xml:"form,attr,omitempty"`
+	Lemma string `xml:"lemma,attr,omitempty"`
+	Upos  string `xml:"upos,attr,omitempty"`
+	Xpos  string `xml:"xpos,attr,omitempty"`
+	FeatsType
+	Head   string    `xml:"head,attr,omitempty"`
+	Deprel string    `xml:"deprel,attr,omitempty"`
+	Dep    []DepType `xml:"dep,omitempty"`
+	Misc   string    `xml:"misc,attr,omitempty"`
+}
+
+type FeatsType struct {
+	Abbr     string `xml:"Abbr,attr,omitempty"`
+	Case     string `xml:"Case,attr,omitempty"`
+	Definite string `xml:"Definite,attr,omitempty"`
+	Degree   string `xml:"Degree,attr,omitempty"`
+	Foreign  string `xml:"Foreign,attr,omitempty"`
+	Gender   string `xml:"Gender,attr,omitempty"`
+	Number   string `xml:"Number,attr,omitempty"`
+	Person   string `xml:"Person,attr,omitempty"`
+	PronType string `xml:"PronType,attr,omitempty"`
+	Reflex   string `xml:"Reflex,attr,omitempty"`
+	Tense    string `xml:"Tense,attr,omitempty"`
+	VerbForm string `xml:"VerbForm,attr,omitempty"`
+}
+
+type DepType struct {
+	Id     string `xml:"id,attr,omitempty"`
+	Head   string `xml:"head,attr,omitempty"`
+	Deprel string `xml:"deprel,attr,omitempty"`
+}
+
+type ConlluType struct {
+	Conllu string `xml:",cdata"`
+	Status string `xml:"status,attr,omitempty"`
+	Error  string `xml:"error,attr,omitempty"`
 }
 
 var (
@@ -69,14 +120,7 @@ Syntax: %s infile.dact outfile.dactx
 		err = xml.Unmarshal([]byte(content), &alpino)
 		x(err)
 		if expand(&alpino) {
-			b, err := xml.MarshalIndent(&alpino, "", "  ")
-			x(err)
-			content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-				strings.Replace(
-					strings.Replace(
-						strings.Replace(string(b), "  <metadata></metadata>\n", "", 1),
-						"  <comments></comments>\n", "", 1),
-					"  <parser></parser>\n", "", 1) + "\n"
+			content = format(alpino)
 		}
 		x(db2.PutXml(name, content, false))
 	}
@@ -89,12 +133,12 @@ Syntax: %s infile.dact outfile.dactx
 
 func expand(alpino *Alpino_ds) bool {
 	refs := make(map[string]*Node)
-	getIndexed(alpino.Node0, refs)
+	getIndexed(alpino.Node, refs)
 	if len(refs) == 0 {
 		return false
 	}
 	alpino.Version = "X-" + alpino.Version
-	expandNode(alpino.Node0, refs)
+	expandNode(alpino.Node, refs)
 	return true
 }
 
@@ -127,6 +171,27 @@ func expandNode(n *Node, nodes map[string]*Node) {
 	}
 
 	n.OtherId = o.Id
+	n.Ud = o.Ud
 
 	copyNodeOnEmpty(n, o)
+}
+
+func format(alpino Alpino_ds) string {
+	b, err := xml.MarshalIndent(&alpino, "", "  ")
+	x(err)
+	s := "<?xml version=\"1.0\"?>\n" + string(b)
+
+	// shorten
+	for _, v := range []string{"meta", "parser", "node", "dep"} {
+		s = strings.Replace(s, "></"+v+">", "/>", -1)
+	}
+
+	// namespace
+	s = strings.Replace(s, "<alpino_ds", "<alpino_ds xmlns:ud=\"http://www.let.rug.nl/alfa/unidep/\"", 1)
+	for _, v := range []string{"ud", "dep", "conllu"} {
+		s = strings.Replace(s, "<"+v, "<ud:"+v, -1)
+		s = strings.Replace(s, "</"+v, "</ud:"+v, -1)
+	}
+
+	return s
 }
