@@ -998,9 +998,12 @@ PQ_vorfeld_non_local = """
 PQ_hoe_langer = """
         ( node[ @lemma="hoe"
                 or
-                node[@lemma="des"]
-                and
-                node[@lemma="te"]
+                @lemma="deste"
+                or
+                ( node[@lemma="des"]
+                  and
+                  node[@lemma="te"]
+                )
           ] and
           node[ @graad="comp"]
         ) """
