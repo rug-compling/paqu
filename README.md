@@ -76,10 +76,9 @@ Je kunt versie 2.5.16 hier downloaden: https://github.com/rug-compling/dbxml
 ### Go: The Go Programming Language ###
 
 De meeste programma's zijn geschreven in de programmeertaal Go. Je hebt
-dus de Go-compiler nodig. In Debian 9 "stretch" is Go beschikbaar in het pakket
-`golang-go`. De versies van Go in Debian 7 "wheezy" en 8 "jessie" zijn te oud.
+dus de Go-compiler nodig.
 
-Je hebt minimaal Go versie 1.4 nodig. Geef het commando `go version` om
+Je hebt minimaal Go versie 1.8 nodig. Geef het commando `go version` om
 dit te controleren.
 
 Je kunt Go downloaden van http://golang.org/
