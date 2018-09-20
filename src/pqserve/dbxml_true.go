@@ -194,12 +194,14 @@ func unpackDact(data, xmldir, dact, conllu, stderr string, chKill chan bool) (to
 		}
 		tokens += len(strings.Fields(alpino.Sentence))
 		fmt.Fprintf(fplines, "%s|%s\n", name, strings.TrimSpace(alpino.Sentence))
-		for _, c := range alpino.Comments {
-			if strings.HasPrefix(c.Comment, "Q#") {
-				a := strings.SplitN(c.Comment, "|", 2)
-				if len(a) == 2 {
-					fmt.Fprintf(fperr, "Q#%s|%s\n", name, strings.TrimSpace(a[1]))
-					break
+		if alpino.Comments != nil {
+			for _, c := range alpino.Comments {
+				if strings.HasPrefix(c, "Q#") {
+					a := strings.SplitN(c, "|", 2)
+					if len(a) == 2 {
+						fmt.Fprintf(fperr, "Q#%s|%s\n", name, strings.TrimSpace(a[1]))
+						break
+					}
 				}
 			}
 		}

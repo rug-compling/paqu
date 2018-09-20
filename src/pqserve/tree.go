@@ -263,7 +263,7 @@ func tree(q *Context) {
 		dot = true
 	}
 
-	alpino := Alpino_ds{}
+	alpino := Alpino_ds_complete{}
 	err := xml.Unmarshal(data, &alpino)
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
@@ -273,7 +273,7 @@ func tree(q *Context) {
 
 	unexpand(alpino.Node0)
 
-	title := html.EscapeString(alpino.Sentence)
+	title := html.EscapeString(alpino.Sent)
 	ctx.words = strings.Fields(title)
 
 	// Multi-word units "ineenvouwen".
@@ -317,8 +317,8 @@ func tree(q *Context) {
 <div style="overflow-x:auto">
 `, title, strings.Join(ctx.words, " "))
 
-		if len(alpino.Meta) > 0 {
-			for _, m := range alpino.Meta {
+		if alpino.Metadata != nil && len(alpino.Metadata.Meta) > 0 {
+			for _, m := range alpino.Metadata.Meta {
 				var v string
 				if m.Type == "date" {
 					t, err := time.Parse("2006-01-02", m.Value)
@@ -342,7 +342,7 @@ func tree(q *Context) {
 			fmt.Fprintln(q.w, "<p>")
 		}
 
-		if alpino.Parser.Cats != "" || alpino.Parser.Skips != "" {
+		if alpino.Parser != nil && (alpino.Parser.Cats != "" || alpino.Parser.Skips != "") {
 			fmt.Fprintf(q.w, "cats: %s<br>\nskips: %s\n<p>\n", html.EscapeString(alpino.Parser.Cats), html.EscapeString(alpino.Parser.Skips))
 		}
 	}
@@ -444,6 +444,8 @@ func tree(q *Context) {
 	fmt.Fprintf(q.w, "</div>\n<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
 
 	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", q.r.URL.RawQuery, html.EscapeString(label))
+
+	conllu2svg(q, 1, &alpino)
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")
 

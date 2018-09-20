@@ -10,7 +10,7 @@ var tooltip=function(){
     var tt,t,c,b,h;
     var ie = document.all ? true : false;
     return{
-	show:function(v,w){
+	show:function(v,w,below){
 	    if (v.search("&lt;table") == 0) {
 		v = v.replace(/&lt;/g, "<")
 		    .replace(/&gt;/g, ">")
@@ -33,8 +33,8 @@ var tooltip=function(){
 		document.body.appendChild(tt);
 		tt.style.opacity = 0;
 		tt.style.filter = 'alpha(opacity=0)';
-		document.onmousemove = this.pos;
 	    }
+	    document.onmousemove = below ? this.pos2 : this.pos;
 	    tt.style.display = 'block';
 	    c.innerHTML = v;
 	    tt.style.width = w ? w + 'px' : 'auto';
@@ -57,6 +57,25 @@ var tooltip=function(){
 	    var o = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 	    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 	    var top = u - h;
+	    if (top < scroll + 10) {
+		top = scroll + 10;
+	    }
+	    tt.style.top = top + 'px';
+	    if (w > maxw && l + maxw > w + o) {
+		tt.style.right = (w - l - left + 10) + 'px';
+		tt.style.left = 'auto';
+	    } else {
+		tt.style.left = (l + left + 10) + 'px';
+		tt.style.right = 'auto';
+	    }
+	},
+	pos2:function(e){
+	    var u = ie ? event.clientY + document.documentElement.scrollTop : e.pageY;
+	    var l = ie ? event.clientX + document.documentElement.scrollLeft : e.pageX;
+	    var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+	    var o = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+	    var scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+	    var top = u + 24;
 	    if (top < scroll + 10) {
 		top = scroll + 10;
 	    }

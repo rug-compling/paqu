@@ -111,18 +111,14 @@ type Alpino_ds_complete struct {
 	Metadata *MetadataType `xml:"metadata,omitempty"`
 	Parser   *ParserT      `xml:"parser,omitempty"`
 	Node0    *Node         `xml:"node,omitempty"`
-	Sentence *SentT        `xml:"sentence,omitempty"`
+	Sent     string        `xml:"sentence"`
+	SentId   string        `xml:"sentid,attr,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
 type MetadataType struct {
-	Meta []MetaType `xml:"meta,omitempty"`
-}
-
-type SentT struct {
-	Sent   string `xml:",chardata"`
-	SentId string `xml:"sentid,attr,omitempty"`
+	Meta []MetaT `xml:"meta,omitempty"`
 }
 
 type Alpino_ds struct {
@@ -139,9 +135,9 @@ type Alpino_ds_meta struct {
 }
 
 type Alpino_ds_no_node struct {
-	XMLName  xml.Name      `xml:"alpino_ds"`
-	Sentence string        `xml:"sentence"`
-	Comments []CommentType `xml:"comments"`
+	XMLName  xml.Name `xml:"alpino_ds"`
+	Sentence string   `xml:"sentence"`
+	Comments []string `xml:"comments>comment"`
 }
 
 type MetaT struct {
@@ -157,10 +153,6 @@ type ParserT struct {
 
 type CommentsType struct {
 	Comment []string `xml:"comment,omitempty"`
-}
-
-type CommentType struct {
-	Comment string `xml:"comment"`
 }
 
 type ConlluType struct {
