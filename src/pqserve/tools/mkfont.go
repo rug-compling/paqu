@@ -5,15 +5,14 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/pebbe/util"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/gofont/gobold"
-	"golang.org/x/image/font/gofont/goregular"
 
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
 const (
-	basesize = 200
+	basesize = 134
 )
 
 var (
@@ -22,31 +21,37 @@ var (
 
 func main() {
 
-	names := []string{"fontRegular", "fontBold"}
-	fonts := make([]*truetype.Font, 2)
-
-	var err error
-	fonts[0], err = truetype.Parse(goregular.TTF)
-	x(err)
-	fonts[1], err = truetype.Parse(gobold.TTF)
-	x(err)
+	fonts := [][2]string{
+		[2]string{"fontRegular", "FreeSans.ttf"},
+		[2]string{"fontBold", "FreeSansBold.ttf"},
+	}
 
 	fmt.Printf("// GENERATED FILE. DO NOT EDIT.\n\npackage main\n\nvar fontBaseSize = %d\n\n", int(basesize))
 
 	for i := 0; i < 2; i++ {
 
+		b, err := ioutil.ReadFile(fonts[i][1])
+		x(err)
+		fnt, err := truetype.Parse(b)
+		x(err)
+
+		name := fonts[i][0]
+
 		// The glyph's ascent and descent equal -bounds.Min.Y and +bounds.Max.Y. A
 		// visual depiction of what these metrics are is at
 		// https://developer.apple.com/library/mac/documentation/TextFonts/Conceptual/CocoaTextArchitecture/Art/glyph_metrics_2x.png
 
-		fc := truetype.NewFace(fonts[i], &truetype.Options{Size: basesize})
-		b, _ := font.BoundString(fc, "X")
-		fmt.Printf("var %sAscent = %d\n\n", names[i], -b.Min.Y.Round())
-		b, _ = font.BoundString(fc, "g")
-		fmt.Printf("var %sDescent = %d\n\n", names[i], b.Max.Y.Round())
-		fmt.Printf("var %sSizes = []uint8{\n", names[i])
+		fc := truetype.NewFace(fnt, &truetype.Options{Size: basesize})
+
+		bs, _ := font.BoundString(fc, "X")
+		fmt.Printf("var %sAscent = %d\n\n", fonts[i][0], -bs.Min.Y.Round())
+
+		bs, _ = font.BoundString(fc, "g")
+		fmt.Printf("var %sDescent = %d\n\n", name, bs.Max.Y.Round())
+
+		fmt.Printf("var %sSizes = []uint8{\n", name)
 		ctx := freetype.NewContext()
-		ctx.SetFont(fonts[i])
+		ctx.SetFont(fnt)
 		ctx.SetFontSize(basesize)
 		for c := rune(0); c < rune(256*256); c++ {
 			s := string(c)
@@ -54,7 +59,7 @@ func main() {
 			x(err)
 			i := p.X.Round()
 			if i < 0 || i > 255 {
-				fmt.Fprintln(os.Stderr, "rune %d dx = %d\n", int(c), i)
+				fmt.Fprintf(os.Stderr, "rune %d dx = %d\n", int(c), i)
 				if i < 0 {
 					i = 0
 				} else {

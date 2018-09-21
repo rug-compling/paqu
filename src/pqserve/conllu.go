@@ -9,21 +9,21 @@ import (
 )
 
 const (
-	MIN_NODE_WIDTH = 80                                         // minimale breedte van nodes
-	NODE_HEIGHT    = 48                                         // hoogte van nodes
-	NODE_SPACING   = 8                                          // horizontale ruimte tussen nodes
-	NODE_FONT      = "Go Regular, Arial, Helvetica, sans-serif" // font in nodes
-	NODE_FONT_SIZE = 16                                         // fontsize in nodes
-	NODE_TWEEK     = 2                                          // schuif teksten verticaal naar elkaar toe
+	FONT = "FreeSans, Arial, Helvetica, sans-serif"
 
-	LVL_HEIGHT             = 40                                         // hoogteverschil tussen edges van opeenvolgend niveau
-	EDGE_FONT              = "Go Regular, Arial, Helvetica, sans-serif" // font van label bij edge
-	EDGE_FONT_SIZE         = 16                                         // fontsize van label bij edge
-	EDGE_FONT_OFFSET       = 8                                          // hoogte van baseline van label boven edge
-	EDGE_FONT_WHITE_MARGIN = 2                                          // extra witruimte om label bij edge
-	EDGE_LBL_BACKGROUND    = "white"                                    // kleur van rechthoek achter label boven edge
-	EDGE_LBL_OPACITY       = .9                                         // doorzichtigheid van rechthoek achter label boven edge
-	EDGE_DROP              = 80                                         // edge curvature: te veel, en lijnen steken onder de figuur uit
+	MIN_NODE_WIDTH = 80 // minimale breedte van nodes
+	NODE_HEIGHT    = 48 // hoogte van nodes
+	NODE_SPACING   = 8  // horizontale ruimte tussen nodes
+	NODE_FONT_SIZE = 16 // fontsize in nodes
+	NODE_TWEEK     = 2  // schuif teksten verticaal naar elkaar toe
+
+	LVL_HEIGHT             = 40      // hoogteverschil tussen edges van opeenvolgend niveau
+	EDGE_FONT_SIZE         = 16      // fontsize van label bij edge
+	EDGE_FONT_OFFSET       = 8       // hoogte van baseline van label boven edge
+	EDGE_FONT_WHITE_MARGIN = 2       // extra witruimte om label bij edge
+	EDGE_LBL_BACKGROUND    = "white" // kleur van rechthoek achter label boven edge
+	EDGE_LBL_OPACITY       = .9      // doorzichtigheid van rechthoek achter label boven edge
+	EDGE_DROP              = 80      // edge curvature: te veel, en lijnen steken onder de figuur uit
 
 	MULTI_SKIP   = 4
 	MULTI_HEIGHT = 28
@@ -514,7 +514,7 @@ function unmrk(id, i, j) {
 			EDGE_LBL_BACKGROUND,
 			EDGE_LBL_OPACITY,
 			whites.String())
-		fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\">\n%s</g>\n", EDGE_FONT, int(EDGE_FONT_SIZE), texts.String())
+		fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\">\n%s</g>\n", FONT, int(EDGE_FONT_SIZE), texts.String())
 
 		fmt.Fprintln(fp, "</g>")
 	}
@@ -546,7 +546,7 @@ function unmrk(id, i, j) {
 	_, _, y := textwidth("Xg", NODE_FONT_SIZE, false)
 	lower := y / 2
 
-	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\">\n", NODE_FONT, int(NODE_FONT_SIZE))
+	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\">\n", FONT, int(NODE_FONT_SIZE))
 	for _, item := range items {
 		enh := ""
 		if item.enhanced {
@@ -560,7 +560,7 @@ function unmrk(id, i, j) {
 	}
 	fmt.Fprintln(fp, "</g>")
 
-	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\" font-style=\"italic\">\n", NODE_FONT, int(NODE_FONT_SIZE))
+	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\" font-style=\"italic\">\n", FONT, int(NODE_FONT_SIZE))
 	for _, item := range items {
 		enh := ""
 		if item.enhanced {
@@ -633,7 +633,7 @@ function unmrk(id, i, j) {
 			html.EscapeString(multi.word))
 	}
 	fmt.Fprintf(fp, "<g fill=\"#D0E0FF\" stroke=\"black\" stroke-width=\"1\">\n%s</g>\n", boxes.String())
-	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" font-style=\"italic\" text-anchor=\"middle\">\n%s</g>\n", NODE_FONT, int(NODE_FONT_SIZE), labels.String())
+	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" font-style=\"italic\" text-anchor=\"middle\">\n%s</g>\n", FONT, int(NODE_FONT_SIZE), labels.String())
 
 	fmt.Fprintf(fp, `
 </svg>
