@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/ungerik/go-cairo"
-
 	"bytes"
 	"fmt"
 	"html"
@@ -11,21 +9,21 @@ import (
 )
 
 const (
-	MIN_NODE_WIDTH = 80           // minimale breedte van nodes
-	NODE_HEIGHT    = 48           // hoogte van nodes
-	NODE_SPACING   = 8            // horizontale ruimte tussen nodes
-	NODE_FONT      = "sans-serif" // font in nodes
-	NODE_FONT_SIZE = 16           // fontsize in nodes
-	NODE_TWEEK     = 2            // schuif teksten verticaal naar elkaar toe
+	MIN_NODE_WIDTH = 80                                         // minimale breedte van nodes
+	NODE_HEIGHT    = 48                                         // hoogte van nodes
+	NODE_SPACING   = 8                                          // horizontale ruimte tussen nodes
+	NODE_FONT      = "Go Regular, Arial, Helvetica, sans-serif" // font in nodes
+	NODE_FONT_SIZE = 16                                         // fontsize in nodes
+	NODE_TWEEK     = 2                                          // schuif teksten verticaal naar elkaar toe
 
-	LVL_HEIGHT             = 40           // hoogteverschil tussen edges van opeenvolgend niveau
-	EDGE_FONT              = "sans-serif" // font van label bij edge
-	EDGE_FONT_SIZE         = 16           // fontsize van label bij edge
-	EDGE_FONT_OFFSET       = 8            // hoogte van baseline van label boven edge
-	EDGE_FONT_WHITE_MARGIN = 2            // extra witruimte om label bij edge
-	EDGE_LBL_BACKGROUND    = "white"      // kleur van rechthoek achter label boven edge
-	EDGE_LBL_OPACITY       = .9           // doorzichtigheid van rechthoek achter label boven edge
-	EDGE_DROP              = 80           // edge curvature: te veel, en lijnen steken onder de figuur uit
+	LVL_HEIGHT             = 40                                         // hoogteverschil tussen edges van opeenvolgend niveau
+	EDGE_FONT              = "Go Regular, Arial, Helvetica, sans-serif" // font van label bij edge
+	EDGE_FONT_SIZE         = 16                                         // fontsize van label bij edge
+	EDGE_FONT_OFFSET       = 8                                          // hoogte van baseline van label boven edge
+	EDGE_FONT_WHITE_MARGIN = 2                                          // extra witruimte om label bij edge
+	EDGE_LBL_BACKGROUND    = "white"                                    // kleur van rechthoek achter label boven edge
+	EDGE_LBL_OPACITY       = .9                                         // doorzichtigheid van rechthoek achter label boven edge
+	EDGE_DROP              = 80                                         // edge curvature: te veel, en lijnen steken onder de figuur uit
 
 	MULTI_SKIP   = 4
 	MULTI_HEIGHT = 28
@@ -225,8 +223,8 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete) {
 			userErr(q, fmt.Errorf("Line %d: Wrong index: %d != %d", item.lineno, item.end, i+1))
 		}
 		item.x1 = width
-		w1, _, _ := textwidth(item.postag+" i", NODE_FONT, NODE_FONT_SIZE, false)
-		w2, _, _ := textwidth(item.word+" i", NODE_FONT, NODE_FONT_SIZE, false)
+		w1, _, _ := textwidth(item.postag+" i", NODE_FONT_SIZE, false)
+		w2, _, _ := textwidth(item.word+" i", NODE_FONT_SIZE, false)
 		item.x2 = width + 24 + max(MIN_NODE_WIDTH, w1, w2)
 		width = item.x2 + NODE_SPACING
 	}
@@ -479,7 +477,7 @@ function unmrk(id, i, j) {
 				dep.end,
 				dep.headpos,
 				x1, y1)
-			w, h, l := textwidth(dep.rel[variant]+"i", EDGE_FONT, EDGE_FONT_SIZE, true)
+			w, h, l := textwidth(dep.rel[variant]+"i", EDGE_FONT_SIZE, true)
 			fmt.Fprintf(&whites,
 				"<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" />\n",
 				(x1+x2-w)/2-EDGE_FONT_WHITE_MARGIN,
@@ -545,7 +543,7 @@ function unmrk(id, i, j) {
 	}
 	fmt.Fprintln(fp, "</g>")
 
-	_, _, y := textwidth("Xg", NODE_FONT, NODE_FONT_SIZE, false)
+	_, _, y := textwidth("Xg", NODE_FONT_SIZE, false)
 	lower := y / 2
 
 	fmt.Fprintf(fp, "<g font-family=\"%s\" font-size=\"%d\" text-anchor=\"middle\">\n", NODE_FONT, int(NODE_FONT_SIZE))
@@ -710,26 +708,34 @@ func tooltip(item *Item) string {
 		html.EscapeString(item.xpostag))
 }
 
-func textwidth(text string, font string, fontsize float64, bold bool) (width, height, lift int) {
-	fonti := cairo.FONT_SLANT_NORMAL
-	fontw := cairo.FONT_WEIGHT_NORMAL
+func textwidth(text string, fontsize float64, bold bool) (width, height, lift int) {
+
+	var sizes []uint8
+	var asc, desc int
 	if bold {
-		fontw = cairo.FONT_WEIGHT_BOLD
+		sizes = fontBoldSizes
+		asc = fontBoldAscent
+		desc = fontBoldDescent
+	} else {
+		sizes = fontRegularSizes
+		asc = fontRegularAscent
+		desc = fontRegularDescent
 	}
 
-	surface := cairo.NewSurface(cairo.FORMAT_ARGB32, 1, 1)
-	surface.SelectFontFace(font, fonti, fontw)
-	surface.SetFontSize(fontsize)
-	te := surface.TextExtents(text)
-	//x := te.Xbearing
-	y := te.Ybearing
-	w := te.Width
-	h := te.Height
-	// dx := te.Xadvance
-	// dy := te.Yadvance
-	surface.Finish()
-
-	return int(w + .5), int(h + .5), -int(y - .5)
+	w := 0
+	for _, c := range text {
+		i := int(c)
+		var w1 int
+		if i >= len(sizes) {
+			w1 = fontBaseSize
+		} else {
+			w1 = int(sizes[i])
+		}
+		w += w1
+	}
+	return int(fontsize * float64(w) / float64(fontBaseSize)),
+		int(fontsize * float64(asc+desc) / float64(fontBaseSize)),
+		int(fontsize * float64(asc) / float64(fontBaseSize))
 }
 
 func max(a int, b ...int) int {
