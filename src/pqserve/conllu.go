@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -78,7 +79,7 @@ var (
 	anchors      [][]Anchor
 )
 
-func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete) {
+func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext) {
 
 	fp := q.w
 	if alpino.Conllu == nil {
@@ -523,13 +524,27 @@ function unmrk(id, i, j) {
 
 	offset := MARGIN + EDGE_FONT_SIZE + EDGE_FONT_OFFSET + LVL_HEIGHT*(maxlvl+1)
 
-	fmt.Fprintln(fp, "<g fill=\"#D0E0FF\" stroke=\"black\" stroke-width=\"1\">")
+	fmt.Fprintln(fp, "<g fill=\"#d3d3d3\" stroke=\"black\" stroke-width=\"1\">")
 	for i, item := range items {
 		enh := ""
 		color := ""
 		if item.enhanced {
 			enh = "enhanced "
 			color = `fill="#ffe0e0" `
+		} else {
+			n, err := strconv.Atoi(item.here)
+			if err == nil {
+				n -= 1
+				if ctx.yellow[i] {
+					if ctx.green[i] {
+						color = `fill="#00ffff" `
+					} else {
+						color = `fill="#ffff00" `
+					}
+				} else if ctx.green[i] {
+					color = `fill="#90ee90" `
+				}
+			}
 		}
 		fmt.Fprintf(fp, "<rect class=\"%sq%d %s\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" rx=\"5\" ry=\"5\" %s/>\n",
 			enh,

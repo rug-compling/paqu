@@ -445,7 +445,7 @@ func tree(q *Context) {
 
 	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", q.r.URL.RawQuery, html.EscapeString(label))
 
-	conllu2svg(q, 1, &alpino)
+	conllu2svg(q, 1, &alpino, ctx)
 
 	fmt.Fprint(q.w, "\n</body>\n</html>\n")
 
@@ -504,6 +504,13 @@ func mwu(ctx *TreeContext, node *Node) {
 			ctx.words[node.Begin] = strings.Join(ctx.words[node.Begin:node.End], " ")
 			for i := node.Begin + 1; i < node.End; i++ {
 				ctx.words[i] = ""
+				// dit is voor conllu
+				if ctx.yellow[node.Begin] {
+					ctx.yellow[i] = true
+				}
+				if ctx.green[node.Begin] {
+					ctx.green[i] = true
+				}
 			}
 		}
 	}
