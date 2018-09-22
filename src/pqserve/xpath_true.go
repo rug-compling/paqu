@@ -23,10 +23,35 @@ import (
 )
 
 var (
-	pqbugtest  string
-	pqxok      string
-	reXpath    = regexp.MustCompile(`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
-	keyTags    = make(map[string]bool)
+	pqbugtest string
+	pqxok     string
+	reXpath   = regexp.MustCompile(
+		`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
+	keyTags = make(map[string]bool)
+	udTags  = map[string]bool{
+		"Abbr":     true,
+		"Case":     true,
+		"Definite": true,
+		"Degree":   true,
+		"Foreign":  true,
+		"Gender":   true,
+		"Number":   true,
+		"Person":   true,
+		"PronType": true,
+		"Reflex":   true,
+		"Tense":    true,
+		"VerbForm": true,
+		"deprel":   true,
+		"error":    true,
+		"form":     true,
+		"head":     true,
+		"id":       true,
+		"lemma":    true,
+		"misc":     true,
+		"status":   true,
+		"upos":     true,
+		"xpos":     true,
+	}
 	xpathNames = map[string]bool{
 		"ancestor-or-self::":   true,
 		"ancestor::":           true,
@@ -83,6 +108,10 @@ var (
 		"treat":                true,
 		"type":                 true,
 		"union":                true,
+		"ud:":                  true,
+		"conllu":               true,
+		"dep":                  true,
+		"ud":                   true,
 	}
 )
 
@@ -154,6 +183,9 @@ PARTLOOP:
 			}
 			if s[0] == '@' {
 				if keyTags[s[1:]] {
+					continue
+				}
+				if udTags[s[1:]] {
 					continue
 				}
 				if s == "@type" || s == "@name" || s == "@value" || s == "@sentid" || s == "@cats" || s == "@skips" {
@@ -1397,8 +1429,11 @@ corpus: <select name="db">
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node', '/alpino_ds[parser/@cats=""]', '/alpino_ds[parser/@skips=""]', '/alpino_ds[parser/@cats="" and parser/@skips=""]', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]', '//parser[@cats=""]', '//parser[@skips=""]', '//parser[@cats="" and @skips=""]'];
-var other = ['/node', '/meta[@name="" and @value=""]', '/parser[@cats=""]', '/parser[@skips=""]', '/parser[@cats="" and @skips=""]'`)
+var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','ud:ud','ud:dep','ud:conllu'`)
 	for _, a := range NodeTags {
+		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
+	}
+	for a := range udTags {
 		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
 	}
 	fmt.Fprint(q.w, `];
@@ -1486,7 +1521,7 @@ $('#xquery').textcomplete([
     index: 1
 },
 {
-    match: /([\/@][-_a-z]*)$/,
+    match: /([\/@][-_a-zA-Z]*|ud:)$/,
     search: function (term, callback) {
         callback($.map(other, function (e) {
             return e.indexOf(term) === 0 ? e : null;
