@@ -412,12 +412,13 @@ func doXml(document, archname, filename string) (result string) {
 		}
 
 		node.Ud.Id = a[0]
-		node.Ud.Form = a[1]
-		node.Ud.Lemma = a[2]
-		node.Ud.Upos = a[3]
-		node.Ud.Xpos = a[4]
-		node.Ud.Head = a[6]
-		node.Ud.Deprel = a[7]
+		node.Ud.Form = noe(a[1])
+		node.Ud.Lemma = noe(a[2])
+		node.Ud.Upos = noe(a[3])
+		node.Ud.Xpos = noe(a[4])
+		node.Ud.Head = noe(a[6])
+		node.Ud.Deprel = noe(a[7])
+		node.Ud.Misc = noe(a[9])
 
 		feats := getItems(a[5])
 		node.Ud.Abbr = feats["Abbr"]
@@ -436,6 +437,13 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	return
+}
+
+func noe(s string) string {
+	if s == "_" {
+		return ""
+	}
+	return s
 }
 
 func format(alpino Alpino_ds) string {
