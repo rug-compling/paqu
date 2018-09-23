@@ -530,18 +530,18 @@ function unmrk(id, i, j) {
 		color := ""
 		if item.enhanced {
 			enh = "enhanced "
-			color = `fill="#ffe0e0" `
+			color = `fill="#FF8080" `
 		} else {
 			n, err := strconv.Atoi(item.here)
 			if err == nil {
 				n -= 1
-				if ctx.yellow[i] {
-					if ctx.green[i] {
+				if ctx.yellow[n] {
+					if ctx.green[n] {
 						color = `fill="#00ffff" `
 					} else {
 						color = `fill="#ffff00" `
 					}
-				} else if ctx.green[i] {
+				} else if ctx.green[n] {
 					color = `fill="#90ee90" `
 				}
 			}
