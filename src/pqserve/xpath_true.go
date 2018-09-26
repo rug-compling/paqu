@@ -1656,6 +1656,52 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 
 	lvl := make([]int, len(woorden)+1)
 	ids := make([]string, len(xmlparts))
+	ud1 := make([]string, 0)
+	ud2 := make([]string, 0)
+
+	for _, part := range xmlparts {
+		alp := Alpino_ds{}
+		err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+<alpino_ds version="1.3">
+<node>
+`+part+`
+</node>
+</alpino_ds>`), &alp)
+		if err != nil {
+			fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+			return
+		}
+		if alp.Node0.Ud != nil {
+			ud1 = append(ud1, alp.Node0.Ud.Id+":"+alp.Node0.Ud.Head+":"+alp.Node0.Ud.Deprel)
+			if i, err := strconv.Atoi(alp.Node0.Ud.Id); err == nil && i > 0 && i <= len(woorden) {
+				lvl[i-1]++
+			}
+		}
+	}
+
+	for _, part := range xmlparts {
+		alp := Alpino_ds{}
+		err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+<alpino_ds version="1.3">
+<node>
+<ud:ud>
+`+part+`
+</ud:ud>
+</node>
+</alpino_ds>`), &alp)
+		if err != nil {
+			fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+			return
+		}
+		if alp.Node0.Ud.Dep != nil {
+			for _, dep := range alp.Node0.Ud.Dep {
+				ud2 = append(ud2, dep.Id+":"+dep.Head+":"+dep.Deprel)
+				if i, err := strconv.Atoi(dep.Id); err == nil && i > 0 && i <= len(woorden) {
+					lvl[i-1]++
+				}
+			}
+		}
+	}
 
 	for i, part := range xmlparts {
 		alp := Alpino_ds{}
@@ -1688,7 +1734,6 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			}
 		}
 	}
-
 	var buf bytes.Buffer
 
 	fmt.Fprint(&buf, "<li>")
@@ -1710,12 +1755,14 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		dactfile = strings.Replace(dactfile, paqudatadir, "$$", 1)
 	}
 
-	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s\" class=\"ico\">&#10020;</a>\n",
+	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s&amp;ud1=%s&amp;ud2=%s\" class=\"ico\">&#10020;</a>\n",
 		prefix,
 		html.EscapeString(dactfile),
 		html.EscapeString(filename),
 		global,
-		strings.Join(ids, ","))
+		strings.Join(ids, ","),
+		strings.Join(ud1, "|"),
+		strings.Join(ud2, "|"))
 
 	fmt.Fprintf(q.w, `<script type="text/javascript"><!--
 $('ol').append(%q);

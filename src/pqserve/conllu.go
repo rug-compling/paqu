@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -56,6 +55,7 @@ type Dependency struct {
 	rel     [2]string
 	dist    int
 	lvl     int
+	marked  [2]bool
 }
 
 type Anchor struct {
@@ -77,6 +77,8 @@ type Multi struct {
 var (
 	dependencies []*Dependency
 	anchors      [][]Anchor
+	ud1s         = make(map[string]bool)
+	ud2s         = make(map[string]bool)
 )
 
 func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext) {
@@ -92,6 +94,24 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 		fmt.Fprintln(fp,
 			"<div style=\"margin:1em 0px;padding:1em 0px;border-top:1px solid grey\">Er was een fout in het afleiden van Universal Dependencies voor deze zin</div>")
 		return
+	}
+
+	yellows := make(map[string]bool)
+	greens := make(map[string]bool)
+	for key := range ctx.yellow {
+		yellows[fmt.Sprint(key+1)] = true
+	}
+	for key := range ctx.green {
+		greens[fmt.Sprint(key+1)] = true
+	}
+	for _, m := range []map[string]bool{ctx.ud1, ctx.ud2} {
+		for key := range m {
+			a := strings.SplitN(key, ":", 3)
+			if len(a) == 3 {
+				yellows[a[0]] = true
+				greens[a[1]] = true
+			}
+		}
 	}
 
 	var lines []Line
@@ -163,11 +183,13 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 				return
 			}
 			if headpos != 0 {
+				ms := fmt.Sprintf("%s:%s:%s", item.here, item.there, item.rel)
 				dependencies = append(dependencies, &Dependency{
 					end:     end,
 					headpos: headpos,
 					rel:     [2]string{item.rel, ""},
-					dist:    abs(end - headpos)})
+					dist:    abs(end - headpos),
+					marked:  [2]bool{ctx.ud1[ms], false}})
 			}
 		}
 
@@ -184,11 +206,13 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 					userErr(q, fmt.Errorf("Line %d: Unknown head position %s", item.lineno, a[0]))
 					return
 				}
+				ms := fmt.Sprintf("%s:%s:%s", item.here, a[0], a[1])
 				dependencies = append(dependencies, &Dependency{
 					end:     end,
 					headpos: headpos,
 					rel:     [2]string{"", a[1]},
-					dist:    abs(end - headpos)})
+					dist:    abs(end - headpos),
+					marked:  [2]bool{false, ctx.ud2[ms]}})
 				hasEnhanced = true
 			}
 		}
@@ -205,6 +229,7 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 				d2 := dependencies[j]
 				if d2.rel[1] != "" && d1.end == d2.end && d1.headpos == d2.headpos && d1.dist == d2.dist {
 					d1.rel[1] = d2.rel[1]
+					d1.marked[1] = d2.marked[1]
 					dependencies = append(dependencies[:j], dependencies[j+1:]...)
 					if j < i {
 						i--
@@ -212,6 +237,14 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 					break
 				}
 			}
+		}
+	}
+
+	hasMarkedLine := false
+	for _, dep := range dependencies {
+		if dep.marked[0] || dep.marked[1] {
+			hasMarkedLine = true
+			break
 		}
 	}
 
@@ -440,25 +473,31 @@ function unmrk(id, i, j) {
 			x2 := items[i2].x1 + 10 + int(d2*anchor(i2, i1, dep.lvl))
 			y1 := MARGIN + EDGE_FONT_SIZE + EDGE_FONT_OFFSET + LVL_HEIGHT*(maxlvl+1)
 			y2 := MARGIN + EDGE_FONT_SIZE + EDGE_FONT_OFFSET + LVL_HEIGHT*(maxlvl-dep.lvl)
+			linestyle := ""
+			if hasMarkedLine && !dep.marked[variant] {
+				linestyle = `stroke-dasharray="3,2" `
+			}
 			if dep.headpos == 0 {
 				y2 = MARGIN + EDGE_FONT_SIZE + EDGE_FONT_OFFSET
 				fmt.Fprintf(&lines,
-					"<path class=\"e%s%d q%dq%d\" d=\"M%d %d L%d %d\" />\n",
+					"<path class=\"e%s%d q%dq%d\" %sd=\"M%d %d L%d %d\" />\n",
 					e,
 					dep.end,
 					dep.end,
 					dep.headpos,
+					linestyle,
 					x1, y1, // M
 					x1, y2) // L
 			} else {
 				fmt.Fprintf(&lines,
-					"<path class=\"e%s%d e%s%d q%dq%d\" d=\"M%d %d L%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d L%d %d\" />\n",
+					"<path class=\"e%s%d e%s%d q%dq%d\" %sd=\"M%d %d L%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d L%d %d\" />\n",
 					e,
 					dep.end,
 					e,
 					dep.headpos,
 					dep.end,
 					dep.headpos,
+					linestyle,
 					x1, y1, // M
 					x1, y2+EDGE_DROP, // L
 					x1, y2, // C
@@ -530,21 +569,17 @@ function unmrk(id, i, j) {
 		color := ""
 		if item.enhanced {
 			enh = "enhanced "
-			color = `fill="#FF8080" `
-		} else {
-			n, err := strconv.Atoi(item.here)
-			if err == nil {
-				n -= 1
-				if ctx.yellow[n] {
-					if ctx.green[n] {
-						color = `fill="#00ffff" `
-					} else {
-						color = `fill="#ffff00" `
-					}
-				} else if ctx.green[n] {
-					color = `fill="#90ee90" `
-				}
+			//color = `fill="#FF8080" `
+			color = `stroke-dasharray="10,10" `
+		}
+		if yellows[item.here] {
+			if greens[item.here] {
+				color += `fill="#00ffff" `
+			} else {
+				color += `fill="#ffff00" `
 			}
+		} else if greens[item.here] {
+			color += `fill="#90ee90" `
 		}
 		fmt.Fprintf(fp, "<rect class=\"%sq%d %s\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" rx=\"5\" ry=\"5\" %s/>\n",
 			enh,
@@ -657,16 +692,19 @@ function unmrk(id, i, j) {
 tts['%s'] = [
 %s
 ];`, svgID, strings.Join(ttips, ",\n"))
-	if !hasEnhanced {
+	check1 := ""
+	check2 := " checked"
+	if !hasEnhanced || (len(ctx.ud2) == 0 && len(ctx.ud1) > 0) {
 		fmt.Fprintf(fp, "toggle('%s',false);\n", svgID)
+		check1, check2 = check2, check1
 	}
 	fmt.Fprintln(fp, "</script>")
 	if hasEnhanced {
 		fmt.Fprintf(fp, `<div class="udcontrol">
-<input type="radio" id="btnb%s" name="btn%s" onclick="toggle('%s',false)" /><label for="btnb%s">Basic</label>
-<input type="radio" id="btne%s" name="btn%s" onclick="toggle('%s',true)" checked /><label for="btne%s">Enhanced</label>
+<input type="radio" id="btnb%s" name="btn%s" onclick="toggle('%s',false)"%s /><label for="btnb%s">Basic</label>
+<input type="radio" id="btne%s" name="btn%s" onclick="toggle('%s',true)"%s /><label for="btne%s">Enhanced</label>
 </div>
-`, svgID, svgID, svgID, svgID, svgID, svgID, svgID, svgID)
+`, svgID, svgID, svgID, check1, svgID, svgID, svgID, svgID, check2, svgID)
 	}
 }
 

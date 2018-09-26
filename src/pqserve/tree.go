@@ -72,6 +72,8 @@ func tree(q *Context) {
 		refs:   make(map[string]bool),
 		mnodes: make(map[string]bool),
 		words:  make([]string, 0),
+		ud1:    make(map[string]bool),
+		ud2:    make(map[string]bool),
 	}
 
 	var data []byte
@@ -252,6 +254,29 @@ func tree(q *Context) {
 
 	// markeringen voor hoofdwoorden
 	ctx.green = indexes(first(q.r, "gr"))
+
+	// markeringen van Universal Dependencies
+	for n, arg := range []string{"ud1", "ud2"} {
+		for _, i := range strings.Split(first(q.r, arg), "|") {
+			i2 := strings.SplitN(i, ":", 3)
+			if len(i2) == 3 {
+				if n == 0 {
+					ctx.ud1[i] = true
+				} else {
+					ctx.ud2[i] = true
+				}
+				// TODO: waarde is geen integer
+				j, err := strconv.Atoi(i2[0])
+				if err == nil {
+					ctx.yellow[j-1] = true
+				}
+				j, err = strconv.Atoi(i2[1])
+				if err == nil {
+					ctx.green[j-1] = true
+				}
+			}
+		}
+	}
 
 	// markeringen van nodes
 	for _, m := range strings.Split(first(q.r, "ms"), ",") {

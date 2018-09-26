@@ -211,6 +211,8 @@ type TreeContext struct {
 	graph  bytes.Buffer // definitie dot-bestand
 	start  int
 	words  []string
+	ud1    map[string]bool
+	ud2    map[string]bool
 }
 
 type Process struct {
