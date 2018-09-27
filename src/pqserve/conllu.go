@@ -182,15 +182,15 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 				userErr(q, fmt.Errorf("Line %d: Unknown head position %s", item.lineno, item.there))
 				return
 			}
-			if headpos != 0 {
-				ms := fmt.Sprintf("%s:%s:%s", item.here, item.there, item.rel)
-				dependencies = append(dependencies, &Dependency{
-					end:     end,
-					headpos: headpos,
-					rel:     [2]string{item.rel, ""},
-					dist:    abs(end - headpos),
-					marked:  [2]bool{ctx.ud1[ms], false}})
-			}
+			// if headpos != 0 {
+			ms := fmt.Sprintf("%s:%s:%s", item.here, item.there, item.rel)
+			dependencies = append(dependencies, &Dependency{
+				end:     end,
+				headpos: headpos,
+				rel:     [2]string{item.rel, ""},
+				dist:    abs(end - headpos),
+				marked:  [2]bool{ctx.ud1[ms], false}})
+			// }
 		}
 
 		if item.deps != "_" {
@@ -414,29 +414,13 @@ function unmrk(id, i, j) {
   $('svg#' + id + ' .q' + j).css({'stroke':'black','stroke-width':1});
 }
 </script>
-<style type="text/css">
-  div.break {
-    margin-top: 1em;
-    padding-top: 1em;
-    border-top: 1px solid grey;
-  }
-  div.unidep {
-    overflow-x: auto;
-  }
-  .udcontrol {
-    margin-bottom: 200px;
-  }
-  .udcontrol input,
-  .udcontrol label {
-    cursor: pointer;
-  }
-  .udcontrol label:hover {
-    color: #0000e0;
-    text-decoration: underline;
-  }
-</style>
 `)
-	fmt.Fprintf(fp, "<div class=\"break\"></div><div class=\"unidep\">\n<svg id=\"%s\" width=\"%d\" height=\"%d\">\n", svgID, width, height)
+	fmt.Fprintf(fp, `
+<div class="break"></div>
+<div class="warning">In ontwikkeling</div>
+<div class="unidep">
+<svg id="%s" width="%d" height="%d">
+`, svgID, width, height)
 
 	if TESTING {
 		fmt.Fprintf(fp, "<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"green\" />\n", width, height)
@@ -672,7 +656,7 @@ function unmrk(id, i, j) {
 			userErr(q, fmt.Errorf("Line %d: Invalid range %s", multi.lineno, multi.id))
 			return
 		}
-		fmt.Fprintf(&boxes, "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" rx=\"5\" ry=\"5\">\n",
+		fmt.Fprintf(&boxes, "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" rx=\"5\" ry=\"5\" />\n",
 			x1,
 			offset+NODE_HEIGHT+MULTI_SKIP,
 			x2-x1,

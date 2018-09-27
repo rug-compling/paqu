@@ -158,6 +158,7 @@ type DepType struct {
 	Id     string `xml:"id,attr,omitempty"`
 	Head   string `xml:"head,attr,omitempty"`
 	Deprel string `xml:"deprel,attr,omitempty"`
+	Elided bool   `xml:"elided,attr,omitempty"`
 }
 
 type ConlluType struct {
@@ -397,6 +398,7 @@ func doXml(document, archname, filename string) (result string) {
 					Id:     a[0],
 					Head:   dep[0],
 					Deprel: dep[1],
+					Elided: strings.Contains(a[0], "."),
 				})
 			}
 		}

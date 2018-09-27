@@ -42,6 +42,7 @@ var (
 		"Tense":    true,
 		"VerbForm": true,
 		"deprel":   true,
+		"elided":   true,
 		"error":    true,
 		"form":     true,
 		"head":     true,

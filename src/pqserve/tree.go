@@ -335,6 +335,34 @@ func tree(q *Context) {
 <title>PaQu: %s</title>
 <link rel="stylesheet" type="text/css" href="tooltip.css" />
 <script type="text/javascript" src="tooltip.js"></script>
+<style type="text/css">
+  div.break {
+    margin-top: 1em;
+    padding-top: 1em;
+    border-top: 1px solid grey;
+  }
+  div.warning {
+    margin: 2em 20%%;
+    padding: 1em;
+    text-align: center;
+    border: 4px solid red;
+    background-color: #ffe0e0;
+  }
+  div.unidep {
+    overflow-x: auto;
+  }
+  .udcontrol {
+    margin-bottom: 200px;
+  }
+  .udcontrol input,
+  .udcontrol label {
+    cursor: pointer;
+  }
+  .udcontrol label:hover {
+    color: #0000e0;
+    text-decoration: underline;
+  }
+</style>
 </head>
 <body>
 <em>%s</em>
@@ -466,9 +494,9 @@ func tree(q *Context) {
 	}
 	// EIND: svg nabewerken en printen
 
-	fmt.Fprintf(q.w, "</div>\n<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", q.r.URL.RawQuery)
+	fmt.Fprintf(q.w, "</div>\n<p>\nopslaan als: <a href=\"tree?%s&amp;dot=1\">dot</a><p>\n", strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1))
 
-	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", q.r.URL.RawQuery, html.EscapeString(label))
+	fmt.Fprintf(q.w, "bestand: <a href=\"tree?%s&amp;xml=1\">%s</a>\n", strings.Replace(q.r.URL.RawQuery, "&", "&amp;", -1), html.EscapeString(label))
 
 	conllu2svg(q, 1, &alpino, ctx)
 

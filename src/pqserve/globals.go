@@ -200,6 +200,7 @@ type DepType struct {
 	Id     string `xml:"id,attr,omitempty"`
 	Head   string `xml:"head,attr,omitempty"`
 	Deprel string `xml:"deprel,attr,omitempty"`
+	Elided bool   `xml:"elided,attr,omitempty"`
 }
 
 type TreeContext struct {
