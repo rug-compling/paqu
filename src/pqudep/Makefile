@@ -3,6 +3,8 @@ include ../Makefile.cfg
 
 SRC = attributes_generated.go udep_generated.go pqudep.go
 
+all: ../../bin/pqudep udep.diff
+
 ../../bin/pqudep: $(SRC)
 	CGO_LDFLAGS="-Wl,-rpath=$(LIBRARY_PATH)" go build -o $@ $(TAGS) $(OPTS) .
 
@@ -18,3 +20,6 @@ udep_generated.go: udep.xq
 	echo 'var udep = `' >> $@
 	cat $< >> $@
 	echo '`' >> $@
+
+udep.diff: udep.xq universal_dependencies_2.2.xq
+	-diff -U10 -b universal_dependencies_2.2.xq udep.xq > udep.diff

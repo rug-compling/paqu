@@ -383,7 +383,6 @@ func doXml(document, archname, filename string) (result string) {
 		}
 
 		if a[8] != "_" {
-			node.Ud.Dep = make([]DepType, 0)
 			for _, deps := range strings.Split(a[8], "|") {
 				dep := strings.SplitN(deps, ":", 2)
 				if len(dep) != 2 {

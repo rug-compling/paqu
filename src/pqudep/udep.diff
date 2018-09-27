@@ -1,0 +1,166 @@
+--- universal_dependencies_2.2.xq	2018-09-14 11:51:50.000000000 +0200
++++ udep.xq	2018-09-27 10:23:46.384450722 +0200
+@@ -1,20 +1,16 @@
+ declare namespace saxon="http://saxon.sf.net/";
+ declare namespace ud="https://universaldependencies.github.io/docs/" ;
+ 
+ declare option saxon:output "omit-xml-declaration=yes";
+ declare option saxon:output "indent=yes";
+ 
+-declare  variable $DIR as xs:string external ;
+-declare  variable $MODE as xs:string external ;
+-declare  variable $ENHANCED as xs:string external ;
+-
+ (: should work in coordinations like te laten reizen en te laten beleven,
+    and recursive cases: Andras blijft ontkennen sexuele relaties met Timea te hebben gehad ,
+ 	          .. of hij ook voor hen wilde komen tekenen :)
+ declare function local:xcomp-control($node as node(), $so_index as xs:string) as node()* {
+ 	for $xcomp in 
+ 	    $node[not(@ud:PronType="Rel")]/ancestor::node//node[(@rel="vc" or (@cat="inf" and @rel="body")) (: covers inf ti oti :)
+ 		                           and node[@rel=("hd","predc") and @ud:Relation="xcomp"]  (: vrouwen moeten vertegenwoordigd zijn :)
+ 		                           and node[@rel="su" and @index]/@index = $so_index
+ 		                          ]
+  	return
+@@ -97,45 +93,49 @@
+                                                         not(@pt or @cat)]/@index = $phrase/@index 
+ 	                                             and node[@rel=("hd","predc") and (@pt or @cat) and   (: bekende cafes zijn A en B :)
+                                                         (: not(@ud:pos=("ADP","AUX")) and not(@cat="mwu") :)
+                                                         not(local:internal_head_position(..) = @end and (@ud:pos=("ADP","AUX") or @cat="mwu") )  
+                                                         ]
+                                               ]  
+ 	                                              (: not coordination of AUX or (complex) Ps :)
+     let $udRelation := local:non_local_dependency_label($phrase,($node/ancestor::node//node[@rel="cnj"]/
+     	                    node[
+                             (: @rel=$phrase/@rel and :)
+-                                not(@pt or @cat) and @index=$phrase/@index])[1])   
++                                not(@pt or @cat) and @index=$phrase/@index],element {"node"} { })[1])
+     let $EudRelation :=
+       if    ($udRelation = ("nmod","obl") and $phrase[@cat="pp"]/node[@rel="hd"])
+       then  string-join(($udRelation,$phrase/node[@rel="hd"]/@lemma),':')   
+       else  $udRelation                               
+ 	where $phrase[@rel=("obj1","su","mod","pc","det") and @index]
+ 	return <headdep head="{local:internal_head_position($conj_head)}" dep="{$EudRelation}"/>
+ };
+ 
+ declare function local:reconstruct_empty_head($node as node()) as node() {
+   let $antecedent := $node/ancestor::node//node[(@pt or @cat) and @index = $node/@index ]
+   let $end := 
+     if   ($node/../node[@pt or @cat])
+     then if  ($node/../node[@pt or @cat]/@begin = $node/../@begin)
+          then ($node/../node[@pt or @cat])[last()]/@end + 0.1
+          else ($node/../node[@pt or @cat])[1]/@begin + 0.1 
+     else $node/../@end - 0.9        (: covers cases where there is no sister with content :)
++  let $copied :=
++    if ($antecedent/@ud:CopiedFrom)
++    then $antecedent/@ud:CopiedFrom
++    else $antecedent/@end
+   return
+     if ( $node[@rel="hd" and @index and not(@pt or @cat)]  and 
+          $antecedent/@word and (: onder andere as hd... :)
+          not(local:auxiliary($antecedent) = ("aux","aux:pass","cop")) (: skip auxiliaries and copulas, prepositions as well? :)
+        )  
+     then  (: added begin for sorting purposes (in conjunction processing) only, add @pt and @rel for use in  add_Edependencies :)
+      <node begin="{$end - 0.1}" end="{$end}" word="{$antecedent/@word}" lemma="{$antecedent/@lemma}" 
+-         postag="{$antecedent/@postag}" pt="{$antecedent/@pt}" rel="{$node/@rel}" ud:Relation="_" ud:HeadPosition="_">
++         postag="{$antecedent/@postag}" pt="{$antecedent/@pt}" rel="{$node/@rel}" ud:Relation="_" ud:HeadPosition="_" ud:CopiedFrom="{$copied}">
+        {$antecedent/@*[namespace-uri()="https://universaldependencies.github.io/docs/" and not(local-name()=("Relation","HeadPosition"))]} 
+      </node>   
+     else 
+      <node>
+       {( $node/@*, 
+         for $child in $node/node return local:reconstruct_empty_head($child)
+        )}
+     </node>       
+ };
+ 
+@@ -1371,86 +1371,35 @@
+                           else if ( $word/@end = 
+    	                               $word/ancestor::node/descendant::node[@word= ("'",'"') and 
+    	                                          index-of($quotes,@begin) mod 2 = 0]/@begin )
+                                 then "SpaceAfter=No"
+                           else "_"
+ 
+ let $orig_postag := replace(replace(replace(replace($word/@postag,',','|'), '\(\)',''),'\(','|') ,'\)','')
+ 
+ order by number($word/@end)
+ return 
+-('&#10;',
+-string-join(($word/@end, $word/@word , $word/@lemma , $word/@ud:pos, $orig_postag, $features, $word/@ud:HeadPosition, $word/@ud:Relation, $word/@ud:Enhanced,"_"), "	" )
++(string-join(($word/@end, $word/@word , $word/@lemma , $word/@ud:pos, $orig_postag, $features, $word/@ud:HeadPosition, $word/@ud:Relation, $word/@ud:Enhanced,if ($word/@ud:CopiedFrom) then concat("CopiedFrom=", $word/@ud:CopiedFrom) else "_"), "	" )
+ )
+ }; 
+ 
+ 
+ declare function local:sanity_check($node as element(node)) as element(node) {
+ let $count := count($node//node[@ud:Relation="root"])
+ let $zeroheadpos := count($node//node[@ud:HeadPosition="0"])
+ let $headpositionisself := count($node//node[@ud:HeadPosition=@end])
+ return
+  element {name($node)} { ( $node/@*, 
+                              attribute {"ud:roots"} {$count}, 
+                              attribute {"ud:zeroheadpos"} {$zeroheadpos},
+                              attribute {"ud:headpositionisself"} {$headpositionisself},
+                              for $child in $node/node return $child ) }
+ };
+ 
+ 
+-for $doc in collection($DIR)
+-    for $node in $doc/alpino_ds/node 
+-  return
+-  if ($MODE eq 'conll') 
+-  then  if ($ENHANCED eq 'yes') 
+-        then
+-          <pre>
+-            <code sentence-id="{document-uri($doc)}">
+-
+-              {$node/../sentence,
+-                local:conll(local:enhanced_dependencies(
+-              	           local:add_dependency_relations(
+-              	             local:add_features(
+-              	             	local:add_pos_tags( 
+-              	             	   local:fix_misplaced_heads_in_coordination(
+-              	             	   	  local:fix_misplaced_heads_in_coordination($node)))))))}
+-            !
+-            </code>
+-          </pre>
+-        else 
+-           <pre>
+-              <code sentence-id="{document-uri($doc)}">
+-
+-                {$node/../sentence,
+-                  local:conll(local:add_dependency_relations(
+-                             local:add_features(
+-                              local:add_pos_tags( 
+-                                 local:fix_misplaced_heads_in_coordination(
+-                                    local:fix_misplaced_heads_in_coordination($node))))))}
+-              !
+-              </code>
+-            </pre>
+-  else if ($ENHANCED eq 'yes') (: if XML :)
+-        then 
+-        <alpino_ds version ="{$node/../@version}" sentence-id="{document-uri($doc)}">
+-          { $node/../metadata,
+-              local:sanity_check(
++local:conll(
+                 local:enhanced_dependencies(
+                   local:add_dependency_relations(
+             	     local:add_features(
+             	      local:add_pos_tags( 
+-              	     local:fix_misplaced_heads_in_coordination($node)))))),
+-            $node/../sentence,
+-            $node/../comments
+-          }
+-        </alpino_ds>
+-        else 
+-          <alpino_ds version ="{$node/../@version}" sentence-id="{document-uri($doc)}">
+-           { $node/../metadata,
+-              local:sanity_check(local:add_dependency_relations(
+-               local:add_features(
+-                 local:add_pos_tags( 
+-                   local:fix_misplaced_heads_in_coordination($node))))),
+-             $node/../sentence,
+-             $node/../comments
+-           }
+-         </alpino_ds>
++          local:fix_misplaced_heads_in_coordination(
++            local:fix_misplaced_heads_in_coordination(/alpino_ds/node)))))))
