@@ -79,7 +79,100 @@ var (
 	anchors      [][]Anchor
 	ud1s         = make(map[string]bool)
 	ud2s         = make(map[string]bool)
+
+	UdTags = []string{
+		"id",
+		"form",
+		"lemma",
+		"upos",
+		"xpos",
+		"head",
+		"deprel",
+		"misc",
+		"Abbr",
+		"Case",
+		"Definite",
+		"Degree",
+		"Foreign",
+		"Gender",
+		"Number",
+		"Person",
+		"PronType",
+		"Reflex",
+		"Tense",
+		"VerbForm",
+	}
+
+	DepTags = []string{
+		"id",
+		"head",
+		"deprel",
+		"elided",
+	}
 )
+
+func getUdAttr(attr string, n *UdType) string {
+	switch attr {
+	case "id":
+		return n.Id
+	case "form":
+		return n.Form
+	case "lemma":
+		return n.Lemma
+	case "upos":
+		return n.Upos
+	case "xpos":
+		return n.Xpos
+	case "head":
+		return n.Head
+	case "deprel":
+		return n.Deprel
+	case "misc":
+		return n.Misc
+	case "Abbr":
+		return n.Abbr
+	case "Case":
+		return n.Case
+	case "Definite":
+		return n.Definite
+	case "Degree":
+		return n.Degree
+	case "Foreign":
+		return n.Foreign
+	case "Gender":
+		return n.Gender
+	case "Number":
+		return n.Number
+	case "Person":
+		return n.Person
+	case "PronType":
+		return n.PronType
+	case "Reflex":
+		return n.Reflex
+	case "Tense":
+		return n.Tense
+	case "VerbForm":
+		return n.VerbForm
+	}
+	return ""
+}
+
+func getDepAttr(attr string, n *DepType) string {
+	switch attr {
+	case "id":
+		return n.Id
+	case "head":
+		return n.Head
+	case "deprel":
+		return n.Deprel
+	case "elided":
+		if n.Elided {
+			return "1"
+		}
+		return "0"
+	}
+	return ""
+}
 
 func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext) {
 

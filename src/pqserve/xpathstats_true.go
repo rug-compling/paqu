@@ -46,9 +46,29 @@ func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
 		*values = append(*values, &ValueItem{-1, -1, n.Index})
 		return
 	}
-	if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
-		*values = append(*values, &ValueItem{n.Begin, n.End, s})
-		return
+	if strings.HasPrefix(attr, "ud:") {
+		if n.Ud != nil {
+			// niet dieper kijken
+			s := strings.TrimSpace(getUdAttr(attr[3:], n.Ud))
+			*values = append(*values, &ValueItem{n.Begin, n.End, s})
+			return
+		}
+	} else if strings.HasPrefix(attr, "dep:") {
+		if n.Ud != nil && n.Ud.Dep != nil {
+			// niet dieper kijken
+			as := make([]string, len(n.Ud.Dep))
+			for i, dep := range n.Ud.Dep {
+				as[i] = getDepAttr(attr[4:], &dep)
+			}
+			s := strings.Join(as, "|")
+			*values = append(*values, &ValueItem{n.Begin, n.End, s})
+			return
+		}
+	} else {
+		if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
+			*values = append(*values, &ValueItem{n.Begin, n.End, s})
+			return
+		}
 	}
 	for _, n2 := range n.NodeList {
 		getDeepAttr(attr, n2, values)
@@ -79,11 +99,28 @@ func getFullAttr(attr string, n, top *Node) string {
 		attr = "word"
 	}
 
-	if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
-		if is_word {
-			return "+"
+	if strings.HasPrefix(attr, "ud:") {
+		if n.Ud != nil {
+			// niet dieper kijken
+			return strings.TrimSpace(getUdAttr(attr[3:], n.Ud))
 		}
-		return s
+	} else if strings.HasPrefix(attr, "dep:") {
+		if n.Ud != nil && n.Ud.Dep != nil {
+			// niet dieper kijken
+			as := make([]string, len(n.Ud.Dep))
+			for i, dep := range n.Ud.Dep {
+				as[i] = getDepAttr(attr[4:], &dep)
+			}
+			return strings.Join(as, "|")
+		}
+	} else {
+		// als leeg, dan dieper kijken
+		if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
+			if is_word {
+				return "+"
+			}
+			return s
+		}
 	}
 	values := make([]*ValueItem, 0)
 	getDeepAttr(attr, n, &values)
@@ -604,11 +641,32 @@ init({
 
 			var at [5]StructIS
 			for _, match := range matches {
+				isUd := strings.HasPrefix(match, "<ud:ud")
+				isDep := strings.HasPrefix(match, "<ud:dep")
 				alp := Alpino_ds{}
-				err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+				var err error
+				if isUd {
+					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+<alpino_ds version="1.3">
+<node>
+`+match+`
+</node>
+</alpino_ds>`), &alp)
+				} else if isDep {
+					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+<alpino_ds version="1.3">
+<node>
+<ud>
+`+match+`
+</ud>
+</node>
+</alpino_ds>`), &alp)
+				} else {
+					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+match+`
 </alpino_ds>`), &alp)
+				}
 				if err != nil {
 					updateError(q, err, !download)
 					logerr(err)

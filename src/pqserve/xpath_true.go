@@ -606,14 +606,21 @@ $('#loading span').html('%.1f%%');
 				fmt.Fprintf(q.w, "<option value=\":%s\">%s</option>\n", html.EscapeString(m.name), html.EscapeString(m.name))
 			}
 			fmt.Fprintln(q.w, "</optgroup>")
-			fmt.Fprintln(q.w, "<optgroup label=\"&mdash; attributen &mdash;\">")
 		}
+		fmt.Fprintln(q.w, "<optgroup label=\"&mdash; node: attributen &mdash;\">")
 		for _, s := range NodeTags {
 			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
 		}
-		if q.hasmeta[prefix] {
-			fmt.Fprintln(q.w, "</optgroup>")
+		fmt.Fprintln(q.w, "<optgroup label=\"&mdash; ud: attributen &mdash;\">")
+		for _, s := range UdTags {
+			fmt.Fprintf(q.w, "<option value=\"ud:%s\">%s</option>\n", s, s)
 		}
+		fmt.Fprintln(q.w, "</optgroup>")
+		fmt.Fprintln(q.w, "<optgroup label=\"&mdash; dep: attributen &mdash;\">")
+		for _, s := range DepTags {
+			fmt.Fprintf(q.w, "<option value=\"dep:%s\">%s</option>\n", s, s)
+		}
+		fmt.Fprintln(q.w, "</optgroup>")
 		fmt.Fprintln(q.w, "</select>")
 	}
 
@@ -1660,29 +1667,28 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 	ud1 := make([]string, 0)
 	ud2 := make([]string, 0)
 
-	for _, part := range xmlparts {
+	for i, part := range xmlparts {
+		isUd := strings.HasPrefix(part, "<ud:ud")
+		isDep := strings.HasPrefix(part, "<ud:dep")
+
 		alp := Alpino_ds{}
-		err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+		if isUd {
+			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
 `+part+`
 </node>
 </alpino_ds>`), &alp)
-		if err != nil {
-			fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
-			return
-		}
-		if alp.Node0.Ud != nil {
+			if err != nil {
+				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+				return
+			}
 			ud1 = append(ud1, alp.Node0.Ud.Id+":"+alp.Node0.Ud.Head+":"+alp.Node0.Ud.Deprel)
 			if i, err := strconv.Atoi(alp.Node0.Ud.Id); err == nil && i > 0 && i <= len(woorden) {
 				lvl[i-1]++
 			}
-		}
-	}
-
-	for _, part := range xmlparts {
-		alp := Alpino_ds{}
-		err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+		} else if isDep {
+			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
 <ud:ud>
@@ -1690,51 +1696,48 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 </ud:ud>
 </node>
 </alpino_ds>`), &alp)
-		if err != nil {
-			fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
-			return
-		}
-		if alp.Node0.Ud.Dep != nil {
+			if err != nil {
+				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+				return
+			}
 			for _, dep := range alp.Node0.Ud.Dep {
 				ud2 = append(ud2, dep.Id+":"+dep.Head+":"+dep.Deprel)
 				if i, err := strconv.Atoi(dep.Id); err == nil && i > 0 && i <= len(woorden) {
 					lvl[i-1]++
 				}
 			}
-		}
-	}
-
-	for i, part := range xmlparts {
-		alp := Alpino_ds{}
-		err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+		} else {
+			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 `+part+`
 </alpino_ds>`), &alp)
-		if err != nil {
-			fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
-			return
-		}
-		if alp.Node0 != nil {
-			ids[i] = alp.Node0.Id
-			if i, err := strconv.Atoi(alp.Node0.Index); err == nil && alp.Node0.Word == "" && len(alp.Node0.NodeList) == 0 {
-				alp.Node0 = alpindex(i, alpino.Node0)
+			if err != nil {
+				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+				return
 			}
-			sid := alp.Node0.Id
-			if alp.Node0.OtherId != "" {
-				sid = alp.Node0.OtherId
-			}
-			if !seen[sid] {
-				seen[sid] = true
-				lvl1 := make([]bool, len(woorden)+1)
-				alpscan(alp.Node0, alpino.Node0, lvl1)
-				for j, n := range lvl1 {
-					if n {
-						lvl[j]++
+			if alp.Node0 != nil {
+				ids[i] = alp.Node0.Id
+				if i, err := strconv.Atoi(alp.Node0.Index); err == nil && alp.Node0.Word == "" && len(alp.Node0.NodeList) == 0 {
+					alp.Node0 = alpindex(i, alpino.Node0)
+				}
+				sid := alp.Node0.Id
+				if alp.Node0.OtherId != "" {
+					sid = alp.Node0.OtherId
+				}
+				if !seen[sid] {
+					seen[sid] = true
+					lvl1 := make([]bool, len(woorden)+1)
+					alpscan(alp.Node0, alpino.Node0, lvl1)
+					for j, n := range lvl1 {
+						if n {
+							lvl[j]++
+						}
 					}
 				}
 			}
 		}
 	}
+
 	var buf bytes.Buffer
 
 	fmt.Fprint(&buf, "<li>")
