@@ -73,6 +73,7 @@ import (
 	"github.com/pebbe/util"
 
 	"bufio"
+	"compress/gzip"
 	"encoding/xml"
 	"flag"
 	"fmt"
@@ -85,7 +86,10 @@ import (
 )
 
 const (
-	VERSION = "PQU001" // volgende: PQU001a, PQU001b... PQU002...
+	// Dit is om verschillende versies van de uitvoer van het programma te onderscheiden,
+	// niet het programma zelf. Dus xml-formaat of xquery-script.
+	// Volgende: PQU001a, PQU001b... PQU002...
+	VERSION = "PQU001"
 )
 
 type Alpino_ds struct {
@@ -179,6 +183,7 @@ var (
 	opt_l = flag.String("l", "", "filelist")
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
+	opt_v = flag.Bool("v", false, "version")
 )
 
 func usage() {
@@ -202,6 +207,7 @@ More options:
 
   -o : overwrite original file (default: save with .tmp)
   -p prefix : remove prefix from filename in stderr
+  -v : print version and exit
 
 `, p, p, p)
 }
@@ -210,6 +216,11 @@ func main() {
 
 	flag.Usage = usage
 	flag.Parse()
+
+	if *opt_v {
+		fmt.Println(VERSION)
+		return
+	}
 
 	if flag.NArg() == 0 && *opt_l == "" && util.IsTerminal(os.Stdin) {
 		usage()
@@ -271,12 +282,35 @@ func doFile(filename string) {
 		db1.Close()
 	} else {
 		fmt.Printf("%s%8s\r", filename, "")
-		b, err := ioutil.ReadFile(filename)
+
+		var b []byte
+		gz := false
+
+		fp, err := os.Open(filename)
 		x(err)
+		rd, err := gzip.NewReader(fp)
+		if err == nil {
+			gz = true
+			b, err = ioutil.ReadAll(rd)
+			rd.Close()
+			fp.Close()
+		} else {
+			fp.Close()
+			b, err = ioutil.ReadFile(filename)
+		}
+		x(err)
+
 		result := doXml(string(b), "", filename)
-		fp, err := os.Create(filename + ".tmp")
+
+		fp, err = os.Create(filename + ".tmp")
 		x(err)
-		fmt.Fprintln(fp, result)
+		if gz {
+			w := gzip.NewWriter(fp)
+			fmt.Fprintln(w, result)
+			w.Close()
+		} else {
+			fmt.Fprintln(fp, result)
+		}
 		fp.Close()
 	}
 	if *opt_o {

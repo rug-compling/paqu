@@ -819,8 +819,8 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	if params != "dact" && Cfg.Conllu {
 		cmd := shell(
-			`find %s -name '*.xml' | sort > %s.list; pqudep -p %s/data/ -l %s.list -o > /dev/null 2> %s.err; rm %s.list`,
-			dirname, conllu, paqudatadir, conllu, conllu, conllu)
+			`find %s -name '*.xml' | sort > %s.list; pqudep -p %s/data/ -l %s.list -o > /dev/null 2> %s.err; rm %s.list ; pqudep -v > %s.version`,
+			dirname, conllu, paqudatadir, conllu, conllu, conllu, conllu)
 		err = run(cmd, task.chKill, nil)
 		if err != nil {
 			return
