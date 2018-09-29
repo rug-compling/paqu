@@ -92,6 +92,7 @@ type ConlluType struct {
 	Conllu string `xml:",cdata"`
 	Status string `xml:"status,attr,omitempty"`
 	Error  string `xml:"error,attr,omitempty"`
+	Auto   string `xml:"auto,attr,omitempty"`
 }
 
 var (

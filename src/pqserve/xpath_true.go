@@ -41,6 +41,7 @@ var (
 		"Reflex":   true,
 		"Tense":    true,
 		"VerbForm": true,
+		"auto":     true,
 		"deprel":   true,
 		"elided":   true,
 		"error":    true,

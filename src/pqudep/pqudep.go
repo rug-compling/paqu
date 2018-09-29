@@ -84,6 +84,10 @@ import (
 	"unsafe"
 )
 
+const (
+	VERSION = "PQU001" // volgende: PQU001a, PQU001b... PQU002...
+)
+
 type Alpino_ds struct {
 	XMLName  xml.Name      `xml:"alpino_ds"`
 	Version  string        `xml:"version,attr,omitempty"`
@@ -165,11 +169,13 @@ type ConlluType struct {
 	Conllu string `xml:",cdata"`
 	Status string `xml:"status,attr,omitempty"`
 	Error  string `xml:"error,attr,omitempty"`
+	Auto   string `xml:"auto,attr,omitempty"`
 }
 
 var (
 	x     = util.CheckErr
-	opt_c = flag.Bool("c", false, "use existing cdata from <conllu> element")
+	opt_i = flag.Bool("i", false, "ignore existing cdata from <conllu>")
+	opt_k = flag.Bool("k", false, "keep existing cdata from <conllu>")
 	opt_l = flag.String("l", "", "filelist")
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
@@ -184,11 +190,16 @@ Usage, examples:
   %s -l filelist
   find . -name '*.xml' | %s
 
-  -l: file with list of names of xml and/or dact files
+  -l filelist : file with list of names of xml and/or dact files
 
-Other options:
+What happens if a file already contains CoNLL-U data?
+With option -i the data is ignored.
+With option -k the data is kept.
+In other cases, the data is ignored only if it was generated with
+an older version of the pqudep program.
 
-  -c : use cdata from <conllu> element, if cdata exists
+More options:
+
   -o : overwrite original file (default: save with .tmp)
   -p prefix : remove prefix from filename in stderr
 
@@ -326,13 +337,21 @@ func doXml(document, archname, filename string) (result string) {
 		lineno = 0
 		return
 	}
+
 	reset(alpino.Node)
-	if alpino.Conllu == nil || !*opt_c {
+	if alpino.Conllu == nil {
 		alpino.Conllu = &ConlluType{}
 	} else {
-		alpino.Conllu.Status = ""
-		alpino.Conllu.Error = ""
+		if *opt_i {
+			alpino.Conllu = &ConlluType{}
+		} else if !*opt_k {
+			if strings.HasPrefix(alpino.Conllu.Auto, "PQU") && alpino.Conllu.Auto < VERSION {
+				alpino.Conllu = &ConlluType{}
+			}
+		}
 	}
+	alpino.Conllu.Status = ""
+	alpino.Conllu.Error = ""
 
 	for _, line := range strings.Split(alpino.Conllu.Conllu, "\n") {
 		line = strings.TrimSpace(line)
@@ -361,6 +380,7 @@ func doXml(document, archname, filename string) (result string) {
 			}
 			lines = append(lines, C.GoString(C.value))
 		}
+		alpino.Conllu.Auto = VERSION
 	}
 
 	valid := make(map[string]bool)
