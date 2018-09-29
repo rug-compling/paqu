@@ -169,6 +169,7 @@ type ConlluType struct {
 
 var (
 	x     = util.CheckErr
+	opt_c = flag.Bool("c", false, "use existing cdata from <conllu> element")
 	opt_l = flag.String("l", "", "filelist")
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
@@ -187,6 +188,7 @@ Usage, examples:
 
 Other options:
 
+  -c : use cdata from <conllu> element, if cdata exists
   -o : overwrite original file (default: save with .tmp)
   -p prefix : remove prefix from filename in stderr
 
@@ -325,26 +327,40 @@ func doXml(document, archname, filename string) (result string) {
 		return
 	}
 	reset(alpino.Node)
-	alpino.Conllu = &ConlluType{}
-
-	cs := C.CString(document)
-	e := C.parse(cs)
-	C.free(unsafe.Pointer(cs))
-	if e != 0 {
-		err = fmt.Errorf("C.parse: %d", e)
-		lineno = 0
-		return
+	if alpino.Conllu == nil || !*opt_c {
+		alpino.Conllu = &ConlluType{}
+	} else {
+		alpino.Conllu.Status = ""
+		alpino.Conllu.Error = ""
 	}
-	for {
-		if e := C.next(); e != 0 {
-			err = fmt.Errorf("C.next: %d", e)
-			lineno = len(lines)
+
+	for _, line := range strings.Split(alpino.Conllu.Conllu, "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" && line[0] != '#' {
+			lines = append(lines, line)
+		}
+	}
+
+	if len(lines) == 0 {
+		cs := C.CString(document)
+		e := C.parse(cs)
+		C.free(unsafe.Pointer(cs))
+		if e != 0 {
+			err = fmt.Errorf("C.parse: %d", e)
+			lineno = 0
 			return
 		}
-		if C.done != 0 {
-			break
+		for {
+			if e := C.next(); e != 0 {
+				err = fmt.Errorf("C.next: %d", e)
+				lineno = len(lines)
+				return
+			}
+			if C.done != 0 {
+				break
+			}
+			lines = append(lines, C.GoString(C.value))
 		}
-		lines = append(lines, C.GoString(C.value))
 	}
 
 	valid := make(map[string]bool)

@@ -484,7 +484,7 @@ function toggle(id, enhanced) {
 function mark(id, i) {
   var cl = normal[id] ? 'n' : 'e';
   var t = tts[id][i-1];
-  tooltip.show('<em>' + t[0] + '</em><br>\n' + t[1] + '<br>\n' + t[2] + '<br>\nLemma: ' + t[3] + (t[4] == "_" ? "" : '<br>\nXpostag: ' + t[4]),'auto',true);
+  tooltip.show('<em>' + t[0] + '</em><br>\n' + t[1] + '<br>\n' + t[2] + '<br>\nLemma: ' + t[3] + (t[4] == "_" ? "" : '<br>\nXpos: ' + t[4]),'auto',true);
   $('svg#' + id + ' .l' + cl + i).css({'fill':'blue','font-weight':'bold'});
   $('svg#' + id + ' .e' + cl + i).css({'stroke':'blue','stroke-width':3});
 }
