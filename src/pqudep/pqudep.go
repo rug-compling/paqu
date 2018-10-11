@@ -399,8 +399,11 @@ func doXml(document, archname, filename string) (result string) {
 		}
 	}
 
-	if len(lines) == 0 {
+	if len(lines) == 0 || strings.HasPrefix(alpino.Conllu.Auto, "PQU") {
 		alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
+	}
+
+	if len(lines) == 0 {
 		cs := C.CString(document)
 		e := C.parse(cs)
 		C.free(unsafe.Pointer(cs))
@@ -650,9 +653,6 @@ func oldVersion(ver string) bool {
 
 func isOld(ver string) bool {
 	vv := strings.Split(ver[3:], ".")
-	if len(vv) < 2 {
-		return true
-	}
 	i, err := strconv.Atoi(vv[0])
 	return err != nil || i < VERSIONxq
 }
