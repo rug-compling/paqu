@@ -16,7 +16,7 @@ func main() {
 		return
 	}
 
-	_, err = db.Prepare(os.Args[2], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+	_, err = db.Prepare(os.Args[2])
 	if err != nil {
 		fmt.Println(err)
 		db.Close()

@@ -298,7 +298,7 @@ c("0", "0");
 		}
 
 		var qu *dbxml.Query
-		qu, errval = db.Prepare(queryparts[0], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+		qu, errval = db.Prepare(queryparts[0])
 		if logerr(errval) {
 			return
 		}
@@ -361,7 +361,7 @@ c("0", "0");
 				seenId = make(map[string]bool)
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", filename)
 				for i := 1; i < len(queryparts)-1; i++ {
-					docs2, errval = db.Query(doctxt+queryparts[i], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+					docs2, errval = db.Query(doctxt + queryparts[i])
 					if logerr(errval) {
 						return
 					}
@@ -373,7 +373,7 @@ c("0", "0");
 					docs2 = nil
 				}
 
-				docs2, errval = db.Query(doctxt+queryparts[len(queryparts)-1], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+				docs2, errval = db.Query(doctxt + queryparts[len(queryparts)-1])
 				if logerr(errval) {
 					return
 				}

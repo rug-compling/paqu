@@ -63,7 +63,6 @@ var (
 		"descendant::":         true,
 		"following-sibling::":  true,
 		"following::":          true,
-		"namespace::":          true,
 		"parent::":             true,
 		"preceding-sibling::":  true,
 		"preceding::":          true,
@@ -110,7 +109,6 @@ var (
 		"treat":                true,
 		"type":                 true,
 		"union":                true,
-		"ud:":                  true,
 		"conllu":               true,
 		"dep":                  true,
 		"ud":                   true,
@@ -412,7 +410,7 @@ $('#loading span').html('%.1f%%');
 		}
 
 		var qu *dbxml.Query
-		qu, errval = db.Prepare(queryparts[0], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+		qu, errval = db.Prepare(queryparts[0])
 		if logerr(errval) {
 			return
 		}
@@ -470,7 +468,7 @@ $('#loading span').html('%.1f%%');
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", name)
 				var docs2 *dbxml.Docs
 				for i := 1; i < len(queryparts)-1; i++ {
-					docs2, errval = db.Query(doctxt+queryparts[i], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+					docs2, errval = db.Query(doctxt + queryparts[i])
 					if logerr(errval) {
 						done <- true
 						return
@@ -480,7 +478,7 @@ $('#loading span').html('%.1f%%');
 					}
 					docs2.Close()
 				}
-				docs2, errval = db.Query(doctxt+queryparts[len(queryparts)-1], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+				docs2, errval = db.Query(doctxt + queryparts[len(queryparts)-1])
 				if logerr(errval) {
 					done <- true
 					return
@@ -1438,7 +1436,7 @@ corpus: <select name="db">
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node', '/alpino_ds[parser/@cats=""]', '/alpino_ds[parser/@skips=""]', '/alpino_ds[parser/@cats="" and parser/@skips=""]', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]', '//parser[@cats=""]', '//parser[@skips=""]', '//parser[@cats="" and @skips=""]'];
-var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','ud:ud','ud:dep','ud:conllu'`)
+var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','ud','dep','conllu'`)
 	for _, a := range NodeTags {
 		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
 	}
@@ -1462,7 +1460,6 @@ var axis = [
 		"descendant::",
 		"following-sibling::",
 		"following::",
-		"namespace::",
 		"parent::",
 		"preceding-sibling::",
 		"preceding::",
@@ -1530,7 +1527,7 @@ $('#xquery').textcomplete([
     index: 1
 },
 {
-    match: /([\/@][-_a-zA-Z]*|ud:)$/,
+    match: /[\/@][-_a-zA-Z]*$/,
     search: function (term, callback) {
         callback($.map(other, function (e) {
             return e.indexOf(term) === 0 ? e : null;
@@ -1669,8 +1666,8 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 	ud2 := make([]string, 0)
 
 	for i, part := range xmlparts {
-		isUd := strings.HasPrefix(part, "<ud:ud")
-		isDep := strings.HasPrefix(part, "<ud:dep")
+		isUd := strings.HasPrefix(part, "<ud")
+		isDep := strings.HasPrefix(part, "<dep")
 
 		alp := Alpino_ds{}
 		if isUd {
@@ -1692,9 +1689,9 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
-<ud:ud>
+<ud>
 `+part+`
-</ud:ud>
+</ud>
 </node>
 </alpino_ds>`), &alp)
 			if err != nil {

@@ -488,7 +488,7 @@ init({
 			return
 		}
 
-		qu, err := db.Prepare(queryparts[0], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+		qu, err := db.Prepare(queryparts[0])
 		if err != nil {
 			updateError(q, err, !download)
 			db.Close()
@@ -539,7 +539,7 @@ init({
 				seenId = make(map[string]bool)
 				doctxt := fmt.Sprintf("[dbxml:metadata('dbxml:name')=%q]", name)
 				for i := 1; i < len(queryparts)-1; i++ {
-					docs2, err := db.Query(doctxt+queryparts[i], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+					docs2, err := db.Query(doctxt + queryparts[i])
 					if err != nil {
 						updateError(q, err, !download)
 						logerr(err)
@@ -553,7 +553,7 @@ init({
 					docs2.Close()
 				}
 
-				docs2, err := db.Query(doctxt+queryparts[len(queryparts)-1], dbxml.Namespace{Prefix: "ud", Uri: "http://www.let.rug.nl/alfa/unidep/"})
+				docs2, err := db.Query(doctxt + queryparts[len(queryparts)-1])
 				if err != nil {
 					updateError(q, err, !download)
 					logerr(err)
@@ -641,8 +641,8 @@ init({
 
 			var at [5]StructIS
 			for _, match := range matches {
-				isUd := strings.HasPrefix(match, "<ud:ud")
-				isDep := strings.HasPrefix(match, "<ud:dep")
+				isUd := strings.HasPrefix(match, "<ud")
+				isDep := strings.HasPrefix(match, "<dep")
 				alp := Alpino_ds{}
 				var err error
 				if isUd {

@@ -86,10 +86,9 @@ import (
 )
 
 const (
-	// Dit is om verschillende versies van de uitvoer van het programma te onderscheiden,
-	// niet het programma zelf. Dus xml-formaat of xquery-script.
-	// Volgende: PQU001a, PQU001b... PQU002...
-	VERSION = "PQU001"
+	VERSIONs   = "PQU%d.%d"
+	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten
+	VERSIONxml = 1 // ophogen als xml-formaat is veranderd
 )
 
 type Alpino_ds struct {
@@ -131,7 +130,6 @@ type NodeType struct {
 	FullNode
 	Ud       *UdType     `xml:"ud,omitempty"`
 	NodeList []*NodeType `xml:"node"`
-	skip     bool
 }
 
 type UdType struct {
@@ -218,7 +216,7 @@ func main() {
 	flag.Parse()
 
 	if *opt_v {
-		fmt.Println(VERSION)
+		fmt.Printf(VERSIONs+"\n", VERSIONxq, VERSIONxml)
 		return
 	}
 
@@ -274,7 +272,7 @@ func doFile(filename string) {
 		for docs.Next() {
 			f := docs.Name()
 			xml := docs.Content()
-			fmt.Printf("%s / %-8s\r", filename, f)
+			fmt.Printf("%s / %s%8s\r", filename, f, "")
 			result := doXml(xml, filename, f)
 			x(db2.PutXml(f, result, false))
 		}
@@ -373,13 +371,16 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	reset(alpino.Node)
+	if oldVersion(alpino.Version) {
+		alpino.Version = "1.8"
+	}
 	if alpino.Conllu == nil {
 		alpino.Conllu = &ConlluType{}
 	} else {
 		if *opt_i {
 			alpino.Conllu = &ConlluType{}
 		} else if !*opt_k {
-			if strings.HasPrefix(alpino.Conllu.Auto, "PQU") && alpino.Conllu.Auto < VERSION {
+			if strings.HasPrefix(alpino.Conllu.Auto, "PQU") && isOld(alpino.Conllu.Auto) {
 				alpino.Conllu = &ConlluType{}
 			}
 		}
@@ -414,7 +415,7 @@ func doXml(document, archname, filename string) (result string) {
 			}
 			lines = append(lines, C.GoString(C.value))
 		}
-		alpino.Conllu.Auto = VERSION
+		alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
 	}
 
 	valid := make(map[string]bool)
@@ -527,13 +528,6 @@ func format(alpino Alpino_ds) string {
 		s = strings.Replace(s, "></"+v+">", "/>", -1)
 	}
 
-	// namespace
-	s = strings.Replace(s, "<alpino_ds", "<alpino_ds xmlns:ud=\"http://www.let.rug.nl/alfa/unidep/\"", 1)
-	for _, v := range []string{"ud", "dep", "conllu"} {
-		s = strings.Replace(s, "<"+v, "<ud:"+v, -1)
-		s = strings.Replace(s, "</"+v, "</ud:"+v, -1)
-	}
-
 	return s
 }
 
@@ -629,4 +623,29 @@ func reset(node *NodeType) {
 	for _, n := range node.NodeList {
 		reset(n)
 	}
+}
+
+func oldVersion(ver string) bool {
+	vv := strings.Split(ver, ".")
+	if len(vv) < 2 {
+		return true
+	}
+	v1, err := strconv.Atoi(vv[0])
+	if err != nil {
+		return true
+	}
+	v2, err := strconv.Atoi(vv[1])
+	if err != nil {
+		return true
+	}
+	if v1 < 1 || (v1 == 1 && v2 < 8) {
+		return true
+	}
+	return false
+}
+
+func isOld(ver string) bool {
+	vv := strings.Split(ver[3:], ".")
+	i, err := strconv.Atoi(vv[0])
+	return err != nil || i < VERSIONxq
 }

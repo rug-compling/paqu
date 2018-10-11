@@ -51,7 +51,6 @@ type Node struct {
 	FullNode
 	Ud       *UdType `xml:"ud,omitempty"`
 	NodeList []*Node `xml:"node"`
-	skip     bool
 }
 
 type UdType struct {
@@ -185,13 +184,6 @@ func format(alpino Alpino_ds) string {
 	// shorten
 	for _, v := range []string{"meta", "parser", "node", "dep"} {
 		s = strings.Replace(s, "></"+v+">", "/>", -1)
-	}
-
-	// namespace
-	s = strings.Replace(s, "<alpino_ds", "<alpino_ds xmlns:ud=\"http://www.let.rug.nl/alfa/unidep/\"", 1)
-	for _, v := range []string{"ud", "dep", "conllu"} {
-		s = strings.Replace(s, "<"+v, "<ud:"+v, -1)
-		s = strings.Replace(s, "</"+v, "</ud:"+v, -1)
 	}
 
 	return s
