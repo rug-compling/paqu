@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -40,7 +41,16 @@ var (
 func main() {
 	configfile := filepath.Join(paquconfigdir, "setup.toml")
 
-	_, err := TomlDecodeFile(configfile, &Cfg)
+	var re *regexp.Regexp
+	var err error
+	if len(os.Args) > 1 {
+		re, err = regexp.Compile(os.Args[1])
+		x(err)
+	} else {
+		fmt.Println("Met regexp: alleen corpora die matchen")
+	}
+
+	_, err = TomlDecodeFile(configfile, &Cfg)
 	x(err)
 
 	if !Cfg.Conllu {
@@ -70,6 +80,9 @@ func main() {
 	version := strings.TrimSpace(string(b))
 
 	for _, corpus := range corpora {
+		if re != nil && !re.MatchString(corpus) {
+			continue
+		}
 		up_to_date := false
 		for {
 			b, err := ioutil.ReadFile(corpus + "/conllu.version")
