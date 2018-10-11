@@ -470,6 +470,7 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 var tts = [];
 var normal = [];
 function toggle(id, enhanced) {
+  unhold();
   if (normal[id] && enhanced) {
     $('svg#'+id+' .enhanced').css({'visibility':''});
     $('svg#'+id+' .normal').css({'visibility':'hidden'});
@@ -481,30 +482,86 @@ function toggle(id, enhanced) {
   }
 }
 
+var holding  = false;
+var holdedge = false;
+var holdnode = false;
+var holdid  = '';
+var holdi = -1;
+var holdj = -1;
+
+function unhold() {
+  if (holding) {
+    holding = false;
+    if (holdnode) {
+      holdnode = false;
+      unmark(holdid, holdi);
+    }
+    if (holdedge) {
+      holdedge = false;
+      unmrk(holdid, holdi, holdj);
+    }
+    holdid = '';
+    holdi = -1;
+    holdj = -1;
+  }
+}
+function hold(id, i) {
+  if (holdnode && id == holdid && i == holdi) {
+    unhold();
+  } else {
+    unhold();
+    mark(id, i);
+    holding = true;
+    holdnode = true;
+    holdid = id;
+    holdi = i;
+  }
+}
+function hld(id, i, j) {
+  if (holdedge && id == holdid && i == holdi && j == holdj) {
+    unhold();
+  } else {
+    unhold();
+    mrk(id, i, j);
+    holding = true;
+    holdedge = true;
+    holdid = id;
+    holdi = i;
+    holdj = j;
+  }
+}
 function mark(id, i) {
   var cl = normal[id] ? 'n' : 'e';
   var t = tts[id][i-1];
   tooltip.show('<em>' + t[0] + '</em><br>\n' + t[1] + '<br>\n' + t[2] + '<br>\nLemma: ' + t[3] + (t[4] == "_" ? "" : '<br>\nXpos: ' + t[4]),'auto',true);
-  $('svg#' + id + ' .l' + cl + i).css({'fill':'blue','font-weight':'bold'});
-  $('svg#' + id + ' .e' + cl + i).css({'stroke':'blue','stroke-width':3});
+  if (!holding) {
+    $('svg#' + id + ' .l' + cl + i).css({'fill':'blue','font-weight':'bold'});
+    $('svg#' + id + ' .e' + cl + i).css({'stroke':'blue','stroke-width':3});
+  }
 }
 function unmark(id, i) {
   var cl = normal[id] ? 'n' : 'e';
   tooltip.hide();
-  $('svg#' + id + ' .l' + cl + i).css({'fill':'black','font-weight':'normal'});
-  $('svg#' + id + ' .e' + cl + i).css({'stroke':'black','stroke-width':1});
+  if (!holding) {
+    $('svg#' + id + ' .l' + cl + i).css({'fill':'black','font-weight':'normal'});
+    $('svg#' + id + ' .e' + cl + i).css({'stroke':'black','stroke-width':1});
+  }
 }
 function mrk(id, i, j) {
-  $('svg#' + id + ' .p' + i + 'p' + j).css({'fill':'blue','font-weight':'bold'});
-  $('svg#' + id + ' .q' + i + 'q' + j).css({'stroke':'blue','stroke-width':3});
-  $('svg#' + id + ' .q' + i).css({'stroke':'blue','stroke-width':3});
-  $('svg#' + id + ' .q' + j).css({'stroke':'blue','stroke-width':3});
+  if (!holding) {
+    $('svg#' + id + ' .p' + i + 'p' + j).css({'fill':'blue','font-weight':'bold'});
+    $('svg#' + id + ' .q' + i + 'q' + j).css({'stroke':'blue','stroke-width':3});
+    $('svg#' + id + ' .q' + i).css({'stroke':'blue','stroke-width':3});
+    $('svg#' + id + ' .q' + j).css({'stroke':'blue','stroke-width':3});
+  }
 }
 function unmrk(id, i, j) {
-  $('svg#' + id + ' .p' + i + 'p' + j).css({'fill':'black','font-weight':'normal'});
-  $('svg#' + id + ' .q' + i + 'q' + j).css({'stroke':'black','stroke-width':1});
-  $('svg#' + id + ' .q' + i).css({'stroke':'black','stroke-width':1});
-  $('svg#' + id + ' .q' + j).css({'stroke':'black','stroke-width':1});
+  if (!holding) {
+    $('svg#' + id + ' .p' + i + 'p' + j).css({'fill':'black','font-weight':'normal'});
+    $('svg#' + id + ' .q' + i + 'q' + j).css({'stroke':'black','stroke-width':1});
+    $('svg#' + id + ' .q' + i).css({'stroke':'black','stroke-width':1});
+    $('svg#' + id + ' .q' + j).css({'stroke':'black','stroke-width':1});
+  }
 }
 </script>
 `)
@@ -603,7 +660,7 @@ function unmrk(id, i, j) {
 				h+2*EDGE_FONT_WHITE_MARGIN)
 			fmt.Fprintf(&texts,
 				"<text class=\"l%s%d l%s%d p%dp%d\" x=\"%d\" y=\"%d\" "+
-					"onmouseover=\"mrk('%s',%d,%d)\" onmouseout=\"unmrk('%s',%d,%d)\">"+
+					"onclick=\"hld('%s',%d,%d)\" onmouseover=\"mrk('%s',%d,%d)\" onmouseout=\"unmrk('%s',%d,%d)\">"+
 					"%s</text>\n",
 				e,
 				dep.end,
@@ -613,6 +670,7 @@ function unmrk(id, i, j) {
 				dep.headpos,
 				(x1+x2)/2,
 				y2-EDGE_FONT_OFFSET,
+				svgID, dep.end, dep.headpos,
 				svgID, dep.end, dep.headpos,
 				svgID, dep.end, dep.headpos,
 				html.EscapeString(dep.rel[variant]))
@@ -710,12 +768,14 @@ function unmrk(id, i, j) {
 			enh = ` class="enhanced"`
 		}
 		fmt.Fprintf(fp, "<rect%s x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" rx=\"5\" ry=\"5\" "+
-			"onmouseover=\"mark('%s',%d)\" onmouseout=\"unmark('%s',%d)\" />\n",
+			"onclick=\"hold('%s',%d)\" onmouseover=\"mark('%s',%d)\" onmouseout=\"unmark('%s',%d)\" />\n",
 			enh,
 			item.x1,
 			offset,
 			item.x2-item.x1,
 			int(NODE_HEIGHT),
+			svgID,
+			i+1,
 			svgID,
 			i+1,
 			svgID,
