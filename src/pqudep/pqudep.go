@@ -80,6 +80,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -182,6 +183,8 @@ var (
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
 	opt_v = flag.Bool("v", false, "version")
+
+	reJunk = regexp.MustCompile(`(<ud:ud.*?</ud:ud>)|(<ud:conllu.*?</ud:conllu>)`)
 )
 
 func usage() {
@@ -364,6 +367,7 @@ func doXml(document, archname, filename string) (result string) {
 		result = format(alpino)
 	}()
 
+	document = reJunk.ReplaceAllString(document, "") // erg oude versie
 	err = xml.Unmarshal([]byte(document), &alpino)
 	if err != nil {
 		lineno = 0
@@ -396,6 +400,7 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	if len(lines) == 0 {
+		alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
 		cs := C.CString(document)
 		e := C.parse(cs)
 		C.free(unsafe.Pointer(cs))
@@ -415,7 +420,6 @@ func doXml(document, archname, filename string) (result string) {
 			}
 			lines = append(lines, C.GoString(C.value))
 		}
-		alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
 	}
 
 	valid := make(map[string]bool)
