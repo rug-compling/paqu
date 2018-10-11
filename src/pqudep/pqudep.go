@@ -88,8 +88,8 @@ import (
 
 const (
 	VERSIONs   = "PQU%d.%d"
-	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten
-	VERSIONxml = 1 // ophogen als xml-formaat is veranderd
+	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
+	VERSIONxml = 2 // ophogen als xml-formaat is veranderd
 )
 
 type Alpino_ds struct {
@@ -184,7 +184,7 @@ var (
 	opt_p = flag.String("p", "", "prefix")
 	opt_v = flag.Bool("v", false, "version")
 
-	reJunk = regexp.MustCompile(`(<ud:ud.*?</ud:ud>)|(<ud:conllu.*?</ud:conllu>)`)
+	reJunk = regexp.MustCompile(`(?s:<ud:ud.*?</ud:ud>)|(?s:<ud:conllu.*?</ud:conllu>)`)
 )
 
 func usage() {
@@ -650,6 +650,9 @@ func oldVersion(ver string) bool {
 
 func isOld(ver string) bool {
 	vv := strings.Split(ver[3:], ".")
+	if len(vv) < 2 {
+		return true
+	}
 	i, err := strconv.Atoi(vv[0])
 	return err != nil || i < VERSIONxq
 }
