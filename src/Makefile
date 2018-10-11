@@ -37,6 +37,7 @@ endif
 	make -C pqupgrade
 	make -C pqxok
 	make -C pqudep
+	make -C pqudupgrade
 
 # pqserve moet als eerste gecompileerd worden omdat
 # sommige andere programma's ervan afhankelijk zijn.
