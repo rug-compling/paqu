@@ -59,7 +59,7 @@ func main() {
 
 	x(os.Chdir(filepath.Join(paqudatadir, "data")))
 
-	corpora := make([]string, 0)
+	corporall := make([]string, 0)
 	db, err := dbopen()
 	x(err)
 	rows, err := db.Query(
@@ -70,7 +70,7 @@ func main() {
 	for rows.Next() {
 		var id string
 		x(rows.Scan(&id))
-		corpora = append(corpora, id)
+		corporall = append(corporall, id)
 	}
 	x(rows.Err())
 	db.Close()
@@ -79,7 +79,8 @@ func main() {
 	x(err)
 	version := strings.TrimSpace(string(b))
 
-	for _, corpus := range corpora {
+	corpora := make([]string, 0)
+	for _, corpus := range corporall {
 		if re != nil && !re.MatchString(corpus) {
 			continue
 		}
@@ -96,12 +97,15 @@ func main() {
 			up_to_date = true
 			break
 		}
-		if up_to_date {
-			continue
+		if !up_to_date {
+			corpora = append(corpora, corpus)
 		}
-		fmt.Println("Updating:", corpus)
+	}
 
-		cmd := exec.Command("sh", "-c", fmt.Sprintf("find %s -name '*.xml.gz' | sort -r | pqudep -o", corpus))
+	for teller, corpus := range corpora {
+		fmt.Printf("Updating: [%d/%d] %s\n", teller+1, len(corpora), corpus)
+
+		cmd := exec.Command("sh", "-c", fmt.Sprintf("find %s -name '*.xml.gz' | sort | pqudep -o", corpus))
 		cmd.Stdout = os.Stdout
 		out, err := cmd.StderrPipe()
 		x(err)
@@ -127,6 +131,8 @@ func main() {
 
 		if _, err = os.Stat(corpus + "/data.dactx"); err == nil {
 			cmd = exec.Command("sh", "-c", fmt.Sprintf("pqdactx %s/data.dact %s/data.dactx.tmp", corpus, corpus))
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
 			x(cmd.Run())
 			x(os.Rename(corpus+"/data.dactx.tmp", corpus+"/data.dactx"))
 		}

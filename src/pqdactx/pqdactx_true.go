@@ -108,13 +108,16 @@ Syntax: %s infile.dact outfile.dactx
 	}
 	db1, err := dbxml.OpenRead(os.Args[1])
 	x(err)
+	size, _ := db1.Size()
 	db2, err := dbxml.OpenReadWrite(os.Args[2])
 	x(err)
 	docs, err := db1.All()
 	x(err)
+	teller := 0
 	for docs.Next() {
+		teller++
 		name := docs.Name()
-		fmt.Fprintln(os.Stderr, name)
+		fmt.Printf("\r\033[K[%d/%d] %s ", teller, size, name)
 		content := docs.Content()
 		alpino := Alpino_ds{}
 		err = xml.Unmarshal([]byte(content), &alpino)
@@ -124,6 +127,7 @@ Syntax: %s infile.dact outfile.dactx
 		}
 		x(db2.PutXml(name, content, false))
 	}
+	fmt.Print("\r\033[K")
 	db2.Close()
 	db1.Close()
 	st, err := os.Stat(os.Args[1])

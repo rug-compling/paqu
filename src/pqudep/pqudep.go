@@ -234,12 +234,14 @@ func main() {
 	}
 	C.free(unsafe.Pointer(cs))
 
+	filenames := make([]string, 0)
+
 	if !util.IsTerminal(os.Stdin) {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			filename := strings.TrimSpace(scanner.Text())
 			if filename != "" {
-				doFile(filename)
+				filenames = append(filenames, filename)
 			}
 		}
 		x(scanner.Err())
@@ -252,37 +254,45 @@ func main() {
 		for scanner.Scan() {
 			filename := strings.TrimSpace(scanner.Text())
 			if filename != "" {
-				doFile(filename)
+				filenames = append(filenames, filename)
 			}
 		}
 		x(scanner.Err())
 	}
 
 	for _, filename := range flag.Args() {
-		doFile(filename)
+		filenames = append(filenames, filename)
 	}
-	fmt.Println()
+
+	for i, filename := range filenames {
+		doFile(filename, i+1, len(filenames))
+	}
+	fmt.Print("\r\033[K")
 }
 
-func doFile(filename string) {
+func doFile(filename string, index, length int) {
 	if strings.HasSuffix(filename, ".dact") {
 		db1, err := dbxml.OpenRead(filename)
+		x(err)
+		size, err := db1.Size()
 		x(err)
 		os.Remove(filename + ".tmp")
 		db2, err := dbxml.OpenReadWrite(filename + ".tmp")
 		x(err)
 		docs, err := db1.All()
+		teller := 0
 		for docs.Next() {
+			teller++
 			f := docs.Name()
 			xml := docs.Content()
-			fmt.Printf("%s / %s%8s\r", filename, f, "")
+			fmt.Printf("\r\033[K[%d/%d] %s -> [%d/%d] %s ", index, length, filename, teller, size, f)
 			result := doXml(xml, filename, f)
 			x(db2.PutXml(f, result, false))
 		}
 		db2.Close()
 		db1.Close()
 	} else {
-		fmt.Printf("%s%8s\r", filename, "")
+		fmt.Printf("\r\033[K[%d/%d] %s ", index, length, filename)
 
 		var b []byte
 		gz := false
