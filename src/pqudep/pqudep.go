@@ -293,8 +293,19 @@ func doFile(filename string, index, length int) {
 		x(err)
 		size, err := db1.Size()
 		x(err)
-		os.Remove(filename + ".tmp")                        // negeer fout
-		os.Rename(filename+".tmp.partial", filename+".tmp") // negeer fout
+
+		os.Remove(filename + ".tmp") // negeer fout
+
+		// is er een gedeeltelijke versie die we kunnen hergebruiken?
+		b, err := ioutil.ReadFile(filename + ".tmp.version")
+		if err == nil {
+			os.Remove(filename + ".tmp.version")
+			if fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml) == strings.TrimSpace(string(b)) {
+				os.Rename(filename+".tmp.partial", filename+".tmp") // negeer fout
+			}
+		}
+		os.Remove(filename + ".tmp.partial") // negeer fout
+
 		db2, err := dbxml.OpenReadWrite(filename + ".tmp")
 		x(err)
 		docs, err := db1.All()
@@ -321,6 +332,10 @@ func doFile(filename string, index, length int) {
 		db1.Close()
 		if quit {
 			os.Rename(filename+".tmp", filename+".tmp.partial")
+			fp, err := os.Create(filename + ".tmp.version")
+			x(err)
+			fmt.Fprintf(fp, VERSIONs+"\n", VERSIONxq, VERSIONxml)
+			fp.Close()
 			return
 		}
 	} else {
