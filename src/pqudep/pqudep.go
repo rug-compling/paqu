@@ -79,10 +79,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"unsafe"
 )
 
@@ -185,6 +187,7 @@ var (
 	opt_v = flag.Bool("v", false, "version")
 
 	reJunk = regexp.MustCompile(`(?s:<ud:ud.*?</ud:ud>)|(?s:<ud:conllu.*?</ud:conllu>)`)
+	chQuit = make(chan bool)
 )
 
 func usage() {
@@ -228,6 +231,14 @@ func main() {
 		return
 	}
 
+	go func() {
+		chSignal := make(chan os.Signal, 1)
+		signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+		sig := <-chSignal
+		close(chQuit)
+		fmt.Printf("\r\033[KSignal: %v\n", sig)
+	}()
+
 	cs := C.CString(udep)
 	if e := C.init(cs); e != 0 {
 		x(fmt.Errorf("C.init: %d", e))
@@ -264,8 +275,14 @@ func main() {
 		filenames = append(filenames, filename)
 	}
 
+LOOP:
 	for i, filename := range filenames {
 		doFile(filename, i+1, len(filenames))
+		select {
+		case <-chQuit:
+			break LOOP
+		default:
+		}
 	}
 	fmt.Print("\r\033[K")
 }
@@ -276,21 +293,36 @@ func doFile(filename string, index, length int) {
 		x(err)
 		size, err := db1.Size()
 		x(err)
-		os.Remove(filename + ".tmp")
+		os.Remove(filename + ".tmp")                        // negeer fout
+		os.Rename(filename+".tmp.partial", filename+".tmp") // negeer fout
 		db2, err := dbxml.OpenReadWrite(filename + ".tmp")
 		x(err)
 		docs, err := db1.All()
 		teller := 0
+		quit := false
 		for docs.Next() {
 			teller++
 			f := docs.Name()
-			xml := docs.Content()
 			fmt.Printf("\r\033[K[%d/%d] %s -> [%d/%d] %s ", index, length, filename, teller, size, f)
+			if _, err := db2.Get(f); err == nil {
+				continue
+			}
+			xml := docs.Content()
 			result := doXml(xml, filename, f)
-			x(db2.PutXml(f, result, false))
+			select {
+			case <-chQuit:
+				quit = true
+				docs.Close()
+			default:
+				x(db2.PutXml(f, result, false))
+			}
 		}
 		db2.Close()
 		db1.Close()
+		if quit {
+			os.Rename(filename+".tmp", filename+".tmp.partial")
+			return
+		}
 	} else {
 		fmt.Printf("\r\033[K[%d/%d] %s ", index, length, filename)
 
@@ -312,6 +344,11 @@ func doFile(filename string, index, length int) {
 		x(err)
 
 		result := doXml(string(b), "", filename)
+		select {
+		case <-chQuit:
+			return
+		default:
+		}
 
 		fp, err = os.Create(filename + ".tmp")
 		x(err)
