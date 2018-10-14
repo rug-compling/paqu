@@ -79,6 +79,9 @@ func copyNodeOnEmpty(dst, src *Node) {
 	if dst.NodeList == nil {
 		dst.NodeList = src.NodeList
 	}
+	if dst.Ud == nil || dst.Ud.Id == "" {
+		dst.Ud = src.Ud
+	}
 }
 `)
 }

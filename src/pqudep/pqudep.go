@@ -91,7 +91,7 @@ import (
 const (
 	VERSIONs   = "PQU%d.%d"
 	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml = 2 // ophogen als xml-formaat is veranderd
+	VERSIONxml = 3 // ophogen als xml-formaat is veranderd
 )
 
 type Alpino_ds struct {
