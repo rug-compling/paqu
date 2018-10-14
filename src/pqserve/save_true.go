@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/dbxml"
 
 	"fmt"
+	"strings"
 )
 
 func saveOpenDact(q *Context, prefix string, arch int) (interface{}, string) {
@@ -28,6 +29,9 @@ func saveOpenDact(q *Context, prefix string, arch int) (interface{}, string) {
 		return nil, ""
 	}
 
+	if strings.HasPrefix(filename, "$$") {
+		filename = paqudatadir + filename[2:]
+	}
 	db, err := dbxml.OpenRead(filename)
 	if doErr(q, err) {
 		return nil, ""

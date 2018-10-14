@@ -289,6 +289,10 @@ func savez2(q *Context) {
 				rows.Close()
 				return
 			}
+			if strings.HasPrefix(filename, "$$") {
+				filename = paqudatadir + "/data/" + prefix + "/xml" + filename[2:]
+			}
+
 			var data []byte
 			if arch < 0 {
 				fpgz, err = os.Open(filename + ".gz")
