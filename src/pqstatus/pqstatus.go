@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -60,17 +61,23 @@ func main() {
 	corpora := make(map[string]int)
 	words := make(map[string]int)
 
-	fmt.Print("\nCORPORA\n\nlaatst gebruikt\tid\t\t\ttokens\t\tstatus\t\teigenaar\n")
+	fmt.Print("\nCORPORA\n\nlaatst gebruikt\tid\t\t\ttokens\t\tstatus\t\tconllu\teigenaar\n")
 	for rows.Next() {
 		var id, owner, status string
 		var nword int
 		var active time.Time
 		util.CheckErr(rows.Scan(&id, &owner, &status, &nword, &active))
-		fmt.Printf("%v\t%-23s\t%-15s\t%-10s\t%v\n",
+		conllu := ""
+		b, err := ioutil.ReadFile(id + "/conllu.version")
+		if err == nil {
+			conllu = strings.TrimSpace(string(b))
+		}
+		fmt.Printf("%v\t%-23s\t%-15s\t%-10s\t%s\t%v\n",
 			date(active),
 			id,
 			fmt.Sprint(nword),
 			status,
+			conllu,
 			owner)
 		disk[id] = false
 		corpora[owner]++
