@@ -572,7 +572,7 @@ func doXml(document, archname, filename string) (result string) {
 					Id:         a[0],
 					Head:       dep[0],
 					Deprel:     dep[1],
-					DeprelHead: dd[0],
+					DeprelMain: dd[0],
 					DeprelAux:  aux,
 					Elided:     strings.Contains(a[0], "."),
 				})
@@ -598,7 +598,7 @@ func doXml(document, archname, filename string) (result string) {
 		node.Ud.Misc = noe(a[9])
 
 		dd := strings.SplitN(node.Ud.Deprel, ":", 2)
-		node.Ud.DeprelHead = dd[0]
+		node.Ud.DeprelMain = dd[0]
 		if len(dd) > 1 {
 			node.Ud.DeprelAux = dd[1]
 		}
