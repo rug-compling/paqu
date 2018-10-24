@@ -91,7 +91,7 @@ import (
 const (
 	VERSIONs   = "PQU%d.%d"
 	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml = 2 // ophogen als xml-formaat is veranderd
+	VERSIONxml = 3 // ophogen als xml-formaat is veranderd
 )
 
 type Alpino_ds struct {
@@ -142,10 +142,12 @@ type UdType struct {
 	Upos  string `xml:"upos,attr,omitempty"`
 	Xpos  string `xml:"xpos,attr,omitempty"`
 	FeatsType
-	Head   string    `xml:"head,attr,omitempty"`
-	Deprel string    `xml:"deprel,attr,omitempty"`
-	Dep    []DepType `xml:"dep,omitempty"`
-	Misc   string    `xml:"misc,attr,omitempty"`
+	Head       string    `xml:"head,attr,omitempty"`
+	Deprel     string    `xml:"deprel,attr,omitempty"`
+	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
+	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
+	Dep        []DepType `xml:"dep,omitempty"`
+	Misc       string    `xml:"misc,attr,omitempty"`
 }
 
 type FeatsType struct {
@@ -164,10 +166,12 @@ type FeatsType struct {
 }
 
 type DepType struct {
-	Id     string `xml:"id,attr,omitempty"`
-	Head   string `xml:"head,attr,omitempty"`
-	Deprel string `xml:"deprel,attr,omitempty"`
-	Elided bool   `xml:"elided,attr,omitempty"`
+	Id         string `xml:"id,attr,omitempty"`
+	Head       string `xml:"head,attr,omitempty"`
+	Deprel     string `xml:"deprel,attr,omitempty"`
+	DeprelMain string `xml:"deprel_main,attr,omitempty"`
+	DeprelAux  string `xml:"deprel_aux,attr,omitempty"`
+	Elided     bool   `xml:"elided,attr,omitempty"`
 }
 
 type ConlluType struct {
@@ -446,7 +450,7 @@ func doXml(document, archname, filename string) (result string) {
 		if *opt_i {
 			alpino.Conllu = &ConlluType{}
 		} else if !*opt_k {
-			if strings.HasPrefix(alpino.Conllu.Auto, "PQU") && isOld(alpino.Conllu.Auto) {
+			if strings.HasPrefix(alpino.Conllu.Auto, "PQU") && (isOld(alpino.Conllu.Auto) || alpino.Conllu.Status != "OK") {
 				alpino.Conllu = &ConlluType{}
 			}
 		}
@@ -497,6 +501,31 @@ func doXml(document, archname, filename string) (result string) {
 			lineno = i + 1
 			return
 		}
+		if strings.Contains(a[3], "ERROR") {
+			err = fmt.Errorf("Invalid UPOS value %v", a[3])
+			lineno = i + 1
+			return
+		}
+		if strings.Contains(a[5], "ERROR") {
+			err = fmt.Errorf("Invalid FEAT value %v", a[5])
+			lineno = i + 1
+			return
+		}
+		if strings.Contains(a[6], "ERROR") {
+			err = fmt.Errorf("Invalid HEAD value %v", a[6])
+			lineno = i + 1
+			return
+		}
+		if strings.Contains(a[7], "ERROR") {
+			err = fmt.Errorf("Invalid DEPREL value %v", a[7])
+			lineno = i + 1
+			return
+		}
+		if strings.Contains(a[8], "ERROR") {
+			err = fmt.Errorf("Invalid DEPS value %v", a[8])
+			lineno = i + 1
+			return
+		}
 		valid[a[0]] = true
 		items := getItems(a[9])
 		if n, ok := items["CopiedFrom"]; ok {
@@ -534,11 +563,18 @@ func doXml(document, archname, filename string) (result string) {
 					err = fmt.Errorf("Not a valid head: %s", dep[0])
 					return
 				}
+				var aux string
+				dd := strings.SplitN(dep[1], ":", 2)
+				if len(dd) > 1 {
+					aux = dd[1]
+				}
 				node.Ud.Dep = append(node.Ud.Dep, DepType{
-					Id:     a[0],
-					Head:   dep[0],
-					Deprel: dep[1],
-					Elided: strings.Contains(a[0], "."),
+					Id:         a[0],
+					Head:       dep[0],
+					Deprel:     dep[1],
+					DeprelHead: dd[0],
+					DeprelAux:  aux,
+					Elided:     strings.Contains(a[0], "."),
 				})
 			}
 		}
@@ -560,6 +596,12 @@ func doXml(document, archname, filename string) (result string) {
 		node.Ud.Head = noe(a[6])
 		node.Ud.Deprel = noe(a[7])
 		node.Ud.Misc = noe(a[9])
+
+		dd := strings.SplitN(node.Ud.Deprel, ":", 2)
+		node.Ud.DeprelHead = dd[0]
+		if len(dd) > 1 {
+			node.Ud.DeprelAux = dd[1]
+		}
 
 		feats := getItems(a[5])
 		node.Ud.Abbr = feats["Abbr"]

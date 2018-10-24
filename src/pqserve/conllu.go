@@ -88,6 +88,8 @@ var (
 		"xpos",
 		"head",
 		"deprel",
+		"deprel_main",
+		"deprel_aux",
 		"misc",
 		"Abbr",
 		"Case",
@@ -107,6 +109,8 @@ var (
 		"id",
 		"head",
 		"deprel",
+		"deprel_main",
+		"deprel_aux",
 		"elided",
 	}
 )
@@ -127,6 +131,10 @@ func getUdAttr(attr string, n *UdType) string {
 		return n.Head
 	case "deprel":
 		return n.Deprel
+	case "deprel_main":
+		return n.DeprelMain
+	case "deprel_aux":
+		return n.DeprelAux
 	case "misc":
 		return n.Misc
 	case "Abbr":
@@ -165,6 +173,10 @@ func getDepAttr(attr string, n *DepType) string {
 		return n.Head
 	case "deprel":
 		return n.Deprel
+	case "deprel_main":
+		return n.DeprelMain
+	case "deprel_aux":
+		return n.DeprelAux
 	case "elided":
 		if n.Elided {
 			return "1"

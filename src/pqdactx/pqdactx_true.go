@@ -60,10 +60,12 @@ type UdType struct {
 	Upos  string `xml:"upos,attr,omitempty"`
 	Xpos  string `xml:"xpos,attr,omitempty"`
 	FeatsType
-	Head   string    `xml:"head,attr,omitempty"`
-	Deprel string    `xml:"deprel,attr,omitempty"`
-	Dep    []DepType `xml:"dep,omitempty"`
-	Misc   string    `xml:"misc,attr,omitempty"`
+	Head       string    `xml:"head,attr,omitempty"`
+	Deprel     string    `xml:"deprel,attr,omitempty"`
+	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
+	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
+	Dep        []DepType `xml:"dep,omitempty"`
+	Misc       string    `xml:"misc,attr,omitempty"`
 }
 
 type FeatsType struct {
@@ -82,9 +84,11 @@ type FeatsType struct {
 }
 
 type DepType struct {
-	Id     string `xml:"id,attr,omitempty"`
-	Head   string `xml:"head,attr,omitempty"`
-	Deprel string `xml:"deprel,attr,omitempty"`
+	Id         string `xml:"id,attr,omitempty"`
+	Head       string `xml:"head,attr,omitempty"`
+	Deprel     string `xml:"deprel,attr,omitempty"`
+	DeprelMain string `xml:"deprel_main,attr,omitempty"`
+	DeprelAux  string `xml:"deprel_aux,attr,omitempty"`
 }
 
 type ConlluType struct {

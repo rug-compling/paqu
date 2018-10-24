@@ -510,7 +510,7 @@ declare function local:pronoun_features($node as element(node)) as attribute()+ 
     else if ($PERSOON eq '3p')      then '3'
     else if ($PERSOON eq '3m')      then '3'
     else if ($PERSOON eq 'persoon') then 'null'
-    else if ($PERSOON)        then 'IERROR_RREGULAR_PERSON'
+    else if ($PERSOON)        then 'ERROR_IRREGULAR_PERSON'
     else                           'null'
     }
     ,
