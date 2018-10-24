@@ -20,7 +20,21 @@ type Alpino_ds struct {
 	Node     *Node         `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
+	Root     *RootType     `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
+}
+
+type RootType struct {
+	Id    string `xml:"id,attr,omitempty"`
+	Form  string `xml:"form,attr,omitempty"`
+	Lemma string `xml:"lemma,attr,omitempty"`
+	Upos  string `xml:"upos,attr,omitempty"`
+	Xpos  string `xml:"xpos,attr,omitempty"`
+	FeatsType
+	Deprel    string `xml:"deprel,attr,omitempty"`
+	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
+	Misc      string `xml:"misc,attr,omitempty"`
+	UdNodes   []byte `xml:",innerxml"`
 }
 
 type MetadataType struct {

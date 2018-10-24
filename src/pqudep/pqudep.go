@@ -91,7 +91,7 @@ import (
 const (
 	VERSIONs   = "PQU%d.%d"
 	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml = 3 // ophogen als xml-formaat is veranderd
+	VERSIONxml = 4 // ophogen als xml-formaat is veranderd
 )
 
 type Alpino_ds struct {
@@ -102,6 +102,7 @@ type Alpino_ds struct {
 	Node     *NodeType     `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
+	Root     *UdNodeType   `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
@@ -133,6 +134,22 @@ type NodeType struct {
 	FullNode
 	Ud       *UdType     `xml:"ud,omitempty"`
 	NodeList []*NodeType `xml:"node"`
+}
+
+type UdNodeType struct {
+	XMLName xml.Name
+	Id      string `xml:"id,attr,omitempty"`
+	Form    string `xml:"form,attr,omitempty"`
+	Lemma   string `xml:"lemma,attr,omitempty"`
+	Upos    string `xml:"upos,attr,omitempty"`
+	Xpos    string `xml:"xpos,attr,omitempty"`
+	FeatsType
+	Head       string        `xml:"head,attr,omitempty"`
+	Deprel     string        `xml:"deprel,attr,omitempty"`
+	DeprelMain string        `xml:"deprel_main,attr,omitempty"`
+	DeprelAux  string        `xml:"deprel_aux,attr,omitempty"`
+	Misc       string        `xml:"misc,attr,omitempty"`
+	UdNodes    []*UdNodeType `xml:",omitempty"`
 }
 
 type UdType struct {
@@ -189,6 +206,8 @@ var (
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
 	opt_v = flag.Bool("v", false, "version")
+
+	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|dep|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|reparandum|root|vocative|xcomp)>`)
 
 	reJunk = regexp.MustCompile(`(?s:<ud:ud.*?</ud:ud>)|(?s:<ud:conllu.*?</ud:conllu>)`)
 	chQuit = make(chan bool)
@@ -533,6 +552,8 @@ func doXml(document, archname, filename string) (result string) {
 		}
 	}
 
+	udNodeList := make([]*UdNodeType, 0)
+
 	for i, line := range lines {
 		lineno = i + 1
 		a := strings.Split(line, "\t")
@@ -617,6 +638,38 @@ func doXml(document, archname, filename string) (result string) {
 		node.Ud.Tense = feats["Tense"]
 		node.Ud.VerbForm = feats["VerbForm"]
 
+		ud := UdNodeType{
+			XMLName:   xml.Name{Local: node.Ud.DeprelMain},
+			Id:        node.Ud.Id,
+			Form:      node.Ud.Form,
+			Lemma:     node.Ud.Lemma,
+			Upos:      node.Ud.Upos,
+			Xpos:      node.Ud.Xpos,
+			Head:      node.Ud.Head,
+			Deprel:    node.Ud.Deprel,
+			DeprelAux: node.Ud.DeprelAux,
+			Misc:      node.Ud.Misc,
+
+			FeatsType: node.Ud.FeatsType,
+
+			UdNodes: make([]*UdNodeType, 0),
+		}
+		udNodeList = append(udNodeList, &ud)
+	}
+
+	for _, n := range udNodeList {
+		if n.Head == "0" {
+			alpino.Root = n
+		} else {
+			for _, m := range udNodeList {
+				if n.Head == m.Id {
+					m.UdNodes = append(m.UdNodes, n)
+					break
+				}
+			}
+		}
+		n.DeprelMain = ""
+		n.Head = ""
 	}
 
 	return
@@ -635,9 +688,7 @@ func format(alpino Alpino_ds) string {
 	s := "<?xml version=\"1.0\"?>\n" + string(b)
 
 	// shorten
-	for _, v := range []string{"meta", "parser", "node", "dep"} {
-		s = strings.Replace(s, "></"+v+">", "/>", -1)
-	}
+	s = reShorted.ReplaceAllString(s, "/>")
 
 	return s
 }
