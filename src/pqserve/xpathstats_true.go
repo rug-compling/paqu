@@ -645,6 +645,8 @@ init({
 				var isUd, isDep, isId, isEid bool
 				var ID string
 
+				var alpino_test Alpino_test
+
 				if strings.HasPrefix(match, "<node") {
 					// isNode
 				} else if strings.HasPrefix(match, "<ud") {
@@ -652,7 +654,6 @@ init({
 				} else if strings.HasPrefix(match, "<dep") {
 					isDep = true
 				} else {
-					var alpino_test Alpino_test
 					err := xml.Unmarshal([]byte(match), &alpino_test)
 					if err != nil {
 						fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
@@ -674,6 +675,8 @@ init({
 						Ud:       findUdId(alpino.Node0, ID),
 						NodeList: make([]*Node, 0),
 					}
+					copyFromTest(alp.Node0, &alpino_test)
+					alp.Node0.Id = "UD:" + alpino_test.Id // hack voor telling: seenID
 					isUd = true
 				} else if isEid {
 					alp.Node0 = &Node{
@@ -682,6 +685,8 @@ init({
 						},
 						NodeList: make([]*Node, 0),
 					}
+					copyFromTest(alp.Node0, &alpino_test)
+					alp.Node0.Id = "EUD:" + alpino_test.Eid // hack voor telling: seenID
 					isDep = true
 				}
 
@@ -694,6 +699,7 @@ init({
 `+match+`
 </node>
 </alpino_ds>`), &alp)
+						alp.Node0.Id = "UD:" + alp.Node0.Ud.Id // hack voor telling: seenID
 					}
 				} else if isDep {
 					if !isEid {
@@ -705,6 +711,7 @@ init({
 </ud>
 </node>
 </alpino_ds>`), &alp)
+						alp.Node0.Id = "EUD:" + alp.Node0.Ud.Dep[0].Id // hack voor telling: seenID
 					}
 				} else {
 					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
@@ -712,6 +719,7 @@ init({
 `+match+`
 </alpino_ds>`), &alp)
 				}
+
 				if err != nil {
 					updateError(q, err, !download)
 					logerr(err)
@@ -719,6 +727,7 @@ init({
 					db.Close()
 					return
 				}
+
 				sid := ""
 				if alp.Node0 != nil {
 					sid = alp.Node0.Id
@@ -949,4 +958,31 @@ func (x ValueItems) Swap(i, j int) {
 
 func (x ValueItems) Len() int {
 	return len(x)
+}
+
+func copyFromTest(node *Node, test *Alpino_test) {
+
+	node.Buiging = test.Buiging
+	node.Conjtype = test.Conjtype
+	node.Dial = test.Dial
+	node.Genus = test.Genus
+	node.Getal = test.Getal
+	node.GetalN = test.GetalN
+	node.Graad = test.Graad
+	node.Lwtype = test.Lwtype
+	node.Naamval = test.Naamval
+	node.Npagr = test.Npagr
+	node.Ntype = test.Ntype
+	node.Numtype = test.Numtype
+	node.Pdtype = test.Pdtype
+	node.Persoon = test.Persoon
+	node.Positie = test.Positie
+	node.Pt = test.Pt
+	node.Pvagr = test.Pvagr
+	node.Pvtijd = test.Pvtijd
+	node.Spectype = test.Spectype
+	node.Status = test.Status
+	node.Vwtype = test.Vwtype
+	node.Vztype = test.Vztype
+	node.Wvorm = test.Wvorm
 }

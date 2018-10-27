@@ -106,9 +106,32 @@ type Sentence struct {
 }
 
 type Alpino_test struct {
-	XMLName xml.Name
-	Id      string `xml:"id,attr"`
-	Eid     string `xml:"eid,attr"`
+	XMLName  xml.Name
+	Id       string `xml:"id,attr"`
+	Eid      string `xml:"eid,attr"`
+	Buiging  string `xml:"buiging,attr"`
+	Conjtype string `xml:"conjtype,attr"`
+	Dial     string `xml:"dial,attr"`
+	Genus    string `xml:"genus,attr"`
+	Getal    string `xml:"getal,attr"`
+	GetalN   string `xml:"getal-n,attr"`
+	Graad    string `xml:"graad,attr"`
+	Lwtype   string `xml:"lwtype,attr"`
+	Naamval  string `xml:"naamval,attr"`
+	Npagr    string `xml:"npagr,attr"`
+	Ntype    string `xml:"ntype,attr"`
+	Numtype  string `xml:"numtype,attr"`
+	Pdtype   string `xml:"pdtype,attr"`
+	Persoon  string `xml:"persoon,attr"`
+	Positie  string `xml:"positie,attr"`
+	Pt       string `xml:"pt,attr"`
+	Pvagr    string `xml:"pvagr,attr"`
+	Pvtijd   string `xml:"pvtijd,attr"`
+	Spectype string `xml:"spectype,attr"`
+	Status   string `xml:"status,attr"`
+	Vwtype   string `xml:"vwtype,attr"`
+	Vztype   string `xml:"vztype,attr"`
+	Wvorm    string `xml:"wvorm,attr"`
 }
 
 type Alpino_ds_complete struct {
