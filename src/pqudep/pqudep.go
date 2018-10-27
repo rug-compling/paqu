@@ -89,9 +89,11 @@ import (
 )
 
 const (
-	VERSIONs   = "PQU%d.%d"
-	VERSIONxq  = 1 // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml = 4 // ophogen als xml-formaat is veranderd
+	VERSIONs        = "PQU%d.%d"
+	VERSIONxq       = int(1) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
+	VERSIONxml      = int(7) // ophogen als xml-formaat is veranderd
+	ALPINO_DS_MAJOR = int(1)
+	ALPINO_DS_MINOR = int(9)
 )
 
 type Alpino_ds struct {
@@ -102,7 +104,7 @@ type Alpino_ds struct {
 	Node     *NodeType     `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
-	Root     *UdNodeType   `xml:"root,omitempty"`
+	Root     []*UdNodeType `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
@@ -138,18 +140,46 @@ type NodeType struct {
 
 type UdNodeType struct {
 	XMLName xml.Name
-	Id      string `xml:"id,attr,omitempty"`
-	Form    string `xml:"form,attr,omitempty"`
-	Lemma   string `xml:"lemma,attr,omitempty"`
-	Upos    string `xml:"upos,attr,omitempty"`
-	Xpos    string `xml:"xpos,attr,omitempty"`
+
+	RecursionLimit string `xml:"recursion_limit,attr,omitempty"`
+	recursion      []string
+
+	Id    string `xml:"id,attr,omitempty"`
+	Eid   string `xml:"eid,attr,omitempty"`
+	Form  string `xml:"form,attr,omitempty"`
+	Lemma string `xml:"lemma,attr,omitempty"`
+	Upos  string `xml:"upos,attr,omitempty"`
 	FeatsType
-	Head       string        `xml:"head,attr,omitempty"`
-	Deprel     string        `xml:"deprel,attr,omitempty"`
-	DeprelMain string        `xml:"deprel_main,attr,omitempty"`
-	DeprelAux  string        `xml:"deprel_aux,attr,omitempty"`
-	Misc       string        `xml:"misc,attr,omitempty"`
-	UdNodes    []*UdNodeType `xml:",omitempty"`
+	Head       string `xml:"head,attr,omitempty"`
+	Deprel     string `xml:"deprel,attr,omitempty"`
+	DeprelMain string `xml:"deprel_main,attr,omitempty"`
+	DeprelAux  string `xml:"deprel_aux,attr,omitempty"`
+
+	Buiging  string `xml:"buiging,attr,omitempty"`
+	Conjtype string `xml:"conjtype,attr,omitempty"`
+	Dial     string `xml:"dial,attr,omitempty"`
+	Genus    string `xml:"genus,attr,omitempty"`
+	Getal    string `xml:"getal,attr,omitempty"`
+	GetalN   string `xml:"getal-n,attr,omitempty"`
+	Graad    string `xml:"graad,attr,omitempty"`
+	Lwtype   string `xml:"lwtype,attr,omitempty"`
+	Naamval  string `xml:"naamval,attr,omitempty"`
+	Npagr    string `xml:"npagr,attr,omitempty"`
+	Ntype    string `xml:"ntype,attr,omitempty"`
+	Numtype  string `xml:"numtype,attr,omitempty"`
+	Pdtype   string `xml:"pdtype,attr,omitempty"`
+	Persoon  string `xml:"persoon,attr,omitempty"`
+	Positie  string `xml:"positie,attr,omitempty"`
+	Pt       string `xml:"pt,attr,omitempty"`
+	Pvagr    string `xml:"pvagr,attr,omitempty"`
+	Pvtijd   string `xml:"pvtijd,attr,omitempty"`
+	Spectype string `xml:"spectype,attr,omitempty"`
+	Status   string `xml:"status,attr,omitempty"`
+	Vwtype   string `xml:"vwtype,attr,omitempty"`
+	Vztype   string `xml:"vztype,attr,omitempty"`
+	Wvorm    string `xml:"wvorm,attr,omitempty"`
+
+	UdNodes []*UdNodeType `xml:",omitempty"`
 }
 
 type UdType struct {
@@ -157,14 +187,12 @@ type UdType struct {
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
-	Xpos  string `xml:"xpos,attr,omitempty"`
 	FeatsType
 	Head       string    `xml:"head,attr,omitempty"`
 	Deprel     string    `xml:"deprel,attr,omitempty"`
 	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
 	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
 	Dep        []DepType `xml:"dep,omitempty"`
-	Misc       string    `xml:"misc,attr,omitempty"`
 }
 
 type FeatsType struct {
@@ -461,7 +489,7 @@ func doXml(document, archname, filename string) (result string) {
 
 	reset(alpino.Node)
 	if oldVersion(alpino.Version) {
-		alpino.Version = "1.8"
+		alpino.Version = fmt.Sprintf("%d.%d", ALPINO_DS_MAJOR, ALPINO_DS_MINOR)
 	}
 	if alpino.Conllu == nil {
 		alpino.Conllu = &ConlluType{}
@@ -553,6 +581,7 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	udNodeList := make([]*UdNodeType, 0)
+	eudNodeList := make([]*UdNodeType, 0)
 
 	for i, line := range lines {
 		lineno = i + 1
@@ -613,10 +642,8 @@ func doXml(document, archname, filename string) (result string) {
 		node.Ud.Form = noe(a[1])
 		node.Ud.Lemma = noe(a[2])
 		node.Ud.Upos = noe(a[3])
-		node.Ud.Xpos = noe(a[4])
 		node.Ud.Head = noe(a[6])
 		node.Ud.Deprel = noe(a[7])
-		node.Ud.Misc = noe(a[9])
 
 		dd := strings.SplitN(node.Ud.Deprel, ":", 2)
 		node.Ud.DeprelMain = dd[0]
@@ -639,40 +666,155 @@ func doXml(document, archname, filename string) (result string) {
 		node.Ud.VerbForm = feats["VerbForm"]
 
 		ud := UdNodeType{
+			recursion: make([]string, 0),
+
 			XMLName:   xml.Name{Local: node.Ud.DeprelMain},
 			Id:        node.Ud.Id,
 			Form:      node.Ud.Form,
 			Lemma:     node.Ud.Lemma,
 			Upos:      node.Ud.Upos,
-			Xpos:      node.Ud.Xpos,
 			Head:      node.Ud.Head,
 			Deprel:    node.Ud.Deprel,
 			DeprelAux: node.Ud.DeprelAux,
-			Misc:      node.Ud.Misc,
 
 			FeatsType: node.Ud.FeatsType,
 
-			UdNodes: make([]*UdNodeType, 0),
+			Buiging:  node.Buiging,
+			Conjtype: node.Conjtype,
+			Dial:     node.Dial,
+			Genus:    node.Genus,
+			Getal:    node.Getal,
+			GetalN:   node.GetalN,
+			Graad:    node.Graad,
+			Lwtype:   node.Lwtype,
+			Naamval:  node.Naamval,
+			Npagr:    node.Npagr,
+			Ntype:    node.Ntype,
+			Numtype:  node.Numtype,
+			Pdtype:   node.Pdtype,
+			Persoon:  node.Persoon,
+			Positie:  node.Positie,
+			Pt:       node.Pt,
+			Pvagr:    node.Pvagr,
+			Pvtijd:   node.Pvtijd,
+			Spectype: node.Spectype,
+			Status:   node.Status,
+			Vwtype:   node.Vwtype,
+			Vztype:   node.Vztype,
+			Wvorm:    node.Wvorm,
 		}
 		udNodeList = append(udNodeList, &ud)
+
+		for _, dep := range node.Ud.Dep {
+
+			ud := UdNodeType{
+				recursion: make([]string, 0),
+
+				XMLName:   xml.Name{Local: dep.DeprelMain},
+				Eid:       dep.Id,
+				Form:      node.Ud.Form,
+				Lemma:     node.Ud.Lemma,
+				Upos:      node.Ud.Upos,
+				Head:      dep.Head,
+				Deprel:    dep.Deprel,
+				DeprelAux: dep.DeprelAux,
+
+				FeatsType: node.Ud.FeatsType,
+
+				Buiging:  node.Buiging,
+				Conjtype: node.Conjtype,
+				Dial:     node.Dial,
+				Genus:    node.Genus,
+				Getal:    node.Getal,
+				GetalN:   node.GetalN,
+				Graad:    node.Graad,
+				Lwtype:   node.Lwtype,
+				Naamval:  node.Naamval,
+				Npagr:    node.Npagr,
+				Ntype:    node.Ntype,
+				Numtype:  node.Numtype,
+				Pdtype:   node.Pdtype,
+				Persoon:  node.Persoon,
+				Positie:  node.Positie,
+				Pt:       node.Pt,
+				Pvagr:    node.Pvagr,
+				Pvtijd:   node.Pvtijd,
+				Spectype: node.Spectype,
+				Status:   node.Status,
+				Vwtype:   node.Vwtype,
+				Vztype:   node.Vztype,
+				Wvorm:    node.Wvorm,
+			}
+			eudNodeList = append(eudNodeList, &ud)
+		}
+
 	}
+
+	alpino.Root = make([]*UdNodeType, 0)
 
 	for _, n := range udNodeList {
 		if n.Head == "0" {
-			alpino.Root = n
-		} else {
-			for _, m := range udNodeList {
-				if n.Head == m.Id {
-					m.UdNodes = append(m.UdNodes, n)
-					break
-				}
-			}
+			alpino.Root = append(alpino.Root, n)
 		}
-		n.DeprelMain = ""
-		n.Head = ""
+	}
+
+	for _, n := range eudNodeList {
+		if n.Head == "0" {
+			alpino.Root = append(alpino.Root, n)
+		}
+	}
+
+	for i, root := range alpino.Root {
+		var items []*UdNodeType
+		if i == 0 {
+			items = udNodeList
+		} else {
+			items = eudNodeList
+		}
+		root.UdNodes = make([]*UdNodeType, 0)
+		expand(root, items, i == 0)
 	}
 
 	return
+}
+
+func expand(udnode *UdNodeType, items []*UdNodeType, standard bool) {
+	var id string
+	if standard {
+		id = udnode.Id
+	} else {
+		id = udnode.Eid
+	}
+	for _, item := range items {
+		if item.Head == id {
+			it := new(UdNodeType)
+			*it = *item
+			it.UdNodes = make([]*UdNodeType, 0)
+			it.recursion = append([]string{id}, udnode.recursion...)
+			udnode.UdNodes = append(udnode.UdNodes, it)
+		}
+	}
+	for _, un := range udnode.UdNodes {
+		if recursionLimit(un.recursion) {
+			un.RecursionLimit = "TOO DEEP"
+		} else {
+			expand(un, items, standard)
+		}
+	}
+	udnode.Head = ""
+}
+
+func recursionLimit(s []string) bool {
+	if len(s) < 2 {
+		return false
+	}
+	found := 0
+	for i := 1; i < len(s)-1; i++ {
+		if s[i] == s[0] && s[i+1] == s[1] {
+			found++
+		}
+	}
+	return found > 1
 }
 
 func noe(s string) string {
@@ -800,7 +942,7 @@ func oldVersion(ver string) bool {
 	if err != nil {
 		return true
 	}
-	if v1 < 1 || (v1 == 1 && v2 < 8) {
+	if v1 < ALPINO_DS_MAJOR || (v1 == ALPINO_DS_MAJOR && v2 < ALPINO_DS_MINOR) {
 		return true
 	}
 	return false

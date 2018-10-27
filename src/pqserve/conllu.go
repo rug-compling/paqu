@@ -85,12 +85,10 @@ var (
 		"form",
 		"lemma",
 		"upos",
-		"xpos",
 		"head",
 		"deprel",
 		"deprel_main",
 		"deprel_aux",
-		"misc",
 		"Abbr",
 		"Case",
 		"Definite",
@@ -125,8 +123,6 @@ func getUdAttr(attr string, n *UdType) string {
 		return n.Lemma
 	case "upos":
 		return n.Upos
-	case "xpos":
-		return n.Xpos
 	case "head":
 		return n.Head
 	case "deprel":
@@ -135,8 +131,6 @@ func getUdAttr(attr string, n *UdType) string {
 		return n.DeprelMain
 	case "deprel_aux":
 		return n.DeprelAux
-	case "misc":
-		return n.Misc
 	case "Abbr":
 		return n.Abbr
 	case "Case":

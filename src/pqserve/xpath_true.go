@@ -29,32 +29,31 @@ var (
 		`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
 	keyTags = make(map[string]bool)
 	udTags  = map[string]bool{
-		"Abbr":        true,
-		"Case":        true,
-		"Definite":    true,
-		"Degree":      true,
-		"Foreign":     true,
-		"Gender":      true,
-		"Number":      true,
-		"Person":      true,
-		"PronType":    true,
-		"Reflex":      true,
-		"Tense":       true,
-		"VerbForm":    true,
-		"auto":        true,
-		"deprel":      true,
-		"deprel_main": true,
-		"deprel_aux":  true,
-		"elided":      true,
-		"error":       true,
-		"form":        true,
-		"head":        true,
-		"id":          true,
-		"lemma":       true,
-		"misc":        true,
-		"status":      true,
-		"upos":        true,
-		"xpos":        true,
+		"Abbr":            true,
+		"Case":            true,
+		"Definite":        true,
+		"Degree":          true,
+		"Foreign":         true,
+		"Gender":          true,
+		"Number":          true,
+		"Person":          true,
+		"PronType":        true,
+		"Reflex":          true,
+		"Tense":           true,
+		"VerbForm":        true,
+		"auto":            true,
+		"deprel":          true,
+		"deprel_main":     true,
+		"deprel_aux":      true,
+		"elided":          true,
+		"error":           true,
+		"form":            true,
+		"head":            true,
+		"id":              true,
+		"lemma":           true,
+		"status":          true,
+		"upos":            true,
+		"recursion_limit": true,
 	}
 	xpathNames = map[string]bool{
 		"ancestor-or-self::":   true,
@@ -114,6 +113,44 @@ var (
 		"conllu":               true,
 		"dep":                  true,
 		"ud":                   true,
+
+		"acl":      true,
+		"advcl":    true,
+		"advmod":   true,
+		"amod":     true,
+		"appos":    true,
+		"aux":      true,
+		"case":     true,
+		"cc":       true,
+		"ccomp":    true,
+		"clf":      true,
+		"compound": true,
+		"conj":     true,
+		"cop":      true,
+		"csubj":    true,
+		//"dep":        true, // dubbel
+		"det":        true,
+		"discourse":  true,
+		"dislocated": true,
+		"expl":       true,
+		"fixed":      true,
+		"flat":       true,
+		"goeswith":   true,
+		"iobj":       true,
+		"list":       true,
+		"mark":       true,
+		"nmod":       true,
+		"nsubj":      true,
+		"nummod":     true,
+		"obj":        true,
+		"obl":        true,
+		"orphan":     true,
+		"parataxis":  true,
+		"punct":      true,
+		"reparandum": true,
+		"root":       true,
+		"vocative":   true,
+		"xcomp":      true,
 	}
 )
 
@@ -1438,7 +1475,7 @@ corpus: <select name="db">
 <script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node', '/alpino_ds[parser/@cats=""]', '/alpino_ds[parser/@skips=""]', '/alpino_ds[parser/@cats="" and parser/@skips=""]', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]', '//parser[@cats=""]', '//parser[@skips=""]', '//parser[@cats="" and @skips=""]'];
-var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','ud','dep','conllu'`)
+var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','/ud','/dep','/conllu'`)
 	for _, a := range NodeTags {
 		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
 	}
@@ -1449,6 +1486,8 @@ var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parse
 
 var axis = [
 		"node",
+		"ud",
+		"dep",
 		"and",
 		"div",
 		"mod",
@@ -1529,7 +1568,7 @@ $('#xquery').textcomplete([
     index: 1
 },
 {
-    match: /[\/@][-_a-zA-Z]*$/,
+    match: /([\/@][-_a-zA-Z]*)$/,
     search: function (term, callback) {
         callback($.map(other, function (e) {
             return e.indexOf(term) === 0 ? e : null;
@@ -1641,7 +1680,7 @@ $('#xquery').textcomplete([
 }],
 {
     maxCount: 200,
-    debounce: 300,
+    debounce: 300
 });
 
 init();
@@ -1668,27 +1707,70 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 	ud2 := make([]string, 0)
 
 	for i, part := range xmlparts {
-		isUd := strings.HasPrefix(part, "<ud")
-		isDep := strings.HasPrefix(part, "<dep")
+
+		var isUd, isDep, isId, isEid bool
+		var ID string
+
+		if strings.HasPrefix(part, "<node") {
+			// isNode
+		} else if strings.HasPrefix(part, "<ud") {
+			isUd = true
+		} else if strings.HasPrefix(part, "<dep") {
+			isDep = true
+		} else {
+			var alpino_test Alpino_test
+			err := xml.Unmarshal([]byte(part), &alpino_test)
+			if err != nil {
+				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+				return
+			}
+			if alpino_test.Id != "" {
+				ID = alpino_test.Id
+				isId = true
+			} else if alpino_test.Eid != "" {
+				ID = alpino_test.Eid
+				isEid = true
+			}
+		}
 
 		alp := Alpino_ds{}
+
+		if isId {
+			alp.Node0 = &Node{
+				Ud:       findUdId(alpino.Node0, ID),
+				NodeList: make([]*Node, 0),
+			}
+			isUd = true
+		} else if isEid {
+			alp.Node0 = &Node{
+				Ud: &UdType{
+					Dep: []DepType{*findDepId(alpino.Node0, ID)},
+				},
+				NodeList: make([]*Node, 0),
+			}
+			isDep = true
+		}
+
 		if isUd {
-			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			if !isId {
+				err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
 `+part+`
 </node>
 </alpino_ds>`), &alp)
-			if err != nil {
-				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
-				return
+				if err != nil {
+					fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+					return
+				}
 			}
 			ud1 = append(ud1, alp.Node0.Ud.Id+":"+alp.Node0.Ud.Head+":"+alp.Node0.Ud.Deprel)
 			if i, err := strconv.Atoi(alp.Node0.Ud.Id); err == nil && i > 0 && i <= len(woorden) {
 				lvl[i-1]++
 			}
 		} else if isDep {
-			err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			if !isEid {
+				err := xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
 <ud>
@@ -1696,9 +1778,10 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 </ud>
 </node>
 </alpino_ds>`), &alp)
-			if err != nil {
-				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
-				return
+				if err != nil {
+					fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+					return
+				}
 			}
 			for _, dep := range alp.Node0.Ud.Dep {
 				ud2 = append(ud2, dep.Id+":"+dep.Head+":"+dep.Deprel)
@@ -1851,4 +1934,32 @@ func bugtest(filename, xpath string) error {
 		logerr(e)
 	}
 	return e
+}
+
+func findUdId(node *Node, ID string) *UdType {
+	if node.Ud != nil && node.Ud.Id == ID {
+		return node.Ud
+	}
+	for _, n := range node.NodeList {
+		if ud := findUdId(n, ID); ud != nil {
+			return ud
+		}
+	}
+	return nil
+}
+
+func findDepId(node *Node, ID string) *DepType {
+	if node.Ud != nil && node.Ud.Dep != nil {
+		for _, d := range node.Ud.Dep {
+			if d.Id == ID {
+				return &d
+			}
+		}
+	}
+	for _, n := range node.NodeList {
+		if dep := findDepId(n, ID); dep != nil {
+			return dep
+		}
+	}
+	return nil
 }

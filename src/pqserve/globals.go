@@ -105,6 +105,12 @@ type Sentence struct {
 	items []Row    // alle matchende dependency relations voor deze zin
 }
 
+type Alpino_test struct {
+	XMLName xml.Name
+	Id      string `xml:"id,attr"`
+	Eid     string `xml:"eid,attr"`
+}
+
 type Alpino_ds_complete struct {
 	XMLName  xml.Name      `xml:"alpino_ds"`
 	Version  string        `xml:"version,attr,omitempty"`
@@ -114,6 +120,7 @@ type Alpino_ds_complete struct {
 	Sent     string        `xml:"sentence"`
 	SentId   string        `xml:"sentid,attr,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
+	Root     []*RootType   `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
@@ -155,6 +162,45 @@ type CommentsType struct {
 	Comment []string `xml:"comment,omitempty"`
 }
 
+type RootType struct {
+	RecursionLimit string `xml:"recursion_limit,attr,omitempty"`
+
+	Id    string `xml:"id,attr,omitempty"`
+	Eid   string `xml:"eid,attr,omitempty"`
+	Form  string `xml:"form,attr,omitempty"`
+	Lemma string `xml:"lemma,attr,omitempty"`
+	Upos  string `xml:"upos,attr,omitempty"`
+	FeatsType
+	Deprel    string `xml:"deprel,attr,omitempty"`
+	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
+
+	Buiging  string `xml:"buiging,attr,omitempty"`
+	Conjtype string `xml:"conjtype,attr,omitempty"`
+	Dial     string `xml:"dial,attr,omitempty"`
+	Genus    string `xml:"genus,attr,omitempty"`
+	Getal    string `xml:"getal,attr,omitempty"`
+	GetalN   string `xml:"getal-n,attr,omitempty"`
+	Graad    string `xml:"graad,attr,omitempty"`
+	Lwtype   string `xml:"lwtype,attr,omitempty"`
+	Naamval  string `xml:"naamval,attr,omitempty"`
+	Npagr    string `xml:"npagr,attr,omitempty"`
+	Ntype    string `xml:"ntype,attr,omitempty"`
+	Numtype  string `xml:"numtype,attr,omitempty"`
+	Pdtype   string `xml:"pdtype,attr,omitempty"`
+	Persoon  string `xml:"persoon,attr,omitempty"`
+	Positie  string `xml:"positie,attr,omitempty"`
+	Pt       string `xml:"pt,attr,omitempty"`
+	Pvagr    string `xml:"pvagr,attr,omitempty"`
+	Pvtijd   string `xml:"pvtijd,attr,omitempty"`
+	Spectype string `xml:"spectype,attr,omitempty"`
+	Status   string `xml:"status,attr,omitempty"`
+	Vwtype   string `xml:"vwtype,attr,omitempty"`
+	Vztype   string `xml:"vztype,attr,omitempty"`
+	Wvorm    string `xml:"wvorm,attr,omitempty"`
+
+	UdNodes []byte `xml:",innerxml"`
+}
+
 type ConlluType struct {
 	Conllu string `xml:",cdata"`
 	Status string `xml:"status,attr,omitempty"`
@@ -174,14 +220,12 @@ type UdType struct {
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
-	Xpos  string `xml:"xpos,attr,omitempty"`
 	FeatsType
 	Head       string    `xml:"head,attr,omitempty"`
 	Deprel     string    `xml:"deprel,attr,omitempty"`
 	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
 	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
 	Dep        []DepType `xml:"dep,omitempty"`
-	Misc       string    `xml:"misc,attr,omitempty"`
 }
 
 type FeatsType struct {

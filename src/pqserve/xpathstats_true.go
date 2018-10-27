@@ -641,19 +641,63 @@ init({
 
 			var at [5]StructIS
 			for _, match := range matches {
-				isUd := strings.HasPrefix(match, "<ud")
-				isDep := strings.HasPrefix(match, "<dep")
+
+				var isUd, isDep, isId, isEid bool
+				var ID string
+
+				if strings.HasPrefix(match, "<node") {
+					// isNode
+				} else if strings.HasPrefix(match, "<ud") {
+					isUd = true
+				} else if strings.HasPrefix(match, "<dep") {
+					isDep = true
+				} else {
+					var alpino_test Alpino_test
+					err := xml.Unmarshal([]byte(match), &alpino_test)
+					if err != nil {
+						fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+						return
+					}
+					if alpino_test.Id != "" {
+						ID = alpino_test.Id
+						isId = true
+					} else if alpino_test.Eid != "" {
+						ID = alpino_test.Eid
+						isEid = true
+					}
+				}
+
 				alp := Alpino_ds{}
+
+				if isId {
+					alp.Node0 = &Node{
+						Ud:       findUdId(alpino.Node0, ID),
+						NodeList: make([]*Node, 0),
+					}
+					isUd = true
+				} else if isEid {
+					alp.Node0 = &Node{
+						Ud: &UdType{
+							Dep: []DepType{*findDepId(alpino.Node0, ID)},
+						},
+						NodeList: make([]*Node, 0),
+					}
+					isDep = true
+				}
+
 				var err error
 				if isUd {
-					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+					if !isId {
+						err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
 `+match+`
 </node>
 </alpino_ds>`), &alp)
+					}
 				} else if isDep {
-					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+					if !isEid {
+						err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
 <node>
 <ud>
@@ -661,6 +705,7 @@ init({
 </ud>
 </node>
 </alpino_ds>`), &alp)
+					}
 				} else {
 					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <alpino_ds version="1.3">
