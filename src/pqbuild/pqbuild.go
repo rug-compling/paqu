@@ -197,8 +197,12 @@ Opties:
 
   id:
   description:
-  owner:       'none' of een e-mailadres
+  owner:       'none', 'auto', 'manual' of een e-mailadres
   public:      0 (private) of 1 (public)
+
+  'none' is voor een globaal corpus
+  'auto' is voor een globaal corpus, automatisch geannoteerd
+  'manual' is voor een globaal corpus, handmatig geannoteerd
 
 
 `, os.Args[0])
@@ -217,8 +221,8 @@ Opties:
 		util.CheckErr(fmt.Errorf("De omschrijving mag niet leeg zijn"))
 	}
 
-	if owner != "none" && strings.Index(owner, "@") < 0 {
-		util.CheckErr(fmt.Errorf("De eigenaar moet 'none' zijn of een e-mailadres"))
+	if owner != "none" && owner != "auto" && owner != "manual" && strings.Index(owner, "@") < 0 {
+		util.CheckErr(fmt.Errorf("De eigenaar moet 'none', 'auto', of 'manual' zijn of een e-mailadres"))
 	}
 
 	if prefix == "" {

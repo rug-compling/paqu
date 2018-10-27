@@ -82,7 +82,7 @@ Usage: %s regexp
 	x(err)
 	rows, err := db.Query(
 		fmt.Sprintf(
-			"SELECT `id`,`params` FROM `%s_info` WHERE `owner` != \"none\" AND `status` = \"FINISHED\" ORDER BY `id`",
+			"SELECT `id`,`params` FROM `%s_info` WHERE `owner` != \"none\" AND `owner` != \"auto\" AND `owner` != \"manual\" AND `status` = \"FINISHED\" ORDER BY `id`",
 			Cfg.Prefix))
 	x(err)
 	for rows.Next() {

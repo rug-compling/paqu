@@ -155,7 +155,7 @@ func handleFunc(url string, handler func(*Context)) {
 			where := ""
 			o := "2"
 			if q.auth {
-				s = fmt.Sprintf("IF(`i`.`owner` = \"none\", \"A\", IF(`i`.`owner` = %q, \"B\", \"C\"))", q.user)
+				s = fmt.Sprintf("IF(`i`.`owner` = \"none\", \"C\", IF(`i`.`owner` = \"auto\", \"B\", IF(`i`.`owner` = \"manual\", \"A\", IF(`i`.`owner` = %q, \"D\", \"E\"))))", q.user)
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 				o = "7, 2"
 			}
@@ -182,21 +182,21 @@ func handleFunc(url string, handler func(*Context)) {
 					logerr(err)
 					return
 				}
-				if group == "C" {
+				if group == "E" {
 					if !q.ignore[id] {
-						q.opt_db = append(q.opt_db, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
+						q.opt_db = append(q.opt_db, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
 						q.prefixes[id] = true
 						if hasmeta > 0 {
-							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen",
+							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen",
 								id, desc, displayEmail(owner), iformat(zinnen)))
 						}
 						if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
-							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("C%s %s \u2014 %s \u2014 %s zinnen",
+							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen",
 								id, desc, displayEmail(owner), iformat(zinnen)))
 							q.spodprefixes[id] = true
 						}
 					}
-				} else if q.auth || owner == "none" {
+				} else if q.auth || owner == "none" || owner == "auto" || owner == "manual" {
 					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
 					q.prefixes[id] = true
 					if hasmeta > 0 {

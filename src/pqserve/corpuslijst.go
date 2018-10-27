@@ -35,6 +35,8 @@ func corpuslijst(q *Context) {
 			"AND (`c`.`user` = %q OR `c`.`user` = \"all\") "+
 			"AND `i`.`owner` != %q "+
 			"AND `i`.`owner` != \"none\" "+
+			"AND `i`.`owner` != \"auto\" "+
+			"AND `i`.`owner` != \"manual\" "+
 			"ORDER BY 2", Cfg.Prefix, Cfg.Prefix, q.user, q.user))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)

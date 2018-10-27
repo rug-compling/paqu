@@ -1122,10 +1122,14 @@ func html_opts(q *Context, opts []string, value, title string) {
 				t := ""
 				switch c {
 				case 'A':
-					t = "algemene corpora"
+					t = "algemene corpora &mdash; handmatig geannoteerd"
 				case 'B':
-					t = "mijn corpora"
+					t = "algemene corpora &mdash; automatisch geannoteerd"
 				case 'C':
+					t = "algemene corpora"
+				case 'D':
+					t = "mijn corpora"
+				case 'E':
 					t = "corpora gedeeld door anderen"
 				}
 				if c != 'Z' {

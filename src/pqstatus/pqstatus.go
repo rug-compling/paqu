@@ -54,7 +54,7 @@ func main() {
 
 	rows, err := db.Query(
 		fmt.Sprintf(
-			"SELECT `id`, `owner`, `status`, `nword`, `active` FROM `%s_info` WHERE `owner` != \"none\" ORDER BY `active` DESC",
+			"SELECT `id`, `owner`, `status`, `nword`, `active` FROM `%s_info` WHERE `owner` != \"none\" AND `owner` != \"auto\" AND `owner` != \"manual\" ORDER BY `active` DESC",
 			Cfg.Prefix))
 	util.CheckErr(err)
 
@@ -107,7 +107,7 @@ func main() {
 
 	rows, err = db.Query(
 		fmt.Sprintf(
-			"SELECT `id` FROM `%s_info` WHERE `owner` = \"none\"",
+			"SELECT `id` FROM `%s_info` WHERE `owner` = \"none\" OR `owner` = \"auto\" OR `owner` = \"manual\"",
 			Cfg.Prefix))
 	util.CheckErr(err)
 	globals := make(map[string]bool)
