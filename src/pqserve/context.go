@@ -151,20 +151,18 @@ func handleFunc(url string, handler func(*Context)) {
 				}
 			}
 
-			s := "\"Z\""
+			s := "IF(`i`.`owner` = \"none\", \"C\", IF(`i`.`owner` = \"auto\", \"B\",  IF(`i`.`owner` = \"manual\", \"A\", \"Z\")))"
 			where := ""
-			o := "2"
 			if q.auth {
 				s = fmt.Sprintf("IF(`i`.`owner` = \"none\", \"C\", IF(`i`.`owner` = \"auto\", \"B\", IF(`i`.`owner` = \"manual\", \"A\", IF(`i`.`owner` = %q, \"D\", \"E\"))))", q.user)
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
-				o = "7, 2"
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
-					"ORDER BY "+o,
+					"ORDER BY 7, 2",
 				Cfg.Prefix,
 				Cfg.Prefix,
 				where))
