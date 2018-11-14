@@ -46,6 +46,7 @@ var (
 		"deprel_main":     true,
 		"deprel_aux":      true,
 		"elided":          true,
+		"enhanced":        true,
 		"error":           true,
 		"form":            true,
 		"head":            true,
