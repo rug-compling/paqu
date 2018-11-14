@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -41,6 +42,10 @@ type Line struct {
 	Log         string
 }
 
+type AlpinoInfo struct {
+	ParserBuild string `json:"parser_build"`
+}
+
 var (
 	opt_d = flag.String("d", "xml", "directory voor uitvoer")
 	opt_e = flag.String("e", "half", "escape level: none / half / full")
@@ -53,7 +58,10 @@ var (
 	opt_t = flag.Int("t", 900, "time-out in seconden per regel")
 	opt_T = flag.Bool("T", false, "true: zinnen zijn getokeniseerd")
 
-	x = util.CheckErr
+	x             = util.CheckErr
+	reParser      = regexp.MustCompile(`<parser.*?>`)
+	reParserBuild = regexp.MustCompile(`<parser[^>]*?build=.*?>`)
+	alpino_build  string
 )
 
 func usage() {
@@ -106,6 +114,11 @@ func main() {
 
 	var lastdir string
 	if *opt_s == "" {
+
+		b, err := ioutil.ReadFile(os.Getenv("ALPINO_HOME") + "/version")
+		x(err)
+		alpino_build = strings.TrimSpace(string(b))
+
 		var fpin, fpout *os.File
 		var errval error
 		tmpfile := filename + ".part"
@@ -213,7 +226,39 @@ Q#%s|skipped|??|????
 				break
 			}
 		}
+		// version en date invoegen
+		filenames := make([]string, 0)
+		x(filepath.Walk(*opt_d, func(path string, info os.FileInfo, err error) error {
+			x(err)
+			if !info.IsDir() && strings.HasSuffix(path, ".xml") {
+				filenames = append(filenames, path)
+			}
+			return nil
+		}))
+		for _, filename := range filenames {
+			b, err := ioutil.ReadFile(filename)
+			x(err)
+			if reParserBuild.Match(b) {
+				continue
+			}
+			xml := setBuild(string(b))
+			fp, err := os.Create(filename)
+			x(err)
+			fp.WriteString(xml)
+			fp.Close()
+		}
 	} else {
+
+		buf1 := bytes.NewBufferString(`{"request":"info"}`)
+		resp, err := http.Post(*opt_s, "application/json", buf1)
+		x(err)
+		data, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		x(err)
+		var info AlpinoInfo
+		x(json.Unmarshal(data, &info))
+		alpino_build = info.ParserBuild
+
 		var buf bytes.Buffer
 		var dataType string
 		if *opt_l {
@@ -241,9 +286,9 @@ Q#%s|skipped|??|????
 		_, err = io.Copy(&buf, fp)
 		fp.Close()
 		x(err)
-		resp, err := http.Post(*opt_s, "application/json", &buf)
+		resp, err = http.Post(*opt_s, "application/json", &buf)
 		util.CheckErr(err)
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err = ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		util.CheckErr(err)
 		var response Response
@@ -328,7 +373,7 @@ Q#%s|skipped|??|????
 					}
 					fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
 					x(err)
-					fmt.Fprintln(fp, line.Alpino_ds)
+					fmt.Fprintln(fp, setBuild(line.Alpino_ds))
 					fp.Close()
 				} else {
 					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
@@ -383,4 +428,16 @@ func escape(s string) string {
 		}
 	}
 	return strings.Join(words, " ")
+}
+
+func setBuild(xml string) string {
+	return reParser.ReplaceAllStringFunc(xml, func(s string) string {
+		if !strings.Contains(s, "date=") {
+			s = s[:7] + fmt.Sprintf(" date=%q", time.Now().Format(time.RFC3339)) + s[7:]
+		}
+		if !strings.Contains(s, "build=") {
+			s = s[:7] + fmt.Sprintf(" build=%q", alpino_build) + s[7:]
+		}
+		return s
+	})
 }

@@ -661,10 +661,11 @@ init({
 					}
 					if alpino_test.Id != "" {
 						ID = alpino_test.Id
-						isId = true
-					} else if alpino_test.Eid != "" {
-						ID = alpino_test.Eid
-						isEid = true
+						if alpino_test.Enhanced {
+							isEid = true
+						} else {
+							isId = true
+						}
 					}
 				}
 
@@ -686,7 +687,7 @@ init({
 						NodeList: make([]*Node, 0),
 					}
 					copyFromTest(alp.Node0, &alpino_test)
-					alp.Node0.Id = "EUD:" + alpino_test.Eid // hack voor telling: seenID
+					alp.Node0.Id = "EUD:" + alpino_test.Id // hack voor telling: seenID
 					isDep = true
 				}
 

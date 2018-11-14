@@ -91,7 +91,7 @@ import (
 const (
 	VERSIONs        = "PQU%d.%d"
 	VERSIONxq       = int(1) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(7) // ophogen als xml-formaat is veranderd
+	VERSIONxml      = int(8) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(9)
 )
@@ -128,6 +128,8 @@ type MetaType struct {
 }
 
 type ParserType struct {
+	Build string `xml:"build,attr,omitempty"`
+	Date  string `xml:"date,attr,omitempty"`
 	Cats  string `xml:"cats,attr,omitempty"`
 	Skips string `xml:"skips,attr,omitempty"`
 }
@@ -144,8 +146,9 @@ type UdNodeType struct {
 	RecursionLimit string `xml:"recursion_limit,attr,omitempty"`
 	recursion      []string
 
+	Enhanced bool `xml:"enhanced,attr,omitempty"`
+
 	Id    string `xml:"id,attr,omitempty"`
-	Eid   string `xml:"eid,attr,omitempty"`
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
@@ -711,13 +714,15 @@ func doXml(document, archname, filename string) (result string) {
 				recursion: make([]string, 0),
 
 				XMLName:   xml.Name{Local: dep.DeprelMain},
-				Eid:       dep.Id,
+				Id:        dep.Id,
 				Form:      node.Ud.Form,
 				Lemma:     node.Ud.Lemma,
 				Upos:      node.Ud.Upos,
 				Head:      dep.Head,
 				Deprel:    dep.Deprel,
 				DeprelAux: dep.DeprelAux,
+
+				Enhanced: true,
 
 				FeatsType: node.Ud.FeatsType,
 
@@ -772,25 +777,19 @@ func doXml(document, archname, filename string) (result string) {
 			items = eudNodeList
 		}
 		root.UdNodes = make([]*UdNodeType, 0)
-		expand(root, items, i == 0)
+		expand(root, items)
 	}
 
 	return
 }
 
-func expand(udnode *UdNodeType, items []*UdNodeType, standard bool) {
-	var id string
-	if standard {
-		id = udnode.Id
-	} else {
-		id = udnode.Eid
-	}
+func expand(udnode *UdNodeType, items []*UdNodeType) {
 	for _, item := range items {
-		if item.Head == id {
+		if item.Head == udnode.Id {
 			it := new(UdNodeType)
 			*it = *item
 			it.UdNodes = make([]*UdNodeType, 0)
-			it.recursion = append([]string{id}, udnode.recursion...)
+			it.recursion = append([]string{udnode.Id}, udnode.recursion...)
 			udnode.UdNodes = append(udnode.UdNodes, it)
 		}
 	}
@@ -798,7 +797,7 @@ func expand(udnode *UdNodeType, items []*UdNodeType, standard bool) {
 		if recursionLimit(un.recursion) {
 			un.RecursionLimit = "TOO DEEP"
 		} else {
-			expand(un, items, standard)
+			expand(un, items)
 		}
 	}
 	udnode.Head = ""
@@ -874,7 +873,7 @@ func minify(alpino Alpino_ds) {
 	if alpino.Metadata != nil && (alpino.Metadata.Meta == nil || len(alpino.Metadata.Meta) == 0) {
 		alpino.Metadata = nil
 	}
-	if alpino.Parser != nil && alpino.Parser.Cats == "" && alpino.Parser.Skips == "" {
+	if alpino.Parser != nil && alpino.Parser.Build == "" && alpino.Parser.Date == "" && alpino.Parser.Cats == "" && alpino.Parser.Skips == "" {
 		alpino.Parser = nil
 	}
 	if alpino.Sentence != nil && alpino.Sentence.Sent == "" && alpino.Sentence.SentId == "" {

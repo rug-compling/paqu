@@ -83,6 +83,8 @@ type MetaType struct {
 }
 
 type ParserType struct {
+	Build string `xml:"build,attr,omitempty"`
+	Date  string `xml:"date,attr,omitempty"`
 	Cats  string `xml:"cats,attr,omitempty"`
 	Skips string `xml:"skips,attr,omitempty"`
 }

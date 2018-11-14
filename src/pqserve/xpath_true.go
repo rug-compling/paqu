@@ -1726,10 +1726,11 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			}
 			if alpino_test.Id != "" {
 				ID = alpino_test.Id
-				isId = true
-			} else if alpino_test.Eid != "" {
-				ID = alpino_test.Eid
-				isEid = true
+				if alpino_test.Enhanced {
+					isEid = true
+				} else {
+					isId = true
+				}
 			}
 		}
 

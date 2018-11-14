@@ -107,8 +107,8 @@ type Sentence struct {
 
 type Alpino_test struct {
 	XMLName  xml.Name
+	Enhanced bool   `xml:"enhanced,attr"`
 	Id       string `xml:"id,attr"`
-	Eid      string `xml:"eid,attr"`
 	Buiging  string `xml:"buiging,attr"`
 	Conjtype string `xml:"conjtype,attr"`
 	Dial     string `xml:"dial,attr"`
@@ -177,6 +177,8 @@ type MetaT struct {
 }
 
 type ParserT struct {
+	Build string `xml:"build,attr,omitempty"`
+	Date  string `xml:"date,attr,omitempty"`
 	Cats  string `xml:"cats,attr,omitempty"`
 	Skips string `xml:"skips,attr,omitempty"`
 }
