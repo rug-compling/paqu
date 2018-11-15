@@ -148,6 +148,7 @@ var (
 		"orphan":     true,
 		"parataxis":  true,
 		"punct":      true,
+		"ref":        true,
 		"reparandum": true,
 		"root":       true,
 		"vocative":   true,

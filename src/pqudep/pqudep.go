@@ -90,8 +90,8 @@ import (
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = int(1) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(8) // ophogen als xml-formaat is veranderd
+	VERSIONxq       = int(1)  // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
+	VERSIONxml      = int(10) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(9)
 )
@@ -238,7 +238,7 @@ var (
 	opt_p = flag.String("p", "", "prefix")
 	opt_v = flag.Bool("v", false, "version")
 
-	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|dep|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|reparandum|root|vocative|xcomp)>`)
+	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|dep|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
 
 	reJunk = regexp.MustCompile(`(?s:<ud:ud.*?</ud:ud>)|(?s:<ud:conllu.*?</ud:conllu>)`)
 	chQuit = make(chan bool)
@@ -571,6 +571,11 @@ func doXml(document, archname, filename string) (result string) {
 			lineno = i + 1
 			return
 		}
+		if a[7] == "root" && a[6] != "0" || a[7] != "root" && a[6] == "0" {
+			err = fmt.Errorf("Invalid HEAD/DEPREL combination %v/%v", a[6], a[7])
+			lineno = i + 1
+			return
+		}
 		if strings.Contains(a[8], "ERROR") {
 			err = fmt.Errorf("Invalid DEPS value %v", a[8])
 			lineno = i + 1
@@ -620,6 +625,10 @@ func doXml(document, archname, filename string) (result string) {
 				dd := strings.SplitN(dep[1], ":", 2)
 				if len(dd) > 1 {
 					aux = dd[1]
+				}
+				if dd[0] == "root" && dep[0] != "0" || dd[0] != "root" && dep[0] == "0" {
+					err = fmt.Errorf("Invalid combination in DEPS %v", deps)
+					return
 				}
 				node.Ud.Dep = append(node.Ud.Dep, DepType{
 					Id:         a[0],
@@ -796,6 +805,7 @@ func expand(udnode *UdNodeType, items []*UdNodeType) {
 	for _, un := range udnode.UdNodes {
 		if recursionLimit(un.recursion) {
 			un.RecursionLimit = "TOO DEEP"
+			un.Head = ""
 		} else {
 			expand(un, items)
 		}
