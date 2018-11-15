@@ -942,6 +942,28 @@ func html_header(q *Context) {
     }
   }
 
+  function mresize() {
+    localStorage.setItem(
+      "paqu-home",
+      JSON.stringify({
+        w: metaarea.outerWidth(),
+        h: metaarea.outerHeight()
+      }));
+  }
+
+  function msetsize() {
+    var storageContent = localStorage.getItem("paqu-home");
+    if (storageContent !== undefined) {
+        var d = JSON.parse(storageContent) || {};
+        if (d['w']) {
+          metaarea.outerWidth(d['w']);
+        }
+        if (d['h']) {
+          metaarea.outerHeight(d['h']);
+        }
+    }
+  }
+
   //--></script>
 `)
 }
@@ -1025,7 +1047,7 @@ corpus: <select name="db">
            </select>
        <tr>
          <td colspan="3"><span class="ie">Metadata:<br></span>
-           <textarea rows="3" cols="40" name="meta" placeholder="metadata">`+first(q.r, "meta")+`</textarea><br>
+           <textarea rows="3" cols="40" name="meta" placeholder="metadata" id="metaarea">`+first(q.r, "meta")+`</textarea><br>
            <small><a href="javascript:void(0)" onclick="javascript:queryhelp()">voorbeelden</a></small>
        <tr>
          <td colspan="3">aantal: <select name="sn">
@@ -1048,6 +1070,11 @@ corpus: <select name="db">
            <input type="reset" value="Reset">
        </table>
        </form>
+<script type="text/javascript"><!--
+  var metaarea = $('#metaarea');
+  metaarea.on('mouseup', mresize);
+  msetsize();
+//--></script>
 <div class="submenu a9999" id="helpquery">
 <div class="queryhelp">
 <b>Voorbeelden van zoeken met metadata</b>

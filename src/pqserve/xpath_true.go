@@ -930,6 +930,7 @@ func html_xpath_header(q *Context) {
   var result;
   var at1, at2, at3, at4, at5;
   var xquery;
+  var macrotext;
   var metadn = 0;
   var metavars = [];
   var aligns;
@@ -1287,6 +1288,7 @@ func html_xpath_header(q *Context) {
       $('#macros').slideUp(200);
       macroIsOpen = false;
     } else {
+      msetsize();
       $("#openmacro").text("Macro's sluiten")
       $('#macros').slideDown(400);
       macroIsOpen = true;
@@ -1294,28 +1296,78 @@ func html_xpath_header(q *Context) {
   }
 
   function enableDeleteSave(e) {
-      var k = e.which;
-      if (k == 8 || k == 46) {
-        enableSave();
-      }
+    var k = e.which;
+    if (k == 8 || k == 46) {
+      enableSave();
+    }
   }
 
   function enableSave() {
-      $('#macrosave').removeAttr('disabled');
-      $('#macrosave').addClass('bold');
+    $('#macrosave').removeAttr('disabled');
+    $('#macrosave').addClass('bold');
   }
 
   function disableSave() {
-      $('#macrosave').attr("disabled", "disabled");
-      $('#macrosave').removeClass('bold');
+    $('#macrosave').attr("disabled", "disabled");
+    $('#macrosave').removeClass('bold');
+  }
+
+  function xresize() {
+    localStorage.setItem(
+    "paqu-xpath-x",
+    JSON.stringify({
+      w: xquery.outerWidth(),
+      h: xquery.outerHeight()
+    }));
+  }
+
+  function mresize() {
+    if (macroIsOpen) {
+      localStorage.setItem(
+        "paqu-xpath-m",
+        JSON.stringify({
+          w: macrotext.outerWidth(),
+          h: macrotext.outerHeight()
+        }));
+    }
+  }
+
+  function xsetsize() {
+    var storageContent = localStorage.getItem("paqu-xpath-x");
+    if (storageContent !== undefined) {
+      var d = JSON.parse(storageContent) || {};
+      if (d['w']) {
+        xquery.outerWidth(d['w']);
+      }
+      if (d['h']) {
+        xquery.outerHeight(d['h']);
+      }
+    }
+  }
+
+  function msetsize() {
+    var storageContent = localStorage.getItem("paqu-xpath-m");
+    if (storageContent !== undefined) {
+      var d = JSON.parse(storageContent) || {};
+      if (d['w']) {
+        macrotext.outerWidth(d['w']);
+      }
+      if (d['h']) {
+        macrotext.outerHeight(d['h']);
+      }
+    }
   }
 
   function init() {
     xquery = $('#xquery');
+    macrotext = $('#macrotext');
+    xsetsize();
     xquery.on('keyup', qcheck);
     xquery.on('change', qcheck);
     xquery.on('click', qcheck);
-    qcheckdo();
+    xquery.on('mouseup', xresize);
+    macrotext.on('mouseup', mresize);
+   qcheckdo();
     $('#openmacro').on('click', openMacro);
     $('#macroreset').on('click', disableSave);
     $('#macrotext').on('keypress', enableSave);
