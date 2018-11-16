@@ -91,7 +91,7 @@ import (
 const (
 	VERSIONs        = "PQU%d.%d"
 	VERSIONxq       = int(1)  // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(10) // ophogen als xml-formaat is veranderd
+	VERSIONxml      = int(11) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(9)
 )
@@ -594,6 +594,9 @@ func doXml(document, archname, filename string) (result string) {
 	for i, line := range lines {
 		lineno = i + 1
 		a := strings.Split(line, "\t")
+		for i := range a {
+			a[i] = strings.TrimSpace(a[i])
+		}
 		if strings.Contains(a[0], "-") {
 			continue
 		}
@@ -651,8 +654,8 @@ func doXml(document, archname, filename string) (result string) {
 		}
 
 		node.Ud.Id = a[0]
-		node.Ud.Form = noe(a[1])
-		node.Ud.Lemma = noe(a[2])
+		node.Ud.Form = a[1]
+		node.Ud.Lemma = a[2]
 		node.Ud.Upos = noe(a[3])
 		node.Ud.Head = noe(a[6])
 		node.Ud.Deprel = noe(a[7])
