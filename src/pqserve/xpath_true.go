@@ -22,6 +22,8 @@ import (
 	"time"
 )
 
+const TEXTCOMPLETE = false
+
 var (
 	pqbugtest string
 	pqxok     string
@@ -1368,7 +1370,7 @@ func html_xpath_header(q *Context) {
     xquery.on('click', qcheck);
     xquery.on('mouseup', xresize);
     macrotext.on('mouseup', mresize);
-   qcheckdo();
+    qcheckdo();
     $('#openmacro').on('click', openMacro);
     $('#macroreset').on('click', disableSave);
     $('#macrotext').on('keypress', enableSave);
@@ -1526,17 +1528,19 @@ corpus: <select name="db">
        <button id="btExpandNxt" style="display:none">Toon verdere macro-expansie</button>
        <button id="btXCopy">Kopieer naar invoer</button>
        </div>
-<script type="text/javascript" src="jquery.textcomplete.js"></script>
+`)
+	if TEXTCOMPLETE {
+		fmt.Fprint(q.w, `<script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var begin = ['//node', '/alpino_ds/node', '/alpino_ds[parser/@cats=""]', '/alpino_ds[parser/@skips=""]', '/alpino_ds[parser/@cats="" and parser/@skips=""]', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]', '//parser[@cats=""]', '//parser[@skips=""]', '//parser[@cats="" and @skips=""]'];
 var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','/ud','/dep','/conllu'`)
-	for _, a := range NodeTags {
-		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
-	}
-	for a := range udTags {
-		fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
-	}
-	fmt.Fprint(q.w, `];
+		for _, a := range NodeTags {
+			fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
+		}
+		for a := range udTags {
+			fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
+		}
+		fmt.Fprint(q.w, `];
 
 var axis = [
 		"node",
@@ -1562,16 +1566,16 @@ var axis = [
 
 var macros = [`)
 
-	keys := getMacrosKeys(q)
-	p := ","
-	for i, key := range keys {
-		if i == len(keys)-1 {
-			p = ""
+		keys := getMacrosKeys(q)
+		p := ","
+		for i, key := range keys {
+			if i == len(keys)-1 {
+				p = ""
+			}
+			fmt.Fprintf(q.w, "%q%s\n", key, p)
 		}
-		fmt.Fprintf(q.w, "%q%s\n", key, p)
-	}
 
-	fmt.Fprint(q.w, `];
+		fmt.Fprint(q.w, `];
 
 function outText(text) {
     var state = 0;
@@ -1736,12 +1740,15 @@ $('#xquery').textcomplete([
     maxCount: 200,
     debounce: 300
 });
-
-init();
-
 //--></script>
 `)
+	} // if TEXTCOMPLETE
 
+	fmt.Fprint(q.w, `
+<script type="text/javascript"><!--
+init();
+//--></script>
+`)
 	return
 }
 
