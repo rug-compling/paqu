@@ -4,23 +4,59 @@ package main
 #cgo LDFLAGS: -lxqilla
 #include <xqilla/xqilla-xqc.h>
 #include <stdlib.h>
+#include <string.h>
 
 XQC_Implementation *impl;
 XQC_Expression *expr;
 XQC_DynamicContext *context;
+XQC_StaticContext *static_context;
 XQC_Sequence *seq, *doc;
 XQC_Error err;
 const char *value;
+char *error_value;
+int error_len;
 int done;
+
+void my_handler(XQC_ErrorHandler *handler,
+                XQC_Error error,
+                const char *error_uri,
+                const char *error_localname,
+                const char *description,
+                XQC_Sequence *error_object)
+{
+    int n;
+    if (!description) {
+      description = "unknown error";
+    }
+    n = strlen(description) + 1;
+    if (n > error_len) {
+      error_value = (char *) realloc (error_value, n * sizeof (char));
+      error_len = n;
+    }
+    strcpy (error_value, description);
+}
+
+XQC_ErrorHandler my_handler_s = {
+    error: my_handler
+};
 
 int init(char const *xquery)
 {
+  error_value = (char *) malloc (sizeof (char));
+  error_value[0] = '\0';
+  error_len = 1;
+
   // XQilla specific way to create an XQC_Implementation struct
   impl = createXQillaXQCImplementation(XQC_VERSION_NUMBER);
   if(impl == 0) return 1;
 
+  err = impl->create_context(impl, &static_context);
+  if(err != 0) return err;
+
+  static_context->set_error_handler(static_context, &my_handler_s);
+
   // Parse an XQuery expression
-  err = impl->prepare(impl, xquery, 0, &expr);
+  err = impl->prepare(impl, xquery, static_context, &expr);
   if(err != 0) return err;
 
   return 0;
@@ -38,6 +74,8 @@ int parse(char const *xml) {
   // Set the document as the context item
   doc->next(doc);
   context->set_context_item(context, doc);
+
+  context->set_error_handler(context, &my_handler_s);
 
   // Execute the query
   err = expr->execute(expr, context, &seq);
@@ -305,7 +343,7 @@ func main() {
 
 	cs := C.CString(udep)
 	if e := C.init(cs); e != 0 {
-		x(fmt.Errorf("C.init: %d", e))
+		x(fmt.Errorf("C.init: %s", C.GoString(C.error_value)))
 	}
 	C.free(unsafe.Pointer(cs))
 
@@ -453,6 +491,9 @@ func doXml(document, archname, filename string) (result string) {
 	lines := make([]string, 0)
 
 	defer func() {
+		if alpino.Conllu == nil {
+			alpino.Conllu = &ConlluType{}
+		}
 		alpino.Conllu.Conllu = "\n" + strings.Join(lines, "\n") + "\n"
 		if err == nil {
 			alpino.Conllu.Status = "OK"
@@ -468,6 +509,9 @@ func doXml(document, archname, filename string) (result string) {
 				fmt.Fprintln(os.Stderr, ">>>", filename)
 			} else {
 				fmt.Fprintln(os.Stderr, ">>>", archname, "/", filename)
+			}
+			if alpino.Sentence == nil {
+				alpino.Sentence = &SentType{}
 			}
 			if id := alpino.Sentence.SentId; id != "" {
 				fmt.Fprintln(os.Stderr, "# sent_id =", id)
@@ -487,7 +531,9 @@ func doXml(document, archname, filename string) (result string) {
 			fmt.Fprintln(os.Stderr)
 			alpino.Conllu.Status = "error"
 			alpino.Conllu.Error = fmt.Sprintf("Line %d: %v", lineno, err)
-			clean(alpino.Node)
+			if alpino.Node != nil {
+				clean(alpino.Node)
+			}
 		}
 		minify(alpino)
 		result = format(alpino)
@@ -538,13 +584,13 @@ func doXml(document, archname, filename string) (result string) {
 		e := C.parse(cs)
 		C.free(unsafe.Pointer(cs))
 		if e != 0 {
-			err = fmt.Errorf("C.parse: %d", e)
+			err = fmt.Errorf("C.parse: %s", C.GoString(C.error_value))
 			lineno = 0
 			return
 		}
 		for {
 			if e := C.next(); e != 0 {
-				err = fmt.Errorf("C.next: %d", e)
+				err = fmt.Errorf("C.next: %s", C.GoString(C.error_value))
 				lineno = len(lines)
 				return
 			}
