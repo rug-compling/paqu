@@ -1309,6 +1309,35 @@ var (
 			"pos",
 		},
 		{
+			"Scheidbare werkwoorden",
+			`//node[starts-with(@sc,"part_")]`,
+			SPOD_STD,
+			"vpart",
+			"Werkwoorden met een scheidbaar partikel||",
+			"",
+		},
+		{
+			"",
+			`//node[starts-with(@sc,"part_") and
+       @rel="hd" and
+       ../node[@rel="svp" and starts-with(@frame,"particle")]]`,
+			SPOD_STD,
+			"vpartex",
+			"Werkwoorden met een scheidbaar partikel|, partikel gescheiden van werkwoord",
+			"",
+		},
+		{
+			"",
+			`//node[starts-with(@sc,"part_") and
+       (   not(@rel="hd") or
+           @rel="hd" and not(../node[@rel="svp" and starts-with(@frame,"particle")])
+       )]`,
+			SPOD_STD,
+			"vpartin",
+			"Werkwoorden met een scheidbaar partikel|, partikel geïncorporeerd in het werkwoord",
+			"",
+		},
+		{
 			"Inbedding",
 			`//node[%PQ_finiete_inbedding0%]`,
 			SPOD_STD,
