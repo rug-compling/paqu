@@ -236,9 +236,10 @@ var (
 	opt_l = flag.String("l", "", "filelist")
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
+	opt_s = flag.String("s", "", "external script")
 	opt_v = flag.Bool("v", false, "version")
 
-	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|dep|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
+	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
 
 	reJunk = regexp.MustCompile(`(?s:<ud:ud.*?</ud:ud>)|(?s:<ud:conllu.*?</ud:conllu>)`)
 	chQuit = make(chan bool)
@@ -265,6 +266,7 @@ More options:
 
   -o : overwrite original file (default: save with .tmp)
   -p prefix : remove prefix from filename in stderr
+  -s script : use external script instead of built-in (implies -i, for development)
   -v : print version and exit
 
 `, p, p, p)
@@ -283,6 +285,14 @@ func main() {
 	if flag.NArg() == 0 && *opt_l == "" && util.IsTerminal(os.Stdin) {
 		usage()
 		return
+	}
+
+	if *opt_s != "" {
+		b, err := ioutil.ReadFile(*opt_s)
+		x(err)
+		udep = string(b)
+		*opt_i = true
+		*opt_k = false
 	}
 
 	go func() {
@@ -516,7 +526,11 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	if len(lines) == 0 || strings.HasPrefix(alpino.Conllu.Auto, "PQU") {
-		alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
+		if *opt_s != "" {
+			alpino.Conllu.Auto = "script:" + fmt.Sprintf(*opt_s)
+		} else {
+			alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
+		}
 	}
 
 	if len(lines) == 0 {
