@@ -86,7 +86,7 @@ var (
 			"hidden1",
 		},
 		{
-			"Hoofdzinnen",
+			"Hoofdzinnen//Hier komt uitleg over hoofdzinnen",
 			`//node[@cat="smain"]`,
 			SPOD_STD,
 			"smain",
@@ -118,7 +118,7 @@ var (
 			"",
 		},
 		{
-			"Bijzinnen",
+			"Bijzinnen//Hier komt uitleg over bijzinnen",
 			`%PQ_ingebedde_vraagzinnen%`,
 			SPOD_STD,
 			"whsub",
@@ -1613,6 +1613,7 @@ func spod_main(q *Context) {
 	fmt.Fprintln(q.w, "<div class=\"warning\">In ontwikkeling</div>")
 
 	fmt.Fprint(q.w, `
+<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
   var xpaths = [
 `)
@@ -1666,6 +1667,30 @@ function hider(id) {
     var e = document.getElementById(id);
     e.classList.toggle("hide");
 }
+var queryvisible = false;
+var queryid;
+function info(id) {
+    uninfo();
+    var e = $(id);
+    e.show();
+    e.css("zIndex", 9999);
+    queryvisible = true;
+    queryid = id;
+    return false;
+
+}
+function uninfo() {
+    if (queryvisible) {
+        var e = $(queryid);
+        e.hide();
+        e.css("zIndex", 1);
+        queryvisible = false;
+    }
+}
+$(document).mouseup(
+  function(e) {
+    uninfo();
+  });
 //--></script>
 <form id="spodform" action="spodform" method="get" accept-charset="utf-8" target="_blank">
 corpus: <select name="db">
@@ -1711,18 +1736,28 @@ corpus: <select name="db">
 				}
 			}
 			blocknum++
+			a := strings.SplitN(spod.header, "//", 2)
+			extra1 := ""
+			extra2 := ""
+			if len(a) == 2 {
+				extra1 = fmt.Sprintf(` &mdash;
+<a href="javascript:info('#h%d')">info</a>
+`, blocknum)
+				extra2 = fmt.Sprintf(`<div id="h%d" class="submenu a9999"><div class="queryhelp">%s</div></div>`, blocknum, strings.TrimSpace(a[1]))
+			}
 			fmt.Fprintf(q.w, `
 <div class="spodblock">
 <a href="javascript:hider('spodblock%d')">%s</a>
 <div class="spodblockinner hide" id="spodblock%d">
-`, blocknum, spodEscape(spod.header), blocknum)
+`, blocknum, spodEscape(a[0]), blocknum)
 			fmt.Fprintf(q.w, `
 <a href="javascript:alles(%d, %d)">alles</a> &mdash;
 <a href="javascript:niets(%d, %d)">niets</a> &mdash;
-<a href="javascript:omkeren(%d, %d)">omkeren</a>
+<a href="javascript:omkeren(%d, %d)">omkeren</a> %s
 <p>
+%s
 <table class="breed">`,
-				i, j, i, j, i, j)
+				i, j, i, j, i, j, extra1, extra2)
 		}
 		fmt.Fprintf(q.w, `<tr>
   <td><input type="checkbox" name="i%d" id="i%d" value="t">
@@ -2066,7 +2101,8 @@ window.onclick = function(event) {
 		}
 
 		if spod.header != "" {
-			header = spod.header
+			a := strings.SplitN(spod.header, "//", 2)
+			header = strings.TrimSpace(a[0])
 		}
 		spodtext := spod.text
 		if strings.Contains(spodtext, "||") || !strings.Contains(spodtext, "|") {
