@@ -1627,11 +1627,10 @@ func spod_main(q *Context) {
 			first = i
 		}
 	}
-	fmt.Fprintf(q.w, `
+	fmt.Fprint(q.w, `
 ];
-  var firstindex = %d;
   var indexen = {
-`, first)
+`)
 	p = ""
 	for i, spod := range spods {
 		fmt.Fprintf(q.w, "%s'%s': %d", p, spod.lbl, i)
@@ -1707,7 +1706,7 @@ $(document).mouseup(
   });
 function getChoices() {
   var res = [];
-  for (var i = firstindex; i < xpaths.length; i++) {
+  for (var i = `, first, `; i < `, len(spods), `; i++) {
     var e = document.getElementById('i' + i);
     if (e.checked) {
       res.push(xpaths[i][2]);
@@ -1723,7 +1722,7 @@ function setChoices(c) {
     }
   }
   var e = document.getElementById("spodform").elements;
-  for (var i = firstindex; i < xpaths.length; i++) {
+  for (var i = `, first, `; i < `, len(spods), `; i++) {
     e[i+1].checked = false;
   }
   for (var i = 0; i < c.length; i++) {
@@ -1768,10 +1767,10 @@ corpus: <select name="db">
 <p>
 <a href="spodlist" target="_blank">lijst van queries</a>
 <p>
-<a href="javascript:alles(0, %d, true)">alles</a> &mdash;
-<a href="javascript:niets(0, %d, true)">niets</a> &mdash;
-<a href="javascript:omkeren(0, %d)">omkeren</a>
-`, len(spods), len(spods), len(spods))
+<a href="javascript:alles(%d, %d, true)">alles</a> &mdash;
+<a href="javascript:niets(%d, %d, true)">niets</a> &mdash;
+<a href="javascript:omkeren(%d, %d)">omkeren</a>
+`, first, len(spods), first, len(spods), first, len(spods))
 
 	inTable := false
 	blocknum := 0
