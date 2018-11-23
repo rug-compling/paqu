@@ -86,7 +86,7 @@ var (
 			"hidden1",
 		},
 		{
-			"Hoofdzinnen//Hier komt uitleg over hoofdzinnen",
+			"Hoofdzinnen",
 			`//node[@cat="smain"]`,
 			SPOD_STD,
 			"smain",
@@ -118,7 +118,7 @@ var (
 			"",
 		},
 		{
-			"Bijzinnen//Hier komt uitleg over bijzinnen",
+			"Bijzinnen",
 			`%PQ_ingebedde_vraagzinnen%`,
 			SPOD_STD,
 			"whsub",
@@ -1309,7 +1309,7 @@ var (
 			"pos",
 		},
 		{
-			"Scheidbare werkwoorden",
+			"Scheidbare werkwoorden//Dit werkt niet voor handmatig geannoteerde corpora",
 			`//node[starts-with(@sc,"part_")]`,
 			SPOD_STD,
 			"vpart",
@@ -1619,12 +1619,26 @@ func spod_main(q *Context) {
 `)
 
 	p := ""
-	for _, spod := range spods {
-		fmt.Fprintf(q.w, "%s['%s', '%s']", p, url.QueryEscape(spod.xpath), spod.method)
+	first := -1
+	for i, spod := range spods {
+		fmt.Fprintf(q.w, "%s['%s', '%s', '%s']", p, url.QueryEscape(spod.xpath), spod.method, spod.lbl)
+		p = ",\n"
+		if first < 0 && !strings.HasPrefix(spod.special, "hidden") {
+			first = i
+		}
+	}
+	fmt.Fprintf(q.w, `
+];
+  var firstindex = %d;
+  var indexen = {
+`, first)
+	p = ""
+	for i, spod := range spods {
+		fmt.Fprintf(q.w, "%s'%s': %d", p, spod.lbl, i)
 		p = ",\n"
 	}
 	fmt.Fprint(q.w, `
-];
+};
 function vb(i) {
     var e = document.getElementById("spodform").elements
     window.open("xpath?db=" + e[0].value + "&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
@@ -1691,6 +1705,54 @@ $(document).mouseup(
   function(e) {
     uninfo();
   });
+function getChoices() {
+  var res = [];
+  for (var i = firstindex; i < xpaths.length; i++) {
+    var e = document.getElementById('i' + i);
+    if (e.checked) {
+      res.push(xpaths[i][2]);
+    }
+  }
+  return res;
+}
+function setChoices(c) {
+  var ee = document.getElementsByClassName("spodblockinner");
+  for (var i = 0; i < ee.length; i++) {
+    if (! ee[i].classList.contains('hide')) {
+      ee[i].classList.add('hide');
+    }
+  }
+  var e = document.getElementById("spodform").elements;
+  for (var i = firstindex; i < xpaths.length; i++) {
+    e[i+1].checked = false;
+  }
+  for (var i = 0; i < c.length; i++) {
+    var idx = indexen[c[i]];
+    if (idx) {
+      var el = e[idx + 1];
+      el.checked = true;
+      while (! el.classList.contains('spodblockinner')) {
+        el = el.parentNode;
+      }
+      if (el.classList.contains('hide')) {
+        el.classList.remove('hide');
+      }
+    }
+  }
+}
+function optsave(n) {
+  localStorage.setItem(
+      "paqu-spod-"+n,
+      JSON.stringify(getChoices())
+  );
+  document.getElementById('op'+n).disabled = false;
+}
+function optload(n) {
+  var storageContent = localStorage.getItem("paqu-spod-" + n);
+  if (storageContent !== undefined) {
+    setChoices(JSON.parse(storageContent) || []);
+  }
+}
 //--></script>
 <form id="spodform" action="spodform" method="get" accept-charset="utf-8" target="_blank">
 corpus: <select name="db">
@@ -1774,6 +1836,16 @@ corpus: <select name="db">
 	fmt.Fprintf(q.w, `</table></div></div>
 <div class="spod"></div>
 <div id="spodfoot"><div id="spodinfoot">
+<div>
+terugzetten<br>
+<button type="button" disabled onclick="optload(1)" id="op1">1</button><button type="button" disabled onclick="optload(2)" id="op2">2</button><button type="button" disabled onclick="optload(3)" id="op3">3</button><br>
+<button type="button" disabled onclick="optload(4)" id="op4">4</button><button type="button" disabled onclick="optload(5)" id="op5">5</button><button type="button" disabled onclick="optload(6)" id="op6">6</button>
+</div>
+<div>
+opslaan<br>
+<button type="button" onclick="optsave(1)">1</button><button type="button" onclick="optsave(2)">2</button><button type="button" onclick="optsave(3)">3</button><br>
+<button type="button" onclick="optsave(4)">4</button><button type="button" onclick="optsave(5)">5</button><button type="button" onclick="optsave(6)">6</button>
+</div>
 uitvoer: <select name="out">
 <option value="html">HTML</option>
 <option value="text">Teksttabel</option>
@@ -1782,6 +1854,17 @@ uitvoer: <select name="out">
 <input type="submit" value="verzenden">
 </div></div>
 </form>
+<script type="text/javascript"><!--
+for (var n = 1; n < 7; n++) {
+  var storageContent = localStorage.getItem("paqu-spod-" + n);
+  if (storageContent !== undefined) {
+    var d = JSON.parse(storageContent);
+    if (d) {
+      document.getElementById('op'+n).disabled = false;
+    }
+  }
+}
+//--></script>
 `)
 
 	fmt.Fprintln(q.w, "</body></html>")

@@ -526,7 +526,10 @@ code {
     padding: 1em;
     max-width: 960px;
 }
-
+#spodinfoot > div {
+  float: right;
+  padding-left: 1em;
+}
 .center {
     text-align: center;
 }
