@@ -1740,11 +1740,12 @@ function setChoices(c) {
   }
 }
 function optsave(n) {
+  var c = getChoices();
   localStorage.setItem(
       "paqu-spod-"+n,
-      JSON.stringify(getChoices())
+      JSON.stringify(c)
   );
-  document.getElementById('op'+n).disabled = false;
+  document.getElementById('op'+n).disabled = (c.length == 0);
 }
 function optload(n) {
   var storageContent = localStorage.getItem("paqu-spod-" + n);
@@ -1798,27 +1799,31 @@ corpus: <select name="db">
 			}
 			blocknum++
 			a := strings.SplitN(spod.header, "//", 2)
-			extra1 := ""
-			extra2 := ""
+			extra := ""
 			if len(a) == 2 {
-				extra1 = fmt.Sprintf(` &mdash;
-<a href="javascript:info('#h%d')">info</a>
-`, blocknum)
-				extra2 = fmt.Sprintf(`<div id="h%d" class="submenu a9999"><div class="queryhelp">%s</div></div>`, blocknum, strings.TrimSpace(a[1]))
+				// we kunnen hier geen <button> gebruiken omdat die de nummering in de war schopt
+				extra = fmt.Sprintf(`
+<a href="javascript:info('#h%d')" class="spodi">?</a>
+<div id="h%d" class="submenu a9999">
+  <div class="queryhelp">
+    <h4>%s</h4>
+%s
+  </div>
+</div>
+`, blocknum, blocknum, html.EscapeString(a[0]), strings.TrimSpace(a[1]))
 			}
 			fmt.Fprintf(q.w, `
 <div class="spodblock">
-<a href="javascript:hider('spodblock%d')">%s</a>
+<a href="javascript:hider('spodblock%d')">%s</a>%s
 <div class="spodblockinner hide" id="spodblock%d">
-`, blocknum, spodEscape(a[0]), blocknum)
+`, blocknum, spodEscape(a[0]), extra, blocknum)
 			fmt.Fprintf(q.w, `
 <a href="javascript:alles(%d, %d)">alles</a> &mdash;
 <a href="javascript:niets(%d, %d)">niets</a> &mdash;
-<a href="javascript:omkeren(%d, %d)">omkeren</a> %s
+<a href="javascript:omkeren(%d, %d)">omkeren</a>
 <p>
-%s
 <table class="breed">`,
-				i, j, i, j, i, j, extra1, extra2)
+				i, j, i, j, i, j)
 		}
 		fmt.Fprintf(q.w, `<tr>
   <td><input type="checkbox" name="i%d" id="i%d" value="t">
@@ -1836,12 +1841,12 @@ corpus: <select name="db">
 <div class="spod"></div>
 <div id="spodfoot"><div id="spodinfoot">
 <div>
-terugzetten<br>
+hergebruiken<br>
 <button type="button" disabled onclick="optload(1)" id="op1">1</button><button type="button" disabled onclick="optload(2)" id="op2">2</button><button type="button" disabled onclick="optload(3)" id="op3">3</button><br>
 <button type="button" disabled onclick="optload(4)" id="op4">4</button><button type="button" disabled onclick="optload(5)" id="op5">5</button><button type="button" disabled onclick="optload(6)" id="op6">6</button>
 </div>
 <div>
-opslaan<br>
+bewaren<br>
 <button type="button" onclick="optsave(1)">1</button><button type="button" onclick="optsave(2)">2</button><button type="button" onclick="optsave(3)">3</button><br>
 <button type="button" onclick="optsave(4)">4</button><button type="button" onclick="optsave(5)">5</button><button type="button" onclick="optsave(6)">6</button>
 </div>
@@ -1858,7 +1863,7 @@ for (var n = 1; n < 7; n++) {
   var storageContent = localStorage.getItem("paqu-spod-" + n);
   if (storageContent !== undefined) {
     var d = JSON.parse(storageContent);
-    if (d) {
+    if (d && d.length > 0) {
       document.getElementById('op'+n).disabled = false;
     }
   }

@@ -573,3 +573,16 @@ table.compact td {
     padding: 0px .35em 0px 0px;
     margin: 0px;
 }
+
+a.spodi {
+    font-weight: normal;
+    color: black;
+    text-decoration: none;
+    background-color: #e0e0e0;
+    border: 1px solid #b0b0b0;
+    padding: .2em .5em;
+    margin-left: 1em;
+}
+a.spodi:hover {
+    text-decoration: none;
+}
