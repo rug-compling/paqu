@@ -66,7 +66,7 @@ int parse(char const *xml) {
   XQC_Sequence
      *value;
   char const
-     *conll[] = { "conll" },
+     *lib[] = { "lib" },
      *any[] = { "_" },
      *yes[] = { "yes" };
 
@@ -80,17 +80,12 @@ int parse(char const *xml) {
 
   context->set_error_handler(context, &my_handler_s);
 
-  impl->create_string_sequence(impl, yes, 1, &value);
-  if(err != 0) return err;
-  err = context->set_variable(context, "", "LIB", value);
-  if(err != 0) return err;
-
   impl->create_string_sequence(impl, any, 1, &value);
   if(err != 0) return err;
   err = context->set_variable(context, "", "DIR", value);
   if(err != 0) return err;
 
-  impl->create_string_sequence(impl, conll, 1, &value);
+  impl->create_string_sequence(impl, lib, 1, &value);
   if(err != 0) return err;
   err = context->set_variable(context, "", "MODE", value);
   if(err != 0) return err;
@@ -155,8 +150,8 @@ import (
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = int(1)  // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(11) // ophogen als xml-formaat is veranderd
+	VERSIONxq       = int(2) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
+	VERSIONxml      = int(0) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(9)
 )

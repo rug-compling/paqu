@@ -21,5 +21,5 @@ udep_generated.go: udep.xq
 	cat $< >> $@
 	echo '`' >> $@
 
-udep.diff: udep.xq universal_dependencies_2.2.xq
-	-diff -U10 -b universal_dependencies_2.2.xq udep.xq > udep.diff
+udep.diff: udep.xq universal_dependencies_2.3.xq
+	-diff -U10 -b universal_dependencies_2.3.xq udep.xq > udep.diff

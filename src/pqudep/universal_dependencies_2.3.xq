@@ -4,9 +4,9 @@ declare namespace ud="https://universaldependencies.github.io/docs/" ;
 declare option saxon:output "omit-xml-declaration=yes";
 declare option saxon:output "indent=yes";
 
-declare  variable $DIR as xs:string external ;
-declare  variable $MODE as xs:string external ;
-declare  variable $ENHANCED as xs:string external ;
+declare  variable $DIR external ;
+declare  variable $MODE external ;
+declare  variable $ENHANCED external ;
 
 (: should work in coordinations like te laten reizen en te laten beleven,
    and recursive cases: Andras blijft ontkennen sexuele relaties met Timea te hebben gehad ,
@@ -62,10 +62,16 @@ declare function local:anaphoric_relpronoun($node as node()) as node()* {
 (: Glastra en Terlouw verzonnen een list --> nsubj(verzonnen,Glastra) nsubj(verzonnen,Terlouw) :)
 declare function local:distribute_conjuncts($node as node()) as node()* {
 	let $coord_head := $node/ancestor::node//node[@end = $node/@ud:HeadPosition 
-	       and @ud:Relation=("amod","appos","nmod","nsubj","nsubj:pass","nummod","obj","iobj","obl","obl:agent")]
+	       and @ud:Relation=("amod","appos","nmod","nsubj","nsubj:pass","nummod","obj","iobj","obl","obl:agent","advcl")]
+  (: let $case := ($node/ancestor::node//node[@ud:Relation="case" and @ud:HeadPosition=$coord_head/@end])[1] :)
+  let $deplabel := 
+    (: if ($coord_head/@ud:Relation=("nmod","obl") and $case)
+    then string-join($coord_head/@ud:Relation,local:enhanced_lemma_string($case))
+    else :) local:enhance_dependency_label($coord_head)
 	return 
 	if ($node[@ud:Relation="conj"] and exists($coord_head))
-	then <headdep head="{$coord_head/@ud:HeadPosition}" dep="{$coord_head/@ud:Relation}"/>
+	(: in A en B vs in A en naast B --> use enh_dep_label($node) in the latter case... :)
+	then <headdep head="{$coord_head/@ud:HeadPosition}" dep="{$deplabel}"/>
 	else ()
 };
 
@@ -95,7 +101,7 @@ declare function local:distribute_dependents($node as node()) as node()* {
                                                     (: @rel=$phrase/@rel
                                                         and -- this constraint is too strict for coord of passives:)
                                                         not(@pt or @cat)]/@index = $phrase/@index 
-	                                             and node[@rel=("hd","predc") and (@pt or @cat) and   (: bekende cafes zijn A en B :)
+	                                             and node[@rel=("hd","predc") and not(@ud:pos="AUX") and (@pt or @cat) and   (: bekende cafes zijn A en B :)
                                                         (: not(@ud:pos=("ADP","AUX")) and not(@cat="mwu") :)
                                                         not(local:internal_head_position(..) = @end and (@ud:pos=("ADP","AUX") or @cat="mwu") )  
                                                         ]
@@ -104,10 +110,10 @@ declare function local:distribute_dependents($node as node()) as node()* {
     let $udRelation := local:non_local_dependency_label($phrase,($node/ancestor::node//node[@rel="cnj"]/
     	                    node[
                             (: @rel=$phrase/@rel and :)
-                                not(@pt or @cat) and @index=$phrase/@index])[1])   
+                                not(@pt or @cat) and @index=$phrase/@index],element {"node"} { })[1])   
     let $EudRelation :=
-      if    ($udRelation = ("nmod","obl") and $phrase[@cat="pp"]/node[@rel="hd"])
-      then  string-join(($udRelation,$phrase/node[@rel="hd"]/@lemma),':')   
+      if    ($udRelation = ("nmod","obl") and $phrase[@cat="pp"]//node[@ud:Relation="case" and @ud:HeadPosition=$node/@end])
+      then  string-join(($udRelation,local:enhanced_lemma_string($phrase//node[@ud:Relation="case" and @ud:HeadPosition=$node/@end])),':')   
       else  $udRelation                               
 	where $phrase[@rel=("obj1","su","mod","pc","det") and @index]
 	return <headdep head="{local:internal_head_position($conj_head)}" dep="{$EudRelation}"/>
@@ -123,8 +129,8 @@ declare function local:reconstruct_empty_head($node as node()) as node() {
     else $node/../@end - 0.9        (: covers cases where there is no sister with content :)
   return
     if ( $node[@rel="hd" and @index and not(@pt or @cat)]  and 
-         $antecedent/@word and (: onder andere as hd... :)
-         not(local:auxiliary($antecedent) = ("aux","aux:pass","cop")) (: skip auxiliaries and copulas, prepositions as well? :)
+         $antecedent/@word (: onder andere as hd... :)
+         (: and not(local:auxiliary($antecedent) = ("aux","aux:pass","cop")) skip auxiliaries and copulas, prepositions as well? :)
        )  
     then  (: added begin for sorting purposes (in conjunction processing) only, add @pt and @rel for use in  add_Edependencies :)
      <node begin="{$end - 0.1}" end="{$end}" word="{$antecedent/@word}" lemma="{$antecedent/@lemma}" 
@@ -139,26 +145,66 @@ declare function local:reconstruct_empty_head($node as node()) as node() {
     </node>       
 };
 
+
 declare function local:enhance_dependency_label($node as node()) as xs:string {
  let $label := $node/@ud:ERelation
- let $crd := ($node/ancestor::node[@cat="conj"]/node[@rel="crd" and @ud:EHeadPosition=$node/@end])[1]
+ (: find the minimal dominating node :)
+ let $crd := ($node/ancestor::node[@cat="conj" and 
+ 	       not(.//node[@cat="conj"]//node/@begin = $node/@begin)]/node[@rel="crd"])[1]
  let $case := ($node/ancestor::node//node[@ud:ERelation="case" and @ud:EHeadPosition=$node/@end])[1]
  let $mark := ($node/ancestor::node//node[@ud:ERelation=("mark","case") and @ud:EHeadPosition=$node/@end])[1]
  return  
      if ($label = "conj" and exists($crd))
-     then string-join(($label,local:enhanced_lemma_string($crd)),':')
+     then if ($crd/@lemma) 
+          then string-join(($label,local:enhanced_lemma_string($crd)),':')
+          else if ($crd/@cat="mwu")
+               then string-join(($label,local:enhanced_lemma_string(($crd/node[@rel="mwp"])[1])),':')
+     			else "ERROR_empty_eud_label"
      else if ($label = ("nmod","obl") and exists($case))
           then string-join(($label,local:enhanced_lemma_string($case)),':')
-          else if ($label = "advcl" and exists($mark))
+          else if ($label = ("advcl","acl") and exists($mark))
                then string-join(($label,local:enhanced_lemma_string($mark)),':')
                else if ( exists($label) )
                     then $label
-                    else "empty_eud_label"
+                    else "ERROR_empty_eud_label"
 };
 
 declare function local:enhanced_lemma_string($node as node()) as xs:string {
   let $fixed := $node/../node[@ud:ERelation="fixed"]
-  return string-join(($node/@lemma,$fixed/@lemma),'_')
+  let $lemma := 
+          if ($node/@lemma = "a.k.a")
+          then "also_known_as"
+          else if ($node/@lemma = "c.q.")
+          then "casu_quo"
+          else if ($node/@lemma = ("dwz.","d.w.z."))
+          then "dat_wil_zeggen"
+          else if ($node/@lemma = "e.d.")
+          then "en_dergelijke"
+          else if ($node/@lemma = "en/of")
+          then "en_of"
+  				else if ($node/@lemma = "enz.")
+  				then "enzovoort"
+          else if ($node/@lemma = "etc.")
+          then "etcetera"
+          else if ($node/@lemma = "m.a.w.")
+          then "met_andere_woorden"
+          else if ($node/@lemma = "nl.")
+          then "namelijk"
+          else if ($node/@lemma = "resp.")
+          then "respectievelijk"
+          else if ($node/@lemma = "t/m")
+          then "tot_en_met"
+          else if ($node/@lemma = "t.a.v.")
+          then "ten_aanzien_van"
+          else if ($node/@lemma = "t.g.v.")
+          then "ten_gunste_van"
+          else if ($node/@lemma = "t.n.v.")
+          then "ten_name_van"
+          else if ($node/@lemma = "t.o.v.")
+          then "ten_opzichte_van"
+  				else $node/@lemma
+  return lower-case(replace(replace(
+            string-join(($lemma,$fixed/@lemma),'_'),"/","schuine_streep"),"-","_"))
 } ;
 
 declare function local:enhanced_elements_to_string($headdep as node()*) as xs:string {
@@ -586,7 +632,8 @@ declare function local:dependency_relation($node as element(node)) as attribute(
 (: used for debugging, but also nice as readable alternative for selecting by [1] or by means of @begin position :)
 declare function local:leftmost($nodes as element(node)*) as element(node) {
 	let $sorted :=  for $node in $nodes
-	                order by number($node/@begin)
+                  let $bi := number($node/@begin)
+	                order by $bi (: solve cases where begin is identical (hij is en blijft omstreden)?? :)
 	                return $node
 	return
 	    $sorted[1]
@@ -727,7 +774,9 @@ declare function local:internal_head_position_of_gapped_constituent($node as ele
   else if ( $node/node[@rel="body" and (@pt or @cat)] )
     then local:internal_head_position_with_gapping(($node/node[@rel="body" and (@pt or @cat)])[1]) 
   else if ( $node/node[@rel="cnj" and (@pt or @cat)] )
-    then local:internal_head_position_with_gapping(($node/node[@rel="cnj" and (@pt or @cat)])[1])
+    then local:internal_head_position_with_gapping(($node/node[@rel="cnj" and (@pt or @cat)])[1]) 
+  else if ( $node/node[@rel="dp" and (@pt or @cat)] )
+    then local:internal_head_position_with_gapping(($node/node[@rel="dp" and (@pt or @cat)])[1])
   else  "ERROR_NO_INTERNAL_HEAD_IN_GAPPED_CONSTITUENT"
 };
 
@@ -754,10 +803,12 @@ declare function local:external_head_position1($node as element(node)) as xs:str
                         (: in de eerste rond --> typo in LassySmall/Wiki , binnen en [advp later buiten ]:)
                                   else local:external_head_position($node/..)
                 else local:external_head_position($node/..)
-   else if ($node[@rel="hd" and starts-with(local:auxiliary($node),'aux')] ) (: aux aux:pass  :)
+   else if ($node[@rel="hd" and local:auxiliary($node)= ("aux","aux:pass")] ) (: aux aux:pass cop :)
           then if ($node/../node[@rel=("vc","predc") and (@pt or (@cat and node[@pt or @cat]))])  (: skip vc with just empty nodes :)
-    	        then local:internal_head_position_with_gapping(($node/../node[@rel="vc"])[1])
-    			else local:external_head_position($node/..)  (: gapping, but does it ever occur with aux?? :)
+    	         then local:internal_head_position_with_gapping(($node/../node[@rel=("vc","predc")])[1])
+          (: else if ($node/../node[@rel="predc"]/@index = $node/../../node[@rel="whd"]/@index)
+               then local:internal_head_position($node/../../node[@rel="whd"]) :)
+    			     else local:external_head_position($node/..)  (: gapping, but does it ever occur with aux?? with cop: hij was en blijft nog steeds een omstreden figuur :)
 
    else if ($node[@rel="hd" and local:auxiliary($node) eq 'cop'] ) 
           then if ($node/../node[@rel="predc" and (@pt or @cat)])
@@ -837,7 +888,7 @@ declare function local:external_head_position1($node as element(node)) as xs:str
   
   else if ($node[@rel=("dlink","sat","tag")])
    then if ($node/../node[@rel="nucl"])
-         then local:internal_head_position($node/../node[@rel="nucl"])
+         then local:internal_head_position_with_gapping($node/../node[@rel="nucl"])
          else "ERROR_NO_EXTERNAL_HEAD"
    
   else if ($node[@rel="vc"]) 
@@ -958,7 +1009,11 @@ declare function local:dependency_label($node as element(node)) as xs:string
     else if ($node[@rel="pobj1"])                   then "expl"
     else if ($node[@rel="predc"]) 
      then if ( $node/../node[@rel=("obj1","se") and (@pt or @cat)] or $node/../node[@rel="hd" and (@pt or @cat) and not(@ud:pos="AUX")] ) 
-           then "xcomp"
+           then if ($node/../@cat="pp") (: check for absolutive (met) constructions, https://github.com/UniversalDependencies/docs/issues/408 :)
+                then if ($node/../../@cat="np")
+                	 then "acl"
+                	 else "advcl" 
+                else "xcomp"
            else local:dependency_label($node/..) (: covers gapping cases where predc is promoted to head as well :)
          (: hack for now: de keuze is gauw gemaakt :)
          (: was amod, is this more accurate?? :)
@@ -993,7 +1048,9 @@ declare function local:dependency_label($node as element(node)) as xs:string
               
     else if ($node[@rel=("obj1","me")] )
           then if ( $node/../@cat="pp" or $node/../node[@rel="hd" and @ud:pos="ADP"]) (: vol vertrouwen , heel de geschiedenis door (cat=ap!) :)
-                then local:dependency_label($node/..)  
+                then if ( $node/../node[@rel="predc"] ) (: absolutive met :)
+                     then "nsubj"
+                     else local:dependency_label($node/..)  
 	            else if ($node[@index = ../../node[@rel="su"]/@index ] )
                     then "nsubj:pass"  (: trees where su (with extraposed material) is spelled out at position of obj1  :)
                     else if ($node/../node[@rel="hd" and (@pt or @cat)] )
@@ -1156,8 +1213,8 @@ declare function local:non_local_dependency_label($head as element(node), $gap a
             else if ($head[@ud:pos=("ADV", "ADP") or @cat=("advp","ap")])    
                  then "advmod" (: waar precies zit je .. :)
                  else "ERROR_NO_LABEL_INDEX_PC"
-  else if ($gap[@rel="pobj1"]) 
-       then "expl"   (: waar het om gaat is dat hij scoort :) 
+  else if ($gap[@rel=("sup","pobj1")]) 
+       then "expl"   (: waar het om gaat is dat hij scoort, het is 1881 en dertien jaar geleden dat ... :)
   else if ($gap[@rel="mwp"]) 
        then local:dependency_label($gap/..)   (: wat heb je voor boeken gelezen :)
   else if ($gap[@rel="vc"]) 
@@ -1194,7 +1251,7 @@ declare function local:label_vmod($node as element(node)) as xs:string {
               	                             NOT: bij Bakema is een stoeptegel door de ruit gegooid
               	                             NO/YES: hierdoor werd Prince door het grote publiek ontdekt :)
                    else if ($node[@cat=("pp","np","conj","mwu") or @ud:pos=("NOUN","PRON","PROPN","X","PUNCT","SYM") ]) then "obl"
-                   else if ($node[@cat=("cp","sv1","smain","ppres","ppart","ti","oti","du","whq","whrel","rel")])  then "advcl"
+                   else if ($node[@cat=("cp","sv1","smain","ssub","ppres","ppart","ti","oti","inf","du","whq","whrel","rel")])  then "advcl"
                    else if ($node[@ud:pos= ("ADJ","ADV","ADP","VERB","SCONJ","INTJ") 
                    	              or @cat=("advp","ap")
                    	              or (@cat="conj" and node/@ud:pos="ADV")])  then "advmod"  (: niet of nauwelijks :)
@@ -1214,11 +1271,12 @@ declare function local:mod_label_inside_np($node as element(node)) as xs:string 
                 (: v2 added relcl -- whrel= met name waar ... :)
     else if ($node[@cat="cp"]/node[@rel="body" and (@ud:pos = ("NOUN","PROPN") or @cat=("np","conj"))] ) then "nmod"   
                 (: zijn loopbaan [CP als schrijver] :) 
-    else if ($node[@cat=("cp","sv1","smain","ppres","ppart","ti","oti","du","whq") or @ud:pos="SCONJ"])  then "acl" 
+    else if ($node[@cat=("cp","sv1","smain","ppres","ppart","inf","ti","oti","du","whq") or @ud:pos="SCONJ"])  then "acl" 
                 (: oa zinnen tussen haakjes :)
     else if ($node[@ud:pos= ("ADV","ADP","VERB","CCONJ") or @cat="advp"])  then "amod"
                (: VERB= aanstormend etc -> amod, ADV = nagenoeg alle prijzen, slechts 4 euro --> amod :)
                (: CCONJ = opdrachten zoals:   --> amod :)
+    else if ($node[@rel="det"]) then "det" (: empty determiners in gapping? :)
     else if ($node[@index])     then "ERROR_INDEX_NMOD"
     else "ERROR_NO_LABEL_NMOD"
 };
@@ -1397,7 +1455,8 @@ return
 };
 
 
-for $doc in collection($DIR)
+
+for $href in doc($DIR)//doc/@href for $doc in doc($href)
     for $node in $doc/alpino_ds/node 
   return
   if ($MODE eq 'conll') 
@@ -1454,3 +1513,4 @@ for $doc in collection($DIR)
              $node/../comments
            }
          </alpino_ds>
+  
