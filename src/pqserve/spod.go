@@ -1323,7 +1323,7 @@ var (
        ../node[@rel="svp" and starts-with(@frame,"particle")]]`,
 			SPOD_STD,
 			"vpartex",
-			"Werkwoorden met een scheidbaar partikel|, partikel gescheiden van werkwoord",
+			"Werkwoorden met een scheidbaar partikel|, partikel gescheiden van het werkwoord",
 			"",
 		},
 		{
@@ -1335,6 +1335,38 @@ var (
 			SPOD_STD,
 			"vpartin",
 			"Werkwoorden met een scheidbaar partikel|, partikel geïncorporeerd in het werkwoord",
+			"",
+		},
+		{
+			"",
+			`//node[starts-with(@sc,"part_") and
+       not(@wvorm="pv")]`,
+			SPOD_STD,
+			"vprtn",
+			"Niet-finiete werkwoorden met een scheidbaar partikel||",
+			"",
+		},
+		{
+			"",
+			`//node[starts-with(@sc,"part_") and
+       not(@wvorm="pv") and
+       @rel="hd" and
+       ../node[@rel="svp" and starts-with(@frame,"particle")]]`,
+			SPOD_STD,
+			"vprtnex",
+			"Niet-finiete werkwoorden met een scheidbaar partikel|, partikel gescheiden van het werkwoord",
+			"",
+		},
+		{
+			"",
+			`//node[starts-with(@sc,"part_") and
+       not(@wvorm="pv") and
+       (   not(@rel="hd") or
+           @rel="hd" and not(../node[@rel="svp" and starts-with(@frame,"particle")])
+       )]`,
+			SPOD_STD,
+			"vprtnin",
+			"Niet-finiete werkwoorden met een scheidbaar partikel|, partikel geïncorporeerd in het werkwoord",
 			"",
 		},
 		{
@@ -1450,7 +1482,7 @@ var (
 			"",
 		},
 		{
-			"Parser succes",
+			"Parser succes//Dit werkt niet voor handmatig geannoteerde corpora",
 			`//parser[@cats="1" and @skips="0"]`,
 			SPOD_STD,
 			"ok",
@@ -1458,7 +1490,7 @@ var (
 			"parser",
 		},
 		{
-			"Parser succes: geparste delen",
+			"Parser succes: geparste delen//Dit werkt niet voor handmatig geannoteerde corpora",
 			`//parser[@cats="0"]`,
 			SPOD_STD,
 			"cats0",
@@ -1498,7 +1530,7 @@ var (
 			"parser",
 		},
 		{
-			"parser success: overgeslagen woorden",
+			"Parser success: overgeslagen woorden//Dit werkt niet voor handmatig geannoteerde corpora",
 			`//parser[@skips="0"]`,
 			SPOD_STD,
 			"skips0",
@@ -1538,7 +1570,7 @@ var (
 			"parser",
 		},
 		{
-			"Onbekende woorden",
+			"Onbekende woorden//Dit werkt niet voor handmatig geannoteerde corpora",
 			`//node[@his]`,
 			SPOD_STD,
 			"his",
