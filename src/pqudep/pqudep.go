@@ -63,6 +63,13 @@ int init(char const *xquery)
 }
 
 int parse(char const *xml) {
+  XQC_Sequence
+     *value;
+  char const
+     *conll[] = { "conll" },
+     *any[] = { "_" },
+     *yes[] = { "yes" };
+
   // Parse a document
   err = impl->parse_document(impl, xml, &doc);
   if(err != 0) return err;
@@ -71,11 +78,31 @@ int parse(char const *xml) {
   err = expr->create_context(expr, &context);
   if(err != 0) return err;
 
+  context->set_error_handler(context, &my_handler_s);
+
+  impl->create_string_sequence(impl, yes, 1, &value);
+  if(err != 0) return err;
+  err = context->set_variable(context, "", "LIB", value);
+  if(err != 0) return err;
+
+  impl->create_string_sequence(impl, any, 1, &value);
+  if(err != 0) return err;
+  err = context->set_variable(context, "", "DIR", value);
+  if(err != 0) return err;
+
+  impl->create_string_sequence(impl, conll, 1, &value);
+  if(err != 0) return err;
+  err = context->set_variable(context, "", "MODE", value);
+  if(err != 0) return err;
+
+  impl->create_string_sequence(impl, yes, 1, &value);
+  if(err != 0) return err;
+  err = context->set_variable(context, "", "ENHANCED", value);
+  if(err != 0) return err;
+
   // Set the document as the context item
   doc->next(doc);
   context->set_context_item(context, doc);
-
-  context->set_error_handler(context, &my_handler_s);
 
   // Execute the query
   err = expr->execute(expr, context, &seq);
@@ -343,7 +370,7 @@ func main() {
 
 	cs := C.CString(udep)
 	if e := C.init(cs); e != 0 {
-		x(fmt.Errorf("C.init: %s", C.GoString(C.error_value)))
+		x(fmt.Errorf("C.init: [%d] %s", e, C.GoString(C.error_value)))
 	}
 	C.free(unsafe.Pointer(cs))
 
@@ -584,13 +611,13 @@ func doXml(document, archname, filename string) (result string) {
 		e := C.parse(cs)
 		C.free(unsafe.Pointer(cs))
 		if e != 0 {
-			err = fmt.Errorf("C.parse: %s", C.GoString(C.error_value))
+			err = fmt.Errorf("C.parse: [%d] %s", e, C.GoString(C.error_value))
 			lineno = 0
 			return
 		}
 		for {
 			if e := C.next(); e != 0 {
-				err = fmt.Errorf("C.next: %s", C.GoString(C.error_value))
+				err = fmt.Errorf("C.next: [%d] %s", e, C.GoString(C.error_value))
 				lineno = len(lines)
 				return
 			}
