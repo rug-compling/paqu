@@ -1640,16 +1640,58 @@ $('#xquery').textcomplete([
     context: outText
 },
 {
-    match: /::([a-z]*)$/,
+    match: /^((.|\n)*['")\]])$/,
     search: function (term, callback) {
-        callback($.map(['node'], function (e) {
-            return e.indexOf(term) === 0 ? e : null;
-        }));
-    },
-    replace: function (value) {
-        return '::' + value + ' ';
+        var chars = [];
+        var i, j;
+        var state = 0;
+
+        for (i = 0, j = term.length; i < j; i++) {
+            var c = term.charAt(i);
+            if (state == 0) {
+               if (c == "'") {
+                   state = 1;
+               } else if (c == '"') {
+                   state = 2;
+               } else if (c == '[') {
+                   chars.unshift(']');
+               } else if (c == ']') {
+                   if (chars.length == 0 || chars[0] != ']') {
+                       callback([]);
+                       return;
+                   }
+                   chars.shift();
+               } else if (c == '(') {
+                   chars.unshift(')');
+               } else if (c == ')') {
+                   if (chars.length == 0 || chars[0] != ')') {
+                       callback([]);
+                       return;
+                   }
+                   chars.shift();
+               }
+            } else if (state == 1) {
+               if (c == "'") {
+                   state = 0;
+               }
+            } else {
+               if (c == '"') {
+                   state = 0;
+               }
+            }
+        }
+        var rt = [];
+        var s = "";
+        while (chars.length > 0) {
+            s += chars.shift();
+            rt.push(s);
+        }
+        callback(rt);
     },
     index: 1,
+    replace: function (value) {
+        return "$1" + value;
+    },
     context: outText
 }],
 {
