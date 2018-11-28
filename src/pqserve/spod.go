@@ -86,6 +86,14 @@ var (
 			"hidden1",
 		},
 		{
+			"",
+			`//node [@sc]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"has_sc",
+			"has @sc",
+			"hidden1",
+		},
+		{
 			"Hoofdzinnen",
 			`//node[@cat="smain"]`,
 			SPOD_STD,
@@ -1314,7 +1322,7 @@ var (
 			SPOD_STD,
 			"vpart",
 			"Werkwoorden met een scheidbaar partikel||",
-			"",
+			"sc",
 		},
 		{
 			"",
@@ -1324,7 +1332,7 @@ var (
 			SPOD_STD,
 			"vpartex",
 			"Werkwoorden met een scheidbaar partikel|, partikel gescheiden van het werkwoord",
-			"",
+			"sc",
 		},
 		{
 			"",
@@ -1335,7 +1343,7 @@ var (
 			SPOD_STD,
 			"vpartin",
 			"Werkwoorden met een scheidbaar partikel|, partikel geïncorporeerd in het werkwoord",
-			"",
+			"sc",
 		},
 		{
 			"",
@@ -1344,7 +1352,7 @@ var (
 			SPOD_STD,
 			"vprtn",
 			"Niet-finiete werkwoorden met een scheidbaar partikel||",
-			"",
+			"sc",
 		},
 		{
 			"",
@@ -1355,7 +1363,7 @@ var (
 			SPOD_STD,
 			"vprtnex",
 			"Niet-finiete werkwoorden met een scheidbaar partikel|, partikel gescheiden van het werkwoord",
-			"",
+			"sc",
 		},
 		{
 			"",
@@ -1367,7 +1375,7 @@ var (
 			SPOD_STD,
 			"vprtnin",
 			"Niet-finiete werkwoorden met een scheidbaar partikel|, partikel geïncorporeerd in het werkwoord",
-			"",
+			"sc",
 		},
 		{
 			"Inbedding",
