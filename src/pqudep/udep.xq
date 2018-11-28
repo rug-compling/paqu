@@ -1503,7 +1503,7 @@ else
       then
 	string-join(
 	  (
-	    concat("# source = ", document-uri($doc)),
+	    concat("# source = ", $href),
 	    concat("# sent_id = ", $doc/alpino_ds/sentence/@sentid),
 	    concat("# text = ", $doc/alpino_ds/sentence),
 	    local:output_conll($doc/alpino_ds/node),
@@ -1512,7 +1512,7 @@ else
 	  "&#10;"
 	)
       else
-	<alpino_ds version ="{$doc/alpino_ds/@version}" sentence-id="{document-uri($doc)}">
+	<alpino_ds version ="{$doc/alpino_ds/@version}" sentence-id="{$href}">
 	  { $doc/alpino_ds/metadata,
 	    local:output_xml($doc/alpino_ds/node),
 	    $doc/alpino_ds/sentence,
