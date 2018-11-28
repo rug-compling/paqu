@@ -22,8 +22,6 @@ import (
 	"time"
 )
 
-const TEXTCOMPLETE = false
-
 var (
 	pqbugtest string
 	pqxok     string
@@ -59,6 +57,7 @@ var (
 		"recursion_limit": true,
 	}
 	xpathNames = map[string]bool{
+		"alpino_ds":            true,
 		"ancestor-or-self::":   true,
 		"ancestor::":           true,
 		"attribute::":          true,
@@ -117,21 +116,20 @@ var (
 		"dep":                  true,
 		"ud":                   true,
 
-		"acl":      true,
-		"advcl":    true,
-		"advmod":   true,
-		"amod":     true,
-		"appos":    true,
-		"aux":      true,
-		"case":     true,
-		"cc":       true,
-		"ccomp":    true,
-		"clf":      true,
-		"compound": true,
-		"conj":     true,
-		"cop":      true,
-		"csubj":    true,
-		//"dep":        true, // dubbel
+		"acl":        true,
+		"advcl":      true,
+		"advmod":     true,
+		"amod":       true,
+		"appos":      true,
+		"aux":        true,
+		"case":       true,
+		"cc":         true,
+		"ccomp":      true,
+		"clf":        true,
+		"compound":   true,
+		"conj":       true,
+		"cop":        true,
+		"csubj":      true,
 		"det":        true,
 		"discourse":  true,
 		"dislocated": true,
@@ -1529,53 +1527,38 @@ corpus: <select name="db">
        <button id="btXCopy">Kopieer naar invoer</button>
        </div>
 `)
-	if TEXTCOMPLETE {
-		fmt.Fprint(q.w, `<script type="text/javascript" src="jquery.textcomplete.js"></script>
+	fmt.Fprint(q.w, `<script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
-var begin = ['//node', '/alpino_ds/node', '/alpino_ds[parser/@cats=""]', '/alpino_ds[parser/@skips=""]', '/alpino_ds[parser/@cats="" and parser/@skips=""]', '/alpino_ds[sentence/@sentid=""]', '//meta[@name="" and @value=""]', '//parser[@cats=""]', '//parser[@skips=""]', '//parser[@cats="" and @skips=""]'];
-var other = ['/node','/meta[@name="" and @value=""]','/parser[@cats=""]','/parser[@skips=""]','/parser[@cats="" and @skips=""]','/ud','/dep','/conllu'`)
-		for _, a := range NodeTags {
-			fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
-		}
-		for a := range udTags {
-			fmt.Fprintf(q.w, ",\n\t%q", "@"+a)
-		}
-		fmt.Fprint(q.w, `];
+var attribs = ["@cats","@skips","@name","@value","@sentid"`)
+	for _, a := range NodeTags {
+		fmt.Fprintf(q.w, ",\n%q", "@"+a)
+	}
+	for a := range udTags {
+		fmt.Fprintf(q.w, ",\n%q", "@"+a)
+	}
+	fmt.Fprint(q.w, `].sort();
 
-var axis = [
-		"node",
-		"ud",
-		"dep",
-		"and",
-		"div",
-		"mod",
-		"or",
-		"fn:",
-		"ancestor-or-self::",
-		"ancestor::",
-		"attribute::",
-		"child::",
-		"descendant-or-self::",
-		"descendant::",
-		"following-sibling::",
-		"following::",
-		"parent::",
-		"preceding-sibling::",
-		"preceding::",
-		"self::"];
+var axis = [`)
+	p := ""
+	for key := range xpathNames {
+		fmt.Fprintf(q.w, "%s\n%q", p, key)
+		p = ","
+	}
+	fmt.Fprint(q.w,
+		`].sort();
 
 var macros = [`)
 
-		keys := getMacrosKeys(q)
-		p := ","
-		for i, key := range keys {
-			if i == len(keys)-1 {
-				p = ""
-			}
-			fmt.Fprintf(q.w, "%q%s\n", key, p)
+	keys := getMacrosKeys(q)
+	p = ","
+	for i, key := range keys {
+		if i == len(keys)-1 {
+			p = ""
 		}
+		fmt.Fprintf(q.w, "%q%s\n", key, p)
+	}
 
-		fmt.Fprint(q.w, `];
+	fmt.Fprint(q.w, `];
 
 function outText(text) {
     var state = 0;
@@ -1614,21 +1597,9 @@ function inMacro(text) {
 
 $('#xquery').textcomplete([
 {
-    match: /^(\/\/?[_a-z]*)$/,
+    match: /(@[-_a-zA-Z0-9]*)$/,
     search: function (term, callback) {
-        callback($.map(begin, function (e) {
-            return e.indexOf(term) === 0 ? e : null;
-        }));
-    },
-    replace: function (value) {
-        return value + ' ';
-    },
-    index: 1
-},
-{
-    match: /([\/@][-_a-zA-Z]*)$/,
-    search: function (term, callback) {
-        callback($.map(other, function (e) {
+        callback($.map(attribs, function (e) {
             return e.indexOf(term) === 0 ? e : null;
         }));
     },
@@ -1680,72 +1651,12 @@ $('#xquery').textcomplete([
     },
     index: 1,
     context: outText
-},
-{
-    match: /^((.|\n)*[ \n'")\]])$/,
-    search: function (term, callback) {
-        var chars = [];
-        var i, j;
-        var state = 0;
-
-        for (i = 0, j = term.length; i < j; i++) {
-            var c = term.charAt(i);
-            if (state == 0) {
-               if (c == "'") {
-                   state = 1;
-               } else if (c == '"') {
-                   state = 2;
-               } else if (c == '[') {
-                   chars.unshift(']');
-               } else if (c == ']') {
-                   if (chars.length == 0 || chars[0] != ']') {
-                       callback([]);
-                       return;
-                   }
-                   chars.shift();
-               } else if (c == '(') {
-                   chars.unshift(')');
-               } else if (c == ')') {
-                   if (chars.length == 0 || chars[0] != ')') {
-                       callback([]);
-                       return;
-                   }
-                   chars.shift();
-               }
-            } else if (state == 1) {
-               if (c == "'") {
-                   state = 0;
-               }
-            } else {
-               if (c == '"') {
-                   state = 0;
-               }
-            }
-        }
-        var rt = [];
-        var s = "";
-        while (chars.length > 0) {
-            s += chars.shift();
-            rt.push(s);
-        }
-        callback(rt);
-    },
-    index: 1,
-    replace: function (value) {
-        return "$1" + value;
-    },
-    context: outText
 }],
 {
     maxCount: 200,
     debounce: 300
 });
-//--></script>
-`)
-	} // if TEXTCOMPLETE
 
-	fmt.Fprint(q.w, `
-<script type="text/javascript"><!--
 init();
 //--></script>
 `)
