@@ -371,7 +371,7 @@ func main() {
 
 	filenames := make([]string, 0)
 
-	if !util.IsTerminal(os.Stdin) {
+	if flag.NArg() == 0 && *opt_l == "" {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			filename := strings.TrimSpace(scanner.Text())
