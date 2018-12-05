@@ -1640,9 +1640,10 @@ $('#xquery').textcomplete([
     context: outText
 },
 {
-    match: /^((.|\n)*['")\]])$/,
+    match: /^((.|\n)*(['")\]]|@[-_a-zA-Z0-9]+ |[%0-9] ))$/,
     search: function (term, callback) {
         var chars = [];
+        var chars2 = [];
         var i, j;
         var state = 0;
 
@@ -1680,11 +1681,55 @@ $('#xquery').textcomplete([
                }
             }
         }
+
+        var alltext = document.getElementById('xquery').value;
+        state = 0;
+        for (i = alltext.length-1, j = term.length; i >= j; i--) {
+            var c = alltext.charAt(i);
+            if (state == 0) {
+               if (c == "'") {
+                   state = 1;
+               } else if (c == '"') {
+                   state = 2;
+               } else if (c == ']') {
+                   chars2.unshift(']');
+               } else if (c == '[') {
+                   if (chars2.length == 0 || chars2[0] != ']') {
+                       chars2 = [];
+                   } else {
+                       chars2.shift();
+                   }
+               } else if (c == ')') {
+                   chars2.unshift(')');
+               } else if (c == '(') {
+                   if (chars2.length == 0 || chars2[0] != ')') {
+                       chars2 = [];
+                   } else {
+                       chars2.shift();
+                   }
+               }
+            } else if (state == 1) {
+               if (c == "'") {
+                   state = 0;
+               }
+            } else {
+               if (c == '"') {
+                   state = 0;
+               }
+            }
+        }
+
         var rt = [];
-        var s = "";
-        while (chars.length > 0) {
-            s += chars.shift();
-            rt.push(s);
+        if (chars.length > 0 && chars2.length > 0) {
+             if (chars2[0] != chars[0]) {
+                rt.push(chars[0]);
+             }
+        } else {
+            var s = "";
+            while (chars.length > 0) {
+                s += chars.shift() + " ";
+                rt.push(s);
+            }
         }
         callback(rt);
     },
