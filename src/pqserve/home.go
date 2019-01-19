@@ -348,6 +348,10 @@ func home(q *Context) {
 <option value="5000">1 per `+iformat(5000)+`</option>
 <option value="10000">1 per `+iformat(10000)+`</option>
 </select>
+<select name="what">
+<option value="text">zinnen</option>
+<option value="data">alle data</option>
+</select>
 <input type="submit" value="downloaden">
 </form>
 `,
@@ -1283,6 +1287,8 @@ func homedl(q *Context) {
 	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	q.w.Header().Set("Content-Disposition", "attachment; filename=uitvoer.txt")
 
+	alldata := firstf(q.form, "what") != "text"
+
 	columns := []string{
 		"word", "begin", "end", "postag",
 		"rel",
@@ -1297,7 +1303,9 @@ func homedl(q *Context) {
 		return
 	}
 
-	fmt.Fprintln(q.w, strings.Join(columns, "\t"))
+	if alldata {
+		fmt.Fprintln(q.w, strings.Join(columns, "\t"))
+	}
 
 	step, _ := strconv.Atoi(firstf(q.form, "step"))
 	if step < 1 {
@@ -1310,14 +1318,25 @@ func homedl(q *Context) {
 	for i := range items {
 		fields[i] = &items[i]
 	}
+	prev := ""
 	for rows.Next() {
 		err := rows.Scan(fields...)
 		if doErr(q, err) {
 			return
 		}
+		if items[9] == prev {
+			continue
+		}
 		lineno++
 		if lineno%step == 0 {
-			fmt.Fprintln(q.w, strings.Join(items, "\t"))
+			if alldata {
+				fmt.Fprintln(q.w, strings.Join(items, "\t"))
+			} else {
+				fmt.Fprintln(q.w, items[9]+"|"+items[10])
+			}
+		}
+		if !alldata {
+			prev = items[9]
 		}
 		select {
 		case <-chClose:
