@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -1839,7 +1840,7 @@ func findDepId(node *Node, ID string) *DepType {
 	return nil
 }
 
-func xpath_do_search(q *Context, query string, prefix string, methode string, offset int, xpathmax int, chClose <-chan bool, html bool, step int) (curno int, hash string, loading bool, errval error) {
+func xpath_do_search(q *Context, query string, prefix string, methode string, offset int, xpathmax int, chClose <-chan bool, doHtml bool, step int) (curno int, hash string, loading bool, errval error) {
 
 	var owner string
 	var nlines uint64
@@ -1892,7 +1893,7 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 		return
 	}
 
-	if html {
+	if doHtml {
 		fmt.Fprintf(q.w, "<ol start=\"%d\" id=\"ol\" class=\"xpath\">\n</ol>\n", offset+1)
 
 		fmt.Fprintln(q.w, "<div id=\"loading\"><img src=\"busy.gif\" alt=\"[bezig]\"> <span></span></div>")
@@ -1930,11 +1931,16 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 		default:
 		}
 
+		dactname := ""
+		if len(dactfiles) > 1 {
+			dactname = path.Base(dactfile) + "//"
+		}
+
 		if Cfg.Dactx && methode == "dx" {
 			if i == 0 {
 				if _, err := os.Stat(dactfile + "x"); err != nil {
 					methode = "std"
-					if html {
+					if doHtml {
 						fmt.Fprintln(q.w, `<script type="text/javascript"><!--
 $('#ol').before('<div class="warning">Geen ge&euml;xpandeerde indexnodes beschikbaar voor dit corpus.<br>De standaardmethode wordt gebruikt.</div>');
 //--></script>`)
@@ -1950,7 +1956,7 @@ $('#ol').before('<div class="warning">Geen ge&euml;xpandeerde indexnodes beschik
 			break
 		}
 
-		if html && seen > 0 {
+		if doHtml && seen > 0 {
 			fmt.Fprintf(q.w, `<script type="text/javascript"><!--
 $('#loading span').html('%.1f%%');
 //--></script>
@@ -2002,7 +2008,7 @@ $('#loading span').html('%.1f%%');
 			if name != filename {
 				if found && curno > offset && curno <= offset+xpathmax {
 					found = false
-					if html {
+					if doHtml {
 						xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 					}
 					xmlparts = xmlparts[0:0]
@@ -2019,7 +2025,7 @@ $('#loading span').html('%.1f%%');
 				newdoc = true
 			}
 			if len(queryparts) == 1 {
-				if html {
+				if doHtml {
 					found = true
 					if curno > offset+xpathmax {
 						docs.Close()
@@ -2040,9 +2046,12 @@ $('#loading span').html('%.1f%%');
 								name = name[:len(name)-4]
 							}
 							if err == nil {
-								fmt.Fprintf(q.w, "%s|%s\n", name, alpino.Sentence)
+								fmt.Fprintf(q.w, "%s%s|%s\n", dactname, name, alpino.Sentence)
 							} else {
-								fmt.Fprintf(q.w, "%s|%v\n", name, err)
+								fmt.Fprintf(q.w, "%s%s|%v\n", dactname, name, err)
+							}
+							if ff, ok := q.w.(http.Flusher); ok {
+								ff.Flush()
 							}
 						}
 					}
@@ -2069,7 +2078,7 @@ $('#loading span').html('%.1f%%');
 				}
 				found = false
 				for docs2.Next() {
-					if html {
+					if doHtml {
 						if !found {
 							found = true
 							curno++
@@ -2093,9 +2102,12 @@ $('#loading span').html('%.1f%%');
 								name = name[:len(name)-4]
 							}
 							if err == nil {
-								fmt.Fprintf(q.w, "%s|%s\n", name, alpino.Sentence)
+								fmt.Fprintf(q.w, "%s%s|%s\n", dactname, name, alpino.Sentence)
 							} else {
-								fmt.Fprintf(q.w, "%s|%v\n", name, err)
+								fmt.Fprintf(q.w, "%s%s|%v\n", dactname, name, err)
+							}
+							if ff, ok := q.w.(http.Flusher); ok {
+								ff.Flush()
 							}
 						}
 						docs2.Close()
@@ -2126,7 +2138,7 @@ $('#loading span').html('%.1f%%');
 
 		if found && curno > offset && curno <= offset+xpathmax {
 			found = false
-			if html {
+			if doHtml {
 				xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
 			}
 			xmlparts = xmlparts[0:0]
@@ -2136,7 +2148,7 @@ $('#loading span').html('%.1f%%');
 		}
 	} // for _, dactfile := range dactfiles
 
-	if html {
+	if doHtml {
 		clearLoading(q.w)
 		loading = false
 	}
