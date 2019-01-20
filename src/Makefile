@@ -36,11 +36,11 @@ endif
 	make -C pqtexter
 	make -C pqupgrade
 	make -C pqxok
-	make -C pqudep
 	make -C pqudupgrade
+	make -C pqudep
 
 # pqserve moet als eerste gecompileerd worden omdat
 # sommige andere programma's ervan afhankelijk zijn.
 
-# udep moet als laatst, voor het geval dat libxqilla
+# pqudep moet als laatst, voor het geval dat libxqilla
 # niet aanwezig is en dit faalt.
