@@ -183,6 +183,7 @@ func main() {
 	handleFunc("browserrud", browserrud)
 
 	handleFunc("xpath", xpath)
+	handleFunc("dlx", xpathdl)
 	handleFunc("xpathcheck", xpathcheck)
 	handleFunc("xstatsmeta", xstatsmeta)
 	handleFunc("xpathstats", xpathstats)
