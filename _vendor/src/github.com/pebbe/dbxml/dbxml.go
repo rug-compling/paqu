@@ -324,7 +324,7 @@ func (db *Db) Prepare(query string, namespaces ...Namespace) (*Query, error) {
 	cs := C.CString(query)
 	defer C.free(unsafe.Pointer(cs))
 
-	ns := make([]*_Ctype_char, 2*len(namespaces)+1)
+	ns := make([]*C.char, 2*len(namespaces)+1)
 	for i, n := range namespaces {
 		ns[2*i] = C.CString(n.Prefix)
 		ns[2*i+1] = C.CString(n.Uri)
@@ -489,7 +489,7 @@ func Check(query string, namespaces ...Namespace) error {
 	cs := C.CString(query)
 	defer C.free(unsafe.Pointer(cs))
 
-	ns := make([]*_Ctype_char, 2*len(namespaces)+1)
+	ns := make([]*C.char, 2*len(namespaces)+1)
 	for i, n := range namespaces {
 		ns[2*i] = C.CString(n.Prefix)
 		ns[2*i+1] = C.CString(n.Uri)

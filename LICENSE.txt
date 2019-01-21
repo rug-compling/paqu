@@ -32,8 +32,8 @@ Date:   Sat Jul 12 14:40:36 2014 +0200
 
 _vendor/src/github.com/pebbe/dbxml/LICENSE.txt
 Source: https://github.com/pebbe/dbxml
-Commit: 7297cedf8c07e1fc764b0bc7a8d324276d05f824
-Date:   Tue Sep 18 12:32:13 2018 +0200
+Commit: 1e2a6ad30f6555bf2982870a17d4caa3db35c82b
+Date:   Mon Jan 21 13:51:43 2019 +0100
 
 _vendor/src/github.com/pebbe/util/LICENSE.txt
 Source: https://github.com/pebbe/util
