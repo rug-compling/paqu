@@ -62,6 +62,8 @@ var (
 	reParser      = regexp.MustCompile(`<parser.*?>`)
 	reParserBuild = regexp.MustCompile(`<parser[^>]*?build=.*?>`)
 	alpino_build  string
+	filename      string
+	lastdir       string
 )
 
 func usage() {
@@ -108,187 +110,269 @@ func main() {
 		usage()
 		return
 	}
-	filename := flag.Arg(0)
+	filename = flag.Arg(0)
 
 	// PARSEN
 
-	var lastdir string
 	if *opt_s == "" {
-
-		b, err := ioutil.ReadFile(os.Getenv("ALPINO_HOME") + "/version")
-		x(err)
-		alpino_build = strings.TrimSpace(string(b))
-
-		var fpin, fpout *os.File
-		var errval error
-		tmpfile := filename + ".part"
-		var maxtok, parser string
-		if *opt_n > 0 {
-			maxtok = fmt.Sprint("max_sentence_length=", *opt_n)
-		}
-		if *opt_p != "" {
-			parser = "application_type=" + *opt_p
-		}
-		defer func() {
-			if fpin != nil {
-				fpin.Close()
-			}
-			if fpout != nil {
-				fpout.Close()
-			}
-			os.Remove(tmpfile)
-			if errval != io.EOF {
-				x(errval)
-			}
-		}()
-		fpin, errval = os.Open(filename)
-		if errval != nil {
+		doLocal()
+	} else {
+		info, err := doServerInfo()
+		if err == nil {
+			doServer(info)
 			return
 		}
-		rd := util.NewReaderSize(fpin, 5000)
-		lineno := 0
-		for {
-			line, err := rd.ReadLineString()
-			if err != nil && err != io.EOF {
-				errval = err
+		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, "Fallback to local Alpino")
+		if *opt_l && *opt_T {
+			doLocal()
+		} else {
+			fmt.Fprintln(os.Stderr, "Lokale versie van Alpino vereist getokeniseerde tekst, één zin per regel")
+		}
+	}
+}
+
+func doLocal() {
+
+	b, err := ioutil.ReadFile(os.Getenv("ALPINO_HOME") + "/version")
+	x(err)
+	alpino_build = strings.TrimSpace(string(b))
+
+	var fpin, fpout *os.File
+	var errval error
+	tmpfile := filename + ".part"
+	var maxtok, parser string
+	if *opt_n > 0 {
+		maxtok = fmt.Sprint("max_sentence_length=", *opt_n)
+	}
+	if *opt_p != "" {
+		parser = "application_type=" + *opt_p
+	}
+	defer func() {
+		if fpin != nil {
+			fpin.Close()
+		}
+		if fpout != nil {
+			fpout.Close()
+		}
+		os.Remove(tmpfile)
+		if errval != io.EOF {
+			x(errval)
+		}
+	}()
+	fpin, errval = os.Open(filename)
+	if errval != nil {
+		return
+	}
+	rd := util.NewReaderSize(fpin, 5000)
+	lineno := 0
+	for {
+		line, err := rd.ReadLineString()
+		if err != nil && err != io.EOF {
+			errval = err
+			return
+		}
+		if err == nil && lineno == 0 {
+			fpout, errval = os.Create(tmpfile)
+			if errval != nil {
 				return
 			}
-			if err == nil && lineno == 0 {
-				fpout, errval = os.Create(tmpfile)
-				if errval != nil {
-					return
-				}
+		}
+		if err == nil {
+			if strings.HasPrefix(line, "%") {
+				continue
 			}
-			if err == nil {
-				if strings.HasPrefix(line, "%") {
-					continue
+			lineno++
+			var label string
+			a := strings.SplitN(line, "|", 2)
+			if len(a) == 2 {
+				a[0] = strings.TrimSpace(a[0])
+				a[1] = strings.TrimSpace(a[1])
+				if a[0] == "" {
+					a[0] = fmt.Sprint(lineno)
 				}
-				lineno++
-				var label string
-				a := strings.SplitN(line, "|", 2)
-				if len(a) == 2 {
-					a[0] = strings.TrimSpace(a[0])
-					a[1] = strings.TrimSpace(a[1])
-					if a[0] == "" {
-						a[0] = fmt.Sprint(lineno)
-					}
-					label = a[0]
-					line = a[0] + "|" + escape(a[1])
-				} else {
-					label = fmt.Sprint(lineno)
-					line = label + "|" + escape(line)
-				}
-				if *opt_n > 0 {
-					if n := len(strings.Fields(line)); n > *opt_n {
-						fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
+				label = a[0]
+				line = a[0] + "|" + escape(a[1])
+			} else {
+				label = fmt.Sprint(lineno)
+				line = label + "|" + escape(line)
+			}
+			if *opt_n > 0 {
+				if n := len(strings.Fields(line)); n > *opt_n {
+					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
 line too long: %d tokens
 Q#%s|skipped|??|????
 **** parsed %s (line number %d)
 `,
-							label, lineno,
-							n,
-							line,
-							label, lineno)
-						continue
-					}
-				}
-				fmt.Fprintln(fpout, line)
-				dirname := filepath.Dir(filepath.Join(*opt_d, label))
-				if dirname != lastdir {
-					lastdir = dirname
-					os.MkdirAll(dirname, 0777)
+						label, lineno,
+						n,
+						line,
+						label, lineno)
+					continue
 				}
 			}
-			if (err == io.EOF && lineno%10000 != 0) || lineno%10000 == 0 {
-				fpout.Close()
-				fpout = nil
-				cmd := exec.Command(
-					"/bin/bash",
-					"-c",
-					fmt.Sprintf(
-						"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d %s %s -parse < %s",
-						*opt_d, *opt_t*1000, maxtok, parser, tmpfile))
-				cmd.Env = []string{
-					"ALPINO_HOME=" + os.Getenv("ALPINO_HOME"),
-					"PATH=" + os.Getenv("ALPINO_HOME") + "/bin:" + os.Getenv("PATH"),
-					"LANG=en_US.utf8",
-					"LANGUAGE=en_US.utf8",
-					"LC_ALL=en_US.utf8",
-				}
-				cmd.Stderr = os.Stderr
-				cmd.Stdout = os.Stdout
-				errval = cmd.Run()
-				if errval != nil {
-					return
-				}
-			}
-			if err == io.EOF {
-				break
+			fmt.Fprintln(fpout, line)
+			dirname := filepath.Dir(filepath.Join(*opt_d, label))
+			if dirname != lastdir {
+				lastdir = dirname
+				os.MkdirAll(dirname, 0777)
 			}
 		}
-		// version en date invoegen
-		filenames := make([]string, 0)
-		x(filepath.Walk(*opt_d, func(path string, info os.FileInfo, err error) error {
-			x(err)
-			if !info.IsDir() && strings.HasSuffix(path, ".xml") {
-				filenames = append(filenames, path)
+		if (err == io.EOF && lineno%10000 != 0) || lineno%10000 == 0 {
+			fpout.Close()
+			fpout = nil
+			cmd := exec.Command(
+				"/bin/bash",
+				"-c",
+				fmt.Sprintf(
+					"$ALPINO_HOME/bin/Alpino -veryfast -flag treebank %s debug=1 end_hook=xml user_max=%d %s %s -parse < %s",
+					*opt_d, *opt_t*1000, maxtok, parser, tmpfile))
+			cmd.Env = []string{
+				"ALPINO_HOME=" + os.Getenv("ALPINO_HOME"),
+				"PATH=" + os.Getenv("ALPINO_HOME") + "/bin:" + os.Getenv("PATH"),
+				"LANG=en_US.utf8",
+				"LANGUAGE=en_US.utf8",
+				"LC_ALL=en_US.utf8",
 			}
-			return nil
-		}))
-		for _, filename := range filenames {
-			b, err := ioutil.ReadFile(filename)
-			x(err)
-			if reParserBuild.Match(b) {
-				continue
+			cmd.Stderr = os.Stderr
+			cmd.Stdout = os.Stdout
+			errval = cmd.Run()
+			if errval != nil {
+				return
 			}
-			xml := setBuild(string(b))
-			fp, err := os.Create(filename)
-			x(err)
-			fp.WriteString(xml)
-			fp.Close()
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+	// version en date invoegen
+	filenames := make([]string, 0)
+	x(filepath.Walk(*opt_d, func(path string, info os.FileInfo, err error) error {
+		x(err)
+		if !info.IsDir() && strings.HasSuffix(path, ".xml") {
+			filenames = append(filenames, path)
+		}
+		return nil
+	}))
+	for _, filename := range filenames {
+		b, err := ioutil.ReadFile(filename)
+		x(err)
+		if reParserBuild.Match(b) {
+			continue
+		}
+		xml := setBuild(string(b))
+		fp, err := os.Create(filename)
+		x(err)
+		fp.WriteString(xml)
+		fp.Close()
+	}
+}
+
+func doServerInfo() (*AlpinoInfo, error) {
+
+	buf1 := bytes.NewBufferString(`{"request":"info"}`)
+	resp, err := http.Post(*opt_s, "application/json", buf1)
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	var info AlpinoInfo
+	err = json.Unmarshal(data, &info)
+	return &info, err
+}
+
+func doServer(info *AlpinoInfo) {
+	alpino_build = info.ParserBuild
+
+	var buf bytes.Buffer
+	var dataType string
+	if *opt_l {
+		if *opt_T {
+			dataType = "lines tokens " + *opt_e
+		} else {
+			dataType = "lines"
 		}
 	} else {
+		if *opt_L == "" {
+			dataType = "text doc"
+		} else {
+			dataType = "text " + *opt_L
+		}
+	}
+	fmt.Fprintf(
+		&buf,
+		`{"request":"parse", "data_type":%q, "timeout":%d, "parser":%q, "max_tokens":%d}`,
+		dataType,
+		*opt_t,
+		*opt_p,
+		*opt_n)
+	fp, err := os.Open(filename)
+	x(err)
+	_, err = io.Copy(&buf, fp)
+	fp.Close()
+	x(err)
+	resp, err := http.Post(*opt_s, "application/json", &buf)
+	util.CheckErr(err)
+	data, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	util.CheckErr(err)
+	var response Response
+	err = json.Unmarshal(data, &response)
+	util.CheckErr(err)
+	if response.Code > 299 {
+		x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
+	}
+	maxinterval := response.Interval
+	totallines := response.Number_of_lines
+	id := response.Id
+	if !*opt_q {
+		if response.Timeout > 0 {
+			fmt.Printf("timeout: %ds\n", response.Timeout)
+		}
+		if response.Max_tokens > 0 {
+			fmt.Printf("max tokens: %d\n", response.Max_tokens)
+		}
+		fmt.Println(totallines)
+	}
 
-		buf1 := bytes.NewBufferString(`{"request":"info"}`)
-		resp, err := http.Post(*opt_s, "application/json", buf1)
-		x(err)
-		data, err := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
-		x(err)
-		var info AlpinoInfo
-		x(json.Unmarshal(data, &info))
-		alpino_build = info.ParserBuild
+	go func() {
+		chSignal := make(chan os.Signal, 1)
+		signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+		sig := <-chSignal
+		fmt.Fprintf(os.Stderr, "Signal: %v\n", sig)
 
 		var buf bytes.Buffer
-		var dataType string
-		if *opt_l {
-			if *opt_T {
-				dataType = "lines tokens " + *opt_e
-			} else {
-				dataType = "lines"
-			}
-		} else {
-			if *opt_L == "" {
-				dataType = "text doc"
-			} else {
-				dataType = "text " + *opt_L
-			}
-		}
-		fmt.Fprintf(
-			&buf,
-			`{"request":"parse", "data_type":%q, "timeout":%d, "parser":%q, "max_tokens":%d}`,
-			dataType,
-			*opt_t,
-			*opt_p,
-			*opt_n)
-		fp, err := os.Open(filename)
-		x(err)
-		_, err = io.Copy(&buf, fp)
-		fp.Close()
-		x(err)
-		resp, err = http.Post(*opt_s, "application/json", &buf)
+		fmt.Fprintf(&buf, `{"request":"cancel", "id":%q}`, id)
+		resp, err := http.Post(*opt_s, "application/json", &buf)
 		util.CheckErr(err)
-		data, err = ioutil.ReadAll(resp.Body)
+		_, err = ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		util.CheckErr(err)
+
+		os.Exit(0)
+	}()
+
+	seen := 0
+	interval := 2
+	incr := true
+	for {
+		if interval > maxinterval {
+			interval = maxinterval
+		}
+		if interval > 120 {
+			interval = 120
+		}
+		time.Sleep(time.Duration(interval) * time.Second)
+
+		var buf bytes.Buffer
+		fmt.Fprintf(&buf, `{"request":"output", "id":%q}`, id)
+		resp, err := http.Post(*opt_s, "application/json", &buf)
+		util.CheckErr(err)
+		data, err := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		util.CheckErr(err)
 		var response Response
@@ -297,111 +381,55 @@ Q#%s|skipped|??|????
 		if response.Code > 299 {
 			x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
 		}
-		maxinterval := response.Interval
-		totallines := response.Number_of_lines
-		id := response.Id
+		seen += len(response.Batch)
 		if !*opt_q {
-			if response.Timeout > 0 {
-				fmt.Printf("timeout: %ds\n", response.Timeout)
+			if totallines > 0 {
+				fmt.Println(totallines - seen)
+			} else {
+				fmt.Println(seen)
 			}
-			if response.Max_tokens > 0 {
-				fmt.Printf("max tokens: %d\n", response.Max_tokens)
-			}
-			fmt.Println(totallines)
 		}
-
-		go func() {
-			chSignal := make(chan os.Signal, 1)
-			signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
-			sig := <-chSignal
-			fmt.Fprintf(os.Stderr, "Signal: %v\n", sig)
-
-			var buf bytes.Buffer
-			fmt.Fprintf(&buf, `{"request":"cancel", "id":%q}`, id)
-			resp, err := http.Post(*opt_s, "application/json", &buf)
-			util.CheckErr(err)
-			_, err = ioutil.ReadAll(resp.Body)
-			resp.Body.Close()
-			util.CheckErr(err)
-
-			os.Exit(0)
-		}()
-
-		seen := 0
-		interval := 2
-		incr := true
-		for {
-			if interval > maxinterval {
-				interval = maxinterval
-			}
-			if interval > 120 {
-				interval = 120
-			}
-			time.Sleep(time.Duration(interval) * time.Second)
-
-			var buf bytes.Buffer
-			fmt.Fprintf(&buf, `{"request":"output", "id":%q}`, id)
-			resp, err := http.Post(*opt_s, "application/json", &buf)
-			util.CheckErr(err)
-			data, err := ioutil.ReadAll(resp.Body)
-			resp.Body.Close()
-			util.CheckErr(err)
-			var response Response
-			err = json.Unmarshal(data, &response)
-			util.CheckErr(err)
-			if response.Code > 299 {
-				x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
-			}
-			seen += len(response.Batch)
-			if !*opt_q {
-				if totallines > 0 {
-					fmt.Println(totallines - seen)
-				} else {
-					fmt.Println(seen)
+		for _, line := range response.Batch {
+			if line.Line_status == "ok" {
+				if line.Label == "" {
+					line.Label = fmt.Sprint(line.Line_number)
 				}
-			}
-			for _, line := range response.Batch {
-				if line.Line_status == "ok" {
-					if line.Label == "" {
-						line.Label = fmt.Sprint(line.Line_number)
-					}
-					filename := filepath.Join(*opt_d, line.Label+".xml")
-					dirname := filepath.Dir(filename)
-					if dirname != lastdir {
-						lastdir = dirname
-						os.MkdirAll(dirname, 0777)
-					}
-					fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
-					x(err)
-					fmt.Fprintln(fp, setBuild(line.Alpino_ds))
-					fp.Close()
-				} else {
-					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
+				filename := filepath.Join(*opt_d, line.Label+".xml")
+				dirname := filepath.Dir(filename)
+				if dirname != lastdir {
+					lastdir = dirname
+					os.MkdirAll(dirname, 0777)
+				}
+				fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
+				x(err)
+				fmt.Fprintln(fp, setBuild(line.Alpino_ds))
+				fp.Close()
+			} else {
+				fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
 %s
 Q#%s|%s|%s|??|????
 **** parsed %s (line number %d)
 `,
-						line.Label, line.Line_number,
-						line.Log,
-						line.Label, line.Sentence, line.Line_status,
-						line.Label, line.Line_number)
-				}
+					line.Label, line.Line_number,
+					line.Log,
+					line.Label, line.Sentence, line.Line_status,
+					line.Label, line.Line_number)
 			}
+		}
 
-			if response.Finished {
-				break
+		if response.Finished {
+			break
+		}
+		if incr && totallines > 0 && len(response.Batch) > totallines-seen {
+			incr = false
+			interval *= totallines - seen
+			interval /= len(response.Batch)
+			if interval < 2 {
+				interval = 2
 			}
-			if incr && totallines > 0 && len(response.Batch) > totallines-seen {
-				incr = false
-				interval *= totallines - seen
-				interval /= len(response.Batch)
-				if interval < 2 {
-					interval = 2
-				}
-			}
-			if incr {
-				interval = (3 * interval) / 2
-			}
+		}
+		if incr {
+			interval = (3 * interval) / 2
 		}
 	}
 }
