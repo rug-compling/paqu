@@ -9,16 +9,6 @@ info:
 	@echo
 
 all:
-ifneq "$(findstring paqu/_vendor, $(GOPATH))" ""
-	go install github.com/BurntSushi/toml
-	go install github.com/beevik/etree
-	go install github.com/dchest/authcookie
-	go install github.com/go-sql-driver/mysql
-	go install github.com/pebbe/compactcorpus
-	CGO_LDFLAGS="-Wl,-rpath=$(LIBRARY_PATH)" go install github.com/pebbe/dbxml
-	go install github.com/pebbe/util
-	go install github.com/robertkrimen/otto
-endif
 	mkdir -p ../bin
 	make -C pqserve
 	make -C pqalpino
