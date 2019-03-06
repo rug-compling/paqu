@@ -231,13 +231,27 @@ PQ_cross_serial_verbcluster = """
 PQ_passive = """
         ( @rel="vc"
           and
-          ( @cat="ppart"
+          ( ( @cat="ppart"
+              and
+              node[@rel="obj1"]/%PQ_i% = ../../node[@rel="su"]/%PQ_i%
+            )
             or
-            @cat="ti"
+            ( @cat="ti"
+              and
+              node/node[@rel="obj1"]/%PQ_i% = ../../node[@rel="su"]/%PQ_i%
+            )
           )
-          and
-          node[@rel="obj1"]/%PQ_i% = ../../node[@rel="su"]/%PQ_i%
         ) """
+
+( @rel="vc"
+  and
+  ( @cat="ppart"
+        or
+        @cat="ti"
+  )
+  and
+  node[@rel="obj1"]/%PQ_i% = ../../node[@rel="su"]/%PQ_i%
+) """
 
 ## only impersonal passives
 ## "in Rotterdam wordt gefeest"
