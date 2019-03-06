@@ -94,7 +94,27 @@ var (
 			"hidden1",
 		},
 		{
-			"Hoofdzinnen",
+			`Hoofdzinnen//Bij deze queries vergelijken we de verschillende typen hoofdzinnen:
+mededelende hoofdzinnen (1), vraagzinnen die met een vraag-constituent
+beginnen (2), ja/nee vragen (3), en imperatieven (4).
+<p>
+<table>
+<tr><td>(1)<td> Pieter leest een boek.</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2)<td>Wie leest er een boek?</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3)<td>Lees jij een boek?</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(4a)<td>Lees dat boek nou toch eens.</td>
+<tr><td>( b)<td> Lees jij dat boek nou toch eens.</tr>
+</table>
+<p>
+Het onderscheid tussen ja/nee vragen en imperatieven is in de
+treebanks niet altijd nauwkeurig te bepalen - met name voor
+de handmatig geannoteerde treebanks die iets minder informatie
+bevatten dan de automatisch geannoteerde treebanks. Bijvoorbeeld
+imperatieven die wel een onderwerp bevatten (4b) zullen door de
+bestaande queries niet worden gevonden als imperatief.`,
 			`//node[@cat="smain"]`,
 			SPOD_STD,
 			"smain",
@@ -126,7 +146,51 @@ var (
 			"",
 		},
 		{
-			"Bijzinnen",
+			`Bijzinnen//Deze queries vergelijken de verschillende soorten bijzinnen.
+We onderscheiden de volgende bijzinnen: ingebedde vraagzinnen
+met een vraag-constituent (1), finiete bijzinnen (2), infiniete
+bijzinnen met "om te" (3) infiniete bijzinnen met alleen "te" (4),
+en infiniete bijzinnen met een ander voorzetsel (5). Daarnaast
+onderscheiden we relatieve bijzinnen (6) en free relatives (7).
+<p>
+<table>
+<tr><td>(1)<td>(ik vroeg) wie dat boek gelezen heeft</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2a)<td>(ik lees dat boek) omdat het door Elsschot geschreven is</tr>
+<tr><td>( b)<td>(ik denk) dat het boek door Elsschot is geschreven</tr>
+<tr><td>( c)<td>(ik vroeg) of het boek door Ellschot is geschreven</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3a)<td>(ik heb geprobeerd) om een boek te lezen</tr>
+<tr><td>( b)<td>(ik ga naar de bieb) om een boek te lezen</tr>
+<tr><td>( c)<td>(het was niet nodig) om het boek te lezen</tr>
+<tr><td>( d)<td>(slangen zijn) om van te gruwen</tr>
+<tr><td>( e)<td>(het kind is oud genoeg) om alleen naar school te gaan</tr>
+<tr><td>( f)<td>(het boek is te duur) om te kopen</tr>
+<tr><td>( g)<td>(hij heeft voldoende invloed) om het boek te verkopen</tr>
+<tr><td>( h)<td>(ze was zo genadig) om het boek voor te lezen</tr>
+<tr><td>( i)<td>(een boek) om nooit te vergeten</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(4)<td>(ik heb geprobeerd) een boek te lezen</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(5)<td>(ik lees dat boek) zonder mijn oordeel uit te spreken</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(6)<td>(ik lees een boek) dat door Elsschot is geschreven</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(7)<td>wie dit leest (is gek)</tr>
+</table>
+<p>
+Binnen de finiete bijzinnen maken we onderscheid tussen bijzinnen die
+ingeleid worden met "dat" (2b), met "of" (2c) dan wel met een ander
+voegwoord (2a).
+<p>
+De infiniete bijzinnen met "om" worden verder onderverdeeld naar
+gelang de bijzin optreedt als complement (3a), of als bepaling (3b),
+als onderwerp (3c), als predicatief complement (3d), of als
+comperatief complement (3efgh). Infiniete bijzinnen die als
+bepaling optreden worden verder onderverdeeld, afhankelijk of
+de bepaling bij een werkwoord optreedt (3b) of bij een zelfstandig
+naamwoord (3i).
+`,
 			`%PQ_ingebedde_vraagzinnen%`,
 			SPOD_STD,
 			"whsub",
@@ -306,7 +370,13 @@ var (
 			"",
 		},
 		{
-			"Correlatieve comparatieven",
+			`Correlatieve comparatieven//Correlatieve comparatieven zijn zinnen zoals:
+<p>
+<table>
+<tr><td>(1)<td>Hoe langer, hoe beter</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2)<td>Hoe langer hij wordt, des te meer hij last van zijn rug krijgt</tr>
+</table>`,
 			`%PQ_minimal_corr_comp%`,
 			SPOD_STD,
 			"corc",
@@ -314,7 +384,54 @@ var (
 			"",
 		},
 		{
-			"Woorden met een comparatief complement",
+			`Woorden met een comparatief complement//<strong>TODO: voorbeelden met "als" verwijderen?</strong>
+<p>
+Comparatieve adjectieven en woorden zo als "zo", "even", "meer", "minder",
+"niet", "niets", "ander", "anders" treden soms op met een complement
+dat vaak wordt ingeleid met het woord "dan" of "als". Naast het totale
+aantal voorkomens van de constructie kijken we naar het aantal voorbeelden
+waarbij "zo" (1) of "even" (2) of een comparatief adjective (3) of
+"meer" of "minder" (4) of "niet", "niets", "ander", "anders" (5) het hoofd is.
+<p>
+Bij comparatieve adjectieven vergelijken we of het complement met "als" (3abcd)
+of
+met "dan" wordt ingeleid (3efgh), waarbij dan ook nog een onderverdeling is naar
+de aard van het complement van "als" of "dan". Een vergelijkbare onderverdeling
+wordt gemaakt voor de andere hoofden.
+<p>
+<table>
+<tr><td>(1)<td>zo groen als gras</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2)<td>even dik als jij</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3a)<td>beter dan jij</tr>
+<tr><td>( b)<td>beter dan ik dacht</tr>
+<tr><td>( c)<td>beter dan bij de buren</tr>
+<tr><td>( d)<td>beter dan gisteren</tr>
+<tr><td>( e)<td>beter als jij</tr>
+<tr><td>( f)<td>beter als ik dacht</tr>
+<tr><td>( g)<td>beter als bij de buren</tr>
+<tr><td>( h)<td>beter als gisteren</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(4a)<td>meer geluk dan wijsheid</tr>
+<tr><td>( b)<td>meer geluk dan ik dacht</tr>
+<tr><td>( c)<td>meer geluk dan bij de buren</tr>
+<tr><td>( d)<td>meer geluk dan gisteren</tr>
+<tr><td>( e)<td>meer geluk als wijsheid</tr>
+<tr><td>( f)<td>meer geluk als ik dacht</tr>
+<tr><td>( g)<td>meer geluk als bij de buren</tr>
+<tr><td>( h)<td>meer geluk als gisteren</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(5a)<td>niets anders dan ellende</tr>
+<tr><td>( b)<td>niets anders dan dat hij kompt</tr>
+<tr><td>( c)<td>niets anders dan bij de buren</tr>
+<tr><td>( d)<td>niets anders dan gisteren</tr>
+<tr><td>( e)<td>niets anders als ellende</tr>
+<tr><td>( f)<td>niets anders als dat hij kompt</tr>
+<tr><td>( g)<td>niets anders als bij de buren</tr>
+<tr><td>( h)<td>niets anders als gisteren</tr>
+</table>
+`,
 			`//node[@rel="hd" and ../node[@rel="obcomp"]]`,
 			SPOD_STD,
 			"cc",
@@ -928,7 +1045,52 @@ var (
 			"",
 		},
 		{
-			"Nevenschikkingen",
+			`Nevenschikkingen//Bij nevenschikkingen maken we onderscheid naar gelang het aantal
+coordinatoren. Geen (1), één (2), twee (3) of meer (4).
+<p>
+<table>
+<tr><td>(1)<td>Zij wilden inspraak , medezeggenschap , democratisering</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2a)<td>Appels en peren</tr>
+<tr><td>( b)<td>Appels of peren</tr>
+<tr><td>( c)<td>De afzijdige maar invloedrijke waarnemer</tr>
+<tr><td>( d)<td>Ze helpen eiwitten, vetten, etc. afbreken</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3)<td>Noch appels noch peren</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(4)<td>U kunt gezond zijn, of ziek of arm of rijk</tr>
+</table>
+<p>
+Indien er precies één coordinator is, maken we onderscheid
+tussen "en" (2a), "of" (2b), "maar" (2c) en het speciale
+geval waar de conjunctie wordt afgesloten met een woord
+zoals "enzovoorts" dat in de annotatie ook als coordinator
+wordt weergegeven (2d).
+<p>
+We maken ook een onderverdeling naar gelang het aantal conjuncten
+dat in de coordinatie optreedt. Eén (5), twee (2), drie (6),
+vier, vijf, zes, of meer.
+<p>
+<table>
+<tr><td>(5)<td>de milieuverontreiniging, enzovoorts</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(6)<td>cacaoboter , cacaopoeder of palmolie</tr>
+</table>
+<p>
+Ten slotte wordt een onderscheid gemaakt naar de categorie
+van de conjuncten: NP (2), PP (7), hoofdzinnen (8),
+VP (9) en bijzinnen (10).
+<p>
+<table>
+<tr><td>(7)<td>in Arnhem en in België</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(8)<td>Drie keer hadden ze dat beloofd en drie keer was die
+     belofte weer ingetrokken</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(9)<td>.. die sinds 1981 in Duitsland woont en werkt</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(10)<td>(Hij zei) dat het er bij hoorde, en dat ik niet bang hoefde te zijn</tr>
+</table>`,
 			`//node[@cat="conj"]`,
 			SPOD_STD,
 			"conj",
@@ -1217,7 +1379,19 @@ var (
 			"",
 		},
 		{
-			"Woordgroepen",
+			`Woordgroepen//Voor woordgroepen onderscheiden we hier naamwoordgroepen (1), voorzetselgroepen
+(2),
+bijvoeglijk-naamwoordgroepen (3) en bijwoordgroepen (4).
+<p>
+<table>
+<tr><td>(1)<td>een grote boom</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2)<td>op een tak</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3)<td>heel erg geliefd</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(4)<td>spelenderwijs</tr>
+</table>`,
 			`//node[%PQ_np%]`,
 			SPOD_STD,
 			"np",
@@ -1261,7 +1435,66 @@ var (
 			"",
 		},
 		{
-			"Werkwoorden",
+			`Werkwoorden//Onder het kopje werkwoorden worden de vaste werkwoordelijke
+uitdrukkingen geteld (1).
+<p>
+<table>
+<tr><td>(1a)<td>aan bod komen</tr>
+<tr><td>( b)<td>ter kennis geven</tr>
+<tr><td>( c)<td>op prijs stellen</tr>
+</table>
+<p>
+Daarnaast maken we een onderscheid bij werkwoordclusters
+tussen de zogenaamde rode en groene volgorde. Bij de
+groene werkwoordvolgorde gaat het voltooid deelwoord
+in de werkwoordcluster aan het hulpwerkwoord vooraf (2),
+en bij de rode volgorde volgt het voltooid deelwoord het
+hulpwerkwoord (3).
+<p>
+<table>
+<tr><td>(2a)<td>zijn boek zal morgen gepresenteerd worden</tr>
+<tr><td>( b)<td>ze zouden nooit een woord met elkaar gewisseld hebben</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3a)<td>zijn boek zal morgen worden gepresenteerd</tr>
+<tr><td>( b)<td>ze zouden nooit een woord met elkaar hebben gewisseld</tr>
+</table>
+<p>
+Voorbeelden van werkwoordclusters worden gegeven in (2), (3), en (4).
+<p>
+<table>
+<tr><td>(4a)<td>Moet op korte termijn worden opgetreden?</tr>
+<tr><td>( b)<td>De zaak moet aanhangig worden gemaakt</tr>
+<tr><td>( c)<td>Ze zeiden dat ik dat zou hebben moeten kunnen zien aankomen</tr>
+</table>
+<p>
+De "accusativus cum infinitivo" constructie vertoont de
+beroemde 'cross-serial' afhankelijkheden. Voorbeelden zijn (5).
+Deze query werkt niet voor het CGN corpus.
+<p>
+<table>
+<tr><td>(5a)<td>Ik heb hem het boek zien lezen</tr>
+<tr><td>( b)<td>Ik heb hem de olifanten helpen voeren</tr>
+<tr><td>( c)<td>Ik heb hem de oppasser de olifanten zien helpen voeren</tr>
+</table>
+<p>
+De passieve werkwoorden worden gebruikt in de lijdende vorm, als in
+(6). Het gaat hierbij om de gevallen waarbij een onderwerp aanwezig
+is. Deze query werkt niet voor het CGN corpus.
+<p>
+<table>
+<tr><td>(6a)<td>Hij wordt geslagen</tr>
+<tr><td>( b)<td>Het monument zal spoedig te zien zijn in het Amsterdamse Oosterpark .</tr>
+</table>
+<p>
+De niet-persoonlijke passieven identificeert de gevallen van de lijdende
+vorm waarbij geen echt onderwerp beschikbaar is. In die gevallen wordt
+vaak "er" als plaatsonderwerp gebruikt.
+<p>
+<table>
+<tr><td>(7a)<td>Er werd niet meer over gesproken</tr>
+<tr><td>( b)<td>In Amsterdam werd niet gedemonstreerd</tr>
+</table>
+`,
 			`//node[@rel="svp" and @cat]`,
 			SPOD_STD,
 			"vwuit",
@@ -1317,7 +1550,25 @@ var (
 			"pos",
 		},
 		{
-			"Scheidbare werkwoorden//Dit werkt niet voor handmatig geannoteerde corpora",
+			`Scheidbare werkwoorden//De queries voor scheidbare werkwoorden zijn niet beschikbaar voor de
+handmatig geannoteerde corpora.
+<p>
+Werkwoorden met een scheidbaar partikel worden gegeven in (1) en (2).
+<p>
+<table>
+<tr><td>(1a)<td>Ik heb hem opgebeld</tr>
+<tr><td>( b)<td>Ik bel hem op</tr>
+<tr><td>( c)<td>Ik heb hem op willen bellen</tr>
+</table>
+<p>
+We maken daarbij een onderscheid tussen gevallen waarbij het partikel
+gescheiden is van het werkwoord (1bc) en gevallen waarbij het partikel
+in het werkwoord geincorporeerd is (1a).
+<p>
+Daarnaast bekijken we de gevallen waarbij het werkwoord niet finiet is
+(1ac). En binnen die gevallen onderscheiden we opnieuw gevallen
+waarbij het partikel gescheiden is van het werkwoord (1c) en gevallen
+waarbij het partikel in het werkwoord geincorporeerd is (1a).`,
 			`//node[starts-with(@sc,"part_")]`,
 			SPOD_STD,
 			"vpart",
@@ -1378,7 +1629,12 @@ var (
 			"sc",
 		},
 		{
-			"Inbedding",
+			`Inbedding//Bij deze queries wordt gekeken naar de complexiteit van de zinnen in
+termen van de inbedding van finitie bijzinnen. Een hoofdzin zonder
+finiete bijzin geldt dan als "geen inbedding". Een hoofdzin met een
+finiete bijzin geldt als "minstens 1 finiete zinsinbedding. Indien de
+finiete bijzin zelf ook een finiete bijzin bevat is er sprake van minstens
+2 finiete zinsinbeddingen. En zo verder.`,
 			`//node[%PQ_finiete_inbedding0%]`,
 			SPOD_STD,
 			"inb0",
@@ -1450,7 +1706,30 @@ var (
 			"",
 		},
 		{
-			"Topicalizatie en Extractie",
+			`Topicalizatie en Extractie//De eerste query, "np-topic is subject", bekijkt hoe vaak in een
+hoofdzin die met een NP begint, deze NP als subject van de
+persoonsvorm fungeert (1), terwijl de tweede query die gevallen telt
+waarbij zo'n NP een andere rol bekleedt (2). De derde query, "topic is
+niet lokaal", identificeert de gevallen waarbij de eerste constituent
+van de hoofdzin geen rol speelt in die hoofdzin, maar een rol speelt
+in een ingebedde constituent. Bij de vierde en vijfde query wordt
+onderzocht hoe vaak in een wh-vraag of relatieve bijzin het
+wh-element, dan wel de woordgroep die het relatieve voornaamwoord
+bevat een rol speelt in de hoofdzin (lokaal, 4) dan wel in een ingebedde
+bijzin (niet lokaal, 5).
+<p>
+<table>
+<tr><td>(1)<td>De kinderen geloven nog in Sinterklaas</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(2)<td>Sinterklaas keurden ze geen blik waardig</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(3)<td>Wie denk je dat ik tegenkwam?</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(4)<td>Welke procedure moet worden gevolgd?</tr>
+<tr><td>&nbsp;</tr>
+<tr><td>(5)<td>Ze keek alleen naar wat ze dacht dat het Amerikaanse belang was</tr>
+</table>
+`,
 			`%PQ_vorfeld_np_subject%`,
 			SPOD_STD,
 			"nptsub",
@@ -1490,7 +1769,11 @@ var (
 			"",
 		},
 		{
-			"Parser succes//Dit werkt niet voor handmatig geannoteerde corpora",
+			`Parser succes//Dit deel werkt niet voor handmatig geannoteerde corpora.
+<p>
+De query telt hoevaak de parser een volledige analyse van de
+zin heeft kunnen uitvoeren (dus zonder woorden over te slaan of
+fragmenten te combineren).`,
 			`//parser[@cats="1" and @skips="0"]`,
 			SPOD_STD,
 			"ok",
@@ -1498,7 +1781,19 @@ var (
 			"parser",
 		},
 		{
-			"Parser succes: geparste delen//Dit werkt niet voor handmatig geannoteerde corpora",
+			`Parser succes: geparste delen//Dit deel werkt niet voor handmatig geannoteerde corpora.
+<p>
+Deze afdeling onderzoekt hoe goed de parser in staat was om de
+zin te parsen. Indien de parser geen gehele parse kan maken dan
+worden de grootste fragmenten waarvoor wel een parse was gevonden
+gecombineerd. Ook kan de parser onder bepaalde voorwaarden
+woorden overslaan. De queries tellen hoe vaak geen enkel fragment
+werd gevonden, dan wel precies één fragment, twee fragmenten,
+drie fragmenten, of vier of meer fragmenten. Indien de parse
+uit precies één fragment bestaat kan het toch zijn dat er
+geen sprake is van een volledige parse indien bijvoorbeeld
+een woord in de zin werd overgeslagen om tot dat fragment te
+komen.`,
 			`//parser[@cats="0"]`,
 			SPOD_STD,
 			"cats0",
@@ -1538,7 +1833,14 @@ var (
 			"parser",
 		},
 		{
-			"Parser success: overgeslagen woorden//Dit werkt niet voor handmatig geannoteerde corpora",
+			`Parser success: overgeslagen woorden//Dit deel werkt niet voor handmatig geannoteerde corpora.
+<p>
+Deze afdeling onderzoekt hoe goed de parser in staat was om de
+zin te parsen. Indien de parser geen gehele parse kan maken dan
+worden de grootste fragmenten waarvoor wel een parse was gevonden
+gecombineerd. Ook kan de parser onder bepaalde voorwaarden
+woorden overslaan. Deze queries tellen hoeveel woorden door de
+parser werden overgeslagen voor het bereiken van de beste parse.`,
 			`//parser[@skips="0"]`,
 			SPOD_STD,
 			"skips0",
@@ -1578,7 +1880,19 @@ var (
 			"parser",
 		},
 		{
-			"Onbekende woorden//Dit werkt niet voor handmatig geannoteerde corpora",
+			`Onbekende woorden//Dit deel werkt niet voor handmatig geannoteerde corpora.
+<p>
+De parser kent een heel scale aan heuristieken om voor woorden die
+niet in het woordenboek staan toch een woordsoort toe te kennen.
+In deze afdeling wordt onderzocht hoe vaak zulke onbekende woorden
+voorkwamen, en op welke manier onbekende woorden alsnog werden
+behandeld. Eerst wordt het totaal aantal woorden gegeven,
+gevolgd door het aantal woorden dat in het woordenboek stond.
+De derde query geeft het aantal onbekende woorden terug.
+De drie volgende queries geven vervolgens aan hoevaak een onbekend
+woord als samenstelling werd gezien, of als naam (maar niet uit
+de namenlijst) of op een nog andere manier werden behandeld.
+`,
 			`//node[@his]`,
 			SPOD_STD,
 			"his",
