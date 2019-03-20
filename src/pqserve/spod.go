@@ -384,19 +384,15 @@ naamwoord (3i).
 			"",
 		},
 		{
-			`Woorden met een comparatief complement//<strong>TODO: voorbeelden met "als" verwijderen?</strong>
-<p>
-Comparatieve adjectieven en woorden zo als "zo", "even", "meer", "minder",
+			`Woorden met een comparatief complement//Comparatieve adjectieven en woorden zo als "zo", "even", "meer", "minder",
 "niet", "niets", "ander", "anders" treden soms op met een complement
 dat vaak wordt ingeleid met het woord "dan" of "als". Naast het totale
 aantal voorkomens van de constructie kijken we naar het aantal voorbeelden
 waarbij "zo" (1) of "even" (2) of een comparatief adjective (3) of
 "meer" of "minder" (4) of "niet", "niets", "ander", "anders" (5) het hoofd is.
 <p>
-Bij comparatieve adjectieven vergelijken we of het complement met "als" (3abcd)
-of
-met "dan" wordt ingeleid (3efgh), waarbij dan ook nog een onderverdeling is naar
-de aard van het complement van "als" of "dan". Een vergelijkbare onderverdeling
+Bij comparatieve adjectieven make we ook nog een onderverdeling naar
+de aard van het complement. Een vergelijkbare onderverdeling
 wordt gemaakt voor de andere hoofden.
 <p>
 <table>
@@ -408,28 +404,16 @@ wordt gemaakt voor de andere hoofden.
 <tr><td>( b)<td>beter dan ik dacht</tr>
 <tr><td>( c)<td>beter dan bij de buren</tr>
 <tr><td>( d)<td>beter dan gisteren</tr>
-<tr><td>( e)<td>beter als jij</tr>
-<tr><td>( f)<td>beter als ik dacht</tr>
-<tr><td>( g)<td>beter als bij de buren</tr>
-<tr><td>( h)<td>beter als gisteren</tr>
 <tr><td>&nbsp;</tr>
 <tr><td>(4a)<td>meer geluk dan wijsheid</tr>
 <tr><td>( b)<td>meer geluk dan ik dacht</tr>
 <tr><td>( c)<td>meer geluk dan bij de buren</tr>
 <tr><td>( d)<td>meer geluk dan gisteren</tr>
-<tr><td>( e)<td>meer geluk als wijsheid</tr>
-<tr><td>( f)<td>meer geluk als ik dacht</tr>
-<tr><td>( g)<td>meer geluk als bij de buren</tr>
-<tr><td>( h)<td>meer geluk als gisteren</tr>
 <tr><td>&nbsp;</tr>
 <tr><td>(5a)<td>niets anders dan ellende</tr>
-<tr><td>( b)<td>niets anders dan dat hij kompt</tr>
+<tr><td>( b)<td>niets anders dan dat hij komt</tr>
 <tr><td>( c)<td>niets anders dan bij de buren</tr>
 <tr><td>( d)<td>niets anders dan gisteren</tr>
-<tr><td>( e)<td>niets anders als ellende</tr>
-<tr><td>( f)<td>niets anders als dat hij kompt</tr>
-<tr><td>( g)<td>niets anders als bij de buren</tr>
-<tr><td>( h)<td>niets anders als gisteren</tr>
 </table>
 `,
 			`//node[@rel="hd" and ../node[@rel="obcomp"]]`,
@@ -469,27 +453,6 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="cmp" and @lemma="dan"]
-       ]
-       and
-       @pt="adj"
-       and
-       @graad="comp"
-]`,
-			SPOD_STD,
-			"ccdan",
-			"met als hoofd comparatief adjectief|, met \"dan\"",
-			"",
-		},
-		{
-			"",
-			`
-//node[@rel="hd"
-       and
-       ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
-               and
                node[@rel="body" and %PQ_np%]
        ]
        and
@@ -499,7 +462,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccdannp",
-			"met als hoofd comparatief adjectief|, met \"dan\", gevolgd door NP",
+			"met als hoofd comparatief adjectief|, gevolgd door NP",
 			"",
 		},
 		{
@@ -508,8 +471,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and (%PQ_s% or @cat="ssub" or @pt="ww" or @cat="cp")]
        ]
@@ -520,7 +481,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccdanvs",
-			"met als hoofd comparatief adjectief|, met \"dan\", gevolgd door VP of S",
+			"met als hoofd comparatief adjectief|, gevolgd door VP of S",
 			"",
 		},
 		{
@@ -529,8 +490,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and @cat="pp"]
        ]
@@ -541,7 +500,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccdanpp",
-			"met als hoofd comparatief adjectief|, met \"dan\", gevolgd door PP",
+			"met als hoofd comparatief adjectief|, gevolgd door PP",
 			"",
 		},
 		{
@@ -550,8 +509,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
        ]
@@ -562,7 +519,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccdanav",
-			"met als hoofd comparatief adjectief|, met \"dan\", gevolgd door A of ADV",
+			"met als hoofd comparatief adjectief|, gevolgd door A of ADV",
 			"",
 		},
 		{
@@ -578,23 +535,7 @@ wordt gemaakt voor de andere hoofden.
 			`
 //node[@rel="hd"
        and
-       ../node[@rel="obcomp" and node[@rel="cmp" and @lemma="dan"]]
-       and
-       (@lemma="veel" or @lemma="minder" or @lemma="weinig")
-]`,
-			SPOD_STD,
-			"ccmd",
-			"met als hoofd \"meer\", \"minder\"|, met \"dan\"",
-			"",
-		},
-		{
-			"",
-			`
-//node[@rel="hd"
-       and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and %PQ_np%]
        ]
@@ -603,7 +544,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccmdnp",
-			"met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door NP",
+			"met als hoofd \"meer\", \"minder\"|, gevolgd door NP",
 			"",
 		},
 		{
@@ -612,8 +553,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and (%PQ_s% or @cat="ssub" or @pt="ww" or @cat="cp")]
        ]
@@ -622,7 +561,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccmdvs",
-			"met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door VP of S",
+			"met als hoofd \"meer\", \"minder\"|, gevolgd door VP of S",
 			"",
 		},
 		{
@@ -631,8 +570,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and @cat="pp"]
        ]
@@ -641,7 +578,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccmdpp",
-			"met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door PP",
+			"met als hoofd \"meer\", \"minder\"|, gevolgd door PP",
 			"",
 		},
 		{
@@ -651,8 +588,6 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="cmp" and @lemma="dan"]
-               and
                node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
        ]
        and
@@ -660,7 +595,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccmdav",
-			"met als hoofd \"meer\", \"minder\"|, met \"dan\", gevolgd door A of ADV",
+			"met als hoofd \"meer\", \"minder\"|, gevolgd door A of ADV",
 			"",
 		},
 		{
@@ -684,24 +619,6 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="cmp" and @lemma="dan"]
-       ]
-       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
-]`,
-			SPOD_STD,
-			"ccnd",
-			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\"",
-			"",
-		},
-		{
-			"",
-			`
-//node[@rel="hd"
-       and
-       ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
-               and
                node[@rel="body" and %PQ_np%]
        ]
        and
@@ -709,7 +626,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccndnp",
-			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door NP",
+			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, gevolgd door NP",
 			"",
 		},
 		{
@@ -718,8 +635,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and (%PQ_s% or @cat="ssub" or @pt="ww" or @cat="cp")]
        ]
@@ -727,7 +642,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccndvs",
-			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door VP of S",
+			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, gevolgd door VP of S",
 			"",
 		},
 		{
@@ -736,8 +651,6 @@ wordt gemaakt voor de andere hoofden.
 //node[@rel="hd"
        and
        ../node[@rel="obcomp"
-               and
-               node[@rel="cmp" and @lemma="dan"]
                and
                node[@rel="body" and @cat="pp"]
        ]
@@ -745,7 +658,7 @@ wordt gemaakt voor de andere hoofden.
 ]`,
 			SPOD_STD,
 			"ccndpp",
-			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door PP",
+			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, gevolgd door PP",
 			"",
 		},
 		{
@@ -755,15 +668,13 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="cmp" and @lemma="dan"]
-               and
                node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
        ]
        and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
 ]`,
 			SPOD_STD,
 			"ccndav",
-			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, met \"dan\", gevolgd door A of ADV",
+			"met als hoofd \"niet\", \"niets\", \"ander\", \"anders\"|, gevolgd door A of ADV",
 			"",
 		},
 		{
