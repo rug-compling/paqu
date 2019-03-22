@@ -115,10 +115,11 @@ var (
 	owner      string
 	public     string
 
-	topfile  = -1
-	toparch  = -1
-	topmidx  = -1
-	lastarch string
+	topfile   = -1
+	toparch   = -1
+	topmidx   = -1
+	lastarch  string
+	wordcount = 0
 
 	buffer       [7]bytes.Buffer
 	buf_has_data [7]bool
@@ -254,7 +255,15 @@ Opties:
 		db_exists = true
 
 		if db_append {
-			rows, err := db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_arch")
+			rows, err := db.Query("SELECT `nword` FROM " + Cfg.Prefix + "_info WHERE `id`=\"" + prefix + "\"")
+			util.CheckErr(err)
+			if rows.Next() {
+				if rows.Scan(&wordcount) != nil {
+					wordcount = 0
+				}
+				rows.Close()
+			}
+			rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_arch")
 			util.CheckErr(err)
 			if rows.Next() {
 				if rows.Scan(&toparch) != nil {
@@ -271,8 +280,7 @@ Opties:
 				rows.Close()
 			}
 			rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_midx")
-			util.CheckErr(err)
-			if rows.Next() {
+			if err == nil && rows.Next() {
 				if rows.Scan(&topmidx) != nil {
 					topmidx = -1
 				}
@@ -390,14 +398,17 @@ Opties:
 			arch varchar(260) NOT NULL)
 			DEFAULT CHARACTER SET utf8;`)
 		util.CheckErr(err)
-		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
+	}
+
+	// deze tabellen altijd aanmaken
+	// als al bestaat dan fout: negeren
+	db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
 			id   int          NOT NULL,
 			type enum('TEXT','INT','FLOAT','DATE','DATETIME') NOT NULL DEFAULT 'TEXT',
 			name varchar(128) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
-		util.CheckErr(err)
-		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
+	db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
 			id   int          NOT NULL,
 			arch int          NOT NULL,
 			file int          NOT NULL,
@@ -408,8 +419,6 @@ Opties:
 			idx  int          NOT NULL DEFAULT -1)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
-		util.CheckErr(err)
-	}
 
 	//
 	// Bestandnamen van stdin inlezen en verwerken.
@@ -471,6 +480,9 @@ Opties:
 	util.CheckErr(err)
 
 	fmt.Println("Tijd:", time.Now().Sub(now))
+
+	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
+		Cfg.Prefix, wordcount, prefix))
 
 	if !db_makeindex {
 		sizes()
@@ -1029,6 +1041,7 @@ func do_data(archname, filename string, data []byte) {
 	err := xml.Unmarshal(data, &alpino)
 	util.CheckErr(err)
 	unexpand(alpino.Node0)
+	wordcount += len(strings.Fields(alpino.Sentence))
 
 	for _, m := range alpino.Meta {
 		if m.Type != "text" && m.Type != "int" && m.Type != "float" && m.Type != "date" && m.Type != "datetime" {
