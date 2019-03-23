@@ -29,14 +29,19 @@ func init() {
 
 func localHello(q *Context) {
 	q.w.Header().Set("Content-type", "text/plain")
+	cache(q)
+
 	fmt.Fprintln(q.w, "Hallo, wereld!")
 }
 
 func localWhoami(q *Context) {
 	if !q.auth {
-		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
+		http.Error(q.w, "Je bent niet ingelogd", http.StatusForbidden)
 		return
 	}
-	q.w.Header().Set("Content-type", "text/plain")
-	fmt.Fprintln(q.w, q.user)
+
+	q.w.Header().Set("Content-type", "application/json")
+	nocache(q)
+
+	fmt.Fprintf(q.w, "{\"user\":%q}\n", q.user)
 }
