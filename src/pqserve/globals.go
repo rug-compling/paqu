@@ -67,6 +67,11 @@ type Config struct {
 	Access []AccessType
 }
 
+type LocalHandlerType struct {
+	path    string
+	handler func(*Context)
+}
+
 type ViewType struct {
 	Allow bool
 	Addr  []string
@@ -325,6 +330,9 @@ const (
 //. Variabelen
 
 var (
+	localDynamicHandlers = []LocalHandlerType{}
+	localStaticHandlers  = []LocalHandlerType{}
+
 	cookiepath string
 
 	tlsConfig = &tls.Config{}

@@ -247,6 +247,13 @@ func main() {
 
 	handleStatic("up", up)
 
+	for _, h := range localDynamicHandlers {
+		handleFunc(h.path, h.handler)
+	}
+	for _, h := range localStaticHandlers {
+		handleStatic(h.path, h.handler)
+	}
+
 	var s string
 	if Cfg.Https || Cfg.Httpdual {
 		s = "s"

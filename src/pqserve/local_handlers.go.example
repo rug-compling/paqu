@@ -1,0 +1,42 @@
+/*
+
+Kopieer dit bestand naar 'local_handlers.go' en definieer je eigen handlers
+
+Go-bestanden waarvan de naam begint met 'local' worden niet in git opgenomen
+
+*/
+
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func init() {
+
+	// static handlers krijgen een zeer beperkte context
+	// alleen w en r zijn gedefinieerd
+	localStaticHandlers = []LocalHandlerType{
+		LocalHandlerType{"/hello", localHello},
+	}
+
+	// dynamic handlers krijgen een complete context
+	localDynamicHandlers = []LocalHandlerType{
+		LocalHandlerType{"/whoami", localWhoami},
+	}
+}
+
+func localHello(q *Context) {
+	q.w.Header().Set("Content-type", "text/plain")
+	fmt.Fprintln(q.w, "Hallo, wereld!")
+}
+
+func localWhoami(q *Context) {
+	if !q.auth {
+		http.Error(q.w, "Je bent niet ingelogd", http.StatusUnauthorized)
+		return
+	}
+	q.w.Header().Set("Content-type", "text/plain")
+	fmt.Fprintln(q.w, q.user)
+}
