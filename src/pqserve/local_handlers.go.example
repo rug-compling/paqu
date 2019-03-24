@@ -10,6 +10,7 @@ package main
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 )
 
@@ -24,6 +25,12 @@ func init() {
 	// dynamic handlers krijgen een complete context
 	localDynamicHandlers = []LocalHandlerType{
 		LocalHandlerType{"/whoami", localWhoami},
+	}
+
+	// als het derde argument true is verschijnt het item alleen op het menu als de gebruiker is ingelogd
+	localMenu = []LocalMenuType{
+		LocalMenuType{"/hello", "Hallo", false},
+		LocalMenuType{"/whoami", "Wie ben ik?", true},
 	}
 }
 
@@ -40,8 +47,9 @@ func localWhoami(q *Context) {
 		return
 	}
 
-	q.w.Header().Set("Content-type", "application/json")
-	nocache(q)
+	writeHead(q, "Wie?", 8)
 
-	fmt.Fprintf(q.w, "{\"user\":%q}\n", q.user)
+	fmt.Fprintln(q.w, html.EscapeString(q.user))
+
+	html_footer(q)
 }

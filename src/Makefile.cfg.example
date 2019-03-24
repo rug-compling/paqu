@@ -28,4 +28,3 @@ export GOPATH=$(HOME)/paqu/_vendor
 # Bijvoorbeeld als DbXML of Graphviz niet op een standaardlokatie staat
 export CPATH=$(HOME)/include:$(HOME)/include/graphviz
 export LIBRARY_PATH=$(HOME)/lib
-

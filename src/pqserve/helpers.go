@@ -155,8 +155,9 @@ func writeHead(q *Context, title string, tab int) {
 		}
 	}
 
-	var t [7]string
-	if tab < 7 {
+	n := 7 + len(localMenu)
+	t := make([]string, n)
+	if tab < n {
 		t[tab] = " class=\"selected\""
 	}
 	fmt.Fprintln(q.w, "</div>\n<div id=\"topmenu\">\n<a href=\".\""+t[1]+">Zoeken</a>")
@@ -171,7 +172,11 @@ func writeHead(q *Context, title string, tab int) {
 	}
 	fmt.Fprintln(q.w, "<a href=\"spod\""+t[5]+">SPOD</a>")
 	fmt.Fprintln(q.w, "<a href=\"info.html\""+t[6]+">Info</a>")
-	extension_menu(q, tab)
+	for i, item := range localMenu {
+		if q.auth || !item.needAuth {
+			fmt.Fprintf(q.w, "<a href=%q %s>%s</a>\n", item.path, t[7+i], item.text)
+		}
+	}
 	fmt.Fprintln(q.w, "</div>\n")
 }
 

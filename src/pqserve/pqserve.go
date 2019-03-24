@@ -227,8 +227,6 @@ func main() {
 	handleFunc("spodform", spod_form)
 	handleFunc("spodlist", spod_list)
 
-	handleFunc("ext", extension)
-
 	handleStatic("debug/env", environment)
 
 	handleStatic("busy.gif", static_busy_gif)

@@ -72,6 +72,12 @@ type LocalHandlerType struct {
 	handler func(*Context)
 }
 
+type LocalMenuType struct {
+	path     string
+	text     string
+	needAuth bool
+}
+
 type ViewType struct {
 	Allow bool
 	Addr  []string
@@ -332,6 +338,7 @@ const (
 var (
 	localDynamicHandlers = []LocalHandlerType{}
 	localStaticHandlers  = []LocalHandlerType{}
+	localMenu            = []LocalMenuType{}
 
 	cookiepath string
 
