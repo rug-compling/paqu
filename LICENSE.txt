@@ -5,6 +5,8 @@ src/pqserve/static/jquery.LICENSE.txt
 
 src/pqserve/static/jquery.textcomplete.LICENSE.txt
 
+src/pqudep/universal_dependencies.LICENCE.txt
+
 _vendor/src/github.com/BurntSushi/toml/COPYING
 Source: https://github.com/BurntSushi/toml
 Commit: f0aeabca5a127c4078abb8c8d64298b147264b55
