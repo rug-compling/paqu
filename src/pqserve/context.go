@@ -38,7 +38,7 @@ type Context struct {
 
 // Wrap handler in minimale context, net genoeg voor afhandelen statische pagina's
 func handleStatic(url string, handler func(*Context)) {
-	if url[0] != '/' {
+	if !strings.HasPrefix(url, "/") {
 		url = "/" + url
 	}
 	http.HandleFunc(
@@ -61,7 +61,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 	if options == nil {
 		options = &HandlerOptions{}
 	}
-	if url[0] != '/' {
+	if !strings.HasPrefix(url, "/") {
 		url = "/" + url
 	}
 	http.HandleFunc(
