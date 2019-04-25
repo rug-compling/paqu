@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
-	"path"
 	"strings"
 )
 
@@ -39,11 +38,13 @@ type Context struct {
 
 // Wrap handler in minimale context, net genoeg voor afhandelen statische pagina's
 func handleStatic(url string, handler func(*Context)) {
-	url = path.Join("/", url)
+	if url[0] != '/' {
+		url = "/" + url
+	}
 	http.HandleFunc(
 		url,
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != url {
+			if r.URL.Path != url && !strings.HasSuffix(url, "/") {
 				http.NotFound(w, r)
 				return
 			}
@@ -56,12 +57,17 @@ func handleStatic(url string, handler func(*Context)) {
 }
 
 // Wrap handler in complete context
-func handleFunc(url string, handler func(*Context)) {
-	url = path.Join("/", url)
+func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
+	if options == nil {
+		options = &HandlerOptions{}
+	}
+	if url[0] != '/' {
+		url = "/" + url
+	}
 	http.HandleFunc(
 		url,
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != url {
+			if r.URL.Path != url && !strings.HasSuffix(url, "/") {
 				http.NotFound(w, r)
 				return
 			}
@@ -228,13 +234,13 @@ func handleFunc(url string, handler func(*Context)) {
 					return
 				}
 			case "POST":
-				if url != "/corsave" {
-					reader, err := r.MultipartReader()
-					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
-						logerr(err)
-						return
-					}
+				reader, err := r.MultipartReader()
+				if err != nil && options.NeedForm {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					logerr(err)
+					return
+				}
+				if err == nil {
 					q.form, err = reader.ReadForm(10 * 1024 * 1024)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)

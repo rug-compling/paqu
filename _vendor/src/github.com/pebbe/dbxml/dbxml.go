@@ -303,17 +303,37 @@ func (db *Db) All() (*Docs, error) {
 //          }
 //      }
 func (db *Db) Query(query string, namespaces ...Namespace) (*Docs, error) {
-	q, err := db.Prepare(query, namespaces...)
+	q, err := db.prepare(query, true, namespaces...)
 	if err != nil {
 		return &Docs{}, err
 	}
 	return q.Run()
 }
 
-// Prepare an XPATH query.
+// TODO: Get all... what?
+func (db *Db) QueryRaw(query string, namespaces ...Namespace) (*Docs, error) {
+	q, err := db.prepare(query, false, namespaces...)
+	if err != nil {
+		return &Docs{}, err
+	}
+	return q.Run()
+}
+
+// Prepare an XPATH query that runs on the default collection.
 //
 // The query can be run multiple times, and a running query can be cancelled by query.Cancel()
 func (db *Db) Prepare(query string, namespaces ...Namespace) (*Query, error) {
+	return db.prepare(query, true, namespaces...)
+}
+
+// Prepare an XPATH query without setting the default collection.
+//
+// The query can be run multiple times, and a running query can be cancelled by query.Cancel()
+func (db *Db) PrepareRaw(query string, namespaces ...Namespace) (*Query, error) {
+	return db.prepare(query, false, namespaces...)
+}
+
+func (db *Db) prepare(query string, useImplicitCollection bool, namespaces ...Namespace) (*Query, error) {
 	q := &Query{}
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -330,7 +350,12 @@ func (db *Db) Prepare(query string, namespaces ...Namespace) (*Query, error) {
 		ns[2*i+1] = C.CString(n.Uri)
 	}
 
-	q.query = C.c_dbxml_prepare_query(db.db, cs, &ns[0])
+	var ci C.int
+	if useImplicitCollection {
+		ci = 1
+	}
+
+	q.query = C.c_dbxml_prepare_query(db.db, cs, ci, &ns[0])
 
 	for i := range namespaces {
 		C.free(unsafe.Pointer(ns[2*i]))
@@ -413,6 +438,11 @@ func (docs *Docs) Match() string {
 	return docs.getNameContent(3)
 }
 
+// Get expression result, for when it is not an xml element
+func (docs *Docs) Value() string {
+	return docs.getNameContent(4)
+}
+
 func (docs *Docs) getNameContent(what int) string {
 	docs.lock.Lock()
 	defer docs.lock.Unlock()
@@ -426,6 +456,8 @@ func (docs *Docs) getNameContent(what int) string {
 		return C.GoString(C.c_dbxml_docs_content(docs.docs))
 	case 3:
 		return C.GoString(C.c_dbxml_docs_match(docs.docs))
+	case 4:
+		return C.GoString(C.c_dbxml_docs_value(docs.docs))
 	}
 	return ""
 }

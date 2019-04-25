@@ -30,6 +30,7 @@ extern "C" {
 	std::string name;
 	std::string content;
 	std::string match;
+	std::string result;
 	bool error;
 	std::string errstring;
     };
@@ -234,7 +235,7 @@ extern "C" {
 	return docs;
     }
 
-    c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query, char const **namespaces)
+    c_dbxml_query c_dbxml_prepare_query(c_dbxml db, char const *query, int useImplicitCollection, char const **namespaces)
     {
 	int i;
 	c_dbxml_query q;
@@ -245,7 +246,7 @@ extern "C" {
 	    for (i = 0; namespaces[i]; i += 2) {
 		q->context.setNamespace(namespaces[i], namespaces[i+1]);
 	    }
-	    q->expression = db->manager.prepare(std::string("collection('" ALIAS "')") + query, q->context);
+	    q->expression = db->manager.prepare(useImplicitCollection ? std::string("collection('" ALIAS "')") + query : query, q->context);
 	    q->error = false;
 	    if (q->expression.isUpdateExpression()) {
 		q->errstring = "Update Expressions are not allowed";
@@ -312,6 +313,7 @@ extern "C" {
 	    docs->name.clear();
 	    docs->content.clear();
 	    docs->match.clear();
+	    docs->result.clear();
 	}
 	return docs->more ? 1 : 0;
     }
@@ -339,6 +341,15 @@ extern "C" {
 	}
 
 	return docs->match.c_str();
+    }
+
+    char const * c_dbxml_docs_value(c_dbxml_docs docs)
+    {
+	if (docs->more && ! docs->result.size()) {
+	    docs->result = docs->value.asString();
+	}
+
+	return docs->result.c_str();
     }
 
     void c_dbxml_docs_free(c_dbxml_docs docs)

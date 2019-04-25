@@ -19,16 +19,17 @@ func init() {
 	// static handlers krijgen een zeer beperkte context
 	// alleen w en r zijn gedefinieerd
 	localStaticHandlers = append(localStaticHandlers,
-		LocalHandlerType{"/hello", localHello})
+		LocalHandlerType{"/hello", localHello, nil})
 
 	// dynamic handlers krijgen een complete context
 	localDynamicHandlers = append(localDynamicHandlers,
-		LocalHandlerType{"/whoami", localWhoami})
+		LocalHandlerType{"/whoami", localWhoami, nil})
 
 	// als het derde argument true is verschijnt het item alleen op het menu als de gebruiker is ingelogd
 	localMenu = append(localMenu,
 		LocalMenuType{"/hello", "Hallo", false},
 		LocalMenuType{"/whoami", "Wie ben ik?", true})
+
 }
 
 func localHello(q *Context) {
