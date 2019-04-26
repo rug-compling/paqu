@@ -224,6 +224,11 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 			}
 
+			if r.Method == "OPTIONS" && options.OptionsHandler != nil {
+				options.OptionsHandler(q)
+				return
+			}
+
 			// Verwerk input
 			switch r.Method {
 			case "GET":
