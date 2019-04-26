@@ -224,8 +224,8 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 			}
 
-			if r.Method == "OPTIONS" && options.OptionsHandler != nil {
-				options.OptionsHandler(q)
+			if r.Method == "OPTIONS" && options.OptionsMethodHandler != nil {
+				options.OptionsMethodHandler(q)
 				return
 			}
 

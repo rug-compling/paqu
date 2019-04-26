@@ -68,8 +68,8 @@ type Config struct {
 }
 
 type HandlerOptions struct {
-	NeedForm       bool
-	OptionsHandler func(*Context)
+	NeedForm             bool
+	OptionsMethodHandler func(*Context)
 }
 
 type LocalHandlerType struct {
