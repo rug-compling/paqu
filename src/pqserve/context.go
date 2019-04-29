@@ -31,6 +31,7 @@ type Context struct {
 	hasmeta      map[string]bool
 	desc         map[string]string
 	lines        map[string]int
+	words        map[string]int
 	shared       map[string]string
 	params       map[string]string
 	form         *multipart.Form
@@ -85,6 +86,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				hasmeta:      make(map[string]bool),
 				desc:         make(map[string]string),
 				lines:        make(map[string]int),
+				words:        make(map[string]int),
 				shared:       make(map[string]string),
 				params:       make(map[string]string),
 			}
@@ -164,7 +166,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta` "+
+				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -178,9 +180,9 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				return
 			}
 			var id, desc, owner, shared, params, group string
-			var zinnen, protected, hasmeta int
+			var zinnen, woorden, protected, hasmeta int
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &owner, &shared, &params, &group, &protected, &hasmeta)
+				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -213,6 +215,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 				q.desc[id] = desc
 				q.lines[id] = zinnen
+				q.words[id] = woorden
 				q.shared[id] = shared
 				q.params[id] = params
 				q.protected[id] = protected > 0
