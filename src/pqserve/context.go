@@ -68,7 +68,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 	http.HandleFunc(
 		url,
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != url && !strings.HasSuffix(url, "/") {
+			if r.URL.Path != url && (url == "/" || !strings.HasSuffix(url, "/")) {
 				http.NotFound(w, r)
 				return
 			}
