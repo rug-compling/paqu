@@ -170,7 +170,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
-					"ORDER BY 7, 2",
+					"ORDER BY 8, 2",
 				Cfg.Prefix,
 				Cfg.Prefix,
 				where))
