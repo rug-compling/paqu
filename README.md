@@ -110,24 +110,24 @@ PaQu maakt gebruik van een directory voor het opslaan van gegevens, en
 een voor het configuratiebestand.
 
 Voor de bepaling van deze directory's wordt eerst gekeken naar de
-environment variable PAQU. Als die gedefinieerd is:
+environment variable `PAQU`. Als die gedefinieerd is:
 
-   data:   $PAQU
-   config: $PAQU
+    data:   $PAQU
+    config: $PAQU
 
 Als die niet gedefinieerd is, dan wordt gekeken naar de waarde die bij
 het compileren is gedefineerd.
 
 Als deze ook niet is gedefineerd, dan gelden de volgende waardes:
 
-   data:   $XDG_DATA_HOME/paqu
-   config: $XDG_CONFIG_HOME/paqu
+    data:   $XDG_DATA_HOME/paqu
+    config: $XDG_CONFIG_HOME/paqu
 
-Als de environment variabelen XDG_DATA_HOME of XDG_CONFIG_HOME niet
+Als de environment variabelen `XDG_DATA_HOME` of `XDG_CONFIG_HOME` niet
 zijn gedefinieerd, dan gelden de volgende waardes:
 
-   data:   $HOME/.local/share/paqu
-   config: $HOME/.config/paqu
+    data:   $HOME/.local/share/paqu
+    config: $HOME/.config/paqu
 
 Hieronder worden deze waardes gesymboliseerd door {data} en {config}.
 
@@ -141,7 +141,7 @@ de aanwijzingen in het bestand.
 
 Als je klaar bent, run `make all`. Als alles goed gaat vind je alle
 programma's in `~/paqu/bin`. Verplaats de programma's naar een plek in
-je PATH, of voeg de directory toe aan PATH.
+je PATH, of voeg de directory toe aan `PATH`.
 
 ### Configuratie ###
 
@@ -262,8 +262,8 @@ aan te passen aan je wensen, en regelmatig (bijvoorbeeld elk kwartier)
 aan te roepen vanuit `cron`. Dit script test of de server nog reageert
 (daarvoor gebruikt het de link `/up` op de server), en start het opnieuw
 mocht dit niet zo zijn. Het print dan ook eventuele foutmeldingen van de
-vorige run van pqserve, en als je `MAILTO` goed hebt gezet in `crontab
--e`, dan worden die foutmeldingen naar je toegestuurd.
+vorige run van pqserve, en als je `MAILTO` goed hebt gezet in
+`crontab -e`, dan worden die foutmeldingen naar je toegestuurd.
 
 ### Log-bestanden ###
 
