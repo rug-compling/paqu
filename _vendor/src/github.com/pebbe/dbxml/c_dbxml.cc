@@ -26,6 +26,7 @@ extern "C" {
 	DbXml::XmlValue value;
 	DbXml::XmlResults it;
 	DbXml::XmlQueryContext context;
+	bool validDoc;
 	bool more;
 	std::string name;
 	std::string content;
@@ -306,9 +307,10 @@ extern "C" {
 	if (docs->more) {
 	    try {
 		docs->it.peek(docs->doc);
+		docs->validDoc = true;
 	    } catch (DbXml::XmlException &ignore) {
 		// Result is not always of type document, but we don't know this until we try.
-		docs->doc = NULL;
+		docs->validDoc = false;
 	    }
 
 	    try {
@@ -331,7 +333,7 @@ extern "C" {
     char const * c_dbxml_docs_name(c_dbxml_docs docs)
     {
 	if (docs->more && ! docs->name.size()) {
-	    if (docs->doc)
+	    if (docs->validDoc)
 		docs->name = docs->doc.getName();
 	    else
 		docs->name = "";
@@ -343,7 +345,7 @@ extern "C" {
     char const * c_dbxml_docs_content(c_dbxml_docs docs)
     {
 	if (docs->more && ! docs->content.size()) {
-	    if (docs->doc) {
+	    if (docs->validDoc) {
 		docs->doc.getContent(docs->content);
 	    } else {
 		docs->content = "";
