@@ -124,6 +124,7 @@ type Sentence struct {
 
 type Alpino_test struct {
 	XMLName  xml.Name
+	Deprel   string `xml:"deprel,attr"`
 	Enhanced bool   `xml:"enhanced,attr"`
 	Id       string `xml:"id,attr"`
 	Buiging  string `xml:"buiging,attr"`

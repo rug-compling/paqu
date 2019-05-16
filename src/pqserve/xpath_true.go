@@ -1584,7 +1584,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 	for i, part := range xmlparts {
 
 		var isUd, isDep, isId, isEid bool
-		var ID string
+		var ID, Deprel string
 
 		if strings.HasPrefix(part, "<node") {
 			// isNode
@@ -1601,6 +1601,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			}
 			if alpino_test.Id != "" {
 				ID = alpino_test.Id
+				Deprel = alpino_test.Deprel
 				if alpino_test.Enhanced {
 					isEid = true
 				} else {
@@ -1620,7 +1621,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		} else if isEid {
 			alp.Node0 = &Node{
 				Ud: &UdType{
-					Dep: []DepType{*findDepId(alpino.Node0, ID)},
+					Dep: []DepType{*findDepId(alpino.Node0, ID, Deprel)},
 				},
 				NodeList: make([]*Node, 0),
 			}
@@ -1824,16 +1825,16 @@ func findUdId(node *Node, ID string) *UdType {
 	return nil
 }
 
-func findDepId(node *Node, ID string) *DepType {
+func findDepId(node *Node, ID string, deprel string) *DepType {
 	if node.Ud != nil && node.Ud.Dep != nil {
 		for _, d := range node.Ud.Dep {
-			if d.Id == ID {
+			if d.Id == ID && d.Deprel == deprel {
 				return &d
 			}
 		}
 	}
 	for _, n := range node.NodeList {
-		if dep := findDepId(n, ID); dep != nil {
+		if dep := findDepId(n, ID, deprel); dep != nil {
 			return dep
 		}
 	}

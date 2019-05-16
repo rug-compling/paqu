@@ -643,7 +643,7 @@ init({
 			for _, match := range matches {
 
 				var isUd, isDep, isId, isEid bool
-				var ID string
+				var ID, Deprel string
 
 				var alpino_test Alpino_test
 
@@ -661,6 +661,7 @@ init({
 					}
 					if alpino_test.Id != "" {
 						ID = alpino_test.Id
+						Deprel = alpino_test.Deprel
 						if alpino_test.Enhanced {
 							isEid = true
 						} else {
@@ -682,12 +683,13 @@ init({
 				} else if isEid {
 					alp.Node0 = &Node{
 						Ud: &UdType{
-							Dep: []DepType{*findDepId(alpino.Node0, ID)},
+							Dep: []DepType{*findDepId(alpino.Node0, ID, Deprel)},
 						},
 						NodeList: make([]*Node, 0),
 					}
 					copyFromTest(alp.Node0, &alpino_test)
-					alp.Node0.Id = "EUD:" + alpino_test.Id // hack voor telling: seenID
+					alp.Node0.Id = "EUD:" + alpino_test.Id +
+						":" + alpino_test.Deprel // hack voor telling: seenID
 					isDep = true
 				}
 
@@ -712,7 +714,9 @@ init({
 </ud>
 </node>
 </alpino_ds>`), &alp)
-						alp.Node0.Id = "EUD:" + alp.Node0.Ud.Dep[0].Id // hack voor telling: seenID
+						alp.Node0.Id = "EUD:" + alp.Node0.Ud.Dep[0].Id +
+							":" + alp.Node0.Ud.Dep[0].Head +
+							":" + alp.Node0.Ud.Dep[0].Deprel // hack voor telling: seenID
 					}
 				} else {
 					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
