@@ -302,24 +302,38 @@ extern "C" {
 
     int c_dbxml_docs_next(c_dbxml_docs docs)
     {
-	// goal: advance to next result and get both doc and value
-	// do a peek() first to get the one, then next() to get the other and advance
 	if (docs->more) {
-	    try {
-		docs->it.peek(docs->doc);
-		docs->validDoc = true;
-	    } catch (DbXml::XmlException &ignore) {
-		// Result is not always of type document, but we don't know this until we try.
-		docs->validDoc = false;
-	    }
+
+	    // goal: advance to next result and get both doc and value
+	    // two times peek() and then next() to prevent a segment violation
 
 	    try {
-		docs->more = docs->it.next(docs->value);
+		docs->more = docs->it.peek(docs->value);
 	    } catch (DbXml::XmlException &xe) {
-		// While there are more results, this should however always succeed, as the result is always an XmlValue
+		// while there are more results, this should always succeed, as the result is always an XmlValue
 		docs->errstring = xe.what();
 		docs->error = true;
 		docs->more = false;
+	    }
+
+	    docs->validDoc = false;
+	    if (docs->more) {
+		try {
+		    // this would cause a segment violation if first peek() failed
+		    docs->it.peek(docs->doc);
+		    docs->validDoc = true;
+		} catch (...) {
+		    // result is not always of type document, but we don't know this until we try.
+		}
+
+		// repeat first peek() as next() to advance
+		try {
+		    docs->more = docs->it.next(docs->value);
+		} catch (DbXml::XmlException &xe) {
+		    docs->errstring = xe.what();
+		    docs->error = true;
+		    docs->more = false;
+		}
 	    }
 
 	    docs->name.clear();
