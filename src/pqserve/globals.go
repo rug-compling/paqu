@@ -123,33 +123,11 @@ type Sentence struct {
 }
 
 type Alpino_test struct {
-	XMLName  xml.Name
-	Deprel   string `xml:"deprel,attr"`
-	Enhanced bool   `xml:"enhanced,attr"`
-	Id       string `xml:"id,attr"`
-	Buiging  string `xml:"buiging,attr"`
-	Conjtype string `xml:"conjtype,attr"`
-	Dial     string `xml:"dial,attr"`
-	Genus    string `xml:"genus,attr"`
-	Getal    string `xml:"getal,attr"`
-	GetalN   string `xml:"getal-n,attr"`
-	Graad    string `xml:"graad,attr"`
-	Lwtype   string `xml:"lwtype,attr"`
-	Naamval  string `xml:"naamval,attr"`
-	Npagr    string `xml:"npagr,attr"`
-	Ntype    string `xml:"ntype,attr"`
-	Numtype  string `xml:"numtype,attr"`
-	Pdtype   string `xml:"pdtype,attr"`
-	Persoon  string `xml:"persoon,attr"`
-	Positie  string `xml:"positie,attr"`
-	Pt       string `xml:"pt,attr"`
-	Pvagr    string `xml:"pvagr,attr"`
-	Pvtijd   string `xml:"pvtijd,attr"`
-	Spectype string `xml:"spectype,attr"`
-	Status   string `xml:"status,attr"`
-	Vwtype   string `xml:"vwtype,attr"`
-	Vztype   string `xml:"vztype,attr"`
-	Wvorm    string `xml:"wvorm,attr"`
+	XMLName xml.Name
+	Deprel  string `xml:"deprel,attr"`
+	Ud      string `xml:"ud,attr"`
+	Head    string `xml:"head,attr"`
+	Id      string `xml:"id,attr"`
 }
 
 type Alpino_ds_complete struct {
@@ -158,10 +136,9 @@ type Alpino_ds_complete struct {
 	Metadata *MetadataType `xml:"metadata,omitempty"`
 	Parser   *ParserT      `xml:"parser,omitempty"`
 	Node0    *Node         `xml:"node,omitempty"`
-	Sent     string        `xml:"sentence"`
-	SentId   string        `xml:"sentid,attr,omitempty"`
+	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
-	Root     []*RootType   `xml:"root,omitempty"`
+	Root     []*UdNodeType `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
@@ -205,15 +182,22 @@ type CommentsType struct {
 	Comment []string `xml:"comment,omitempty"`
 }
 
-type RootType struct {
+type SentType struct {
+	Sent   string `xml:",chardata"`
+	SentId string `xml:"sentid,attr,omitempty"`
+}
+
+type UdNodeType struct {
 	RecursionLimit string `xml:"recursion_limit,attr,omitempty"`
 
+	Ud    string `xml:"ud,attr,omitempty"`
 	Id    string `xml:"id,attr,omitempty"`
 	Eid   string `xml:"eid,attr,omitempty"`
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
 	FeatsType
+	Head      string `xml:"head,attr,omitempty"`
 	Deprel    string `xml:"deprel,attr,omitempty"`
 	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
 

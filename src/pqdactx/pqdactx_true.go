@@ -20,19 +20,23 @@ type Alpino_ds struct {
 	Node     *Node         `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
-	Root     []*RootType   `xml:"root,omitempty"`
+	Root     []*UdNodeType `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
-type RootType struct {
+type UdNodeType struct {
+	XMLName xml.Name
+
 	RecursionLimit string `xml:"recursion_limit,attr,omitempty"`
 
+	Ud    string `xml:"ud,attr,omitempty"`
 	Id    string `xml:"id,attr,omitempty"`
 	Eid   string `xml:"eid,attr,omitempty"`
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
 	FeatsType
+	Head      string `xml:"head,attr,omitempty"`
 	Deprel    string `xml:"deprel,attr,omitempty"`
 	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
 

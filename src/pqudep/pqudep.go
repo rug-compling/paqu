@@ -151,9 +151,9 @@ import (
 const (
 	VERSIONs        = "PQU%d.%d"
 	VERSIONxq       = int(2) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(0) // ophogen als xml-formaat is veranderd
+	VERSIONxml      = int(4) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
-	ALPINO_DS_MINOR = int(9)
+	ALPINO_DS_MINOR = int(10)
 )
 
 type Alpino_ds struct {
@@ -164,7 +164,7 @@ type Alpino_ds struct {
 	Node     *NodeType     `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
-	Root     []*UdNodeType `xml:"root,omitempty"`
+	UdNodes  []*UdNodeType `xml:"root,omitempty"`
 	Conllu   *ConlluType   `xml:"conllu,omitempty"`
 }
 
@@ -206,17 +206,16 @@ type UdNodeType struct {
 	RecursionLimit string `xml:"recursion_limit,attr,omitempty"`
 	recursion      []string
 
-	Enhanced bool `xml:"enhanced,attr,omitempty"`
+	Ud string `xml:"ud,attr,omitempty"`
 
 	Id    string `xml:"id,attr,omitempty"`
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
 	FeatsType
-	Head       string `xml:"head,attr,omitempty"`
-	Deprel     string `xml:"deprel,attr,omitempty"`
-	DeprelMain string `xml:"deprel_main,attr,omitempty"`
-	DeprelAux  string `xml:"deprel_aux,attr,omitempty"`
+	Head      string `xml:"head,attr,omitempty"`
+	Deprel    string `xml:"deprel,attr,omitempty"`
+	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
 
 	Buiging  string `xml:"buiging,attr,omitempty"`
 	Conjtype string `xml:"conjtype,attr,omitempty"`
@@ -626,6 +625,7 @@ func doXml(document, archname, filename string) (result string) {
 	valid := make(map[string]bool)
 	valid["0"] = true // root
 	copies := make(map[string]string)
+	prevID := "0"
 	for i, line := range lines {
 		a := strings.Split(line, "\t")
 		if len(a) != 10 {
@@ -633,6 +633,12 @@ func doXml(document, archname, filename string) (result string) {
 			lineno = i + 1
 			return
 		}
+		if prevID >= a[0] {
+			err = fmt.Errorf("Unordered ID numbers %v, %v", prevID, a[0])
+			lineno = i + 1
+			return
+		}
+		prevID = a[0]
 		if strings.Contains(a[3], "ERROR") {
 			err = fmt.Errorf("Invalid UPOS value %v", a[3])
 			lineno = i + 1
@@ -773,6 +779,7 @@ func doXml(document, archname, filename string) (result string) {
 			Head:      node.Ud.Head,
 			Deprel:    node.Ud.Deprel,
 			DeprelAux: node.Ud.DeprelAux,
+			Ud:        "basic",
 
 			FeatsType: node.Ud.FeatsType,
 
@@ -815,8 +822,7 @@ func doXml(document, archname, filename string) (result string) {
 				Head:      dep.Head,
 				Deprel:    dep.Deprel,
 				DeprelAux: dep.DeprelAux,
-
-				Enhanced: true,
+				Ud:        "enhanced",
 
 				FeatsType: node.Ud.FeatsType,
 
@@ -849,21 +855,21 @@ func doXml(document, archname, filename string) (result string) {
 
 	}
 
-	alpino.Root = make([]*UdNodeType, 0)
+	alpino.UdNodes = make([]*UdNodeType, 0)
 
 	for _, n := range udNodeList {
 		if n.Head == "0" {
-			alpino.Root = append(alpino.Root, n)
+			alpino.UdNodes = append(alpino.UdNodes, n)
 		}
 	}
 
 	for _, n := range eudNodeList {
 		if n.Head == "0" {
-			alpino.Root = append(alpino.Root, n)
+			alpino.UdNodes = append(alpino.UdNodes, n)
 		}
 	}
 
-	for i, root := range alpino.Root {
+	for i, root := range alpino.UdNodes {
 		var items []*UdNodeType
 		if i == 0 {
 			items = udNodeList
@@ -890,12 +896,10 @@ func expand(udnode *UdNodeType, items []*UdNodeType) {
 	for _, un := range udnode.UdNodes {
 		if recursionLimit(un.recursion) {
 			un.RecursionLimit = "TOO DEEP"
-			un.Head = ""
 		} else {
 			expand(un, items)
 		}
 	}
-	udnode.Head = ""
 }
 
 func recursionLimit(s []string) bool {

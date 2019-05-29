@@ -44,18 +44,18 @@ var (
 		"VerbForm":        true,
 		"auto":            true,
 		"deprel":          true,
-		"deprel_main":     true,
 		"deprel_aux":      true,
+		"deprel_main":     true,
 		"elided":          true,
-		"enhanced":        true,
 		"error":           true,
 		"form":            true,
 		"head":            true,
 		"id":              true,
 		"lemma":           true,
-		"status":          true,
-		"upos":            true,
 		"recursion_limit": true,
+		"status":          true,
+		"ud":              true,
+		"upos":            true,
 	}
 	xpathNames = map[string]bool{
 		"alpino_ds":            true,
@@ -1584,7 +1584,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 	for i, part := range xmlparts {
 
 		var isUd, isDep, isId, isEid bool
-		var ID, Deprel string
+		var ID, Head, Deprel string
 
 		if strings.HasPrefix(part, "<node") {
 			// isNode
@@ -1601,8 +1601,9 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			}
 			if alpino_test.Id != "" {
 				ID = alpino_test.Id
+				Head = alpino_test.Head
 				Deprel = alpino_test.Deprel
-				if alpino_test.Enhanced {
+				if alpino_test.Ud == "enhanced" {
 					isEid = true
 				} else {
 					isId = true
@@ -1613,18 +1614,10 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 		alp := Alpino_ds{}
 
 		if isId {
-			alp.Node0 = &Node{
-				Ud:       findUdId(alpino.Node0, ID),
-				NodeList: make([]*Node, 0),
-			}
+			alp.Node0 = findUdId(alpino.Node0, ID)
 			isUd = true
 		} else if isEid {
-			alp.Node0 = &Node{
-				Ud: &UdType{
-					Dep: []DepType{*findDepId(alpino.Node0, ID, Deprel)},
-				},
-				NodeList: make([]*Node, 0),
-			}
+			alp.Node0 = findDepId(alpino.Node0, ID, Head, Deprel)
 			isDep = true
 		}
 
@@ -1813,9 +1806,9 @@ func bugtest(filename, xpath string) error {
 	return e
 }
 
-func findUdId(node *Node, ID string) *UdType {
+func findUdId(node *Node, ID string) *Node {
 	if node.Ud != nil && node.Ud.Id == ID {
-		return node.Ud
+		return node
 	}
 	for _, n := range node.NodeList {
 		if ud := findUdId(n, ID); ud != nil {
@@ -1825,16 +1818,24 @@ func findUdId(node *Node, ID string) *UdType {
 	return nil
 }
 
-func findDepId(node *Node, ID string, deprel string) *DepType {
+func findDepId(node *Node, ID string, head string, deprel string) *Node {
 	if node.Ud != nil && node.Ud.Dep != nil {
 		for _, d := range node.Ud.Dep {
-			if d.Id == ID && d.Deprel == deprel {
-				return &d
+			if d.Id == ID && d.Head == head && d.Deprel == deprel {
+				if len(node.Ud.Dep) == 1 {
+					return node
+				}
+				n := *node // kopie
+				n.NodeList = nil
+				ud := *node.Ud // kopie
+				ud.Dep = []DepType{d}
+				n.Ud = &ud
+				return &n
 			}
 		}
 	}
 	for _, n := range node.NodeList {
-		if dep := findDepId(n, ID, deprel); dep != nil {
+		if dep := findDepId(n, ID, head, deprel); dep != nil {
 			return dep
 		}
 	}

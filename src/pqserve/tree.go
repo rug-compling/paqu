@@ -298,7 +298,7 @@ func tree(q *Context) {
 
 	unexpand(alpino.Node0)
 
-	title := html.EscapeString(alpino.Sent)
+	title := html.EscapeString(alpino.Sentence.Sent)
 	ctx.words = strings.Fields(title)
 
 	// Multi-word units "ineenvouwen".

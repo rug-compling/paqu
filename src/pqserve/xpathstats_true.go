@@ -642,89 +642,43 @@ init({
 			var at [5]StructIS
 			for _, match := range matches {
 
-				var isUd, isDep, isId, isEid bool
-				var ID, Deprel string
-
-				var alpino_test Alpino_test
-
+				node := &Node{}
+				var sid string
+				var err error
 				if strings.HasPrefix(match, "<node") {
-					// isNode
-				} else if strings.HasPrefix(match, "<ud") {
-					isUd = true
-				} else if strings.HasPrefix(match, "<dep") {
-					isDep = true
-				} else {
-					err := xml.Unmarshal([]byte(match), &alpino_test)
-					if err != nil {
-						fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
-						return
+					err = xml.Unmarshal([]byte(match), node)
+					sid = node.Id
+					if node.OtherId != "" {
+						sid = node.OtherId
 					}
-					if alpino_test.Id != "" {
-						ID = alpino_test.Id
-						Deprel = alpino_test.Deprel
-						if alpino_test.Enhanced {
-							isEid = true
-						} else {
-							isId = true
+				} else if strings.HasPrefix(match, "<ud") {
+					var ud UdType
+					err = xml.Unmarshal([]byte(match), &ud)
+					node = findUdId(alpino.Node0, ud.Id)
+					sid = "UD:" + ud.Id
+				} else if strings.HasPrefix(match, "<dep") {
+					var dep DepType
+					err = xml.Unmarshal([]byte(match), &dep)
+					node = findDepId(alpino.Node0, dep.Id, dep.Head, dep.Deprel)
+					sid = "EUD:" + dep.Id + ":" + dep.Head + ":" + dep.Deprel
+				} else {
+					var alpino_test Alpino_test
+					err = xml.Unmarshal([]byte(match), &alpino_test)
+					if err == nil {
+						if alpino_test.Id != "" {
+							ID := alpino_test.Id
+							head := alpino_test.Head
+							deprel := alpino_test.Deprel
+							if alpino_test.Ud == "enhanced" {
+								node = findDepId(alpino.Node0, ID, head, deprel)
+								sid = "EUD:" + ID + ":" + head + ":" + deprel
+							} else {
+								node = findUdId(alpino.Node0, ID)
+								sid = "UD:" + ID
+							}
 						}
 					}
 				}
-
-				alp := Alpino_ds{}
-
-				if isId {
-					alp.Node0 = &Node{
-						Ud:       findUdId(alpino.Node0, ID),
-						NodeList: make([]*Node, 0),
-					}
-					copyFromTest(alp.Node0, &alpino_test)
-					alp.Node0.Id = "UD:" + alpino_test.Id // hack voor telling: seenID
-					isUd = true
-				} else if isEid {
-					alp.Node0 = &Node{
-						Ud: &UdType{
-							Dep: []DepType{*findDepId(alpino.Node0, ID, Deprel)},
-						},
-						NodeList: make([]*Node, 0),
-					}
-					copyFromTest(alp.Node0, &alpino_test)
-					alp.Node0.Id = "EUD:" + alpino_test.Id +
-						":" + alpino_test.Deprel // hack voor telling: seenID
-					isDep = true
-				}
-
-				var err error
-				if isUd {
-					if !isId {
-						err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
-<alpino_ds version="1.3">
-<node>
-`+match+`
-</node>
-</alpino_ds>`), &alp)
-						alp.Node0.Id = "UD:" + alp.Node0.Ud.Id // hack voor telling: seenID
-					}
-				} else if isDep {
-					if !isEid {
-						err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
-<alpino_ds version="1.3">
-<node>
-<ud>
-`+match+`
-</ud>
-</node>
-</alpino_ds>`), &alp)
-						alp.Node0.Id = "EUD:" + alp.Node0.Ud.Dep[0].Id +
-							":" + alp.Node0.Ud.Dep[0].Head +
-							":" + alp.Node0.Ud.Dep[0].Deprel // hack voor telling: seenID
-					}
-				} else {
-					err = xml.Unmarshal([]byte(`<?xml version="1.0" encoding="UTF-8"?>
-<alpino_ds version="1.3">
-`+match+`
-</alpino_ds>`), &alp)
-				}
-
 				if err != nil {
 					updateError(q, err, !download)
 					logerr(err)
@@ -733,16 +687,13 @@ init({
 					return
 				}
 
-				sid := ""
-				if alp.Node0 != nil {
-					sid = alp.Node0.Id
-					if alp.Node0.OtherId != "" {
-						sid = alp.Node0.OtherId
-					}
+				// TODO ???
+				if node != nil {
 					if wantRel {
-						sid = sid + " " + alp.Node0.Rel
+						sid = sid + " " + node.Rel
 					}
 				}
+
 				if seenId[sid] {
 					continue
 				}
@@ -753,19 +704,19 @@ init({
 							for _, at[3] = range mm[3] {
 								for _, at[4] = range mm[4] {
 									if nAttr > 0 && attr[0][0] != ':' {
-										at[0] = StructIS{0, getFullAttr(attr[0], alp.Node0, alpino.Node0)}
+										at[0] = StructIS{0, getFullAttr(attr[0], node, alpino.Node0)}
 									}
 									if nAttr > 1 && attr[1][0] != ':' {
-										at[1] = StructIS{0, getFullAttr(attr[1], alp.Node0, alpino.Node0)}
+										at[1] = StructIS{0, getFullAttr(attr[1], node, alpino.Node0)}
 									}
 									if nAttr > 2 && attr[2][0] != ':' {
-										at[2] = StructIS{0, getFullAttr(attr[2], alp.Node0, alpino.Node0)}
+										at[2] = StructIS{0, getFullAttr(attr[2], node, alpino.Node0)}
 									}
 									if nAttr > 3 && attr[3][0] != ':' {
-										at[3] = StructIS{0, getFullAttr(attr[3], alp.Node0, alpino.Node0)}
+										at[3] = StructIS{0, getFullAttr(attr[3], node, alpino.Node0)}
 									}
 									if nAttr > 4 && attr[4][0] != ':' {
-										at[4] = StructIS{0, getFullAttr(attr[4], alp.Node0, alpino.Node0)}
+										at[4] = StructIS{0, getFullAttr(attr[4], node, alpino.Node0)}
 									}
 									sums[at]++
 									count++
@@ -963,31 +914,4 @@ func (x ValueItems) Swap(i, j int) {
 
 func (x ValueItems) Len() int {
 	return len(x)
-}
-
-func copyFromTest(node *Node, test *Alpino_test) {
-
-	node.Buiging = test.Buiging
-	node.Conjtype = test.Conjtype
-	node.Dial = test.Dial
-	node.Genus = test.Genus
-	node.Getal = test.Getal
-	node.GetalN = test.GetalN
-	node.Graad = test.Graad
-	node.Lwtype = test.Lwtype
-	node.Naamval = test.Naamval
-	node.Npagr = test.Npagr
-	node.Ntype = test.Ntype
-	node.Numtype = test.Numtype
-	node.Pdtype = test.Pdtype
-	node.Persoon = test.Persoon
-	node.Positie = test.Positie
-	node.Pt = test.Pt
-	node.Pvagr = test.Pvagr
-	node.Pvtijd = test.Pvtijd
-	node.Spectype = test.Spectype
-	node.Status = test.Status
-	node.Vwtype = test.Vwtype
-	node.Vztype = test.Vztype
-	node.Wvorm = test.Wvorm
 }
