@@ -151,7 +151,7 @@ import (
 const (
 	VERSIONs        = "PQU%d.%d"
 	VERSIONxq       = int(2) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(5) // ophogen als xml-formaat is veranderd
+	VERSIONxml      = int(6) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
 )
@@ -552,6 +552,7 @@ func doXml(document, archname, filename string) (result string) {
 			fmt.Fprintln(os.Stderr)
 			alpino.Conllu.Status = "error"
 			alpino.Conllu.Error = fmt.Sprintf("Line %d: %v", lineno, err)
+			alpino.UdNodes = nil
 			if alpino.Node != nil {
 				clean(alpino.Node)
 			}
