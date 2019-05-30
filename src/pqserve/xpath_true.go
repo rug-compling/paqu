@@ -388,7 +388,7 @@ func xpath(q *Context) {
 		qs += "&U=1"
 	}
 	if fff[2] {
-		qs += "&X=1"
+		qs += "&E=1"
 	}
 	if offset > 0 || curno > offset+xpathmax {
 		if offset > 0 {
@@ -439,9 +439,6 @@ func xpath(q *Context) {
 <input type="hidden" name="xpath" value="%s">
 <input type="hidden" name="db" value="%s">
 <input type="hidden" name="mt" value="%s">
-<input type="hidden" name="A" value="%v">
-<input type="hidden" name="U" value="%v">
-<input type="hidden" name="X" value="%v">
 <input type="submit" value="nieuw corpus maken op basis van deze zoekopdracht">
 </form>
 `,
@@ -743,7 +740,7 @@ func html_xpath_header(q *Context) {
     f.xpath.value = "";
     f.A.checked = false;
     f.U.checked = false;
-    f.X.checked = false;
+    f.E.checked = false;
     xquery.css('background-color', '#ffffff');
   }
 
@@ -1289,7 +1286,7 @@ func html_xpath_form(q *Context, xpathmax int) (has_query bool, filter [3]bool) 
 	filter = [3]bool{
 		first(q.r, "A") != "",
 		first(q.r, "U") != "",
-		first(q.r, "X") != "",
+		first(q.r, "E") != "",
 	}
 
 	if q.auth {
@@ -1344,7 +1341,7 @@ corpus: <select name="db">
 	fmt.Fprintf(q.w, `filter:
 <input type="checkbox" id="cbA" name="A"%v> <label for="cbA">Alpino</label> &nbsp;
 <input type="checkbox" id="cbU" name="U"%v> <label for="cbU">Basic UD</label> &nbsp;
-<input type="checkbox" id="cbX" name="X"%v> <label for="cbX">Enhanced UD</label>
+<input type="checkbox" id="cbE" name="E"%v> <label for="cbE">Enhanced UD</label>
 <p>
 `,
 		ifelse(filter[0], " checked", ""),
