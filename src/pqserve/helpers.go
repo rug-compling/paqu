@@ -527,3 +527,10 @@ func minifyNode(node *Node) {
 		}
 	}
 }
+
+func ifelse(v bool, yes interface{}, no interface{}) interface{} {
+	if v {
+		return yes
+	}
+	return no
+}

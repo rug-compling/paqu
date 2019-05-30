@@ -155,6 +155,15 @@ var (
 		"vocative":   true,
 		"xcomp":      true,
 	}
+
+	filters = map[[3]bool]string{
+		[3]bool{true, false, false}: "/(self::node|self::ud|self::dep)",
+		[3]bool{false, true, false}: "/self::*[@ud='basic']",
+		[3]bool{false, false, true}: "/self::*[@ud='enhanced']",
+		[3]bool{true, true, false}:  "/(self::node|self::ud|self::dep|self::*[@ud='basic'])",
+		[3]bool{true, false, true}:  "/(self::node|self::ud|self::dep|self::*[@ud='enhanced'])",
+		[3]bool{false, true, true}:  "/self::*[@ud]",
+	}
 )
 
 func xpathcheck(q *Context) {
@@ -321,7 +330,7 @@ func xpath(q *Context) {
 
 	// HTML-uitvoer van het formulier
 	// Returnwaarde is true als er een query was gedefinieerd
-	has_query := html_xpath_form(q, xpathmax)
+	has_query, fff := html_xpath_form(q, xpathmax)
 
 	// Als er geen query is gedefinieerd, HTML-uitvoer van korte helptekst, pagina-einde, en exit
 	if !has_query {
@@ -355,6 +364,8 @@ func xpath(q *Context) {
 	// hier begint het
 
 	query := first(q.r, "xpath")
+	oriquery := query
+	query += filters[fff]
 	now := time.Now()
 	curno, hash, loading, errval := xpath_do_search(q, query, prefix, methode, offset, xpathmax, chClose, true, 1)
 	if errval != nil {
@@ -369,7 +380,16 @@ func xpath(q *Context) {
 	}
 
 	// Links naar volgende en vorige pagina's met resultaten
-	qs := "xpath=" + urlencode(query) + "&amp;mt=" + methode
+	qs := "xpath=" + urlencode(oriquery) + "&amp;mt=" + methode
+	if fff[0] {
+		qs += "&A=1"
+	}
+	if fff[1] {
+		qs += "&U=1"
+	}
+	if fff[2] {
+		qs += "&X=1"
+	}
 	if offset > 0 || curno > offset+xpathmax {
 		if offset > 0 {
 			fmt.Fprintf(q.w, "<a href=\"xpath?%s&amp;offset=%d\">vorige</a>", qs, offset-xpathmax)
@@ -408,7 +428,7 @@ func xpath(q *Context) {
 <input type="submit" value="zinnen downloaden">
 </form>
 `,
-			html.EscapeString(first(q.r, "xpath")),
+			html.EscapeString(query),
 			html.EscapeString(prefix),
 			methode)
 	}
@@ -419,10 +439,13 @@ func xpath(q *Context) {
 <input type="hidden" name="xpath" value="%s">
 <input type="hidden" name="db" value="%s">
 <input type="hidden" name="mt" value="%s">
+<input type="hidden" name="A" value="%v">
+<input type="hidden" name="U" value="%v">
+<input type="hidden" name="X" value="%v">
 <input type="submit" value="nieuw corpus maken op basis van deze zoekopdracht">
 </form>
 `,
-			html.EscapeString(first(q.r, "xpath")),
+			html.EscapeString(query),
 			html.EscapeString(prefix),
 			methode)
 	}
@@ -1253,12 +1276,18 @@ Voorbeelden, zie:
 `)
 }
 
-func html_xpath_form(q *Context, xpathmax int) (has_query bool) {
+func html_xpath_form(q *Context, xpathmax int) (has_query bool, filter [3]bool) {
 	has_query = true
 	if first(q.r, "xpath") == "" {
 		has_query = false
 	}
 	methode := first(q.r, "mt")
+
+	filter = [3]bool{
+		first(q.r, "A") != "",
+		first(q.r, "U") != "",
+		first(q.r, "X") != "",
+	}
 
 	if q.auth {
 		macros := ""
@@ -1309,6 +1338,15 @@ corpus: <select name="db">
 		<textarea name="xpath" rows="6" cols="80" maxlength="1200" id="xquery">%s</textarea>
 		<p>
 		`, html.EscapeString(first(q.r, "xpath")))
+	fmt.Fprintf(q.w, `filter:
+<input type="checkbox" id="cbA" name="A"%v> <label for="cbA">Alpino</label> &nbsp;
+<input type="checkbox" id="cbU" name="U"%v> <label for="cbU">Basic UD</label> &nbsp;
+<input type="checkbox" id="cbX" name="X"%v> <label for="cbX">Enhanced UD</label>
+<p>
+`,
+		ifelse(filter[0], " checked", ""),
+		ifelse(filter[1], " checked", ""),
+		ifelse(filter[2], " checked", ""))
 	if Cfg.Dactx {
 		selected := ""
 		if methode == "dx" {
