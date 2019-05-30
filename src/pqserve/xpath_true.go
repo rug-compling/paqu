@@ -741,6 +741,9 @@ func html_xpath_header(q *Context) {
 
   function formclear(f) {
     f.xpath.value = "";
+    f.A.checked = false;
+    f.U.checked = false;
+    f.X.checked = false;
     xquery.css('background-color', '#ffffff');
   }
 
@@ -1605,11 +1608,23 @@ init();
 }
 
 func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlparts []string, prefix string, global bool) {
+
+	fout := func(err error, s string) {
+		s2 := fmt.Sprintf("<li>FOUT bij parsen van XML: %s\n<pre>%s</pre></li>\n", html.EscapeString(err.Error()), html.EscapeString(s))
+		fmt.Fprintf(q.w, `<script type="text/javascript"><!--
+$('ol').append(%q);
+//--></script>
+`, s2)
+		if ff, ok := q.w.(http.Flusher); ok {
+			ff.Flush()
+		}
+	}
+
 	seen := make(map[string]bool)
 	alpino := Alpino_ds{}
 	err := xml.Unmarshal([]byte(xmlall), &alpino)
 	if err != nil {
-		fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+		fout(err, xmlall)
 		return
 	}
 	woorden := strings.Fields(alpino.Sentence)
@@ -1634,7 +1649,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 			var alpino_test Alpino_test
 			err := xml.Unmarshal([]byte(part), &alpino_test)
 			if err != nil {
-				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+				fout(err, part)
 				return
 			}
 			if alpino_test.Id != "" {
@@ -1668,7 +1683,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 </node>
 </alpino_ds>`), &alp)
 				if err != nil {
-					fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+					fout(err, part)
 					return
 				}
 			}
@@ -1687,7 +1702,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 </node>
 </alpino_ds>`), &alp)
 				if err != nil {
-					fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+					fout(err, part)
 					return
 				}
 			}
@@ -1703,7 +1718,7 @@ func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlp
 `+part+`
 </alpino_ds>`), &alp)
 			if err != nil {
-				fmt.Fprintf(q.w, "FOUT bij parsen van XML: %s\n", html.EscapeString(err.Error()))
+				fout(err, part)
 				return
 			}
 			if alp.Node0 != nil {
