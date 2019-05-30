@@ -190,8 +190,8 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 		return
 	}
 	if alpino.Conllu.Status != "OK" {
-		fmt.Fprintln(fp,
-			"<div style=\"margin:1em 0px;padding:1em 0px;border-top:1px solid grey\">Er was een fout in het afleiden van Universal Dependencies voor deze zin</div>")
+		fmt.Fprintf(fp,
+			"<div style=\"margin:1em 0px;padding:1em 0px;border-top:1px solid grey\">Er was een fout in het afleiden van Universal Dependencies voor deze zin: <em>%s</em></div>\n", html.EscapeString(alpino.Conllu.Error))
 		return
 	}
 
