@@ -151,7 +151,7 @@ import (
 const (
 	VERSIONs        = "PQU%d.%d"
 	VERSIONxq       = int(2) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(4) // ophogen als xml-formaat is veranderd
+	VERSIONxml      = int(5) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
 )
@@ -625,7 +625,7 @@ func doXml(document, archname, filename string) (result string) {
 	valid := make(map[string]bool)
 	valid["0"] = true // root
 	copies := make(map[string]string)
-	prevID := "0"
+	var prevID float64
 	for i, line := range lines {
 		a := strings.Split(line, "\t")
 		if len(a) != 10 {
@@ -633,12 +633,13 @@ func doXml(document, archname, filename string) (result string) {
 			lineno = i + 1
 			return
 		}
-		if prevID >= a[0] {
-			err = fmt.Errorf("Unordered ID numbers %v, %v", prevID, a[0])
+		if id, _ := strconv.ParseFloat(a[0], 64); prevID >= id {
+			err = fmt.Errorf("Unordered ID numbers %g, %g", prevID, id)
 			lineno = i + 1
 			return
+		} else {
+			prevID = id
 		}
-		prevID = a[0]
 		if strings.Contains(a[3], "ERROR") {
 			err = fmt.Errorf("Invalid UPOS value %v", a[3])
 			lineno = i + 1
