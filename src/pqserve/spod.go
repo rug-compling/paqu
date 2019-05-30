@@ -2774,9 +2774,13 @@ func spod_list(q *Context) {
 		if strings.HasPrefix(spod.special, "hidden") {
 			continue
 		}
+		header := spod.header
+		if i := strings.Index(header, "//"); i > 0 {
+			header = header[:i]
+		}
 		spodtext := strings.Replace(spod.text, "|", "", -1)
-		if spod.header != "" {
-			fmt.Fprint(q.w, "\n\n", spod.header, "\n", strings.Repeat("=", len(spod.header)), "\n\n")
+		if header != "" {
+			fmt.Fprint(q.w, "\n\n", header, "\n", strings.Repeat("=", len(header)), "\n\n")
 		}
 		fmt.Fprint(q.w,
 			"\n",
