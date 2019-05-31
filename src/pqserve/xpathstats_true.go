@@ -223,15 +223,11 @@ function init(s) {
 	attr := make([]string, 5)
 	attr[0], attr[1], attr[2], attr[3], attr[4] =
 		first(q.r, "attr1"), first(q.r, "attr2"), first(q.r, "attr3"), first(q.r, "attr4"), first(q.r, "attr5")
-	wantRel := false
 	j := 0
 	for i := 0; i < 5; i++ {
 		if attr[i] != "" {
 			attr[j] = attr[i]
 			j++
-			if attr[i] == "rel" {
-				wantRel = true
-			}
 		}
 	}
 	for ; j < 5; j++ {
@@ -648,19 +644,22 @@ init({
 				if strings.HasPrefix(match, "<node") {
 					err = xml.Unmarshal([]byte(match), node)
 					sid = node.Id
-					if node.OtherId != "" {
-						sid = node.OtherId
-					}
 				} else if strings.HasPrefix(match, "<ud") {
 					var ud UdType
 					err = xml.Unmarshal([]byte(match), &ud)
 					node = findUdId(alpino.Node0, ud.Id)
 					sid = "UD:" + ud.Id
+					if methode == "dx" && node.Index != "" {
+						node.Rel = "???"
+					}
 				} else if strings.HasPrefix(match, "<dep") {
 					var dep DepType
 					err = xml.Unmarshal([]byte(match), &dep)
 					node = findDepId(alpino.Node0, dep.Id, dep.Head, dep.Deprel)
 					sid = "EUD:" + dep.Id + ":" + dep.Head + ":" + dep.Deprel
+					if methode == "dx" && node.Index != "" {
+						node.Rel = "???"
+					}
 				} else {
 					var alpino_test Alpino_test
 					err = xml.Unmarshal([]byte(match), &alpino_test)
@@ -678,6 +677,9 @@ init({
 							}
 						}
 					}
+					if methode == "dx" && node.Index != "" {
+						node.Rel = "???"
+					}
 				}
 				if err != nil {
 					updateError(q, err, !download)
@@ -692,52 +694,25 @@ init({
 				}
 				seenId[sid] = true
 
-				rel := node.Rel
-				if wantRel && methode == "dx" && node.Index != "" {
-					rels := make([]string, 0)
-					getRel(alpino.Node0, node.Index, &rels)
-					rel = strings.Join(rels, "|")
-				}
-
 				for _, at[0] = range mm[0] {
 					for _, at[1] = range mm[1] {
 						for _, at[2] = range mm[2] {
 							for _, at[3] = range mm[3] {
 								for _, at[4] = range mm[4] {
 									if nAttr > 0 && attr[0][0] != ':' {
-										if attr[0] == "rel" {
-											at[0] = StructIS{0, rel}
-										} else {
-											at[0] = StructIS{0, getFullAttr(attr[0], node, alpino.Node0)}
-										}
+										at[0] = StructIS{0, getFullAttr(attr[0], node, alpino.Node0)}
 									}
 									if nAttr > 1 && attr[1][0] != ':' {
-										if attr[1] == "rel" {
-											at[1] = StructIS{0, rel}
-										} else {
-											at[1] = StructIS{0, getFullAttr(attr[1], node, alpino.Node0)}
-										}
+										at[1] = StructIS{0, getFullAttr(attr[1], node, alpino.Node0)}
 									}
 									if nAttr > 2 && attr[2][0] != ':' {
-										if attr[2] == "rel" {
-											at[2] = StructIS{0, rel}
-										} else {
-											at[2] = StructIS{0, getFullAttr(attr[2], node, alpino.Node0)}
-										}
+										at[2] = StructIS{0, getFullAttr(attr[2], node, alpino.Node0)}
 									}
 									if nAttr > 3 && attr[3][0] != ':' {
-										if attr[3] == "rel" {
-											at[3] = StructIS{0, rel}
-										} else {
-											at[3] = StructIS{0, getFullAttr(attr[3], node, alpino.Node0)}
-										}
+										at[3] = StructIS{0, getFullAttr(attr[3], node, alpino.Node0)}
 									}
 									if nAttr > 4 && attr[4][0] != ':' {
-										if attr[4] == "rel" {
-											at[4] = StructIS{0, rel}
-										} else {
-											at[4] = StructIS{0, getFullAttr(attr[4], node, alpino.Node0)}
-										}
+										at[4] = StructIS{0, getFullAttr(attr[4], node, alpino.Node0)}
 									}
 									sums[at]++
 									count++
@@ -935,15 +910,4 @@ func (x ValueItems) Swap(i, j int) {
 
 func (x ValueItems) Len() int {
 	return len(x)
-}
-
-func getRel(node *Node, idx string, rels *[]string) {
-	if node.Index == idx {
-		*rels = append(*rels, node.Rel)
-	}
-	if node.NodeList != nil {
-		for _, n := range node.NodeList {
-			getRel(n, idx, rels)
-		}
-	}
 }
