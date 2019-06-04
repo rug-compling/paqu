@@ -52,10 +52,14 @@ Kies een of meer corpora:
 			var t string
 			switch gr {
 			case 'A':
-				t = "algemene corpora"
+				t = "algemene corpora &mdash; handmatig geannoteerd"
 			case 'B':
-				t = "mijn corpora"
+				t = "algemene corpora &mdash; automatisch geannoteerd"
 			case 'C':
+				t = "algemene corpora"
+			case 'D':
+				t = "mijn corpora"
+			case 'E':
 				t = "corpora gedeeld door anderen"
 			}
 			fmt.Fprintln(q.w, "<b>&mdash;", t, "&mdash;</b><br>")
