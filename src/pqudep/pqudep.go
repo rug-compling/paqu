@@ -151,7 +151,7 @@ import (
 const (
 	VERSIONs        = "PQU%d.%d"
 	VERSIONxq       = int(2) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(6) // ophogen als xml-formaat is veranderd
+	VERSIONxml      = int(7) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
 )
@@ -623,24 +623,65 @@ func doXml(document, archname, filename string) (result string) {
 		}
 	}
 
-	valid := make(map[string]bool)
-	valid["0"] = true // root
-	copies := make(map[string]string)
+	// ontdubbelen
 	var prevID float64
-	for i, line := range lines {
-		a := strings.Split(line, "\t")
+	var prevDeps string
+	var prevFrom string
+	for i := 0; i < len(lines); i++ {
+		a := strings.Split(lines[i], "\t")
 		if len(a) != 10 {
 			err = fmt.Errorf("Wrong number of fields")
 			lineno = i + 1
 			return
 		}
-		if id, _ := strconv.ParseFloat(a[0], 64); prevID >= id {
-			err = fmt.Errorf("Unordered ID numbers %g, %g", prevID, id)
-			lineno = i + 1
-			return
-		} else {
-			prevID = id
+		id, _ := strconv.ParseFloat(a[0], 64)
+		from := getItems(a[9])["CopiedFrom"]
+		if prevID >= id {
+			if prevID > id || from == "" {
+				err = fmt.Errorf("Unordered ID numbers %g, %g", prevID, id)
+				lineno = i + 1
+				return
+			}
+			if from != prevFrom {
+				err = fmt.Errorf("Duplicate ID number %g with different original", id)
+				lineno = i + 1
+				return
+			}
+			items := make(map[string]bool)
+			list := make([]string, 0)
+			for _, item := range strings.Split(prevDeps, "|") {
+				if item != "" && item != "_" {
+					items[item] = true
+					list = append(list, item)
+				}
+			}
+			found := false
+			for _, item := range strings.Split(a[8], "|") {
+				if item != "" && item != "_" {
+					if !items[item] {
+						found = true
+						items[item] = true
+						list = append(list, item)
+					}
+				}
+			}
+			if found {
+				a[8] = strings.Join(list, "|")
+				lines[i] = strings.Join(a, "\t")
+			}
+			lines = append(lines[:i-1], lines[i:]...)
+			i--
 		}
+		prevID = id
+		prevDeps = a[8]
+		prevFrom = from
+	}
+
+	valid := make(map[string]bool)
+	valid["0"] = true // root
+	copies := make(map[string]string)
+	for i, line := range lines {
+		a := strings.Split(line, "\t")
 		if strings.Contains(a[3], "ERROR") {
 			err = fmt.Errorf("Invalid UPOS value %v", a[3])
 			lineno = i + 1
