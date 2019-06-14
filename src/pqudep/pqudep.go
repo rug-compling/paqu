@@ -309,7 +309,7 @@ func usage() {
 	fmt.Printf(`
 Usage, examples:
 
-  %s file.(xml|dact)...
+  %s file.(xml|xml.gz|dact)...
   %s -l filelist
   find . -name '*.xml' | %s
 
@@ -432,6 +432,7 @@ func doFile(filename string, index, length int) {
 		db2, err := dbxml.OpenReadWrite(filename + ".tmp")
 		x(err)
 		docs, err := db1.All()
+		x(err)
 		teller := 0
 		quit := false
 		for docs.Next() {

@@ -72,7 +72,7 @@ func usage() {
 	fmt.Printf(`
 Usage, examples:
 
-  %s file.(xml|dact)...
+  %s file.(xml|xml.gz|dact)...
   %s -l filelist
   find . -name '*.xml' | %s
 
