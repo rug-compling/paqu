@@ -16,6 +16,7 @@ all:
 	make -C pqbuild
 	make -C pqclean
 	make -C pqconfig
+	make -C pqconllu
 	make -C pqdactx
 	make -C pqfolia
 	make -C pqinit
