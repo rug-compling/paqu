@@ -627,7 +627,8 @@ func doXml(document, archname, filename string) (result string) {
 	valid := make(map[string]bool)
 	valid["0"] = true // root
 	copies := make(map[string]string)
-	var prevID float64
+	var prevID [2]int
+	var prevIDs string
 	for i, line := range lines {
 		a := strings.Split(line, "\t")
 		if len(a) != 10 {
@@ -635,12 +636,13 @@ func doXml(document, archname, filename string) (result string) {
 			lineno = i + 1
 			return
 		}
-		if id, _ := strconv.ParseFloat(a[0], 64); prevID >= id {
-			err = fmt.Errorf("Unordered ID numbers %g, %g", prevID, id)
+		if id := get2(a[0]); prevID[0] > id[0] || prevID[0] == id[0] && prevID[1] >= id[1] {
+			err = fmt.Errorf("Unordered ID numbers %s, %s", prevIDs, a[0])
 			lineno = i + 1
 			return
 		} else {
 			prevID = id
+			prevIDs = a[0]
 		}
 		if strings.Contains(a[3], "ERROR") {
 			err = fmt.Errorf("Invalid UPOS value %v", a[3])
@@ -1053,4 +1055,17 @@ func isOld(ver string) bool {
 	vv := strings.Split(ver[3:], ".")
 	i, err := strconv.Atoi(vv[0])
 	return err != nil || i < VERSIONxq
+}
+
+func get2(s string) [2]int {
+	var r [2]int
+	aa := strings.Split(s, ".")
+	for i, a := range aa {
+		if i == 2 {
+			break
+		}
+		n, _ := strconv.Atoi(a)
+		r[i] = n
+	}
+	return r
 }
