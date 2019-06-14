@@ -58,10 +58,10 @@ var (
 
 	opt_l = flag.String("l", "", "filelist")
 
-	reUnQ1 = regexp.MustCompile(`( ,,) (.*?) ('' )`)
+	reUnQ1 = regexp.MustCompile(`( (?:,,|'')) (.*?) ('' )`)
 	reUnQ2 = regexp.MustCompile(`( ") (.*?) (" )`)
 	reUnQ3 = regexp.MustCompile("( [`']) (.*?) (' )")
-	reUnQ4 = regexp.MustCompile(`( ‘) (.*?) (’ )`)
+	reUnQ4 = regexp.MustCompile(`( [‘’]) (.*?) (’ )`)
 	reUnQ5 = regexp.MustCompile(`( [“„”]) (.*?) (” )`)
 	reUnP1 = regexp.MustCompile(`([\[({]) `)
 	reUnP2 = regexp.MustCompile(` ([\])}:;.,!?])`)
@@ -161,15 +161,18 @@ func doFile(filename string) {
 
 func doXml(document, archname, filename string) {
 	var alpino Alpino_ds
-	x(xml.Unmarshal([]byte(document), &alpino))
+	err := xml.Unmarshal([]byte(document), &alpino)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR in (%s) %s: %v\n", archname, filename, err)
+		return
+	}
 	if alpino.Conllu == nil {
 		return
 	}
-	if archname == "" {
-		fmt.Println("# source =", filename)
-	} else {
-		fmt.Println("# source =", archname, "::", filename)
+	if archname != "" {
+		fmt.Println("# archive =", archname)
 	}
+	fmt.Println("# source =", filename)
 	if id := alpino.Sentence.SentId; id != "" {
 		fmt.Println("# sent_id =", id)
 	}
@@ -212,7 +215,14 @@ func doXml(document, archname, filename string) {
 		}
 	}
 	for i, com := range alpino.Comments {
-		fmt.Printf("# comment_%d = %s\n", i+1, com)
+		coms := strings.Split(com, "\n")
+		if len(coms) == 1 {
+			fmt.Printf("# comment_%d = %s\n", i+1, com)
+		} else {
+			for j, cc := range coms {
+				fmt.Printf("# comment_%d.%02d = %s\n", i+1, j+1, cc)
+			}
+		}
 	}
 
 	fmt.Println(strings.TrimSpace(alpino.Conllu.Conllu))
