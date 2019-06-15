@@ -150,8 +150,8 @@ import (
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = int(2) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(8) // ophogen als xml-formaat is veranderd
+	VERSIONxq       = int(3) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
+	VERSIONxml      = int(0) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
 )

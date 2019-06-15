@@ -126,7 +126,8 @@ declare function local:reconstruct_empty_head($node as node()) as node() {
     if	 ($node/../node[@pt or @cat])
     then if  ($node/../node[@pt or @cat]/@begin = $node/../@begin)
 	 then ($node/../node[@pt or @cat])[last()]/@end + 0.1
-	 else ($node/../node[@pt or @cat])[1]/@begin + 0.1
+	 (: else ($node/../node[@pt or @cat])[1]/@begin + 0.1 :)
+	 else local:left_edge($node/../node[@pt or @cat][1]) + 0.1
     else $node/../@end - 0.9	    (: covers cases where there is no sister with content :)
   let $copied :=
     if ($antecedent/@ud:CopiedFrom)
@@ -150,6 +151,15 @@ declare function local:reconstruct_empty_head($node as node()) as node() {
     </node>
 };
 
+declare function local:left_edge($node as node()) as xs:integer {
+  let $words :=
+    for $word in $node/descendant-or-self::node[@pt]
+    order by $word/number(@begin)
+    return $word
+  return
+    $words[1]/@begin
+
+};
 
 declare function local:enhance_dependency_label($node as node()) as xs:string {
  let $label := $node/@ud:ERelation
@@ -174,7 +184,15 @@ declare function local:enhance_dependency_label($node as node()) as xs:string {
 		    else "ERROR_empty_eud_label"
 };
 
-declare function local:enhanced_lemma_string($node as node()) as xs:string {
+declare function local:enhanced_lemma_string($nodes as node()*) as xs:string {
+       let $lemmas :=
+               for $node in $nodes
+                       order by number($node/@head)
+                               return local:enhanced_lemma_string1($node)
+       return string-join($lemmas,"_")
+};
+
+declare function local:enhanced_lemma_string1($node as node()) as xs:string {
   let $fixed := $node/../node[@ud:ERelation="fixed"]
   let $lemma :=
 	  if ($node/@lemma = "a.k.a")
@@ -358,7 +376,11 @@ declare function local:universal_pos_tag($node as element(node)) as attribute() 
 			else 'SYM'
 	      else 'SYM'
 
-    else if ($PT eq 'adj') then 'ADJ'
+    else if ($PT eq 'adj') then
+      if ($node[@rel="det"])  then 'DET'
+      else if ($node[@rel="hd" and ../@cat="pp"]) then "ADP" (: vol vertrouwen :)
+      else if ($node[@rel="crd"]) then 'CCONJ' (: respectievelijk :)
+      else 'ADJ' (: exceptions forced by 2.4 validation :)
     else if ($PT eq 'bw')  then 'ADV'
     else if ($PT eq 'lid') then 'DET'
     else if ($PT eq 'n')   then
@@ -375,7 +397,11 @@ declare function local:universal_pos_tag($node as element(node)) as attribute() 
     else if ($PT eq 'vz')  then 'ADP'  (: v2: do not use PART for SVPs and complementizers :)
     else if ($PT eq 'vnw')
 	 then if ($REL eq 'det' and not($node/@vwtype="bez") )	then 'DET'
-	 else if ($node/@pdtype eq 'adv-pron' ) then 'ADV'
+         else if ($node/@pdtype eq 'adv-pron' )
+              then if ($node[@rel="pobj1"]) then "PRON"
+                   else 'ADV'
+         else if ($node[(@rel="mod" or (@rel="hd" and ../@rel="mod")) and @pdtype="grad"]) then 'ADV' (: veel minder :)
+
 	 else 'PRON'
     else if ($PT eq 'vg') then
       if ($node/@conjtype eq 'neven')  then  'CCONJ'  else 'SCONJ' (: V2: CONJ ==> CCONJ :)
@@ -686,14 +712,18 @@ declare function local:internal_head_position($nodes as element(node)*) as xs:st
 } ;
 
 declare function local:internal_head_position1($node as element(node)) as xs:string
-{ if	  ($node[@cat="pp"])
-  then	  if ($node/node[@rel="hd" and @pt=("bw","n")] )  (: n --> TEMPORARY HACK to fix error where NP is erroneously tagged as PP :)
-	  then $node/node[@rel="hd"]/@end
-	  else if ($node/node[@rel=("obj1","pobj1","se")])
-	       then local:internal_head_position($node/node[@rel=("obj1","pobj1","se")][1])
-	       else if ($node/node[@rel="hd" and @cat="mwu"])  (: mede [op grond hiervan] :)
-		    then local:internal_head_position($node/node[@rel="hd"] )
-		    else local:internal_head_position( $node/node[1] )
+{ if      ($node[@cat="pp"])
+  then    (: if ($node/node[@rel="hd" and @pt=("bw","n")] )  ( n --> TEMPORARY HACK to fix error where NP is erroneously tagged as PP )
+          then $node/node[@rel="hd"]/@end
+          else
+          :)  if ($node/node[@rel=("obj1","pobj1","se")])
+               then local:internal_head_position($node/node[@rel=("obj1","pobj1","se")][1])
+               else if ($node/node[@rel="hd"])
+                    then (: if ($node/@cat="mwu")  ( mede [op grond hiervan] )
+                         then local:internal_head_position($node/node[@rel="hd"] )
+                         else :)
+                         local:internal_head_position($node/node[@rel="hd"])
+                    else local:internal_head_position( $node/node[1] )
 
   else if ($node[@cat="mwu"] )
   then	  $node/node[@rel="mwp" and not(../node/number(@begin) < number(@begin))]/@end
@@ -1140,13 +1170,17 @@ declare function local:dependency_label($node as element(node)) as xs:string
     else if ($node[@rel="hdf"])	  then "case"
 
     else if ($node[@rel="predm"])
-	 then if ($node[@ud:pos])
+         then if ($node[@ud:pos="VERB"])
+              then "xcomp"
+         else if ($node[@ud:pos])
 	       then "advmod"
 	       else "advcl"
 
     else if ( $node[@rel=("rhd","whd")] )
 	 then if ( $node/../node[@rel="body"]//node/number(@index) = $node/number(@index) )
 	      then local:non_local_dependency_label($node,($node/../node[@rel="body"]//node[number(@index) = $node/number(@index)])[1])
+              else if ($node[@cat="pp"])
+                   then "nmod" (: onder wie michael boogerd :)
 	      else "advmod"  (: [whq waarom jij] :)
 
     else if ($node[@rel="body"])
@@ -1271,6 +1305,7 @@ declare function local:mod_label_inside_np($node as element(node)) as xs:string 
     else if ($node[@ud:pos="ADJ" or @cat="ap" or node[@cat="conj" and node[@ud:POS="ADJ" or @cat="ap"] ]])	then "amod"
 	else if ($node[@cat=("pp","np","conj","mwu") or @ud:pos=("NOUN","PRON","PROPN","X","PUNCT","SYM","INTJ") ]) then "nmod"
     else if ($node[@ud:pos="NUM"])	       then "nummod"
+    else if ($node[@cat="detp"]/node[@rel="hd" and @ud:pos="NUM"])               then "nummod"
     else if ($node[@cat="detp"])	       then "det" (: [detp niet veel] meer error? :)
     else if ($node[@cat=("rel","whrel")])      then "acl:relcl"
 		(: v2 added relcl -- whrel= met name waar ... :)
@@ -1514,6 +1549,7 @@ else
       else
 	<alpino_ds version ="{$doc/alpino_ds/@version}" sentence-id="{$href}">
 	  { $doc/alpino_ds/metadata,
+	    $doc/alpino_ds/parser,
 	    local:output_xml($doc/alpino_ds/node),
 	    $doc/alpino_ds/sentence,
 	    $doc/alpino_ds/comments
