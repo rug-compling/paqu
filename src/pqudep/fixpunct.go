@@ -1,12 +1,18 @@
 package main
 
 /*
-zie:
+
+Dit is een bewerking van fixpunct.py, geschreven door Martin Popel, onderdeel van udapi.
+
+Links:
+
+https://udapi.github.io/
+https://udapi.readthedocs.io/en/latest/udapi.block.ud.html#module-udapi.block.ud.fixpunct
+
+Zie ook:
 
 https://udapi.readthedocs.io/en/latest/udapi.core.html#udapi.core.node.Node
 https://udapi.readthedocs.io/en/latest/udapi.core.html#udapi.core.root.Root
-
-https://udapi.readthedocs.io/en/latest/udapi.block.ud.html#module-udapi.block.ud.complywithtext
 
 */
 
@@ -160,6 +166,7 @@ func fixpunct(lines []string) []string {
 	                   another_node.udeprel = 'punct'
 	*/
 	// root.children zijn niet de children van node=root, maar de toppen van de boom, en dat is er maar 1
+	// TODO: klopt dit?
 	if root.f[DEPREL] != "root" {
 		root.f[DEPREL] = "root"
 		root.changed = true
@@ -171,12 +178,13 @@ func fixpunct(lines []string) []string {
 		}
 	}
 
-	// uitvoer
+	// update DEPS en uitvoer
 	for _, node := range nodes {
+		if node.f[UPOS] == "PUNCT" {
+			node.f[DEPS] = node.f[HEAD] + ":" + node.f[DEPREL]
+			node.changed = true
+		}
 		if node.changed {
-			if node.f[UPOS] == "PUNCT" {
-				node.f[DEPS] = node.f[HEAD] + ":" + node.f[DEPREL]
-			}
 			node.line = strings.Join(node.f, "\t")
 		}
 	}
@@ -213,7 +221,7 @@ func fixPairedPunct(openingNode *Node, closingPunct string, nodes, rootDescendan
 	for _, node := range rootDescendants[openingNode.ord:] {
 		if node.f[FORM] == closingPunct {
 			if nestedLevel > 0 {
-				nestedLevel--
+				nestedLevel-- // ?????? (zie boven)
 			} else {
 				fixPair(openingNode, node, rootDescendants)
 				return
