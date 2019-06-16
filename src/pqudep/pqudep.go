@@ -150,7 +150,7 @@ import (
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = int(3) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
+	VERSIONxq       = int(4) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
 	VERSIONxml      = int(0) // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
@@ -622,6 +622,7 @@ func doXml(document, archname, filename string) (result string) {
 			}
 			lines = append(lines, C.GoString(C.value))
 		}
+		lines = fixpunct(lines)
 	}
 
 	valid := make(map[string]bool)

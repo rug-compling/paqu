@@ -1,7 +1,7 @@
 
 include ../Makefile.cfg
 
-SRC = attributes_generated.go udep_generated.go pqudep.go
+SRC = attributes_generated.go udep_generated.go pqudep.go fixpunct.go
 
 all: ../../bin/pqudep udep.diff
 
