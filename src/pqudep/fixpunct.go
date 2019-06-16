@@ -179,7 +179,7 @@ func fixpunct(lines []string) []string {
 	}
 
 	// update DEPS en uitvoer
-	for _, node := range nodes {
+	for _, node := range rootDescendants {
 		if node.f[UPOS] == "PUNCT" {
 			node.f[DEPS] = node.f[HEAD] + ":" + node.f[DEPREL]
 			node.changed = true
