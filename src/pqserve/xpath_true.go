@@ -1172,15 +1172,26 @@ func html_xpath_header(q *Context) {
     }
   }
 
+  function limit(v, min, max) {
+    v = Number(v);
+    if (v < min) {
+      return min;
+    }
+    if (v > max) {
+      return max;
+    }
+    return v;
+  }
+
   function xsetsize() {
     var storageContent = localStorage.getItem("paqu-xpath-x");
     if (storageContent !== undefined) {
       var d = JSON.parse(storageContent) || {};
       if (d['w']) {
-        xquery.outerWidth(d['w']);
+        xquery.outerWidth(limit(d['w'], 400, 1000));
       }
       if (d['h']) {
-        xquery.outerHeight(d['h']);
+        xquery.outerHeight(limit(d['h'], 80, 600));
       }
     }
   }
@@ -1190,10 +1201,10 @@ func html_xpath_header(q *Context) {
     if (storageContent !== undefined) {
       var d = JSON.parse(storageContent) || {};
       if (d['w']) {
-        macrotext.outerWidth(d['w']);
+        macrotext.outerWidth(limit(d['w'], 400, 1000));
       }
       if (d['h']) {
-        macrotext.outerHeight(d['h']);
+        macrotext.outerHeight(limit(d['h'], 80, 600));
       }
     }
   }

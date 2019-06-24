@@ -955,15 +955,26 @@ func html_header(q *Context) {
       }));
   }
 
+  function limit(v, min, max) {
+    v = Number(v);
+    if (v < min) {
+      return min;
+    }
+    if (v > max) {
+      return max;
+    }
+    return v;
+  }
+
   function msetsize() {
     var storageContent = localStorage.getItem("paqu-home");
     if (storageContent !== undefined) {
         var d = JSON.parse(storageContent) || {};
         if (d['w']) {
-          metaarea.outerWidth(d['w']);
+          metaarea.outerWidth(limit(d['w'], 400, 1000));
         }
         if (d['h']) {
-          metaarea.outerHeight(d['h']);
+          metaarea.outerHeight(limit(d['h'], 80, 600));
         }
     }
   }
