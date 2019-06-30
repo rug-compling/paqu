@@ -1442,7 +1442,7 @@ let $abbr := if ($word/@ud:Abbr)
 	       else ""
 return
     replace(replace(replace(replace(
-			       string-join(($abbr,$case,$definite,$degree,$foreign,$gender,$number,$person,$prontype,$reflex,$tense,$verbform),"|"),
+			       string-join(($abbr,$case,$definite,$degree,$foreign,$gender,$number,$person,$poss,$prontype,$reflex,$tense,$verbform),"|"),
 			       "\|+","|"),
 			       "^\|$","_"),
 			       "^\|",""),
