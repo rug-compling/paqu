@@ -1302,7 +1302,7 @@ declare function local:label_vmod($node as element(node)) as xs:string {
 
 declare function local:mod_label_inside_np($node as element(node)) as xs:string {
     if ($node[@cat="pp"]/node[@rel="vc"]) then "acl"  (: pp containing a clause :)
-    else if ($node[@ud:pos="ADJ" or @cat="ap" or node[@cat="conj" and node[@ud:POS="ADJ" or @cat="ap"] ]])	then "amod"
+    else if ($node[@ud:pos="ADJ" or @cat="ap" or node[@cat="conj" and node[@ud:pos="ADJ" or @cat="ap"] ]])	then "amod"
 	else if ($node[@cat=("pp","np","conj","mwu") or @ud:pos=("NOUN","PRON","PROPN","X","PUNCT","SYM","INTJ") ]) then "nmod"
     else if ($node[@ud:pos="NUM"])	       then "nummod"
     else if ($node[@cat="detp"]/node[@rel="hd" and @ud:pos="NUM"])               then "nummod"
