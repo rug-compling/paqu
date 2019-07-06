@@ -141,7 +141,7 @@ declare function local:reconstruct_empty_head($node as node()) as node() {
     then  (: added begin for sorting purposes (in conjunction processing) only, add @pt and @rel for use in  add_Edependencies :)
      <node begin="{$end - 0.1}" end="{$end}" word="{$antecedent/@word}" lemma="{$antecedent/@lemma}"
 	 postag="{$antecedent/@postag}" pt="{$antecedent/@pt}" rel="{$node/@rel}" ud:Relation="_" ud:HeadPosition="_" ud:CopiedFrom="{$copied}">
-       {$antecedent/@*[namespace-uri()="https://universaldependencies.github.io/docs/" and not(local-name()=("Relation","HeadPosition"))]}
+       {$antecedent/@*[namespace-uri()="https://universaldependencies.github.io/docs/" and not(local-name()=("Relation","HeadPosition","CopiedFrom"))]}
      </node>
     else
      <node>
