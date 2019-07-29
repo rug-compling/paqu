@@ -260,7 +260,7 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 
 	fmt.Fprintln(q.w, "<p>\n<dl>")
 	for _, zin := range zinnen {
-		fmt.Fprintf(q.w, "<dt><a href=\"tree?db=%s&amp;arch=%d&amp;file=%d\">%s</a>\n<dd>%s\n",
+		fmt.Fprintf(q.w, "<dt><a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;mwu=false\">%s</a>\n<dd>%s\n",
 			id, zin.arch, zin.file,
 			html.EscapeString(zin.lbl),
 			html.EscapeString(zin.zin))
