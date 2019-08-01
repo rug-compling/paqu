@@ -9,7 +9,7 @@ import (
 )
 
 // updates to the output
-const VersionMajor = int(1)
+const VersionMajor = int(3)
 
 // updates to the package API (unlikely)
 const VersionMinor = int(0)
