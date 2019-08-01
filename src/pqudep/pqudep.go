@@ -22,7 +22,7 @@ import (
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = 4 + alud.VersionMajor // volgende resetten als alud.MajorVersion is verhoogd
+	VERSIONxq       = 5 + alud.VersionMajor // volgende resetten als alud.MajorVersion is verhoogd
 	VERSIONxml      = int(0)                // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
@@ -367,15 +367,14 @@ func doXml(document, archname, filename string) (result string) {
 	var lineno int
 	var err error
 	lines := make([]string, 0)
+	warnings := make([]string, 0)
 
 	defer func() {
 		if alpino.Conllu == nil {
 			alpino.Conllu = &ConlluType{}
 		}
 		alpino.Conllu.Conllu = "\n" + strings.Join(lines, "\n") + "\n"
-		if err == nil {
-			alpino.Conllu.Status = "OK"
-		} else {
+		if err != nil || len(warnings) > 0 {
 			if *opt_p != "" {
 				if archname == "" {
 					filename = strings.Replace(filename, *opt_p, "", 1)
@@ -397,6 +396,16 @@ func doXml(document, archname, filename string) (result string) {
 			if t := alpino.Sentence.Sent; t != "" {
 				fmt.Fprintln(os.Stderr, "# text =", t)
 			}
+			for _, w := range warnings {
+				fmt.Fprintln(os.Stderr, w)
+			}
+		}
+		if err == nil {
+			alpino.Conllu.Status = "OK"
+			if len(warnings) > 0 {
+				fmt.Fprintln(os.Stderr)
+			}
+		} else {
 			if lineno == 0 {
 				fmt.Fprintln(os.Stderr, "^^^", err)
 			}
@@ -463,6 +472,9 @@ func doXml(document, archname, filename string) (result string) {
 		}
 		for _, line := range strings.Split(text, "\n") {
 			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "# warning") {
+				warnings = append(warnings, line)
+			}
 			if line != "" && line[0] != '#' {
 				lines = append(lines, line)
 			}
