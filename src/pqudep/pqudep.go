@@ -1,136 +1,9 @@
 package main
 
-/*
-#cgo LDFLAGS: -lxqilla
-#include <xqilla/xqilla-xqc.h>
-#include <stdlib.h>
-#include <string.h>
-
-XQC_Implementation *impl;
-XQC_Expression *expr;
-XQC_DynamicContext *context;
-XQC_StaticContext *static_context;
-XQC_Sequence *seq, *doc;
-XQC_Error err;
-const char *value;
-char *error_value;
-int error_len;
-int done;
-
-void my_handler(XQC_ErrorHandler *handler,
-                XQC_Error error,
-                const char *error_uri,
-                const char *error_localname,
-                const char *description,
-                XQC_Sequence *error_object)
-{
-    int n;
-    if (!description) {
-      description = "unknown error";
-    }
-    n = strlen(description) + 1;
-    if (n > error_len) {
-      error_value = (char *) realloc (error_value, n * sizeof (char));
-      error_len = n;
-    }
-    strcpy (error_value, description);
-}
-
-XQC_ErrorHandler my_handler_s = {
-    error: my_handler
-};
-
-int init(char const *xquery)
-{
-  error_value = (char *) malloc (sizeof (char));
-  error_value[0] = '\0';
-  error_len = 1;
-
-  // XQilla specific way to create an XQC_Implementation struct
-  impl = createXQillaXQCImplementation(XQC_VERSION_NUMBER);
-  if(impl == 0) return 1;
-
-  err = impl->create_context(impl, &static_context);
-  if(err != 0) return err;
-
-  static_context->set_error_handler(static_context, &my_handler_s);
-
-  // Parse an XQuery expression
-  err = impl->prepare(impl, xquery, static_context, &expr);
-  if(err != 0) return err;
-
-  return 0;
-}
-
-int parse(char const *xml) {
-  XQC_Sequence
-     *value;
-  char const
-     *lib[] = { "lib" },
-     *any[] = { "_" },
-     *yes[] = { "yes" };
-
-  // Parse a document
-  err = impl->parse_document(impl, xml, &doc);
-  if(err != 0) return err;
-
-  // Create a dynamic context
-  err = expr->create_context(expr, &context);
-  if(err != 0) return err;
-
-  context->set_error_handler(context, &my_handler_s);
-
-  impl->create_string_sequence(impl, any, 1, &value);
-  if(err != 0) return err;
-  err = context->set_variable(context, "", "DIR", value);
-  if(err != 0) return err;
-
-  impl->create_string_sequence(impl, lib, 1, &value);
-  if(err != 0) return err;
-  err = context->set_variable(context, "", "MODE", value);
-  if(err != 0) return err;
-
-  impl->create_string_sequence(impl, yes, 1, &value);
-  if(err != 0) return err;
-  err = context->set_variable(context, "", "ENHANCED", value);
-  if(err != 0) return err;
-
-  // Set the document as the context item
-  doc->next(doc);
-  context->set_context_item(context, doc);
-
-  // Execute the query
-  err = expr->execute(expr, context, &seq);
-  if(err != 0) return err;
-
-  return 0;
-}
-
-int next() {
-  done = 1;
-  if((err = seq->next(seq)) == XQC_NO_ERROR) {
-    seq->string_value(seq, &value);
-    done = 0;
-  }
-
-  if(err == XQC_END_OF_SEQUENCE)
-    err = XQC_NO_ERROR;
-
-  if (done) {
-    seq->free(seq);
-    context->free(context);
-    doc->free(doc);
-  }
-
-  return err;
-}
-
-*/
-import "C"
-
 import (
 	"github.com/pebbe/dbxml"
 	"github.com/pebbe/util"
+	"github.com/rug-compling/alud"
 
 	"bufio"
 	"compress/gzip"
@@ -145,13 +18,12 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-	"unsafe"
 )
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = int(4) // ophogen als xquery-script veranderd is, en dan de volgende resetten naar 0
-	VERSIONxml      = int(0) // ophogen als xml-formaat is veranderd
+	VERSIONxq       = 4 + alud.VersionMajor // volgende resetten als alud.MajorVersion is verhoogd
+	VERSIONxml      = int(0)                // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
 )
@@ -295,7 +167,6 @@ var (
 	opt_l = flag.String("l", "", "filelist")
 	opt_o = flag.Bool("o", false, "overwrite")
 	opt_p = flag.String("p", "", "prefix")
-	opt_s = flag.String("s", "", "external script")
 	opt_v = flag.Bool("v", false, "version")
 
 	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
@@ -325,7 +196,6 @@ More options:
 
   -o : overwrite original file (default: save with .tmp)
   -p prefix : remove prefix from filename in stderr
-  -s script : use external script instead of built-in (implies -i, for development)
   -v : print version and exit
 
 `, p, p, p)
@@ -346,14 +216,6 @@ func main() {
 		return
 	}
 
-	if *opt_s != "" {
-		b, err := ioutil.ReadFile(*opt_s)
-		x(err)
-		udep = string(b)
-		*opt_i = true
-		*opt_k = false
-	}
-
 	go func() {
 		chSignal := make(chan os.Signal, 1)
 		signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
@@ -361,12 +223,6 @@ func main() {
 		close(chQuit)
 		fmt.Printf("\r\033[KSignal: %v\n", sig)
 	}()
-
-	cs := C.CString(udep)
-	if e := C.init(cs); e != 0 {
-		x(fmt.Errorf("C.init: [%d] %s", e, C.GoString(C.error_value)))
-	}
-	C.free(unsafe.Pointer(cs))
 
 	filenames := make([]string, 0)
 
@@ -595,34 +451,22 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	if len(lines) == 0 || strings.HasPrefix(alpino.Conllu.Auto, "PQU") {
-		if *opt_s != "" {
-			alpino.Conllu.Auto = "script:" + fmt.Sprintf(*opt_s)
-		} else {
-			alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
-		}
+		alpino.Conllu.Auto = fmt.Sprintf(VERSIONs, VERSIONxq, VERSIONxml)
 	}
 
 	if len(lines) == 0 {
-		cs := C.CString(document)
-		e := C.parse(cs)
-		C.free(unsafe.Pointer(cs))
-		if e != 0 {
-			err = fmt.Errorf("C.parse: [%d] %s", e, C.GoString(C.error_value))
+		text, e := alud.Ud([]byte(document), filename)
+		if e != nil {
+			err = e
 			lineno = 0
 			return
 		}
-		for {
-			if e := C.next(); e != 0 {
-				err = fmt.Errorf("C.next: [%d] %s", e, C.GoString(C.error_value))
-				lineno = len(lines)
-				return
+		for _, line := range strings.Split(text, "\n") {
+			line = strings.TrimSpace(line)
+			if line != "" && line[0] != '#' {
+				lines = append(lines, line)
 			}
-			if C.done != 0 {
-				break
-			}
-			lines = append(lines, C.GoString(C.value))
 		}
-		lines = fixpunct(lines)
 	}
 
 	valid := make(map[string]bool)
