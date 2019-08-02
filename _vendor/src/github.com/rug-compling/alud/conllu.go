@@ -41,13 +41,16 @@ func conll(q *context) string {
 		}
 		return s
 	}
-	uc := func(i int) string {
-		if i > 0 {
-			return "CopiedFrom=" + number(i)
+	misc := func(node *nodeType) string {
+		ss := make([]string, 0, 2)
+		if node.udCopiedFrom > 0 {
+			ss = append(ss, "CopiedFrom="+number(node.udCopiedFrom))
 		}
-		return "_"
+		if node.udNoSpaceAfter {
+			ss = append(ss, "SpaceAfter=No")
+		}
+		return strings.Join(ss, "|")
 	}
-
 	postag := func(s string) string {
 		return strings.Join(strings.FieldsFunc(s, func(r rune) bool {
 			return r == '(' || r == ')' || r == ','
@@ -65,7 +68,7 @@ func conll(q *context) string {
 			number(node.udHeadPosition), // HEAD
 			u(node.udRelation),          // DEPREL
 			u(node.udEnhanced),          // DEPS
-			uc(node.udCopiedFrom))       // MISC
+			u(misc(node)))               // MISC
 	}
 
 	fmt.Fprintln(&buf)

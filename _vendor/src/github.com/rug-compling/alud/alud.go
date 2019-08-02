@@ -9,7 +9,7 @@ import (
 )
 
 // updates to the output
-const VersionMajor = int(3)
+const VersionMajor = int(4)
 
 // updates to the package API (unlikely)
 const VersionMinor = int(0)
@@ -98,6 +98,7 @@ type nodeType struct {
 	udForeign        string
 	udGender         string
 	udHeadPosition   int
+	udNoSpaceAfter   bool
 	udNumber         string
 	udPerson         string
 	udPos            string
