@@ -17,7 +17,6 @@ var (
 
 func untokenize(q *context) {
 
-	// q.ptnodes zijn gesorteerd door functie fixpunct
 	nodes := make([]*nodeType, 0)
 	words1 := make([]string, 0)
 	for _, node := range q.ptnodes {

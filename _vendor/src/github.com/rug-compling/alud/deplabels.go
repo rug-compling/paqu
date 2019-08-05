@@ -6,9 +6,7 @@ package alud
 
 // recursive
 func dependencyLabel(node *nodeType, q *context) string {
-	if depthCheck(q, "dependencyLabel") {
-		return "ERROR_RECURSION_LIMIT"
-	}
+	depthCheck(q, "dependencyLabel")
 
 	if node.parent.Cat == "top" && node.parent.End == 1000 {
 		return "root"
@@ -2173,6 +2171,9 @@ func dependencyLabel(node *nodeType, q *context) string {
 		if node.udPos == "VERB" {
 			return "xcomp"
 		}
+		if node.udPos == "PRON" { //floating quantifiers
+			return "obl"
+		}
 		if node.udPos != "" {
 			return "advmod"
 		}
@@ -2384,7 +2385,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 					},
 				},
 			}) {
-				return "appos" // 1. Jantje is ziek  1-->appos??
+				return "parataxis" // 1. Jantje is ziek  1-->appos??
 			}
 			return "root"
 		}
@@ -3506,9 +3507,7 @@ func subjectLabel(subj *nodeType, q *context) string {
 
 // recursive
 func passiveSubject(subj *nodeType, q *context) string {
-	if depthCheck(q, "passiveSubject") {
-		return "ERROR_RECURSION_LIMIT"
-	}
+	depthCheck(q, "passiveSubject")
 
 	aux := auxiliary1(n1(find(q /* ($subj/../node[@rel="hd"])[1] */, &xPath{
 		arg1: &dSort{
@@ -3818,7 +3817,7 @@ func detLabel(node *nodeType, q *context) string {
 	}) {
 		return "det" // meer // genoeg // the
 	}
-	if test(q /* $node/@cat = ("mwu","np","pp","ap","detp","smain") */, &xPath{
+	if test(q /* $node/@cat = "detp" */, &xPath{
 		arg1: &dSort{
 			arg1: &dEqual{
 				ARG: equal__is,
@@ -3829,7 +3828,99 @@ func detLabel(node *nodeType, q *context) string {
 					},
 				},
 				arg2: &dElem{
-					DATA: []interface{}{"mwu", "np", "pp", "ap", "detp", "smain"},
+					DATA: []interface{}{"detp"},
+					arg1: &dCollect{
+						ARG: collect__attributes__cat,
+						arg1: &dVariable{
+							VAR: node,
+						},
+					},
+				},
+			},
+		},
+	}) {
+		if test(q /* $node/node[@rel="hd" and @ud:pos="NUM"] */, &xPath{
+			arg1: &dSort{
+				arg1: &dCollect{
+					ARG: collect__child__node,
+					arg1: &dVariable{
+						VAR: node,
+					},
+					arg2: &dPredicate{
+						arg1: &dAnd{
+							arg1: &dEqual{
+								ARG: equal__is,
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"hd"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+							arg2: &dEqual{
+								ARG: equal__is,
+								arg1: &dCollect{
+									ARG:  collect__attributes__ud_3apos,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"NUM"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__ud_3apos,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}) {
+			return "nummod"
+		}
+		return "det"
+	}
+	if test(q /* $node/@cat="np" */, &xPath{
+		arg1: &dSort{
+			arg1: &dEqual{
+				ARG: equal__is,
+				arg1: &dCollect{
+					ARG: collect__attributes__cat,
+					arg1: &dVariable{
+						VAR: node,
+					},
+				},
+				arg2: &dElem{
+					DATA: []interface{}{"np"},
+					arg1: &dCollect{
+						ARG: collect__attributes__cat,
+						arg1: &dVariable{
+							VAR: node,
+						},
+					},
+				},
+			},
+		},
+	}) {
+		return "nmod"
+	}
+	if test(q /* $node/@cat = ("mwu","pp","ap","smain") */, &xPath{
+		arg1: &dSort{
+			arg1: &dEqual{
+				ARG: equal__is,
+				arg1: &dCollect{
+					ARG: collect__attributes__cat,
+					arg1: &dVariable{
+						VAR: node,
+					},
+				},
+				arg2: &dElem{
+					DATA: []interface{}{"mwu", "pp", "ap", "smain"},
 					arg1: &dCollect{
 						ARG: collect__attributes__cat,
 						arg1: &dVariable{
@@ -4636,7 +4727,7 @@ func labelVmod(node *nodeType, q *context) string {
 			NO/YES: hierdoor werd Prince door het grote publiek ontdekt
 		*/
 	}
-	if test(q /* $node[@cat=("pp","np","conj","mwu") or @ud:pos=("NOUN","PRON","PROPN","X","PUNCT","SYM") ] */, &xPath{
+	if test(q /* $node[@cat=("pp","np","conj","mwu") or @ud:pos=("NOUN","VERB","PRON","PROPN","X","PUNCT","SYM") ] */, &xPath{
 		arg1: &dSort{
 			arg1: &dFilter{
 				arg1: &dVariable{
@@ -4665,11 +4756,57 @@ func labelVmod(node *nodeType, q *context) string {
 								arg1: &dNode{},
 							},
 							arg2: &dElem{
-								DATA: []interface{}{"NOUN", "PRON", "PROPN", "X", "PUNCT", "SYM"},
+								DATA: []interface{}{"NOUN", "VERB", "PRON", "PROPN", "X", "PUNCT", "SYM"},
 								arg1: &dCollect{
 									ARG:  collect__attributes__ud_3apos,
 									arg1: &dNode{},
 								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}) {
+		return "obl"
+	}
+	if test(q /* $node[@cat="advp"]/node[@ud:pos=("NOUN","VERB","ADP")] */, &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dFilter{
+					arg1: &dVariable{
+						VAR: node,
+					},
+					arg2: &dSort{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__cat,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"advp"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__cat,
+									arg1: &dNode{},
+								},
+							},
+						},
+					},
+				},
+				arg2: &dPredicate{
+					arg1: &dEqual{
+						ARG: equal__is,
+						arg1: &dCollect{
+							ARG:  collect__attributes__ud_3apos,
+							arg1: &dNode{},
+						},
+						arg2: &dElem{
+							DATA: []interface{}{"NOUN", "VERB", "ADP"},
+							arg1: &dCollect{
+								ARG:  collect__attributes__ud_3apos,
+								arg1: &dNode{},
 							},
 						},
 					},

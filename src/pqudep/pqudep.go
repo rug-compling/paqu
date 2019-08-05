@@ -464,7 +464,7 @@ func doXml(document, archname, filename string) (result string) {
 	}
 
 	if len(lines) == 0 {
-		text, e := alud.Ud([]byte(document), filename)
+		text, e := alud.Ud([]byte(document), filename, alud.OPT_NO_COMMENTS|alud.OPT_NO_DETOKENIZE)
 		if e != nil {
 			err = e
 			lineno = 0

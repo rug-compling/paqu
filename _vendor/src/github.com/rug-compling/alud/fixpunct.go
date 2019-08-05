@@ -58,17 +58,13 @@ func fixpunct(q *context) {
 	rootDescendants := make([]*pNode, 0)
 	var root *pNode
 
-	sort.Slice(q.ptnodes, func(i, j int) bool {
-		return q.ptnodes[i].End < q.ptnodes[i].End
-	})
-
 	ord := 0
 	skip := false
 	for _, line := range q.ptnodes {
 		if line.udCopiedFrom <= 0 {
 			if line.udHeadPosition == 0 && line.udRelation != "root" {
 				// fixpunct zou deze fout foutief doen verdwijnen
-				q.warnings = append(q.warnings, fmt.Sprintf("invalid HEAD/DEPREL combination 0/%s, skipping fixpunct()", line.udRelation))
+				q.warnings = append(q.warnings, fmt.Sprintf("Invalid HEAD/DEPREL combination 0/%s, skipping fixpunct()", line.udRelation))
 				skip = true
 			}
 

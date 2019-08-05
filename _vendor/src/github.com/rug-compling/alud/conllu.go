@@ -3,36 +3,32 @@ package alud
 import (
 	"bytes"
 	"fmt"
-	"sort"
 	"strings"
 )
 
-func conll(q *context) string {
+func conll(q *context, options int) string {
 
 	var buf bytes.Buffer
 
-	// TODO: is dit nodig? ook gesorteerd in fixpunct()
-	sort.Slice(q.ptnodes, func(i, j int) bool {
-		return q.ptnodes[i].End < q.ptnodes[j].End
-	})
-
-	fmt.Fprintf(&buf, `# source = %s
+	if options&OPT_NO_COMMENTS == 0 {
+		fmt.Fprintf(&buf, `# source = %s
 # sent_id = %s
 # text = %s
 # auto = ALUD %d
 `,
-		q.filename,
-		strings.Replace(q.sentid, "/", "\\", -1), // het teken / is gereserveerd
-		q.sentence,
-		VersionMajor)
+			q.filename,
+			strings.Replace(q.sentid, "/", "\\", -1), // het teken / is gereserveerd
+			q.sentence,
+			VersionMajor)
 
-	/*
-		for i, d := range q.debugs {
-			fmt.Fprintf(&buf, "# debug_%d = %s\n", i+1, d)
+		if options&OPT_DEBUG != 0 {
+			for i, d := range q.debugs {
+				fmt.Fprintf(&buf, "# debug_%d = %s\n", i+1, d)
+			}
 		}
-	*/
-	for i, w := range q.warnings {
-		fmt.Fprintf(&buf, "# warning_%d = %s\n", i+1, w)
+		for i, w := range q.warnings {
+			fmt.Fprintf(&buf, "# warning_%d = %s\n", i+1, w)
+		}
 	}
 
 	u := func(s string) string {

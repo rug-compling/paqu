@@ -12,7 +12,17 @@ import (
 const VersionMajor = int(4)
 
 // updates to the package API (unlikely)
-const VersionMinor = int(0)
+const VersionMinor = int(1)
+
+// options can be or'ed as last argument to Ud()
+const (
+	OPT_DEBUG         = 1 << iota // include debug messages in comments
+	OPT_NO_COMMENTS               // don't include comments
+	OPT_NO_DETOKENIZE             // don't try to restore detokenized sentence
+	OPT_NO_ENHANCED               // skip enhanced dependencies
+	OPT_NO_FIX_PUNCT              // don't fix punctuation
+	OPT_PANIC                     // panic on error (for development)
+)
 
 const (
 	error_EXTERNAL_HEAD_MUST_HAVE_ONE_ARG = -1000 * (iota + 1)
@@ -138,22 +148,23 @@ func init() {
 }
 
 // Derive Universal Dependencies form parsed sentence in alpino_ds format.
-func Ud(alpino_doc []byte, filename string) (conllu string, err error) {
+func Ud(alpino_doc []byte, filename string, options int) (conllu string, err error) {
 
-	defer func() {
-		if r := recover(); r != nil {
-			conllu = ""
-			err = fmt.Errorf("%v", r)
-		}
-	}()
+	if options&OPT_PANIC == 0 {
+		defer func() {
+			if r := recover(); r != nil {
+				conllu = ""
+				err = fmt.Errorf("%v", r)
+			}
+		}()
+	}
 
-	conllu, err = UdTry(alpino_doc, filename)
+	conllu, err = udTry(alpino_doc, filename, options)
 
 	return
 }
 
-// Like Ud(), but may panic. Used for development.
-func UdTry(alpino_doc []byte, filename string) (conllu string, err error) {
+func udTry(alpino_doc []byte, filename string, options int) (conllu string, err error) {
 
 	var alpino alpino_ds
 	err = xml.Unmarshal(alpino_doc, &alpino)
@@ -198,10 +209,22 @@ func UdTry(alpino_doc []byte, filename string) (conllu string, err error) {
 	addPosTags(q)
 	addFeatures(q)
 	addDependencyRelations(q)
-	enhancedDependencies(q)
-	fixpunct(q)
-	untokenize(q)
-	return conll(q), nil
+	if options&OPT_NO_ENHANCED == 0 {
+		enhancedDependencies(q)
+	}
+
+	// voor de laatste drie onderdelen moet q.ptnodes op woordpositie gesorteerd zijn
+	sort.Slice(q.ptnodes, func(i, j int) bool {
+		return q.ptnodes[i].End < q.ptnodes[i].End
+	})
+
+	if options&OPT_NO_FIX_PUNCT == 0 {
+		fixpunct(q)
+	}
+	if options&OPT_NO_DETOKENIZE == 0 {
+		untokenize(q)
+	}
+	return conll(q, options), nil
 }
 
 func inspect(q *context) {

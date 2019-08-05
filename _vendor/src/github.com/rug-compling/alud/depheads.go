@@ -10,9 +10,7 @@ import (
 
 // recursive
 func externalHeadPosition(nodes []interface{}, q *context) int {
-	if depthCheck(q, "externalHeadPosition") {
-		return error_RECURSION_LIMIT
-	}
+	depthCheck(q, "externalHeadPosition")
 
 	if len(nodes) == 0 {
 		return error_EXTERNAL_HEAD_MUST_HAVE_ONE_ARG
@@ -2829,9 +2827,7 @@ func externalHeadPosition(nodes []interface{}, q *context) int {
 
 // recursive
 func internalHeadPosition(nodes []interface{}, q *context) int {
-	if depthCheck(q, "internalHeadPosition") {
-		return error_RECURSION_LIMIT
-	}
+	depthCheck(q, "internalHeadPosition")
 
 	if n := len(nodes); n == 0 {
 		return error_NO_INTERNAL_HEAD_POSITION_FOUND
@@ -3720,9 +3716,7 @@ func internalHeadPositionWithGapping(node []interface{}, q *context) int {
 }
 
 func internalHeadPositionOfGappedConstituent(node []interface{}, q *context) int {
-	if depthCheck(q, "internalHeadPositionOfGappedConstituent") {
-		return error_RECURSION_LIMIT
-	}
+	depthCheck(q, "internalHeadPositionOfGappedConstituent")
 
 	if test(q /* $node/node[@rel="hd" and (@pt or @cat)] */, &xPath{
 		arg1: &dSort{

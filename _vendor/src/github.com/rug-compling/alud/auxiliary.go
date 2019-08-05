@@ -24,7 +24,8 @@ func auxiliary1(node *nodeType, q *context) string {
 
 	if test(q, /* $node[not(../node[@rel=("obj1","se","vc")]) and
 			        (: ud documentation suggests 1 cop per lg, van Eynde suggests much more, compromise: the traditional ones :)
-			        @lemma=("zijn","lijken","blijken","blijven","schijnen","heten","voorkomen","worden","dunken") and
+			        (: @lemma=("zijn","lijken","blijken","blijven","schijnen","heten","voorkomen","worden","dunken") and :)
+			        @lemma="zijn" and
 		                 ( contains(@sc,'copula') or
 		                   contains(@sc,'pred')   or
 		                   contains(@sc,'cleft')  or
@@ -75,7 +76,7 @@ func auxiliary1(node *nodeType, q *context) string {
 										arg1: &dNode{},
 									},
 									arg2: &dElem{
-										DATA: []interface{}{"zijn", "lijken", "blijken", "blijven", "schijnen", "heten", "voorkomen", "worden", "dunken"},
+										DATA: []interface{}{"zijn"},
 										arg1: &dCollect{
 											ARG:  collect__attributes__lemma,
 											arg1: &dNode{},

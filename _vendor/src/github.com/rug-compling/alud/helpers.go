@@ -88,13 +88,11 @@ func iZ(ii []interface{}) int {
 }
 */
 
-func depthCheck(q *context, s string) bool {
+func depthCheck(q *context, s string) {
 	q.depth++
-	if q.depth < 1000 {
-		return false
+	if q.depth == 1000 {
+		panic("Recursion depth limit for " + s)
 	}
-	q.warnings = append(q.warnings, "Recursion depth limit for "+s)
-	return true
 }
 
 /*
