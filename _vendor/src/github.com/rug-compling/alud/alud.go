@@ -215,7 +215,7 @@ func udTry(alpino_doc []byte, filename string, options int) (conllu string, err 
 
 	// voor de laatste drie onderdelen moet q.ptnodes op woordpositie gesorteerd zijn
 	sort.Slice(q.ptnodes, func(i, j int) bool {
-		return q.ptnodes[i].End < q.ptnodes[i].End
+		return q.ptnodes[i].End < q.ptnodes[j].End
 	})
 
 	if options&OPT_NO_FIX_PUNCT == 0 {
