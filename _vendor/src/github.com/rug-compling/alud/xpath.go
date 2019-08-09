@@ -435,7 +435,7 @@ func (d *dFunction) do(subdoc []interface{}, q *context) []interface{} {
 	case function__last__0__args:
 		return []interface{}{indexType(-1)}
 	case function__local__internal__head__position__1__args:
-		return []interface{}{internalHeadPosition(r[0].([]interface{}), q)}
+		return []interface{}{internalHeadPosition(r[0].([]interface{}), q, []trace{trace{s: "XPath function"}})}
 	case function__not__1__args:
 		if len(r[0].([]interface{})) == 0 {
 			return nTRUE
@@ -531,12 +531,14 @@ func (d *dPredicate) do(subdoc []interface{}, q *context) []interface{} {
 	}
 }
 
+/*
 type dRoot struct {
 }
 
 func (d *dRoot) do(subdoc []interface{}, q *context) []interface{} {
 	return q.varroot
 }
+*/
 
 type dSort struct {
 	arg1 doer
@@ -655,13 +657,17 @@ func flatten(aa []interface{}) []interface{} {
 	return result
 }
 
+/*
 func (a *alpino_ds) children() []interface{} {
 	return []interface{}{a.Node}
 }
+*/
 
+/*
 func (a *alpino_ds) descendantsOrSelf() []interface{} {
 	return a.Node.axDescendantsOrSelf
 }
+*/
 
 func (n *nodeType) children() []interface{} {
 	return n.axChildren

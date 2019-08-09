@@ -22,7 +22,7 @@ import (
 
 const (
 	VERSIONs        = "PQU%d.%d"
-	VERSIONxq       = 5 + alud.VersionMajor // volgende resetten als alud.MajorVersion is verhoogd
+	VERSIONxq       = 6 + alud.VersionMajor // volgende resetten als alud.MajorVersion is verhoogd
 	VERSIONxml      = int(0)                // ophogen als xml-formaat is veranderd
 	ALPINO_DS_MAJOR = int(1)
 	ALPINO_DS_MINOR = int(10)
@@ -169,7 +169,8 @@ var (
 	opt_p = flag.String("p", "", "prefix")
 	opt_v = flag.Bool("v", false, "version")
 
-	reShorted = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
+	reShorted  = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
+	reNoConllu = regexp.MustCompile(`><!\[CDATA\[\s*\]\]></conllu>`)
 
 	reJunk = regexp.MustCompile(`(?s:<ud:ud.*?</ud:ud>)|(?s:<ud:conllu.*?</ud:conllu>)`)
 	chQuit = make(chan bool)
@@ -367,14 +368,19 @@ func doXml(document, archname, filename string) (result string) {
 	var lineno int
 	var err error
 	lines := make([]string, 0)
-	warnings := make([]string, 0)
 
 	defer func() {
 		if alpino.Conllu == nil {
 			alpino.Conllu = &ConlluType{}
 		}
-		alpino.Conllu.Conllu = "\n" + strings.Join(lines, "\n") + "\n"
-		if err != nil || len(warnings) > 0 {
+		if len(lines) > 0 {
+			alpino.Conllu.Conllu = "\n" + strings.Join(lines, "\n") + "\n"
+		} else {
+			alpino.Conllu.Conllu = ""
+		}
+		if err == nil {
+			alpino.Conllu.Status = "OK"
+		} else {
 			if *opt_p != "" {
 				if archname == "" {
 					filename = strings.Replace(filename, *opt_p, "", 1)
@@ -396,16 +402,6 @@ func doXml(document, archname, filename string) (result string) {
 			if t := alpino.Sentence.Sent; t != "" {
 				fmt.Fprintln(os.Stderr, "# text =", t)
 			}
-			for _, w := range warnings {
-				fmt.Fprintln(os.Stderr, w)
-			}
-		}
-		if err == nil {
-			alpino.Conllu.Status = "OK"
-			if len(warnings) > 0 {
-				fmt.Fprintln(os.Stderr)
-			}
-		} else {
 			if lineno == 0 {
 				fmt.Fprintln(os.Stderr, "^^^", err)
 			}
@@ -416,8 +412,16 @@ func doXml(document, archname, filename string) (result string) {
 				}
 			}
 			fmt.Fprintln(os.Stderr)
+			es := err.Error()
+			if i := strings.Index(es, "\n"); i > 0 {
+				es = es[:i]
+			}
 			alpino.Conllu.Status = "error"
-			alpino.Conllu.Error = fmt.Sprintf("Line %d: %v", lineno, err)
+			if lineno > 0 {
+				alpino.Conllu.Error = fmt.Sprintf("Line %d: %s", lineno, es)
+			} else {
+				alpino.Conllu.Error = es
+			}
 			alpino.UdNodes = nil
 			if alpino.Node != nil {
 				clean(alpino.Node)
@@ -472,10 +476,7 @@ func doXml(document, archname, filename string) (result string) {
 		}
 		for _, line := range strings.Split(text, "\n") {
 			line = strings.TrimSpace(line)
-			if strings.HasPrefix(line, "# warning") {
-				warnings = append(warnings, line)
-			}
-			if line != "" && line[0] != '#' {
+			if line != "" {
 				lines = append(lines, line)
 			}
 		}
@@ -487,6 +488,7 @@ func doXml(document, archname, filename string) (result string) {
 	var prevID [2]int
 	var prevIDs string
 	for i, line := range lines {
+		// al deze controles zijn niet nodig voor uitvoer van alud, maar wel voor hergebruikte conllu-data
 		a := strings.Split(line, "\t")
 		if len(a) != 10 {
 			err = fmt.Errorf("Wrong number of fields")
@@ -791,6 +793,7 @@ func format(alpino Alpino_ds) string {
 
 	// shorten
 	s = reShorted.ReplaceAllString(s, "/>")
+	s = reNoConllu.ReplaceAllString(s, "/>")
 
 	return s
 }

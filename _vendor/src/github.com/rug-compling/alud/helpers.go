@@ -1,6 +1,8 @@
 package alud
 
 import (
+	"bytes"
+	"fmt"
 	"sort"
 )
 
@@ -75,7 +77,7 @@ func i1(ii []interface{}) int {
 	if len(ii) > 0 {
 		return ii[0].(int)
 	}
-	return error_NO_VALUE
+	return error_no_value
 }
 
 /*
@@ -103,3 +105,97 @@ func dump(alpino *Alpino_ds) {
 	fmt.Println("<?xml version=\"1.0\"?>\n" + s)
 }
 */
+
+func tracer(s string, tr []trace, q *context) string {
+	var buf bytes.Buffer
+	buf.WriteString(s)
+	if len(tr) > 0 && tr[0].node != nil {
+		fmt.Fprintf(&buf, " for %s:%s", number(tr[0].node.End), tr[0].node.Word)
+	}
+	for _, d := range q.debugs {
+		buf.WriteString("\n  # debug: " + d)
+	}
+	for i := len(tr) - 1; i >= 0; i-- {
+		t := tr[i]
+		buf.WriteString("\n    in " + t.s)
+		for ii, n := range []*nodeType{t.node, t.head, t.gap} {
+			if n == nil {
+				continue
+			}
+			fmt.Fprintf(
+				&buf,
+				"\n        %s -- id:%d  begin:%s  end:%s",
+				[]string{"node", "head", "gap "}[ii],
+				n.Id,
+				number(n.Begin),
+				number(n.End))
+			if a := n.Word; a != "" {
+				fmt.Fprintf(&buf, "  word:%s", a)
+			}
+			if a := n.Pt; a != "" {
+				fmt.Fprintf(&buf, "  pt:%s", a)
+			}
+			if a := n.Cat; a != "" {
+				fmt.Fprintf(&buf, "  cat:%s", a)
+			}
+			if a := n.Rel; a != "" {
+				fmt.Fprintf(&buf, "  rel:%s", a)
+			}
+			if a := n.Conjtype; a != "" {
+				fmt.Fprintf(&buf, "  conjtype:%s", a)
+			}
+			if a := n.Genus; a != "" {
+				fmt.Fprintf(&buf, "  genus:%s", a)
+			}
+			if a := n.Getal; a != "" {
+				fmt.Fprintf(&buf, "  getal:%s", a)
+			}
+			if a := n.Graad; a != "" {
+				fmt.Fprintf(&buf, "  graad:%s", a)
+			}
+			if a := n.Index; a > 0 {
+				fmt.Fprintf(&buf, "  index:%d", a)
+			}
+			if a := n.Lemma; a != "" {
+				fmt.Fprintf(&buf, "  lemma:%s", a)
+			}
+			if a := n.Lwtype; a != "" {
+				fmt.Fprintf(&buf, "  lwtype:%s", a)
+			}
+			if a := n.Naamval; a != "" {
+				fmt.Fprintf(&buf, "  naamval:%s", a)
+			}
+			if a := n.Ntype; a != "" {
+				fmt.Fprintf(&buf, "  ntype:%s", a)
+			}
+			if a := n.Numtype; a != "" {
+				fmt.Fprintf(&buf, "  numtype:%s", a)
+			}
+			if a := n.Pdtype; a != "" {
+				fmt.Fprintf(&buf, "  pdtype:%s", a)
+			}
+			if a := n.Persoon; a != "" {
+				fmt.Fprintf(&buf, "  persoon:%s", a)
+			}
+			if a := n.Pvagr; a != "" {
+				fmt.Fprintf(&buf, "  pvagr:%s", a)
+			}
+			if a := n.Pvtijd; a != "" {
+				fmt.Fprintf(&buf, "  pvtijd:%s", a)
+			}
+			if a := n.Sc; a != "" {
+				fmt.Fprintf(&buf, "  sc:%s", a)
+			}
+			if a := n.Spectype; a != "" {
+				fmt.Fprintf(&buf, "  spectype:%s", a)
+			}
+			if a := n.Vwtype; a != "" {
+				fmt.Fprintf(&buf, "  vwtype:%s", a)
+			}
+			if a := n.Wvorm; a != "" {
+				fmt.Fprintf(&buf, "  wvorm:%s", a)
+			}
+		}
+	}
+	return buf.String()
+}

@@ -1,5 +1,9 @@
 package alud
 
+import (
+	"fmt"
+)
+
 func addFeatures(q *context) {
 	for _, node := range q.ptnodes {
 		switch node.udPos {
@@ -30,8 +34,7 @@ func nominalFeatues(node *nodeType, q *context) {
 	case "":
 		node.udGender = ""
 	default:
-		node.udGender = "ERROR_IRREGULAR_GENDER"
-
+		panic(fmt.Sprintf("Irregular gender for %s:%s : %s", number(node.End), node.Word, node.Genus))
 	}
 	switch node.Getal {
 	case "ev":
@@ -41,7 +44,7 @@ func nominalFeatues(node *nodeType, q *context) {
 	case "":
 		node.udNumber = ""
 	default:
-		node.udNumber = "ERROR_IRREGULAR_NUMBER"
+		panic(fmt.Sprintf("Irregular number for %s:%s : %s", number(node.End), node.Word, node.Getal))
 	}
 	switch node.Graad {
 	case "dim":
@@ -51,7 +54,7 @@ func nominalFeatues(node *nodeType, q *context) {
 	case "":
 		node.udDegree = ""
 	default:
-		node.udDegree = "ERROR_IRREGULAR_DEGREE"
+		panic(fmt.Sprintf("Irregular degree for %s:%s : %s", number(node.End), node.Word, node.Graad))
 	}
 }
 
@@ -68,7 +71,7 @@ func adjectiveFeatures(node *nodeType, q *context) {
 	case "":
 		node.udDegree = ""
 	default:
-		node.udDegree = "ERROR_IRREGULAR_DEGREE"
+		panic(fmt.Sprintf("Irregular degree for %s:%s : %s", number(node.End), node.Word, node.Graad))
 	}
 }
 
@@ -97,7 +100,7 @@ func pronounFeatures(node *nodeType, q *context) {
 	case "":
 		node.udPronType = ""
 	default:
-		node.udPronType = "ERROR_IRREGULAR_PRONTYPE"
+		panic(fmt.Sprintf("Irregular prontype for %s:%s : %s", number(node.End), node.Word, node.Vwtype))
 	}
 
 	switch node.Persoon {
@@ -112,7 +115,7 @@ func pronounFeatures(node *nodeType, q *context) {
 	case "":
 		node.udPerson = ""
 	default:
-		node.udPerson = "ERROR_IRREGULAR_PERSON"
+		panic(fmt.Sprintf("Irregular person for %s:%s : %s", number(node.End), node.Word, node.Persoon))
 	}
 
 	switch node.Naamval {
@@ -129,8 +132,7 @@ func pronounFeatures(node *nodeType, q *context) {
 	case "":
 		node.udCase = ""
 	default:
-		node.udCase = "ERROR_IRREGULAR_CASE"
-
+		panic(fmt.Sprintf("Irregular case for %s:%s : %s", number(node.End), node.Word, node.Naamval))
 	}
 }
 
@@ -146,7 +148,7 @@ func verbalFeatures(node *nodeType, q *context) {
 	case "":
 		node.udVerbForm = ""
 	default:
-		node.udVerbForm = "ERROR_IRREGULAR_VERBFORM"
+		panic(fmt.Sprintf("Irregular verbform for %s:%s : %s", number(node.End), node.Word, node.Wvorm))
 	}
 
 	switch node.Pvtijd {
@@ -157,7 +159,7 @@ func verbalFeatures(node *nodeType, q *context) {
 	case "":
 		node.udTense = ""
 	default:
-		node.udTense = "ERROR_IRREGULAR_TENSE"
+		panic(fmt.Sprintf("Irregular tense for %s:%s : %s", number(node.End), node.Word, node.Pvtijd))
 	}
 
 	switch node.Pvagr {
@@ -168,7 +170,7 @@ func verbalFeatures(node *nodeType, q *context) {
 	case "":
 		node.udNumber = ""
 	default:
-		node.udNumber = "ERROR_IRREGULAR_NUMBER"
+		panic(fmt.Sprintf("Irregular number for %s:%s : %s", number(node.End), node.Word, node.Pvagr))
 	}
 }
 
@@ -181,7 +183,7 @@ func determinerFeatures(node *nodeType, q *context) {
 	case "":
 		node.udDefinite = ""
 	default:
-		node.udDefinite = "ERROR_IRREGULAR_DEFINITE"
+		panic(fmt.Sprintf("Irregular definite for %s:%s : %s", number(node.End), node.Word, node.Lwtype))
 	}
 }
 

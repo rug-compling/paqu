@@ -9,33 +9,32 @@ import (
 )
 
 // updates to the output
-const VersionMajor = int(4)
+const VersionMajor = 4
 
 // updates to the package API (unlikely)
-const VersionMinor = int(1)
+const VersionMinor = 2
+
+const (
+	UDVersionMajor = 2
+	UDVersionMinor = 2 // not yet 3
+)
 
 // options can be or'ed as last argument to Ud()
 const (
-	OPT_DEBUG         = 1 << iota // include debug messages in comments
-	OPT_NO_COMMENTS               // don't include comments
-	OPT_NO_DETOKENIZE             // don't try to restore detokenized sentence
-	OPT_NO_ENHANCED               // skip enhanced dependencies
-	OPT_NO_FIX_PUNCT              // don't fix punctuation
-	OPT_PANIC                     // panic on error (for development)
+	OPT_DEBUG                  = 1 << iota // include debug messages in comments
+	OPT_NO_COMMENTS                        // don't include comments
+	OPT_NO_DETOKENIZE                      // don't try to restore detokenized sentence
+	OPT_NO_ENHANCED                        // skip enhanced dependencies
+	OPT_NO_FIX_PUNCT                       // don't fix punctuation
+	OPT_NO_FIX_MISPLACED_HEADS             // don't fix misplaced heads in coordination
+	OPT_PANIC                              // panic on error (for development)
 )
 
 const (
-	error_EXTERNAL_HEAD_MUST_HAVE_ONE_ARG = -1000 * (iota + 1)
-	error_MORE_THAN_ONE_INTERNAL_HEAD_POSITION_FOUND
-	error_NO_EXTERNAL_HEAD
-	error_NO_HEAD_FOUND
-	error_NO_INTERNAL_HEAD
-	error_NO_INTERNAL_HEAD_IN_GAPPED_CONSTITUENT
-	error_NO_INTERNAL_HEAD_POSITION_FOUND
-	error_NO_VALUE
-	error_RECURSION_LIMIT
-	underscore
+	underscore = -1000 * (iota + 1)
 	empty_head
+	error_no_head
+	error_no_value
 )
 
 type context struct {
@@ -44,7 +43,6 @@ type context struct {
 	sentence      string
 	sentid        string
 	debugs        []string
-	warnings      []string
 	depth         int
 	allnodes      []*nodeType
 	ptnodes       []*nodeType
@@ -52,6 +50,13 @@ type context struct {
 	varindexnodes []interface{}
 	varptnodes    []interface{}
 	varroot       []interface{}
+}
+
+type trace struct {
+	s    string
+	node *nodeType
+	head *nodeType
+	gap  *nodeType
 }
 
 type alpino_ds struct {
@@ -138,8 +143,8 @@ var (
 		axChildren:          []interface{}{},
 		axDescendants:       []interface{}{},
 		axDescendantsOrSelf: []interface{}{},
-		udHeadPosition:      error_NO_EXTERNAL_HEAD,
-		udEHeadPosition:     error_NO_EXTERNAL_HEAD,
+		udHeadPosition:      error_no_head,
+		udEHeadPosition:     error_no_head,
 	}
 )
 
@@ -200,12 +205,13 @@ func udTry(alpino_doc []byte, filename string, options int) (conllu string, err 
 		sentence: alpino.Sentence.Sent,
 		sentid:   alpino.Sentence.SentId,
 		varroot:  []interface{}{alpino.Node},
-		warnings: []string{},
 	}
 
 	inspect(q)
 
-	fixMisplacedHeadsInCoordination(q)
+	if options&OPT_NO_FIX_MISPLACED_HEADS == 0 {
+		fixMisplacedHeadsInCoordination(q)
+	}
 	addPosTags(q)
 	addFeatures(q)
 	addDependencyRelations(q)

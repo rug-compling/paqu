@@ -15,7 +15,7 @@ func fixMisplacedHeadsInCoordination(q *context) {
 		return
 	}
 
-	seen := make(map[[2]int]int)
+	seen := make(map[[2]int]bool)
 	counter := 0
 
 START:
@@ -23,12 +23,12 @@ START:
 		for _, n1 := range q.varallnodes {
 			// FIND op varallnodes niet mogelijk omdat twee keer naar $node wordt verwezen, en dat moet dezelfde node zijn
 			for _, n2 := range find(q, /*
-				$n1[@rel=("hd","ld") and
+				$n1[(@rel=("hd","ld") or (@rel="obj1" and ../node[@rel="hd" and @pt="vz"])) and
 				      @index and
 				      (@pt or @cat) and
 				      ancestor::node[@rel="cnj"] and
 				      ancestor::node[@cat="conj"]/node[@rel="cnj" and
-				                                       descendant-or-self::node[@rel=("hd","ld") and
+				                                       descendant-or-self::node[@rel=("hd","ld","obj1") and
 				                                                                @index=$n1/@index and
 				                                                                not(@cat or @pt) and
 				                                                                ( @begin        = ..//node[@cat or @pt]/@end or
@@ -46,17 +46,78 @@ START:
 									arg1: &dAnd{
 										arg1: &dAnd{
 											arg1: &dAnd{
-												arg1: &dEqual{
-													ARG: equal__is,
-													arg1: &dCollect{
-														ARG:  collect__attributes__rel,
-														arg1: &dNode{},
-													},
-													arg2: &dElem{
-														DATA: []interface{}{"hd", "ld"},
-														arg1: &dCollect{
-															ARG:  collect__attributes__rel,
-															arg1: &dNode{},
+												arg1: &dSort{
+													arg1: &dOr{
+														arg1: &dEqual{
+															ARG: equal__is,
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+															arg2: &dElem{
+																DATA: []interface{}{"hd", "ld"},
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
+															},
+														},
+														arg2: &dSort{
+															arg1: &dAnd{
+																arg1: &dEqual{
+																	ARG: equal__is,
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__rel,
+																		arg1: &dNode{},
+																	},
+																	arg2: &dElem{
+																		DATA: []interface{}{"obj1"},
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																	},
+																},
+																arg2: &dCollect{
+																	ARG: collect__child__node,
+																	arg1: &dCollect{
+																		ARG:  collect__parent__type__node,
+																		arg1: &dNode{},
+																	},
+																	arg2: &dPredicate{
+																		arg1: &dAnd{
+																			arg1: &dEqual{
+																				ARG: equal__is,
+																				arg1: &dCollect{
+																					ARG:  collect__attributes__rel,
+																					arg1: &dNode{},
+																				},
+																				arg2: &dElem{
+																					DATA: []interface{}{"hd"},
+																					arg1: &dCollect{
+																						ARG:  collect__attributes__rel,
+																						arg1: &dNode{},
+																					},
+																				},
+																			},
+																			arg2: &dEqual{
+																				ARG: equal__is,
+																				arg1: &dCollect{
+																					ARG:  collect__attributes__pt,
+																					arg1: &dNode{},
+																				},
+																				arg2: &dElem{
+																					DATA: []interface{}{"vz"},
+																					arg1: &dCollect{
+																						ARG:  collect__attributes__pt,
+																						arg1: &dNode{},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
 														},
 													},
 												},
@@ -151,7 +212,7 @@ START:
 																			arg1: &dNode{},
 																		},
 																		arg2: &dElem{
-																			DATA: []interface{}{"hd", "ld"},
+																			DATA: []interface{}{"hd", "ld", "obj1"},
 																			arg1: &dCollect{
 																				ARG:  collect__attributes__rel,
 																				arg1: &dNode{},
@@ -281,7 +342,7 @@ START:
 				}) {
 				node2 := n2.(*nodeType)
 				for _, n3 := range find(q, /*
-					$q.varallnodes[@rel=("hd","ld","vc") and @index and not(@pt or @cat) and
+					$q.varallnodes[(@rel=("hd","ld","vc") or (@rel="obj1" and ../node[@rel="hd" and @pt="vz"])) and @index and not(@pt or @cat) and
 					                 ancestor::node[@rel="cnj"]  and
 					                                    ( @begin        = ..//node[@cat or @pt]/@end or
 					                                      @begin - 1000 = ..//node[@cat or @pt]/@end
@@ -296,17 +357,78 @@ START:
 										arg1: &dAnd{
 											arg1: &dAnd{
 												arg1: &dAnd{
-													arg1: &dEqual{
-														ARG: equal__is,
-														arg1: &dCollect{
-															ARG:  collect__attributes__rel,
-															arg1: &dNode{},
-														},
-														arg2: &dElem{
-															DATA: []interface{}{"hd", "ld", "vc"},
-															arg1: &dCollect{
-																ARG:  collect__attributes__rel,
-																arg1: &dNode{},
+													arg1: &dSort{
+														arg1: &dOr{
+															arg1: &dEqual{
+																ARG: equal__is,
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
+																arg2: &dElem{
+																	DATA: []interface{}{"hd", "ld", "vc"},
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__rel,
+																		arg1: &dNode{},
+																	},
+																},
+															},
+															arg2: &dSort{
+																arg1: &dAnd{
+																	arg1: &dEqual{
+																		ARG: equal__is,
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dElem{
+																			DATA: []interface{}{"obj1"},
+																			arg1: &dCollect{
+																				ARG:  collect__attributes__rel,
+																				arg1: &dNode{},
+																			},
+																		},
+																	},
+																	arg2: &dCollect{
+																		ARG: collect__child__node,
+																		arg1: &dCollect{
+																			ARG:  collect__parent__type__node,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dPredicate{
+																			arg1: &dAnd{
+																				arg1: &dEqual{
+																					ARG: equal__is,
+																					arg1: &dCollect{
+																						ARG:  collect__attributes__rel,
+																						arg1: &dNode{},
+																					},
+																					arg2: &dElem{
+																						DATA: []interface{}{"hd"},
+																						arg1: &dCollect{
+																							ARG:  collect__attributes__rel,
+																							arg1: &dNode{},
+																						},
+																					},
+																				},
+																				arg2: &dEqual{
+																					ARG: equal__is,
+																					arg1: &dCollect{
+																						ARG:  collect__attributes__pt,
+																						arg1: &dNode{},
+																					},
+																					arg2: &dElem{
+																						DATA: []interface{}{"vz"},
+																						arg1: &dCollect{
+																							ARG:  collect__attributes__pt,
+																							arg1: &dNode{},
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
 															},
 														},
 													},
@@ -440,14 +562,10 @@ START:
 					node3 := n3.(*nodeType)
 					if node2.Index == node3.Index {
 						pair := [2]int{node2.Id, node3.Id}
-						if i, ok := seen[pair]; ok {
-							if i == 1 {
-								panic(fmt.Sprintf("Loop detected in fixMisplacedHeadsInCoordination: %d %d", node2.Id, node3.Id))
-							}
-							seen[pair]++
-							continue
+						if seen[pair] {
+							panic(fmt.Sprintf("Loop detected in fixMisplacedHeadsInCoordination: %d %d", node2.Id, node3.Id))
 						}
-						seen[pair] = 1
+						seen[pair] = true
 						counter++
 						// kopieer inhoud van node2 (niet leeg) naar node3 (leeg)
 						id, rel := node3.Id, node3.Rel

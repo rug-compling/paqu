@@ -1,5 +1,9 @@
 package alud
 
+import (
+	"fmt"
+)
+
 func addPosTags(q *context) {
 	for _, node := range q.ptnodes {
 		node.udPos = universalPosTags(node, q)
@@ -95,5 +99,5 @@ func universalPosTags(node *nodeType, q *context) string {
 		}
 		return "AUX" // v2: cop and aux:pass --> AUX  (already in place in v1?)
 	}
-	return "ERROR_NO_POS_FOUND"
+	panic(fmt.Sprintf("No pos found for %s:%s", number(node.End), node.Word))
 }
