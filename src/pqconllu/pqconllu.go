@@ -173,48 +173,68 @@ func doXml(document, archname, filename string) {
 	lines := strings.Split(strings.TrimSpace(alpino.Conllu.Conllu), "\n")
 
 	// untokenize
+	noSpace := make(map[string]bool)
 	alines := make([][]string, len(lines))
 	for i, line := range lines {
 		alines[i] = strings.Fields(line)
-	}
-	words1 := make([]string, 0, len(lines))
-	for _, line := range alines {
-		if len(line) != 10 {
-			fmt.Fprintf(os.Stderr, "ERROR in (%s) %s: %d columns\n", archname, filename, len(line))
+		if len(alines[i]) != 10 {
+			fmt.Fprintf(os.Stderr, "ERROR in (%s) %s: %d columns\n", archname, filename, len(alines[i]))
 			return
 		}
-		if !strings.Contains(line[0], ".") {
-			words1 = append(words1, line[1])
+		if strings.Contains(strings.ToLower(alines[i][9]), "spaceafter=no") {
+			noSpace[alines[i][0]] = true
 		}
 	}
-	sent1 := strings.Join(words1, " ")
-	sent2 := reUnQ1.ReplaceAllString(" "+sent1+" ", `$1$2$3`)
-	sent2 = reUnQ2.ReplaceAllString(sent2, `$1$2$3`)
-	sent2 = reUnQ3.ReplaceAllString(sent2, `$1$2$3`)
-	sent2 = reUnQ4.ReplaceAllString(sent2, `$1$2$3`)
-	sent2 = reUnQ5.ReplaceAllString(sent2, `$1$2$3`)
-	sent2 = reUnP1.ReplaceAllString(sent2, `$1`)
-	sent2 = reUnP2.ReplaceAllString(sent2, `$1`)
-	sent2 = strings.TrimSpace(sent2)
-	noSpace := make(map[string]bool)
-	words2 := strings.Fields(sent2)
-	j := 0
-	for i, word1 := range words1 {
-		if word1 != words2[j] {
-			noSpace[fmt.Sprint(i+1)] = true
-			words2[j] = words2[j][len(word1):]
-		} else {
-			j++
-		}
-	}
-	for i, line := range alines {
-		if noSpace[line[0]] {
-			if alines[i][9] == "_" {
-				alines[i][9] = "SpaceAfter=No"
-			} else {
-				alines[i][9] += "|SpaceAfter=No"
+	var sent2 string
+	if len(noSpace) > 0 {
+		// gebruik bestaande SpaceAfter
+		words := make([]string, 0, len(lines))
+		for i, line := range alines {
+			if !strings.Contains(line[0], ".") {
+				if i == len(alines)-1 || noSpace[line[0]] {
+					words = append(words, line[1])
+				} else {
+					words = append(words, line[1]+" ")
+				}
 			}
-			lines[i] = strings.Join(alines[i], "\t")
+		}
+		sent2 = strings.Join(words, "")
+	} else {
+		// maak nieuwe SpaceAfter
+		words1 := make([]string, 0, len(lines))
+		for _, line := range alines {
+			if !strings.Contains(line[0], ".") {
+				words1 = append(words1, line[1])
+			}
+		}
+		sent1 := strings.Join(words1, " ")
+		sent2 = reUnQ1.ReplaceAllString(" "+sent1+" ", `$1$2$3`)
+		sent2 = reUnQ2.ReplaceAllString(sent2, `$1$2$3`)
+		sent2 = reUnQ3.ReplaceAllString(sent2, `$1$2$3`)
+		sent2 = reUnQ4.ReplaceAllString(sent2, `$1$2$3`)
+		sent2 = reUnQ5.ReplaceAllString(sent2, `$1$2$3`)
+		sent2 = reUnP1.ReplaceAllString(sent2, `$1`)
+		sent2 = reUnP2.ReplaceAllString(sent2, `$1`)
+		sent2 = strings.TrimSpace(sent2)
+		words2 := strings.Fields(sent2)
+		j := 0
+		for i, word1 := range words1 {
+			if word1 != words2[j] {
+				noSpace[fmt.Sprint(i+1)] = true
+				words2[j] = words2[j][len(word1):]
+			} else {
+				j++
+			}
+		}
+		for i, line := range alines {
+			if noSpace[line[0]] {
+				if alines[i][9] == "_" {
+					alines[i][9] = "SpaceAfter=No"
+				} else {
+					alines[i][9] += "|SpaceAfter=No"
+				}
+				lines[i] = strings.Join(alines[i], "\t")
+			}
 		}
 	}
 
