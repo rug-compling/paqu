@@ -169,6 +169,55 @@ func doXml(document, archname, filename string) {
 	if alpino.Conllu == nil {
 		return
 	}
+
+	lines := strings.Split(strings.TrimSpace(alpino.Conllu.Conllu), "\n")
+
+	// untokenize
+	alines := make([][]string, len(lines))
+	for i, line := range lines {
+		alines[i] = strings.Fields(line)
+	}
+	words1 := make([]string, 0, len(lines))
+	for _, line := range alines {
+		if len(line) != 10 {
+			fmt.Fprintf(os.Stderr, "ERROR in (%s) %s: %d columns\n", archname, filename, len(line))
+			return
+		}
+		if !strings.Contains(line[0], ".") {
+			words1 = append(words1, line[1])
+		}
+	}
+	sent1 := strings.Join(words1, " ")
+	sent2 := reUnQ1.ReplaceAllString(" "+sent1+" ", `$1$2$3`)
+	sent2 = reUnQ2.ReplaceAllString(sent2, `$1$2$3`)
+	sent2 = reUnQ3.ReplaceAllString(sent2, `$1$2$3`)
+	sent2 = reUnQ4.ReplaceAllString(sent2, `$1$2$3`)
+	sent2 = reUnQ5.ReplaceAllString(sent2, `$1$2$3`)
+	sent2 = reUnP1.ReplaceAllString(sent2, `$1`)
+	sent2 = reUnP2.ReplaceAllString(sent2, `$1`)
+	sent2 = strings.TrimSpace(sent2)
+	noSpace := make(map[string]bool)
+	words2 := strings.Fields(sent2)
+	j := 0
+	for i, word1 := range words1 {
+		if word1 != words2[j] {
+			noSpace[fmt.Sprint(i+1)] = true
+			words2[j] = words2[j][len(word1):]
+		} else {
+			j++
+		}
+	}
+	for i, line := range alines {
+		if noSpace[line[0]] {
+			if alines[i][9] == "_" {
+				alines[i][9] = "SpaceAfter=No"
+			} else {
+				alines[i][9] += "|SpaceAfter=No"
+			}
+			lines[i] = strings.Join(alines[i], "\t")
+		}
+	}
+
 	if archname != "" {
 		fmt.Println("# archive =", archname)
 	}
@@ -176,16 +225,7 @@ func doXml(document, archname, filename string) {
 	if id := alpino.Sentence.SentId; id != "" {
 		fmt.Println("# sent_id =", id)
 	}
-	if t := alpino.Sentence.Sent; t != "" {
-		t = reUnQ1.ReplaceAllString(" "+t+" ", `$1$2$3`)
-		t = reUnQ2.ReplaceAllString(t, `$1$2$3`)
-		t = reUnQ3.ReplaceAllString(t, `$1$2$3`)
-		t = reUnQ4.ReplaceAllString(t, `$1$2$3`)
-		t = reUnQ5.ReplaceAllString(t, `$1$2$3`)
-		t = reUnP1.ReplaceAllString(t, `$1`)
-		t = reUnP2.ReplaceAllString(t, `$1`)
-		fmt.Println("# text =", strings.TrimSpace(t))
-	}
+	fmt.Println("# text =", sent2)
 	if s := alpino.Conllu.Status; s != "" {
 		fmt.Println("# conllu_status =", s)
 	}
@@ -225,6 +265,6 @@ func doXml(document, archname, filename string) {
 		}
 	}
 
-	fmt.Println(strings.TrimSpace(alpino.Conllu.Conllu))
+	fmt.Println(strings.Join(lines, "\n"))
 	fmt.Println()
 }
