@@ -27,8 +27,11 @@ func enhancedDependencies(q *context) {
 			node.udERelation = dependencyLabel(node, q, []trace{trace{s: "enhancedDependencies", node: node}})
 			q.depth = 0
 			node.udEHeadPosition = externalHeadPosition(list(node), q, []trace{trace{s: "enhancedDependencies", node: node}})
-			if node.udEHeadPosition == 0 && node.udERelation != "root" {
-				panic(fmt.Sprintf("Invalid EUD 0:%s in %s:%s", node.udERelation, number(node.End), node.Word))
+			if node.udEHeadPosition == 0 && node.udERelation != "root" ||
+				node.udEHeadPosition != 0 && node.udERelation == "root" {
+				panic(fmt.Sprintf("Invalid DEPS %s:%s in %s:%s",
+					number(node.udEHeadPosition), node.udERelation,
+					number(node.End), node.Word))
 			}
 		} else {
 			node.udERelation = node.udRelation
