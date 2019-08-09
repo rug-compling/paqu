@@ -17,10 +17,12 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 //. Types
@@ -120,7 +122,24 @@ Usage: %s regexp
 		}
 	}
 
+	var lockfile string
+
+	go func() {
+		chSignal := make(chan os.Signal, 1)
+		signal.Notify(chSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+		<-chSignal
+		os.Remove(lockfile)
+		os.Exit(1)
+	}()
+
 	for teller, corpus := range corpora {
+
+		lockfile = corpus.id + "/lock"
+		if os.Symlink(fmt.Sprintf("%s.%d", lockfile, os.Getpid()), lockfile) != nil {
+			fmt.Printf("Locked:   [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
+			continue
+		}
+
 		fmt.Printf("Updating: [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
 
 		status := readStatus(corpus.id)
@@ -180,6 +199,8 @@ Usage: %s regexp
 		x(err)
 		fmt.Fprintln(fp, version)
 		fp.Close()
+
+		os.Remove(lockfile)
 	}
 }
 
