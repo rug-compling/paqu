@@ -152,7 +152,7 @@ func init() {
 	noNode.parent = noNode
 }
 
-// Derive Universal Dependencies form parsed sentence in alpino_ds format.
+// Derive Universal Dependencies from parsed sentence in alpino_ds format.
 func Ud(alpino_doc []byte, filename string, options int) (conllu string, err error) {
 
 	if options&OPT_PANIC == 0 {
