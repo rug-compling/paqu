@@ -187,10 +187,16 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 	fp := q.w
 	if alpino.Conllu == nil || alpino.Conllu.Status == "" {
 		conllu, err := alud.Ud(data, "", alud.OPT_NO_COMMENTS|alud.OPT_NO_DETOKENIZE)
-		if err != nil {
-			return
+		if err == nil {
+			alpino.Conllu = &ConlluType{Status: "OK", Conllu: conllu}
+		} else {
+			e := err.Error()
+			i := strings.Index(e, "\n")
+			if i > 0 {
+				e = e[:i]
+			}
+			alpino.Conllu = &ConlluType{Status: "error", Error: e}
 		}
-		alpino.Conllu = &ConlluType{Status: "OK", Conllu: conllu}
 	}
 	if alpino.Conllu.Status != "OK" {
 		fmt.Fprintf(fp,
