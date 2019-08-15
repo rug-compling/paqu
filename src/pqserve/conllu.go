@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/alud"
+
 	"bytes"
 	"fmt"
 	"html"
@@ -180,14 +182,15 @@ func getDepAttr(attr string, n *DepType) string {
 	return ""
 }
 
-func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext) {
+func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext, data []byte) {
 
 	fp := q.w
-	if alpino.Conllu == nil {
-		return
-	}
-	if alpino.Conllu.Status == "" {
-		return
+	if alpino.Conllu == nil || alpino.Conllu.Status == "" {
+		conllu, err := alud.Ud(data, "", alud.OPT_NO_COMMENTS|alud.OPT_NO_DETOKENIZE)
+		if err != nil {
+			return
+		}
+		alpino.Conllu = &ConlluType{Status: "OK", Conllu: conllu}
 	}
 	if alpino.Conllu.Status != "OK" {
 		fmt.Fprintf(fp,
