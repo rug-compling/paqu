@@ -1,5 +1,5 @@
 //
-// GENERATED FILE -- DO NOT EDIT
+// // THIS IS A GENERATED FILE. DO NOT EDIT.
 //
 
 package alud

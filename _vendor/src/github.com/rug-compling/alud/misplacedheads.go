@@ -1,5 +1,5 @@
 //
-// GENERATED FILE -- DO NOT EDIT
+// // THIS IS A GENERATED FILE. DO NOT EDIT.
 //
 
 package alud
@@ -568,18 +568,8 @@ START:
 						seen[pair] = true
 						counter++
 						// kopieer inhoud van node2 (niet leeg) naar node3 (leeg)
-						id, rel := node3.Id, node3.Rel
-						*node3 = *node2
-						node3.Id, node3.Rel = id, rel
-						// maak node2 leeg
-						*node2 = nodeType{
-							Begin: node2.Begin,
-							End:   node2.End,
-							Id:    node2.Id,
-							Index: node2.Index,
-							Rel:   node2.Rel,
-							Node:  []*nodeType{},
-						}
+						swap(node2, node3)
+						q.swapped = append(q.swapped, [2]*nodeType{node2, node3})
 						// opnieuw beginnen
 						inspect(q)
 						continue START
@@ -591,5 +581,21 @@ START:
 	}
 	if counter > 0 {
 		q.debugs = append(q.debugs, fmt.Sprintf("fixMisplacedHeadsInCoordination: %d swaps", counter))
+	}
+}
+
+func swap(nietLeeg, leeg *nodeType) {
+	// kopieer nietLeeg naar leeg
+	id, rel := leeg.Id, leeg.Rel
+	*leeg = *nietLeeg
+	leeg.Id, leeg.Rel = id, rel
+	// maak nietLeeg leeg
+	*nietLeeg = nodeType{
+		Begin: nietLeeg.Begin,
+		End:   nietLeeg.End,
+		Id:    nietLeeg.Id,
+		Index: nietLeeg.Index,
+		Rel:   nietLeeg.Rel,
+		Node:  []*nodeType{},
 	}
 }

@@ -1,5 +1,5 @@
 //
-// GENERATED FILE -- DO NOT EDIT
+// // THIS IS A GENERATED FILE. DO NOT EDIT.
 //
 
 package alud
@@ -168,6 +168,15 @@ func reconstructEmptyHead(q *context) bool {
 			copied = antenode.udCopiedFrom
 		} else {
 			copied = antenode.End
+		}
+
+		node.udOldState = &nodeType{
+			Begin:  node.Begin,
+			End:    node.End,
+			Word:   node.Word,
+			Lemma:  node.Lemma,
+			Postag: node.Postag,
+			Pt:     node.Pt,
 		}
 
 		node.Begin = end - 1

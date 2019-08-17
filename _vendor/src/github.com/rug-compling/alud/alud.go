@@ -37,100 +37,6 @@ const (
 	error_no_value
 )
 
-type context struct {
-	alpino        *alpino_ds
-	filename      string
-	sentence      string
-	sentid        string
-	debugs        []string
-	depth         int
-	allnodes      []*nodeType
-	ptnodes       []*nodeType
-	varallnodes   []interface{}
-	varindexnodes []interface{}
-	varptnodes    []interface{}
-	varroot       []interface{}
-}
-
-type trace struct {
-	s    string
-	node *nodeType
-	head *nodeType
-	gap  *nodeType
-}
-
-type alpino_ds struct {
-	XMLName  xml.Name  `xml:"alpino_ds"`
-	Node     *nodeType `xml:"node,omitempty"`
-	Sentence *sentType `xml:"sentence,omitempty"`
-}
-
-type sentType struct {
-	Sent   string `xml:",chardata"`
-	SentId string `xml:"sentid,attr,omitempty"`
-}
-
-type nodeType struct {
-	Begin    int         `xml:"begin,attr"`
-	Cat      string      `xml:"cat,attr,omitempty"`
-	Conjtype string      `xml:"conjtype,attr,omitempty"`
-	End      int         `xml:"end,attr"`
-	Genus    string      `xml:"genus,attr,omitempty"`
-	Getal    string      `xml:"getal,attr,omitempty"`
-	Graad    string      `xml:"graad,attr,omitempty"`
-	Id       int         `xml:"id,attr,omitempty"`
-	Index    int         `xml:"index,attr,omitempty"`
-	Lemma    string      `xml:"lemma,attr,omitempty"`
-	Lwtype   string      `xml:"lwtype,attr,omitempty"`
-	Naamval  string      `xml:"naamval,attr,omitempty"`
-	Ntype    string      `xml:"ntype,attr,omitempty"`
-	Numtype  string      `xml:"numtype,attr,omitempty"`
-	Pdtype   string      `xml:"pdtype,attr,omitempty"`
-	Persoon  string      `xml:"persoon,attr,omitempty"`
-	Postag   string      `xml:"postag,attr,omitempty"`
-	Pt       string      `xml:"pt,attr,omitempty"`
-	Pvagr    string      `xml:"pvagr,attr,omitempty"`
-	Pvtijd   string      `xml:"pvtijd,attr,omitempty"`
-	Rel      string      `xml:"rel,attr,omitempty"`
-	Sc       string      `xml:"sc,attr,omitempty"`
-	Spectype string      `xml:"spectype,attr,omitempty"`
-	Vwtype   string      `xml:"vwtype,attr,omitempty"`
-	Word     string      `xml:"word,attr,omitempty"`
-	Wvorm    string      `xml:"wvorm,attr,omitempty"`
-	Node     []*nodeType `xml:"node"`
-	parent   *nodeType
-
-	// als je hier iets aan toevoegt, dan ook toevoegen in emptyheads-in.go in functie reconstructEmptyHead
-	udAbbr           string
-	udCase           string
-	udCopiedFrom     int
-	udDefinite       string
-	udDegree         string
-	udEHeadPosition  int
-	udERelation      string
-	udEnhanced       string
-	udFirstWordBegin int
-	udForeign        string
-	udGender         string
-	udHeadPosition   int
-	udNoSpaceAfter   bool
-	udNumber         string
-	udPerson         string
-	udPos            string
-	udPoss           string
-	udPronType       string
-	udReflex         string
-	udRelation       string
-	udTense          string
-	udVerbForm       string
-
-	axParent            []interface{}
-	axAncestors         []interface{}
-	axChildren          []interface{}
-	axDescendants       []interface{}
-	axDescendantsOrSelf []interface{}
-}
-
 var (
 	noNode = &nodeType{
 		Begin:               -1000,
@@ -152,9 +58,53 @@ func init() {
 	noNode.parent = noNode
 }
 
+//
+func AlpinoUd(alpino_doc []byte, filename string) (alpino string, err error) {
+	conllu, q, err := ud(alpino_doc, filename, OPT_NO_COMMENTS|OPT_NO_DETOKENIZE)
+
+	if err == nil {
+		alpinoRestore(q)
+		alpinoDo(conllu, q)
+		return alpinoFormat(q.alpino), nil
+	}
+
+	e := err.Error()
+	i := strings.Index(e, "\n")
+	if i > 0 {
+		e = e[:i]
+	}
+
+	var r func(*nodeType)
+	r = func(node *nodeType) {
+		node.Ud = nil
+		for _, n := range node.Node {
+			r(n)
+		}
+	}
+
+	var alp alpino_ds
+	if xml.Unmarshal(alpino_doc, &alp) != nil {
+		alp = alpino_ds{}
+	} else {
+		r(alp.Node)
+	}
+	alp.UdNodes = []*udNodeType{}
+	alp.Conllu = &conlluType{
+		Status: "error",
+		Error:  e,
+		Auto:   fmt.Sprintf("ALUD%d.%d", int(VersionMajor), int(VersionMinor)),
+		Conllu: " ", // spatie is nodig, wordt later verwijderd
+	}
+	return alpinoFormat(&alp), err
+}
+
 // Derive Universal Dependencies from parsed sentence in alpino_ds format.
 func Ud(alpino_doc []byte, filename string, options int) (conllu string, err error) {
+	conllu, _, err = ud(alpino_doc, filename, options)
+	return
+}
 
+func ud(alpino_doc []byte, filename string, options int) (conllu string, q *context, err error) {
 	if options&OPT_PANIC == 0 {
 		defer func() {
 			if r := recover(); r != nil {
@@ -163,18 +113,16 @@ func Ud(alpino_doc []byte, filename string, options int) (conllu string, err err
 			}
 		}()
 	}
-
-	conllu, err = udTry(alpino_doc, filename, options)
-
+	conllu, q, err = udTry(alpino_doc, filename, options)
 	return
 }
 
-func udTry(alpino_doc []byte, filename string, options int) (conllu string, err error) {
+func udTry(alpino_doc []byte, filename string, options int) (conllu string, q *context, err error) {
 
 	var alpino alpino_ds
 	err = xml.Unmarshal(alpino_doc, &alpino)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	if alpino.Sentence.SentId == "" {
@@ -199,12 +147,13 @@ func udTry(alpino_doc []byte, filename string, options int) (conllu string, err 
 	}
 	walk(alpino.Node)
 
-	q := &context{
+	q = &context{
 		alpino:   &alpino,
 		filename: filename,
 		sentence: alpino.Sentence.Sent,
 		sentid:   alpino.Sentence.SentId,
 		varroot:  []interface{}{alpino.Node},
+		swapped:  [][2]*nodeType{},
 	}
 
 	inspect(q)
@@ -230,7 +179,7 @@ func udTry(alpino_doc []byte, filename string, options int) (conllu string, err 
 	if options&OPT_NO_DETOKENIZE == 0 {
 		untokenize(q)
 	}
-	return conll(q, options), nil
+	return conll(q, options), q, nil
 }
 
 func inspect(q *context) {
