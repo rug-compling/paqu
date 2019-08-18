@@ -98,7 +98,7 @@ type conlluType struct {
 type nodeType struct {
 	Begin  int    `xml:"begin,attr"`
 	End    int    `xml:"end,attr"`
-	Id     int    `xml:"id,attr,omitempty"`
+	Id     int    `xml:"id,attr"`
 	Index  int    `xml:"index,attr,omitempty"`
 	Lemma  string `xml:"lemma,attr,omitempty"`
 	Postag string `xml:"postag,attr,omitempty"`
