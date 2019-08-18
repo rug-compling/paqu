@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -19,8 +18,16 @@ var (
 //
 // Use UD info from alpino_doc if conllu is "".
 //
-// Some very basic checks are performed, but most errors in the conllu format are not detected.
+// The conllu format is not checked for correctness. Garbage in, garbage out.
 func Alpino(alpino_doc []byte, conllu string) (alpino string, err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			alpino = ""
+			err = fmt.Errorf("%v", r)
+		}
+	}()
+
 	var alp alpino_ds
 	if err = xml.Unmarshal(alpino_doc, &alp); err != nil {
 		return "", err
@@ -28,14 +35,6 @@ func Alpino(alpino_doc []byte, conllu string) (alpino string, err error) {
 	if strings.TrimSpace(conllu) == "" && alp.Conllu != nil {
 		conllu = alp.Conllu.Conllu
 	}
-	lines := []string{}
-	for _, line := range strings.Split(conllu, "\n") {
-		line = strings.TrimSpace(line)
-		if line != "" && line[0] != '#' {
-			lines = append(lines, line)
-		}
-	}
-	conllu = strings.Join(lines, "\n") + "\n"
 	var reset func(*nodeType)
 	reset = func(node *nodeType) {
 		node.Ud = &udType{Dep: make([]depType, 0)}
@@ -47,12 +46,10 @@ func Alpino(alpino_doc []byte, conllu string) (alpino string, err error) {
 	}
 	reset(alp.Node)
 	alp.UdNodes = []*udNodeType{}
-	alp.Conllu = &conlluType{Auto: versionID, Conllu: conllu}
-	err = alpinoDo(conllu, &alp, true)
-	if err != nil {
-		return "", err
-	}
-	return alpinoFormat(&alp), nil
+	alp.Conllu = &conlluType{Conllu: conllu}
+	alpinoDo(conllu, &alp)
+	alpino, err = alpinoFormat(&alp), nil
+	return
 }
 
 // Derive Universal Dependencies and insert into alpino_ds format.
@@ -63,7 +60,7 @@ func UdAlpino(alpino_doc []byte, filename string) (alpino string, err error) {
 
 	if err == nil {
 		alpinoRestore(q)
-		_ = alpinoDo(conllu, q.alpino, false)
+		alpinoDo(conllu, q.alpino)
 		return alpinoFormat(q.alpino), nil
 	}
 
@@ -155,7 +152,7 @@ func alpinoFormat(alpino *alpino_ds) string {
 	return s
 }
 
-func alpinoDo(conllu string, alpino *alpino_ds, doCheck bool) error {
+func alpinoDo(conllu string, alpino *alpino_ds) {
 
 	lines := make([]string, 0)
 
@@ -166,53 +163,25 @@ func alpinoDo(conllu string, alpino *alpino_ds, doCheck bool) error {
 		}
 	}
 
-	var words [][2]string
-	if doCheck {
-		var getWords func(node *nodeType)
-		getWords = func(node *nodeType) {
-			if word := strings.TrimSpace(node.Word); word != "" {
-				words = append(words, [2]string{word, fmt.Sprintf("%04d", node.End)})
-			} else if node.Node != nil {
-				for _, n := range node.Node {
-					getWords(n)
-				}
-			}
-			// node.Ud = &udType{Dep: make([]depType, 0)}
-		}
-		getWords(alpino.Node)
-		sort.Slice(words, func(i, j int) bool {
-			return words[i][1] < words[j][1]
-		})
-	}
-
 	udNodeList := make([]*udNodeType, 0)
 	eudNodeList := make([]*udNodeType, 0)
 
-	wordCount := 0
 	for _, line := range lines {
 		a := strings.Split(line, "\t")
+		if strings.Contains(a[0], "-") {
+			continue
+		}
 		items := getItems(a[9])
 		es, isCopy := items["CopiedFrom"]
 		if !isCopy {
+			if strings.Contains(a[0], ".") {
+				panic("Missing CopiedFrom for ID=" + a[0])
+			}
 			es = a[0]
 		}
 		e, err := strconv.Atoi(es)
-		if doCheck {
-			if strings.Contains(a[0], "-") {
-				continue
-			}
-			if strings.Contains(a[0], ".") && !isCopy {
-				return fmt.Errorf("Missing CopiedFrom in for ID=%s", a[0])
-			}
-			if err != nil {
-				return fmt.Errorf("%v for ID=%s", err, a[0])
-			}
-			if e < 1 || e > len(words) {
-				return fmt.Errorf("Out of range for ID=%s", a[0])
-			}
-			if a[1] != words[e-1][0] {
-				return fmt.Errorf("Words mismatch for ID=%s : %q != %q", a[0], a[1], words[e-1][0])
-			}
+		if err != nil {
+			panic(fmt.Sprintf("%v for ID=%s", err, a[0]))
 		}
 		node := getNode(alpino.Node, e)
 
@@ -238,7 +207,6 @@ func alpinoDo(conllu string, alpino *alpino_ds, doCheck bool) error {
 		if isCopy {
 			continue
 		}
-		wordCount++
 
 		node.Ud.Id = a[0]
 		node.Ud.Form = a[1]
@@ -354,10 +322,6 @@ func alpinoDo(conllu string, alpino *alpino_ds, doCheck bool) error {
 
 	}
 
-	if doCheck && wordCount != len(words) {
-		return fmt.Errorf("%d line(s) missing", len(words)-wordCount)
-	}
-
 	alpino.UdNodes = make([]*udNodeType, 0)
 
 	for _, n := range udNodeList {
@@ -385,7 +349,6 @@ func alpinoDo(conllu string, alpino *alpino_ds, doCheck bool) error {
 	minify(alpino)
 	alpino.Conllu.Status = "OK"
 	alpino.Conllu.Conllu = "\n" + strings.TrimSpace(conllu) + "\n"
-	return nil
 }
 
 /*

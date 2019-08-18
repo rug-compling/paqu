@@ -14,12 +14,12 @@ func conll(q *context, options int) string {
 		fmt.Fprintf(&buf, `# source = %s
 # sent_id = %s
 # text = %s
-# auto = ALUD %d
+# auto = %s
 `,
 			q.filename,
 			strings.Replace(q.sentid, "/", "\\", -1), // het teken / is gereserveerd
 			q.sentence,
-			VersionMajor)
+			versionID)
 
 		if options&OPT_DEBUG != 0 {
 			for i, d := range q.debugs {
