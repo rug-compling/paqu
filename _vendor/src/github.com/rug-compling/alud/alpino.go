@@ -2,7 +2,10 @@ package alud
 
 import (
 	"encoding/xml"
+	"fmt"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -11,6 +14,97 @@ var (
 	reShorted  = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
 	reNoConllu = regexp.MustCompile(`><!\[CDATA\[\s*\]\]></conllu>`)
 )
+
+// Insert given Universal Dependencies into alpino_ds format.
+//
+// Use UD info from alpino_doc if conllu is "".
+//
+// Some very basic checks are performed, but most errors in the conllu format are not detected.
+func Alpino(alpino_doc []byte, conllu string) (alpino string, err error) {
+	var alp alpino_ds
+	if err = xml.Unmarshal(alpino_doc, &alp); err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(conllu) == "" && alp.Conllu != nil {
+		conllu = alp.Conllu.Conllu
+	}
+	lines := []string{}
+	for _, line := range strings.Split(conllu, "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" && line[0] != '#' {
+			lines = append(lines, line)
+		}
+	}
+	conllu = strings.Join(lines, "\n") + "\n"
+	var reset func(*nodeType)
+	reset = func(node *nodeType) {
+		node.Ud = &udType{Dep: make([]depType, 0)}
+		if node.Node != nil {
+			for _, n := range node.Node {
+				reset(n)
+			}
+		}
+	}
+	reset(alp.Node)
+	alp.UdNodes = []*udNodeType{}
+	alp.Conllu = &conlluType{Auto: versionID, Conllu: conllu}
+	err = alpinoDo(conllu, &alp, true)
+	if err != nil {
+		return "", err
+	}
+	return alpinoFormat(&alp), nil
+}
+
+// Derive Universal Dependencies and insert into alpino_ds format.
+//
+// When err is not nil and alpino is not "" it contains the err in the alpino_ds format.
+func UdAlpino(alpino_doc []byte, filename string) (alpino string, err error) {
+	conllu, q, err := ud(alpino_doc, filename, OPT_NO_COMMENTS|OPT_NO_DETOKENIZE)
+
+	if err == nil {
+		alpinoRestore(q)
+		_ = alpinoDo(conllu, q.alpino, false)
+		return alpinoFormat(q.alpino), nil
+	}
+
+	var alp alpino_ds
+	if xml.Unmarshal(alpino_doc, &alp) != nil {
+		return "", err
+	}
+
+	e := err.Error()
+	i := strings.Index(e, "\n")
+	if i > 0 {
+		e = e[:i]
+	}
+
+	var r func(*nodeType)
+	r = func(node *nodeType) {
+		node.Ud = nil
+		for _, n := range node.Node {
+			r(n)
+		}
+	}
+	if alp.Node != nil {
+		r(alp.Node)
+	}
+
+	if alp.Sentence.SentId == "" {
+		id := filepath.Base(filename)
+		if strings.HasSuffix(id, ".xml") {
+			id = id[:len(id)-4]
+		}
+		alp.Sentence.SentId = id
+	}
+	alp.UdNodes = []*udNodeType{}
+	alp.Conllu = &conlluType{
+		Status: "error",
+		Error:  e,
+		Auto:   versionID,
+		Conllu: " ", // spatie is nodig, wordt later verwijderd
+	}
+	return alpinoFormat(&alp), err
+}
 
 func alpinoRestore(q *context) {
 	for i := len(q.swapped) - 1; i >= 0; i-- {
@@ -61,22 +155,40 @@ func alpinoFormat(alpino *alpino_ds) string {
 	return s
 }
 
-func alpinoDo(conllu string, q *context) {
-
-	alpino := q.alpino
+func alpinoDo(conllu string, alpino *alpino_ds, doCheck bool) error {
 
 	lines := make([]string, 0)
 
 	for _, line := range strings.Split(conllu, "\n") {
 		line = strings.TrimSpace(line)
-		if line != "" {
+		if line != "" && line[0] != '#' {
 			lines = append(lines, line)
 		}
+	}
+
+	var words [][2]string
+	if doCheck {
+		var getWords func(node *nodeType)
+		getWords = func(node *nodeType) {
+			if word := strings.TrimSpace(node.Word); word != "" {
+				words = append(words, [2]string{word, fmt.Sprintf("%04d", node.End)})
+			} else if node.Node != nil {
+				for _, n := range node.Node {
+					getWords(n)
+				}
+			}
+			// node.Ud = &udType{Dep: make([]depType, 0)}
+		}
+		getWords(alpino.Node)
+		sort.Slice(words, func(i, j int) bool {
+			return words[i][1] < words[j][1]
+		})
 	}
 
 	udNodeList := make([]*udNodeType, 0)
 	eudNodeList := make([]*udNodeType, 0)
 
+	wordCount := 0
 	for _, line := range lines {
 		a := strings.Split(line, "\t")
 		items := getItems(a[9])
@@ -84,7 +196,24 @@ func alpinoDo(conllu string, q *context) {
 		if !isCopy {
 			es = a[0]
 		}
-		e, _ := strconv.Atoi(es)
+		e, err := strconv.Atoi(es)
+		if doCheck {
+			if strings.Contains(a[0], "-") {
+				continue
+			}
+			if strings.Contains(a[0], ".") && !isCopy {
+				return fmt.Errorf("Missing CopiedFrom in for ID=%s", a[0])
+			}
+			if err != nil {
+				return fmt.Errorf("%v for ID=%s", err, a[0])
+			}
+			if e < 1 || e > len(words) {
+				return fmt.Errorf("Out of range for ID=%s", a[0])
+			}
+			if a[1] != words[e-1][0] {
+				return fmt.Errorf("Words mismatch for ID=%s : %q != %q", a[0], a[1], words[e-1][0])
+			}
+		}
 		node := getNode(alpino.Node, e)
 
 		if a[8] != "_" {
@@ -109,6 +238,7 @@ func alpinoDo(conllu string, q *context) {
 		if isCopy {
 			continue
 		}
+		wordCount++
 
 		node.Ud.Id = a[0]
 		node.Ud.Form = a[1]
@@ -224,6 +354,10 @@ func alpinoDo(conllu string, q *context) {
 
 	}
 
+	if doCheck && wordCount != len(words) {
+		return fmt.Errorf("%d line(s) missing", len(words)-wordCount)
+	}
+
 	alpino.UdNodes = make([]*udNodeType, 0)
 
 	for _, n := range udNodeList {
@@ -249,8 +383,9 @@ func alpinoDo(conllu string, q *context) {
 		expand(root, items)
 	}
 	minify(alpino)
-	q.alpino.Conllu.Status = "OK"
-	q.alpino.Conllu.Conllu = "\n" + strings.TrimSpace(conllu) + "\n"
+	alpino.Conllu.Status = "OK"
+	alpino.Conllu.Conllu = "\n" + strings.TrimSpace(conllu) + "\n"
+	return nil
 }
 
 /*

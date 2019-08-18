@@ -64,56 +64,6 @@ func VersionID() string {
 	return versionID
 }
 
-// Derive Universal Dependencies and insert into alpino_ds format.
-//
-// When err is not nil and alpino is not "" it contains the err in the alpino_ds format.
-func AlpinoUd(alpino_doc []byte, filename string) (alpino string, err error) {
-	conllu, q, err := ud(alpino_doc, filename, OPT_NO_COMMENTS|OPT_NO_DETOKENIZE)
-
-	if err == nil {
-		alpinoRestore(q)
-		alpinoDo(conllu, q)
-		return alpinoFormat(q.alpino), nil
-	}
-
-	var alp alpino_ds
-	if xml.Unmarshal(alpino_doc, &alp) != nil {
-		return "", err
-	}
-
-	e := err.Error()
-	i := strings.Index(e, "\n")
-	if i > 0 {
-		e = e[:i]
-	}
-
-	var r func(*nodeType)
-	r = func(node *nodeType) {
-		node.Ud = nil
-		for _, n := range node.Node {
-			r(n)
-		}
-	}
-	if alp.Node != nil {
-		r(alp.Node)
-	}
-
-	if alp.Sentence.SentId == "" {
-		id := filepath.Base(filename)
-		if strings.HasSuffix(id, ".xml") {
-			id = id[:len(id)-4]
-		}
-		alp.Sentence.SentId = id
-	}
-	alp.UdNodes = []*udNodeType{}
-	alp.Conllu = &conlluType{
-		Status: "error",
-		Error:  e,
-		Auto:   versionID,
-		Conllu: " ", // spatie is nodig, wordt later verwijderd
-	}
-	return alpinoFormat(&alp), err
-}
 
 // Derive Universal Dependencies from parsed sentence in alpino_ds format.
 func Ud(alpino_doc []byte, filename string, options int) (conllu string, err error) {
