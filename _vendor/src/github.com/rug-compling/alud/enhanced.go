@@ -27,12 +27,6 @@ func enhancedDependencies(q *context) {
 			node.udERelation = dependencyLabel(node, q, []trace{trace{s: "enhancedDependencies", node: node}})
 			q.depth = 0
 			node.udEHeadPosition = externalHeadPosition(list(node), q, []trace{trace{s: "enhancedDependencies", node: node}})
-			if node.udEHeadPosition == 0 && node.udERelation != "root" ||
-				node.udEHeadPosition != 0 && node.udERelation == "root" {
-				panic(fmt.Sprintf("Invalid DEPS %s:%s in %s:%s",
-					number(node.udEHeadPosition), node.udERelation,
-					number(node.End), node.Word))
-			}
 		} else {
 			node.udERelation = node.udRelation
 			node.udEHeadPosition = node.udHeadPosition
@@ -403,8 +397,10 @@ func enhancedDependencies1(node *nodeType, q *context) {
 	}
 	ss := make([]string, 0, len(enhanced))
 	for _, e := range enhanced {
-		if e.head == 0 && e.dep != "root" {
-			panic(fmt.Sprintf("Invalid EUD 0:%s in %s:%s", e.dep, number(node.End), node.Word))
+		if e.head == 0 && e.dep != "root" ||
+			e.head != 0 && e.dep == "root" ||
+			e.dep == "orphan" {
+			panic(fmt.Sprintf("Invalid EUD %s:%s in %s:%s", number(e.head), e.dep, number(node.End), node.Word))
 		}
 		if e.dep != "" {
 			ss = append(ss, number(e.head)+":"+e.dep)

@@ -52,13 +52,21 @@ var (
 		udHeadPosition:      error_no_head,
 		udEHeadPosition:     error_no_head,
 	}
+	versionID = fmt.Sprintf("ALUD%d.%d", VersionMajor, VersionMinor)
 )
 
 func init() {
 	noNode.parent = noNode
 }
 
+// Version identifier in format ALUDmajor.minor
+func VersionID() string {
+	return versionID
+}
+
+// Derive Universal Dependencies and insert into alpino_ds format.
 //
+// When err is not nil and alpino is not "" it contains the err in the alpino_ds format.
 func AlpinoUd(alpino_doc []byte, filename string) (alpino string, err error) {
 	conllu, q, err := ud(alpino_doc, filename, OPT_NO_COMMENTS|OPT_NO_DETOKENIZE)
 
@@ -66,6 +74,11 @@ func AlpinoUd(alpino_doc []byte, filename string) (alpino string, err error) {
 		alpinoRestore(q)
 		alpinoDo(conllu, q)
 		return alpinoFormat(q.alpino), nil
+	}
+
+	var alp alpino_ds
+	if xml.Unmarshal(alpino_doc, &alp) != nil {
+		return "", err
 	}
 
 	e := err.Error()
@@ -81,18 +94,22 @@ func AlpinoUd(alpino_doc []byte, filename string) (alpino string, err error) {
 			r(n)
 		}
 	}
-
-	var alp alpino_ds
-	if xml.Unmarshal(alpino_doc, &alp) != nil {
-		alp = alpino_ds{}
-	} else {
+	if alp.Node != nil {
 		r(alp.Node)
+	}
+
+	if alp.Sentence.SentId == "" {
+		id := filepath.Base(filename)
+		if strings.HasSuffix(id, ".xml") {
+			id = id[:len(id)-4]
+		}
+		alp.Sentence.SentId = id
 	}
 	alp.UdNodes = []*udNodeType{}
 	alp.Conllu = &conlluType{
 		Status: "error",
 		Error:  e,
-		Auto:   fmt.Sprintf("ALUD%d.%d", int(VersionMajor), int(VersionMinor)),
+		Auto:   versionID,
 		Conllu: " ", // spatie is nodig, wordt later verwijderd
 	}
 	return alpinoFormat(&alp), err
@@ -167,12 +184,6 @@ func udTry(alpino_doc []byte, filename string, options int) (conllu string, q *c
 	if options&OPT_NO_ENHANCED == 0 {
 		enhancedDependencies(q)
 	}
-
-	// voor de laatste drie onderdelen moet q.ptnodes op woordpositie gesorteerd zijn
-	sort.Slice(q.ptnodes, func(i, j int) bool {
-		return q.ptnodes[i].End < q.ptnodes[j].End
-	})
-
 	if options&OPT_NO_FIX_PUNCT == 0 {
 		fixpunct(q)
 	}

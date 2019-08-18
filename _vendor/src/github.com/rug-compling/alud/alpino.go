@@ -2,7 +2,6 @@ package alud
 
 import (
 	"encoding/xml"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -34,23 +33,30 @@ func alpinoRestore(q *context) {
 		node.End /= 1000
 	}
 	q.alpino.UdNodes = []*udNodeType{}
-	q.alpino.Conllu = &conlluType{
-		Auto: fmt.Sprintf("ALUD%d.%d", int(VersionMajor), int(VersionMinor)),
-	}
+	q.alpino.Conllu = &conlluType{Auto: versionID}
 }
 
 func alpinoFormat(alpino *alpino_ds) string {
+	var v1, v2 int
+	if a := strings.Split(alpino.Version, "."); len(a) > 1 {
+		var err error
+		if v1, err = strconv.Atoi(a[0]); err != nil {
+			v1 = 0
+		}
+		if v2, err = strconv.Atoi(a[1]); err != nil {
+			v2 = 0
+		}
+	}
+	if v1 < 1 || (v1 == 1 && v2 < 10) {
+		alpino.Version = "1.10"
+	}
+
 	b, _ := xml.MarshalIndent(alpino, "", "  ")
 	s := "<?xml version=\"1.0\"?>\n" + string(b)
 
 	// shorten
 	s = reShorted.ReplaceAllString(s, "/>")
 	s = reNoConllu.ReplaceAllString(s, "/>")
-
-	v, err := strconv.ParseFloat(alpino.Version, 64)
-	if err != nil || v < 1.10 {
-		alpino.Version = "1.10"
-	}
 
 	return s
 }
