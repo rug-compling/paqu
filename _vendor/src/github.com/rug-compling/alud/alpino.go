@@ -19,7 +19,9 @@ var (
 // Use UD info from alpino_doc if conllu is "".
 //
 // The conllu format is not checked for correctness. Garbage in, garbage out.
-func Alpino(alpino_doc []byte, conllu string) (alpino string, err error) {
+//
+// The value from auto is copied to the output.
+func Alpino(alpino_doc []byte, conllu, auto string) (alpino string, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -46,7 +48,7 @@ func Alpino(alpino_doc []byte, conllu string) (alpino string, err error) {
 	}
 	reset(alp.Node)
 	alp.UdNodes = []*udNodeType{}
-	alp.Conllu = &conlluType{Conllu: conllu}
+	alp.Conllu = &conlluType{Conllu: conllu, Auto: auto}
 	alpinoDo(conllu, &alp)
 	alpino, err = alpinoFormat(&alp), nil
 	return
@@ -399,7 +401,7 @@ func noe(s string) string {
 }
 
 func getNode(node *nodeType, end int) *nodeType {
-	if node == nil {
+	if node == nil || node.End < end || node.Begin >= end {
 		return nil
 	}
 	if node.End == end && node.Word != "" {

@@ -154,7 +154,7 @@ Usage: %s regexp
 			fp, err := os.Create(corpus.id + "/conllu.err.tmp")
 			x(err)
 			for scanner.Scan() {
-				line := strings.TrimSpace(scanner.Text())
+				line := strings.TrimRight(scanner.Text(), "\n")
 				if strings.HasSuffix(line, ".xml.gz") {
 					line = line[:len(line)-3]
 				}
