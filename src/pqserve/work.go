@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/pebbe/util"
+	"github.com/rug-compling/alud"
 
 	"bytes"
 	"compress/gzip"
@@ -678,9 +679,15 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			if Cfg.Timeout > 0 {
 				timeout = fmt.Sprint("-t ", Cfg.Timeout)
 			}
+			ud1 := ""
+			ud2 := ""
+			if Cfg.Conllu {
+				ud1 = "-u " + conllu + ".err"
+				ud2 = "; echo " + alud.VersionID() + " > " + conllu + ".version"
+			}
 			cmd := shell(
-				`pqalpino -e half -l -T -q -n %d -d %s %s %s %s.lines%s >> %s 2>> %s`,
-				Cfg.Maxtokens, xml, server, timeout, data, ext, stdout, stderr)
+				`pqalpino %s -e half -l -T -q -n %d -d %s %s %s %s.lines%s >> %s 2>> %s%s`,
+				ud1, Cfg.Maxtokens, xml, server, timeout, data, ext, stdout, stderr, ud2)
 			err = run(cmd, task.chKill, nil)
 			if err != nil {
 				return
@@ -815,19 +822,6 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		fp.Close()
 		os.Rename(x+".tmp", x)
 		os.Remove(m)
-	}
-
-	if params != "dact" && Cfg.Conllu {
-		cmd := shell(
-			`find %s -name '*.xml' | sort > %s.list; pqudep -p %s/data/ -l %s.list -o > /dev/null 2> %s.err; rm %s.list ; pqudep -v > %s.version`,
-			dirname, conllu, paqudatadir, conllu, conllu, conllu, conllu)
-		err = run(cmd, task.chKill, nil)
-		if err != nil {
-			return
-		}
-		if cu, _ := os.Stat(conllu + ".err"); cu.Size() != 0 {
-			sysErr(fmt.Errorf("CONLLU error(s) in %s.err", conllu))
-		}
 	}
 
 	cmd := shell(

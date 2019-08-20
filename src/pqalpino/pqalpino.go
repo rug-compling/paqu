@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/pebbe/util"
+	"github.com/rug-compling/alud"
 
 	"bytes"
 	"encoding/json"
@@ -57,6 +58,8 @@ var (
 	opt_s = flag.String("s", "", "URL van Alpino-server")
 	opt_t = flag.Int("t", 900, "time-out in seconden per regel")
 	opt_T = flag.Bool("T", false, "true: zinnen zijn getokeniseerd")
+	opt_u = flag.String("u", "", "output file for UD errors (impliceert -U)")
+	opt_U = flag.Bool("U", false, "true: derive Universal Dependencies")
 
 	x             = util.CheckErr
 	reParser      = regexp.MustCompile(`<parser.*?>`)
@@ -90,6 +93,8 @@ Overige opties:
   -n int    : Maximum aantal tokens per regel (default: 0 = geen limiet)
   -p string : Alternatieve parser, zoals qa (default: geen)
   -t int    : Time-out per regel (default: 900)
+  -U        : Derive Universal Dependencies (UD) (default: nee)
+  -u string : Output file for UD errors (impliceert -U) (default: geen)
 
 Opties alleen van toepassing bij gebruik van Alpino-server:
 
@@ -137,6 +142,12 @@ func doLocal() {
 	b, err := ioutil.ReadFile(os.Getenv("ALPINO_HOME") + "/version")
 	x(err)
 	alpino_build = strings.TrimSpace(string(b))
+
+	var fpud *os.File
+	if *opt_u != "" {
+		fpud, err = os.Create(*opt_u)
+		x(err)
+	}
 
 	var fpin, fpout *os.File
 	var errval error
@@ -245,7 +256,7 @@ Q#%s|skipped|??|????
 			break
 		}
 	}
-	// version en date invoegen
+	// UD, version en date invoegen
 	filenames := make([]string, 0)
 	x(filepath.Walk(*opt_d, func(path string, info os.FileInfo, err error) error {
 		x(err)
@@ -261,10 +272,23 @@ Q#%s|skipped|??|????
 			continue
 		}
 		xml := setBuild(string(b))
+		if *opt_U || *opt_u != "" {
+			s, err := alud.UdAlpino([]byte(xml), filename)
+			if s != "" {
+				xml = s
+			}
+			if err != nil && *opt_u != "" {
+				fmt.Fprintln(fpud, ">>>", filename)
+				fmt.Fprintln(fpud, "^^^", err)
+			}
+		}
 		fp, err := os.Create(filename)
 		x(err)
 		fp.WriteString(xml)
 		fp.Close()
+	}
+	if *opt_u != "" {
+		x(fpud.Close())
 	}
 }
 
@@ -287,6 +311,13 @@ func doServerInfo() (*AlpinoInfo, error) {
 
 func doServer(info *AlpinoInfo) {
 	alpino_build = info.ParserBuild
+
+	var fpud *os.File
+	var err error
+	if *opt_u != "" {
+		fpud, err = os.Create(*opt_u)
+		x(err)
+	}
 
 	var buf bytes.Buffer
 	var dataType string
@@ -395,12 +426,22 @@ func doServer(info *AlpinoInfo) {
 					line.Label = fmt.Sprint(line.Line_number)
 				}
 				filename := filepath.Join(*opt_d, line.Label+".xml")
+				if *opt_U || *opt_u != "" {
+					s, err := alud.UdAlpino([]byte(line.Alpino_ds), filename)
+					if s != "" {
+						line.Alpino_ds = s
+					}
+					if err != nil && *opt_u != "" {
+						fmt.Fprintln(fpud, ">>>", filename)
+						fmt.Fprintln(fpud, "^^^", err)
+					}
+				}
 				dirname := filepath.Dir(filename)
 				if dirname != lastdir {
 					lastdir = dirname
 					os.MkdirAll(dirname, 0777)
 				}
-				fp, err := os.Create(filepath.Join(*opt_d, line.Label+".xml"))
+				fp, err := os.Create(filename)
 				x(err)
 				fmt.Fprintln(fp, setBuild(line.Alpino_ds))
 				fp.Close()
@@ -431,6 +472,9 @@ Q#%s|%s|%s|??|????
 		if incr {
 			interval = (3 * interval) / 2
 		}
+	}
+	if *opt_u != "" {
+		x(fpud.Close())
 	}
 }
 
