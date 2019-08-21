@@ -274,6 +274,7 @@ func doXml(document, archname, filename string) (result string) {
 			fmt.Fprintln(os.Stderr, ">>>", archname, "/", filename)
 		}
 		fmt.Fprintln(os.Stderr, "^^^", err)
+		fmt.Fprintln(os.Stderr)
 	}
 	return result
 }

@@ -136,11 +136,29 @@ Usage: %s regexp
 
 		lockfile = corpus.id + "/lock"
 		if os.Symlink(fmt.Sprintf("%s.%d", lockfile, os.Getpid()), lockfile) != nil {
-			fmt.Printf("Locked:   [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
+			fmt.Printf("Locked:     [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
 			continue
 		}
 
-		fmt.Printf("Updating: [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
+		up_to_date := false
+		for {
+			b, err := ioutil.ReadFile(corpus.id + "/conllu.version")
+			if err != nil {
+				break
+			}
+			s := strings.TrimSpace(string(b))
+			if s != version {
+				break
+			}
+			up_to_date = true
+			break
+		}
+		if up_to_date {
+			fmt.Printf("Up to date: [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
+			continue
+		}
+
+		fmt.Printf("Updating:   [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
 
 		status := readStatus(corpus.id)
 

@@ -280,6 +280,7 @@ Q#%s|skipped|??|????
 			if err != nil && *opt_u != "" {
 				fmt.Fprintln(fpud, ">>>", filename)
 				fmt.Fprintln(fpud, "^^^", err)
+				fmt.Fprintln(fpud)
 			}
 		}
 		fp, err := os.Create(filename)
@@ -357,7 +358,7 @@ func doServer(info *AlpinoInfo) {
 	if response.Code > 299 {
 		x(fmt.Errorf("%d %s -- %s", response.Code, response.Status, response.Message))
 	}
-	maxinterval := response.Interval
+	maxinterval := (response.Interval * 100) / 80
 	totallines := response.Number_of_lines
 	id := response.Id
 	if !*opt_q {
@@ -390,6 +391,7 @@ func doServer(info *AlpinoInfo) {
 	seen := 0
 	interval := 2
 	incr := true
+	moment := time.Now()
 	for {
 		if interval > maxinterval {
 			interval = maxinterval
@@ -397,15 +399,22 @@ func doServer(info *AlpinoInfo) {
 		if interval > 120 {
 			interval = 120
 		}
-		time.Sleep(time.Duration(interval) * time.Second)
+
+		if sleep := time.Duration(interval)*time.Second - time.Now().Sub(moment); sleep > 0 {
+			time.Sleep(sleep)
+		}
 
 		var buf bytes.Buffer
 		fmt.Fprintf(&buf, `{"request":"output", "id":%q}`, id)
 		resp, err := http.Post(*opt_s, "application/json", &buf)
 		util.CheckErr(err)
+
+		moment = time.Now()
+
 		data, err := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		util.CheckErr(err)
+
 		var response Response
 		err = json.Unmarshal(data, &response)
 		util.CheckErr(err)
@@ -434,6 +443,7 @@ func doServer(info *AlpinoInfo) {
 					if err != nil && *opt_u != "" {
 						fmt.Fprintln(fpud, ">>>", filename)
 						fmt.Fprintln(fpud, "^^^", err)
+						fmt.Fprintln(fpud)
 					}
 				}
 				dirname := filepath.Dir(filename)
