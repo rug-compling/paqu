@@ -19,7 +19,7 @@ func conll(q *context, options int) string {
 			q.filename,
 			strings.Replace(q.sentid, "/", "\\", -1), // het teken / is gereserveerd
 			q.sentence,
-			versionID)
+			VersionID())
 
 		if options&OPT_DEBUG != 0 {
 			for i, d := range q.debugs {

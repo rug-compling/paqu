@@ -8,17 +8,6 @@ import (
 	"strings"
 )
 
-// updates to the output
-const VersionMajor = 4
-
-// updates to the package API (unlikely)
-const VersionMinor = 2
-
-const (
-	UDVersionMajor = 2
-	UDVersionMinor = 2 // not yet 3
-)
-
 // options can be or'ed as last argument to Ud()
 const (
 	OPT_DEBUG                  = 1 << iota // include debug messages in comments
@@ -52,18 +41,16 @@ var (
 		udHeadPosition:      error_no_head,
 		udEHeadPosition:     error_no_head,
 	}
-	versionID = fmt.Sprintf("ALUD%d.%d", VersionMajor, VersionMinor)
 )
 
 func init() {
 	noNode.parent = noNode
 }
 
-// Version identifier in format ALUDmajor.minor
+// Version ID string
 func VersionID() string {
-	return versionID
+	return "ALUD" + version
 }
-
 
 // Derive Universal Dependencies from parsed sentence in alpino_ds format.
 func Ud(alpino_doc []byte, filename string, options int) (conllu string, err error) {

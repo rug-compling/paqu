@@ -99,7 +99,7 @@ func UdAlpino(alpino_doc []byte, filename string) (alpino string, err error) {
 	alp.Conllu = &conlluType{
 		Status: "error",
 		Error:  e,
-		Auto:   versionID,
+		Auto:   VersionID(),
 		Conllu: " ", // spatie is nodig, wordt later verwijderd
 	}
 	return alpinoFormat(&alp), err
@@ -126,7 +126,7 @@ func alpinoRestore(q *context) {
 		node.End /= 1000
 	}
 	q.alpino.UdNodes = []*udNodeType{}
-	q.alpino.Conllu = &conlluType{Auto: versionID}
+	q.alpino.Conllu = &conlluType{Auto: VersionID()}
 }
 
 func alpinoFormat(alpino *alpino_ds) string {
