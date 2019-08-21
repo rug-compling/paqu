@@ -155,6 +155,7 @@ Usage: %s regexp
 		}
 		if up_to_date {
 			fmt.Printf("Up to date: [%d/%d] %s\n", teller+1, len(corpora), corpus.id)
+			os.Remove(lockfile)
 			continue
 		}
 
