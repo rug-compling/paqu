@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/pebbe/util"
-	"github.com/rug-compling/alud"
+	"github.com/rug-compling/alud/v2"
 
 	"bytes"
 	"encoding/json"
