@@ -20,11 +20,18 @@ type context struct {
 	swapped       [][2]*nodeType
 }
 
-type trace struct {
+type traceT struct {
+	msg    string
+	debugs []string
+	trace  []traceType
+}
+
+type traceType struct {
 	s    string
 	node *nodeType
 	head *nodeType
 	gap  *nodeType
+	subj *nodeType
 }
 
 type alpino_ds struct {
@@ -198,4 +205,9 @@ type udType struct {
 	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
 	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
 	Dep        []depType `xml:"dep,omitempty"`
+}
+
+type nodeDepType struct {
+	node *nodeType
+	dep  *depType
 }

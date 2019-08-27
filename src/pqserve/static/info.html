@@ -31,6 +31,7 @@ Inhoud:
 <li class="dbxml"><a href="#xpath" target="_self" class="dbxml">Zoeken met XPath</a>
 <ul class="dbxml">
   <li class="dbxml"><a href="#expanded" target="_self" class="dbxml">Zoeken met geëxpandeerde indexnodes</a>
+  <li class="dbxml"><a href="#ud" target="_self" class="dbxml">Zoeken naar Universal Dependencies</a>
 </ul class="dbxml">
 <li><a href="#corpora" target="_self">Corpora</a>
 <ul>
@@ -71,7 +72,12 @@ miljoen woorden) is voor elke zin de syntactische ontleding handmatig
 gecheckt. In Lassy Groot (700 miljoen woorden) is de
 syntactische ontleding automatisch toegevoegd door de automatische
 parser Alpino. Beide treebanks worden door PaQu ondersteund.
-
+<p>
+PaQu gebruikt de syntactische annotatie om daaruit automatisch
+<a href="https://universaldependencies.org/">Universal
+Dependencies</a> af te leiden, en die te integreren in de syntactische
+annotatie. Het resultaat hiervan kan met XPath bevraagd worden.
+	      
 <h3 id="inlnk">Nadere informatie</h3>
 
 De preciese uitleg voor de syntactische annotatie is beschikbaar in de het document
@@ -569,6 +575,13 @@ met geëxpandeerde indexnodes, dan zijn de gegevens van alle lege
 indexnodes aangevuld met de gegevens &mdash; attributen en dochters
 &mdash; van de corresponderende niet-lege node. Hierdoor krijg je in dit
 geval toch een match.
+</div>
+
+<h3 id="ud" class="dbxml" style="clear:both">Zoeken naar Universal Dependencies</h3>
+<div class="dbxml">
+Dit is niet beschikbaar voor de grootste corpora.
+<p>
+TODO
 
 </div>
 

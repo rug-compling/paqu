@@ -10,16 +10,22 @@ import (
 )
 
 // recursive
-func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
-	depthCheck(q, "externalHeadPosition")
+func externalHeadPosition(nodes []interface{}, q *context) int {
+	var node *nodeType
+
+	defer func() {
+		if r := recover(); r != nil {
+			panic(trace(r, "externalHeadPosition", q, node))
+		}
+	}()
+
+	depthCheck(q)
 
 	if len(nodes) == 0 {
-		tr = append(tr, trace{s: "externalHeadPosition"})
-		panic(tracer(fmt.Sprint("External head must have one arg, has ", len(nodes)), tr, q))
+		panic(fmt.Sprint("External head must have one arg, has ", len(nodes)))
 	}
 
-	node := nodes[0].(*nodeType)
-	tr = append(tr, trace{s: "externalHeadPosition", node: node})
+	node = nodes[0].(*nodeType)
 
 	if node.Rel == "hd" && (node.udPos == "ADP" || node.parent.Cat == "pp") {
 		// vol vertrouwen
@@ -53,7 +59,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		}); len(n) > 0 {
 			// met als titel
-			return internalHeadPosition(n[:1], q, tr)
+			return internalHeadPosition(n[:1], q)
 		}
 		if obj1_vc_se_me := find(q /* $node/../node[@rel=("obj1","vc","se","me")] */, &xPath{
 			arg1: &dSort{
@@ -106,7 +112,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			}) {
-				return internalHeadPositionWithGapping(if1(obj1_vc_se_me), q, tr)
+				return internalHeadPositionWithGapping(if1(obj1_vc_se_me), q)
 			}
 			if test(q /* $obj1_vc_se_me[@index = ancestor::node/node[@rel=("rhd","whd")]/@index] */, &xPath{
 				arg1: &dSort{
@@ -218,7 +224,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 								},
 							},
 						},
-					}), q, tr)
+					}), q)
 			}
 			if pobj1 := find(q /* $node/../node[@rel="pobj1"] */, &xPath{
 				arg1: &dSort{
@@ -249,78 +255,78 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			}); len(pobj1) > 0 {
-				return internalHeadPosition(if1(pobj1), q, tr)
+				return internalHeadPosition(if1(pobj1), q)
 			}
 			// in de eerste rond --> typo in LassySmall/Wiki , binnen en [advp later buiten ]
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		} else {
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		}
 	}
 
-	aux := auxiliary1(node, q)
-
-	if node.Rel == "hd" && (aux == "aux" || aux == "aux:pass") {
-		// aux aux:pass cop
-		if vc_predc := find(q /* $node/../node[@rel=("vc","predc")] */, &xPath{
-			arg1: &dSort{
-				arg1: &dCollect{
-					ARG: collect__child__node,
+	if aux, err := auxiliary1(node, q); err == nil {
+		if node.Rel == "hd" && (aux == "aux" || aux == "aux:pass") {
+			// aux aux:pass cop
+			if vc_predc := find(q /* $node/../node[@rel=("vc","predc")] */, &xPath{
+				arg1: &dSort{
 					arg1: &dCollect{
-						ARG: collect__parent__type__node,
-						arg1: &dVariable{
-							VAR: node,
-						},
-					},
-					arg2: &dPredicate{
-						arg1: &dEqual{
-							ARG: equal__is,
-							arg1: &dCollect{
-								ARG:  collect__attributes__rel,
-								arg1: &dNode{},
+						ARG: collect__child__node,
+						arg1: &dCollect{
+							ARG: collect__parent__type__node,
+							arg1: &dVariable{
+								VAR: node,
 							},
-							arg2: &dElem{
-								DATA: []interface{}{"vc", "predc"},
+						},
+						arg2: &dPredicate{
+							arg1: &dEqual{
+								ARG: equal__is,
 								arg1: &dCollect{
 									ARG:  collect__attributes__rel,
 									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"vc", "predc"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
 								},
 							},
 						},
 					},
 				},
-			},
-		}); len(vc_predc) > 0 {
-			if test(q /* $vc_predc[@pt or (@cat and node[@pt or @cat])] */, &xPath{
-				arg1: &dSort{
-					arg1: &dFilter{
-						arg1: &dVariable{
-							VAR: vc_predc,
-						},
-						arg2: &dSort{
-							arg1: &dOr{
-								arg1: &dCollect{
-									ARG:  collect__attributes__pt,
-									arg1: &dNode{},
-								},
-								arg2: &dSort{
-									arg1: &dAnd{
-										arg1: &dCollect{
-											ARG:  collect__attributes__cat,
-											arg1: &dNode{},
-										},
-										arg2: &dCollect{
-											ARG:  collect__child__node,
-											arg1: &dNode{},
-											arg2: &dPredicate{
-												arg1: &dOr{
-													arg1: &dCollect{
-														ARG:  collect__attributes__pt,
-														arg1: &dNode{},
-													},
-													arg2: &dCollect{
-														ARG:  collect__attributes__cat,
-														arg1: &dNode{},
+			}); len(vc_predc) > 0 {
+				if test(q /* $vc_predc[@pt or (@cat and node[@pt or @cat])] */, &xPath{
+					arg1: &dSort{
+						arg1: &dFilter{
+							arg1: &dVariable{
+								VAR: vc_predc,
+							},
+							arg2: &dSort{
+								arg1: &dOr{
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dSort{
+										arg1: &dAnd{
+											arg1: &dCollect{
+												ARG:  collect__attributes__cat,
+												arg1: &dNode{},
+											},
+											arg2: &dCollect{
+												ARG:  collect__child__node,
+												arg1: &dNode{},
+												arg2: &dPredicate{
+													arg1: &dOr{
+														arg1: &dCollect{
+															ARG:  collect__attributes__pt,
+															arg1: &dNode{},
+														},
+														arg2: &dCollect{
+															ARG:  collect__attributes__cat,
+															arg1: &dNode{},
+														},
 													},
 												},
 											},
@@ -330,146 +336,112 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 							},
 						},
 					},
-				},
-			}) {
-				// skip vc with just empty nodes
-				return internalHeadPositionWithGapping(if1(vc_predc), q, tr)
+				}) {
+					// skip vc with just empty nodes
+					return internalHeadPositionWithGapping(if1(vc_predc), q)
+				}
 			}
+			// if ($node/../node[@rel="predc"]/@index = $node/../../node[@rel="whd"]/@index)
+			//     then local:internal_head_position($node/../../node[@rel="whd"])
+			return externalHeadPosition(node.axParent, q) // gapping, but does it ever occur with aux?? with cop: hij was en blijft nog steeds een omstreden figuur
 		}
-		// if ($node/../node[@rel="predc"]/@index = $node/../../node[@rel="whd"]/@index)
-		//     then local:internal_head_position($node/../../node[@rel="whd"])
-		return externalHeadPosition(node.axParent, q, tr) // gapping, but does it ever occur with aux?? with cop: hij was en blijft nog steeds een omstreden figuur
-	}
 
-	if node.Rel == "hd" && aux == "cop" {
-		predc := find(q /* $node/../node[@rel="predc"] */, &xPath{
-			arg1: &dSort{
-				arg1: &dCollect{
-					ARG: collect__child__node,
+		if node.Rel == "hd" && aux == "cop" {
+			predc := find(q /* $node/../node[@rel="predc"] */, &xPath{
+				arg1: &dSort{
 					arg1: &dCollect{
-						ARG: collect__parent__type__node,
-						arg1: &dVariable{
-							VAR: node,
-						},
-					},
-					arg2: &dPredicate{
-						arg1: &dEqual{
-							ARG: equal__is,
-							arg1: &dCollect{
-								ARG:  collect__attributes__rel,
-								arg1: &dNode{},
+						ARG: collect__child__node,
+						arg1: &dCollect{
+							ARG: collect__parent__type__node,
+							arg1: &dVariable{
+								VAR: node,
 							},
-							arg2: &dElem{
-								DATA: []interface{}{"predc"},
+						},
+						arg2: &dPredicate{
+							arg1: &dEqual{
+								ARG: equal__is,
 								arg1: &dCollect{
 									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"predc"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			})
+			if len(predc) > 0 && test(q /* $predc[@pt or @cat] */, &xPath{
+				arg1: &dSort{
+					arg1: &dFilter{
+						arg1: &dVariable{
+							VAR: predc,
+						},
+						arg2: &dSort{
+							arg1: &dOr{
+								arg1: &dCollect{
+									ARG:  collect__attributes__pt,
+									arg1: &dNode{},
+								},
+								arg2: &dCollect{
+									ARG:  collect__attributes__cat,
 									arg1: &dNode{},
 								},
 							},
 						},
 					},
 				},
-			},
-		})
-		if len(predc) > 0 && test(q /* $predc[@pt or @cat] */, &xPath{
-			arg1: &dSort{
-				arg1: &dFilter{
-					arg1: &dVariable{
-						VAR: predc,
-					},
-					arg2: &dSort{
-						arg1: &dOr{
-							arg1: &dCollect{
-								ARG:  collect__attributes__pt,
-								arg1: &dNode{},
-							},
-							arg2: &dCollect{
-								ARG:  collect__attributes__cat,
-								arg1: &dNode{},
-							},
-						},
-					},
-				},
-			},
-		}) {
-			return internalHeadPositionWithGapping(if1(predc), q, tr)
-		}
-		if test(q /* $node/../node[@rel="predc"]/@index = $node/ancestor::node/node[@rel=("rhd","whd")]/@index */, &xPath{
-			arg1: &dSort{
-				arg1: &dEqual{
-					ARG: equal__is,
-					arg1: &dCollect{
-						ARG: collect__attributes__index,
+			}) {
+				return internalHeadPositionWithGapping(if1(predc), q)
+			}
+			if test(q /* $node/../node[@rel="predc"]/@index = $node/ancestor::node/node[@rel=("rhd","whd")]/@index */, &xPath{
+				arg1: &dSort{
+					arg1: &dEqual{
+						ARG: equal__is,
 						arg1: &dCollect{
-							ARG: collect__child__node,
+							ARG: collect__attributes__index,
 							arg1: &dCollect{
-								ARG: collect__parent__type__node,
-								arg1: &dVariable{
-									VAR: node,
-								},
-							},
-							arg2: &dPredicate{
-								arg1: &dEqual{
-									ARG: equal__is,
-									arg1: &dCollect{
-										ARG:  collect__attributes__rel,
-										arg1: &dNode{},
+								ARG: collect__child__node,
+								arg1: &dCollect{
+									ARG: collect__parent__type__node,
+									arg1: &dVariable{
+										VAR: node,
 									},
-									arg2: &dElem{
-										DATA: []interface{}{"predc"},
+								},
+								arg2: &dPredicate{
+									arg1: &dEqual{
+										ARG: equal__is,
 										arg1: &dCollect{
 											ARG:  collect__attributes__rel,
 											arg1: &dNode{},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"predc"},
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
 										},
 									},
 								},
 							},
 						},
-					},
-					arg2: &dCollect{
-						ARG: collect__attributes__index,
-						arg1: &dCollect{
-							ARG: collect__child__node,
+						arg2: &dCollect{
+							ARG: collect__attributes__index,
 							arg1: &dCollect{
-								ARG: collect__ancestors__node,
-								arg1: &dVariable{
-									VAR: node,
-								},
-							},
-							arg2: &dPredicate{
-								arg1: &dEqual{
-									ARG: equal__is,
-									arg1: &dCollect{
-										ARG:  collect__attributes__rel,
-										arg1: &dNode{},
-									},
-									arg2: &dElem{
-										DATA: []interface{}{"rhd", "whd"},
-										arg1: &dCollect{
-											ARG:  collect__attributes__rel,
-											arg1: &dNode{},
-										},
+								ARG: collect__child__node,
+								arg1: &dCollect{
+									ARG: collect__ancestors__node,
+									arg1: &dVariable{
+										VAR: node,
 									},
 								},
-							},
-						},
-					},
-				},
-			},
-		}) {
-			return internalHeadPosition(
-				find(q /* $node/ancestor::node/node[@rel=("rhd","whd") and @index = $node/../node[@rel="predc"]/@index] */, &xPath{
-					arg1: &dSort{
-						arg1: &dCollect{
-							ARG: collect__child__node,
-							arg1: &dCollect{
-								ARG: collect__ancestors__node,
-								arg1: &dVariable{
-									VAR: node,
-								},
-							},
-							arg2: &dPredicate{
-								arg1: &dAnd{
+								arg2: &dPredicate{
 									arg1: &dEqual{
 										ARG: equal__is,
 										arg1: &dCollect{
@@ -484,34 +456,68 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 											},
 										},
 									},
-									arg2: &dEqual{
-										ARG: equal__is,
-										arg1: &dCollect{
-											ARG:  collect__attributes__index,
-											arg1: &dNode{},
-										},
-										arg2: &dCollect{
-											ARG: collect__attributes__index,
+								},
+							},
+						},
+					},
+				},
+			}) {
+				return internalHeadPosition(
+					find(q /* $node/ancestor::node/node[@rel=("rhd","whd") and @index = $node/../node[@rel="predc"]/@index] */, &xPath{
+						arg1: &dSort{
+							arg1: &dCollect{
+								ARG: collect__child__node,
+								arg1: &dCollect{
+									ARG: collect__ancestors__node,
+									arg1: &dVariable{
+										VAR: node,
+									},
+								},
+								arg2: &dPredicate{
+									arg1: &dAnd{
+										arg1: &dEqual{
+											ARG: equal__is,
 											arg1: &dCollect{
-												ARG: collect__child__node,
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"rhd", "whd"},
 												arg1: &dCollect{
-													ARG: collect__parent__type__node,
-													arg1: &dVariable{
-														VAR: node,
-													},
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
 												},
-												arg2: &dPredicate{
-													arg1: &dEqual{
-														ARG: equal__is,
-														arg1: &dCollect{
-															ARG:  collect__attributes__rel,
-															arg1: &dNode{},
+											},
+										},
+										arg2: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__index,
+												arg1: &dNode{},
+											},
+											arg2: &dCollect{
+												ARG: collect__attributes__index,
+												arg1: &dCollect{
+													ARG: collect__child__node,
+													arg1: &dCollect{
+														ARG: collect__parent__type__node,
+														arg1: &dVariable{
+															VAR: node,
 														},
-														arg2: &dElem{
-															DATA: []interface{}{"predc"},
+													},
+													arg2: &dPredicate{
+														arg1: &dEqual{
+															ARG: equal__is,
 															arg1: &dCollect{
 																ARG:  collect__attributes__rel,
 																arg1: &dNode{},
+															},
+															arg2: &dElem{
+																DATA: []interface{}{"predc"},
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
 															},
 														},
 													},
@@ -522,12 +528,11 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 								},
 							},
 						},
-					},
-				}),
-				q,
-				tr)
+					}),
+					q)
+			}
+			return externalHeadPosition(node.axParent, q) // gapping, but could it??
 		}
-		return externalHeadPosition(node.axParent, q, tr) // gapping, but could it??
 	}
 
 	if node.Rel == "hd" || node.Rel == "nucl" || node.Rel == "body" {
@@ -575,9 +580,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}); len(n) > 0 {
-			return internalHeadPosition(list(n), q, tr) // dan moet je moet
+			return internalHeadPosition(list(n), q) // dan moet je moet
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if node.Rel == "predc" {
@@ -699,7 +704,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			}) {
-				return externalHeadPosition(node.axParent, q, tr) // met als presentator Bruno W , met als gevolg [vc dat ...]
+				return externalHeadPosition(node.axParent, q) // met als presentator Bruno W , met als gevolg [vc dat ...]
 			}
 			return internalHeadPosition(find(q /* $node/../node[@rel="hd"] */, &xPath{
 				arg1: &dSort{
@@ -729,7 +734,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			}), q, tr)
+			}), q)
 		}
 		if test(q /* $node/parent::node[@cat=("np","ap") and node[@rel="hd" and (@pt or @cat) and not(@ud:pos="AUX") ]  ] */, &xPath{
 			arg1: &dSort{
@@ -846,7 +851,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			}), q, tr)
+			}), q)
 		}
 		if test(q /* $node/../node[@rel="hd" and (@pt or @cat) and not(@ud:pos=("AUX","ADP"))] */, &xPath{
 			arg1: &dSort{
@@ -942,9 +947,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			}), q, tr)
+			}), q)
 		}
-		return externalHeadPosition(node.axParent, q, tr) // covers gapping as well?
+		return externalHeadPosition(node.axParent, q) // covers gapping as well?
 	}
 
 	if test(q /* $node[@rel=("obj1","se","me") and (../@cat="pp" or ../node[@ud:pos="ADP" and @rel="hd"])] */, &xPath{
@@ -1066,9 +1071,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}); len(predc) > 0 {
-			return internalHeadPosition(predc, q, tr)
+			return internalHeadPosition(predc, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if test(q /* $node[@rel="pobj1" and (../@cat="pp" or ../node[@ud:pos="ADP" and @rel="hd"])] */, &xPath{
@@ -1190,9 +1195,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}); len(vc) > 0 {
-			return internalHeadPosition(vc, q, tr)
+			return internalHeadPosition(vc, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if test(q /* $node[@rel="mod" and not(../node[@rel=("obj1","pobj1","se","me")]) and (../@cat="pp" or ../node[@rel="hd" and @ud:pos="ADP"])] */, &xPath{
@@ -1361,9 +1366,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) {
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr) // gapping
+		return externalHeadPosition(node.axParent, q) // gapping
 	}
 
 	if test(q /* $node[@rel=("cnj","dp","mwp")] */, &xPath{
@@ -1420,12 +1425,12 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		})) {
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		}
 		if node.Rel == "cnj" {
-			return headPositionOfConjunction(node, q, tr)
+			return headPositionOfConjunction(node, q)
 		}
-		return internalHeadPositionWithGapping(node.axParent, q, tr)
+		return internalHeadPositionWithGapping(node.axParent, q)
 	}
 
 	if test(q /* $node[@rel="cmp" and ../node[@rel="body"]] */, &xPath{
@@ -1511,7 +1516,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if node.Rel == "--" && node.Cat != "" {
@@ -1604,11 +1609,11 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 							},
 						},
 					},
-				}), q, tr)
+				}), q)
 			}
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if node.Rel == "--" && node.udPos != "" {
@@ -1746,8 +1751,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				}),
-				q,
-				tr)
+				q)
 		}
 		if n := find(q /* $node/../node[@cat][1] */, &xPath{
 			arg1: &dSort{
@@ -1773,7 +1777,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}); len(n) > 0 {
-			return internalHeadPosition(n, q, tr)
+			return internalHeadPosition(n, q)
 		}
 		if test(q /* $node[@ud:pos="PUNCT" and count(../node) > 1] */, &xPath{
 			arg1: &dSort{
@@ -1873,7 +1877,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			}); len(n) > 0 {
-				return internalHeadPosition(n, q, tr)
+				return internalHeadPosition(n, q)
 			}
 			if node == nLeft(find(q /* $node/../node[@rel="--" and (@cat or @pt)] */, &xPath{
 				arg1: &dSort{
@@ -1918,14 +1922,14 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			})) {
-				return externalHeadPosition(node.axParent, q, tr)
+				return externalHeadPosition(node.axParent, q)
 			}
 			return 1000 // ie end of first punct token
 		}
 		if node.parent.Begin >= 0 {
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		}
-		panic(tracer("No head found", tr, q))
+		panic("No head found")
 	}
 
 	if node.Rel == "dlink" || node.Rel == "sat" || node.Rel == "tag" {
@@ -1958,9 +1962,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}); len(n) > 0 {
-			return internalHeadPositionWithGapping(n, q, tr)
+			return internalHeadPositionWithGapping(n, q)
 		}
-		panic(tracer("No external head", tr, q))
+		panic("No external head")
 	}
 
 	if node.Rel == "vc" {
@@ -2106,7 +2110,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			}) {
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		}
 		if test(q /* $node/../@cat="pp" */, &xPath{
 			arg1: &dSort{
@@ -2136,7 +2140,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) { // eraan dat
-			return externalHeadPosition(node.axParent, q, tr)
+			return externalHeadPosition(node.axParent, q)
 		}
 		if test(q /* $node/../node[@rel=("hd","su") and (@pt or @cat)] */, &xPath{
 			arg1: &dSort{
@@ -2181,9 +2185,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) {
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if node.Rel == "whd" || node.Rel == "rhd" {
@@ -2246,7 +2250,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			}), q, tr)
+			}), q)
 		}
 		return internalHeadPosition(find(q /* $node/../node[@rel="body"] */, &xPath{
 			arg1: &dSort{
@@ -2276,7 +2280,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	/*
@@ -2287,7 +2291,8 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 		elliptical cases, select last() as brute force solution
 	*/
 	if node.Rel == "crd" {
-		tmp := followingCnjSister(node, q, tr)
+		//NP -> OK, followingCnjSister geeft geen panic
+		tmp := followingCnjSister(node, q)
 		return internalHeadPositionWithGapping(ifZ(find(q, /* $node/../node[@rel="cnj" and
 			   @begin=$tmp/@begin and
 			   @end=$tmp/@end
@@ -2349,122 +2354,103 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			})), q, tr)
+			})), q)
 	}
 
 	if node.Rel == "su" {
-		if test(q, /* $node[../node[@rel="vc"] and ../node[@rel="hd" and
-			   ( @ud:pos="AUX" or $node/ancestor::node[@rel="top"]//node[@ud:pos="AUX"]/@index = @index ) ]] */&xPath{
+		if test(q, /* $node/../node[@rel="vc"] and $node/../node[@rel="hd" and
+			   ( @ud:pos="AUX" or $node/ancestor::node[@rel="top"]//node[@ud:pos="AUX"]/@index = @index ) ] */&xPath{
 				arg1: &dSort{
-					arg1: &dFilter{
-						arg1: &dVariable{
-							VAR: node,
-						},
-						arg2: &dSort{
-							arg1: &dAnd{
-								arg1: &dCollect{
-									ARG: collect__child__node,
+					arg1: &dAnd{
+						arg1: &dCollect{
+							ARG: collect__child__node,
+							arg1: &dCollect{
+								ARG: collect__parent__type__node,
+								arg1: &dVariable{
+									VAR: node,
+								},
+							},
+							arg2: &dPredicate{
+								arg1: &dEqual{
+									ARG: equal__is,
 									arg1: &dCollect{
-										ARG:  collect__parent__type__node,
+										ARG:  collect__attributes__rel,
 										arg1: &dNode{},
 									},
-									arg2: &dPredicate{
-										arg1: &dEqual{
-											ARG: equal__is,
+									arg2: &dElem{
+										DATA: []interface{}{"vc"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__rel,
+											arg1: &dNode{},
+										},
+									},
+								},
+							},
+						},
+						arg2: &dCollect{
+							ARG: collect__child__node,
+							arg1: &dCollect{
+								ARG: collect__parent__type__node,
+								arg1: &dVariable{
+									VAR: node,
+								},
+							},
+							arg2: &dPredicate{
+								arg1: &dAnd{
+									arg1: &dEqual{
+										ARG: equal__is,
+										arg1: &dCollect{
+											ARG:  collect__attributes__rel,
+											arg1: &dNode{},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"hd"},
 											arg1: &dCollect{
 												ARG:  collect__attributes__rel,
 												arg1: &dNode{},
 											},
-											arg2: &dElem{
-												DATA: []interface{}{"vc"},
-												arg1: &dCollect{
-													ARG:  collect__attributes__rel,
-													arg1: &dNode{},
-												},
-											},
 										},
 									},
-								},
-								arg2: &dCollect{
-									ARG: collect__child__node,
-									arg1: &dCollect{
-										ARG:  collect__parent__type__node,
-										arg1: &dNode{},
-									},
-									arg2: &dPredicate{
-										arg1: &dAnd{
+									arg2: &dSort{
+										arg1: &dOr{
 											arg1: &dEqual{
 												ARG: equal__is,
 												arg1: &dCollect{
-													ARG:  collect__attributes__rel,
+													ARG:  collect__attributes__ud_3apos,
 													arg1: &dNode{},
 												},
 												arg2: &dElem{
-													DATA: []interface{}{"hd"},
+													DATA: []interface{}{"AUX"},
 													arg1: &dCollect{
-														ARG:  collect__attributes__rel,
+														ARG:  collect__attributes__ud_3apos,
 														arg1: &dNode{},
 													},
 												},
 											},
-											arg2: &dSort{
-												arg1: &dOr{
-													arg1: &dEqual{
-														ARG: equal__is,
+											arg2: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG: collect__attributes__index,
+													arg1: &dCollect{
+														ARG: collect__child__node,
 														arg1: &dCollect{
-															ARG:  collect__attributes__ud_3apos,
-															arg1: &dNode{},
-														},
-														arg2: &dElem{
-															DATA: []interface{}{"AUX"},
+															ARG: collect__descendant__or__self__type__node,
 															arg1: &dCollect{
-																ARG:  collect__attributes__ud_3apos,
-																arg1: &dNode{},
-															},
-														},
-													},
-													arg2: &dEqual{
-														ARG: equal__is,
-														arg1: &dCollect{
-															ARG: collect__attributes__index,
-															arg1: &dCollect{
-																ARG: collect__child__node,
-																arg1: &dCollect{
-																	ARG: collect__descendant__or__self__type__node,
-																	arg1: &dCollect{
-																		ARG: collect__ancestors__node,
-																		arg1: &dVariable{
-																			VAR: node,
-																		},
-																		arg2: &dPredicate{
-																			arg1: &dEqual{
-																				ARG: equal__is,
-																				arg1: &dCollect{
-																					ARG:  collect__attributes__rel,
-																					arg1: &dNode{},
-																				},
-																				arg2: &dElem{
-																					DATA: []interface{}{"top"},
-																					arg1: &dCollect{
-																						ARG:  collect__attributes__rel,
-																						arg1: &dNode{},
-																					},
-																				},
-																			},
-																		},
-																	},
+																ARG: collect__ancestors__node,
+																arg1: &dVariable{
+																	VAR: node,
 																},
 																arg2: &dPredicate{
 																	arg1: &dEqual{
 																		ARG: equal__is,
 																		arg1: &dCollect{
-																			ARG:  collect__attributes__ud_3apos,
+																			ARG:  collect__attributes__rel,
 																			arg1: &dNode{},
 																		},
 																		arg2: &dElem{
-																			DATA: []interface{}{"AUX"},
+																			DATA: []interface{}{"top"},
 																			arg1: &dCollect{
-																				ARG:  collect__attributes__ud_3apos,
+																				ARG:  collect__attributes__rel,
 																				arg1: &dNode{},
 																			},
 																		},
@@ -2472,11 +2458,27 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 																},
 															},
 														},
-														arg2: &dCollect{
-															ARG:  collect__attributes__index,
-															arg1: &dNode{},
+														arg2: &dPredicate{
+															arg1: &dEqual{
+																ARG: equal__is,
+																arg1: &dCollect{
+																	ARG:  collect__attributes__ud_3apos,
+																	arg1: &dNode{},
+																},
+																arg2: &dElem{
+																	DATA: []interface{}{"AUX"},
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__ud_3apos,
+																		arg1: &dNode{},
+																	},
+																},
+															},
 														},
 													},
+												},
+												arg2: &dCollect{
+													ARG:  collect__attributes__index,
+													arg1: &dNode{},
 												},
 											},
 										},
@@ -2487,39 +2489,13 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			}) {
-			tmp := internalHeadPositionWithGapping(find(q /* $node/../node[@rel="vc"] */, &xPath{
-				arg1: &dSort{
-					arg1: &dCollect{
-						ARG: collect__child__node,
-						arg1: &dCollect{
-							ARG: collect__parent__type__node,
-							arg1: &dVariable{
-								VAR: node,
-							},
-						},
-						arg2: &dPredicate{
-							arg1: &dEqual{
-								ARG: equal__is,
-								arg1: &dCollect{
-									ARG:  collect__attributes__rel,
-									arg1: &dNode{},
-								},
-								arg2: &dElem{
-									DATA: []interface{}{"vc"},
-									arg1: &dCollect{
-										ARG:  collect__attributes__rel,
-										arg1: &dNode{},
-									},
-								},
-							},
-						},
-					},
-				},
-			}), q, tr)
-			if node.Begin < tmp && tmp <= node.End {
-				return externalHeadPosition(node.axParent, q, tr)
+			//NP -> half opgelost -> zie TODO
+			tmp, err := internalHeadPositionWithGappingWithError(node.axParent, q) // testing -- dont go to vc as it has no head sometimes...
+			if err == nil && node.Begin < tmp && tmp <= node.End {                 // maybe the different error handling in go code causes diff with xquery script?
+				return externalHeadPosition(node.axParent, q)
 			}
-			return tmp
+			// TODO: dit is gelijk aan tmp... wat als err != nil?
+			return internalHeadPositionWithGapping(node.axParent, q) // dont go to vc directly as it might be empty
 		}
 		if test(q /* $node/../node[@rel="hd" and (@pt or @cat)] */, &xPath{
 			arg1: &dSort{
@@ -2564,7 +2540,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) { // gapping
-			return internalHeadPositionWithGapping(node.axParent, q, tr) // ud head could still be a predc
+			return internalHeadPositionWithGapping(node.axParent, q) // ud head could still be a predc
 		}
 		// only for 1 case where verb is missing -- die eigendom ... (no verb))
 		if test(q /* $node[../node[@rel="predc" and (@pt or @cat)] and not(../node[@rel="hd" and (@pt or @cat)])] */, &xPath{
@@ -2689,9 +2665,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			}), q, tr)
+			}), q)
 		}
-		return externalHeadPosition(node.axParent, q, tr) // this probably does no change anything, as we are still attaching to head of left conjunct
+		return externalHeadPosition(node.axParent, q) // this probably does no change anything, as we are still attaching to head of left conjunct
 	}
 
 	if node.Rel == "obj1" {
@@ -2738,9 +2714,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) { // gapping, as su but now su could be head as well
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if node.Rel == "pc" {
@@ -2787,9 +2763,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) { // gapping, as su but now su could be head as well
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if node.Rel == "mod" {
@@ -2836,7 +2812,7 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) { // gapping, as su but now su or obj1  could be head as well
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
 		if n := find(q /* $node/../node[@rel="mod" and (@cat or @pt)] */, &xPath{
 			arg1: &dSort{
@@ -2882,9 +2858,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		}); len(n) > 0 {
 			if node == nLeft(n) { // gapping with multiple mods
-				return externalHeadPosition(node.axParent, q, tr)
+				return externalHeadPosition(node.axParent, q)
 			}
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
 		if test(q /* $node/../../node[@rel="su" and (@pt or @cat)] */, &xPath{
 			arg1: &dSort{
@@ -2963,9 +2939,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				},
-			}), q, tr)
+			}), q)
 		}
-		return externalHeadPosition(node.axParent, q, tr) /* an empty mod in an otherwise empty tree
+		return externalHeadPosition(node.axParent, q) /* an empty mod in an otherwise empty tree
 		   -- mod is co-indexed with rhd, rest is elided,
 		   LassySmall4/wiki-7064/wiki-7064.p.28.s.3.xml */
 	}
@@ -3014,9 +2990,9 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) { // gapping with an app (or a det)!
-			return internalHeadPositionWithGapping(node.axParent, q, tr)
+			return internalHeadPositionWithGapping(node.axParent, q)
 		}
-		return externalHeadPosition(node.axParent, q, tr)
+		return externalHeadPosition(node.axParent, q)
 	}
 
 	if node.Rel == "top" {
@@ -3024,22 +3000,45 @@ func externalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 	}
 
 	if node.Rel != "hd" { // TODO: klopt dit?
-		return internalHeadPositionWithGapping(node.axParent, q, tr)
+		return internalHeadPositionWithGapping(node.axParent, q)
 	}
 
-	panic(tracer("No external head", tr, q))
+	panic("No external head")
+}
+
+func internalHeadPositionWithError(nodes []interface{}, q *context) (head int, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			head = error_no_head
+			err = fmt.Errorf("NO HEAD")
+		}
+	}()
+	head = internalHeadPosition(nodes, q)
+	return // geen argumenten i.v.m. recover
 }
 
 // recursive
-func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
-	depthCheck(q, "internalHeadPosition")
+func internalHeadPosition(nodes []interface{}, q *context) int {
+
+	defer func() {
+		if r := recover(); r != nil {
+			var n *nodeType
+			if len(nodes) == 1 {
+				if n1, ok := nodes[0].(*nodeType); ok {
+					n = n1
+				}
+			}
+			panic(trace(r, "internalHeadPosition", q, n))
+		}
+	}()
+
+	depthCheck(q)
 
 	if n := len(nodes); n != 1 {
-		tr = append(tr, trace{s: "internalHeadPosition"})
 		if n == 0 {
-			panic(tracer("No internal head position found", tr, q))
+			panic("No internal head position found")
 		} else if n > 1 {
-			panic(tracer("More than one internal head position found", tr, q))
+			panic("More than one internal head position found")
 		}
 	}
 	node := nodes[0]
@@ -3102,7 +3101,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}); len(n) > 0 {
-			return internalHeadPosition(n, q, tr)
+			return internalHeadPosition(n, q)
 		}
 		if n := find(q /* $node/node[@rel="hd"] */, &xPath{
 			arg1: &dSort{
@@ -3132,7 +3131,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 		}); len(n) > 0 {
 			// if ($node/@cat="mwu")  ( mede [op grond hiervan] )
 			//     local:internal_head_position($node/node[@rel="hd"] )
-			return internalHeadPosition(n, q, tr)
+			return internalHeadPosition(n, q)
 		}
 		return internalHeadPosition(find(q /* $node/node[1] */, &xPath{
 			arg1: &dSort{
@@ -3148,7 +3147,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if test(q /* $node[@cat="mwu"] */, &xPath{
@@ -3283,7 +3282,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			},
-		})), q, tr)
+		})), q)
 	}
 
 	if predc := find(q /* $node/node[@rel="predc"] */, &xPath{
@@ -3354,7 +3353,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 				},
 			},
 		}) {
-			return internalHeadPosition(predc, q, tr)
+			return internalHeadPosition(predc, q)
 		}
 		hd := find(q /* $node/node[@rel="hd"] */, &xPath{
 			arg1: &dSort{
@@ -3383,9 +3382,9 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		})
 		if len(hd) == 0 { // cases where copula is missing by accident (ungrammatical, not gapping)
-			return internalHeadPosition(predc, q, tr)
+			return internalHeadPosition(predc, q)
 		}
-		return internalHeadPosition(hd, q, tr)
+		return internalHeadPosition(hd, q)
 	}
 
 	if test(q, /* $node[node[@rel="vc"] and
@@ -3546,7 +3545,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if n := find(q /* $node/node[@rel="hd"][1] */, &xPath{
@@ -3580,7 +3579,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPosition(n, q, tr)
+		return internalHeadPosition(n, q)
 	}
 
 	if n := find(q /* $node/node[@rel="body"][1] */, &xPath{
@@ -3614,7 +3613,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPosition(n, q, tr)
+		return internalHeadPosition(n, q)
 	}
 
 	if n := find(q /* $node/node[@rel="dp"] */, &xPath{
@@ -3643,7 +3642,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPosition(ifLeft(n), q, tr)
+		return internalHeadPosition(ifLeft(n), q)
 		// sometimes co-indexing leads to du's starting at same position ...
 	}
 
@@ -3673,7 +3672,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPosition(if1(n), q, tr)
+		return internalHeadPosition(if1(n), q)
 	}
 
 	if n := find(q /* $node/node[@cat="du"] */, &xPath{
@@ -3702,7 +3701,7 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 			},
 		},
 	}); len(n) > 0 { // is this neccesary at all? , only one referring to cat, and causes problems if applied before @rel=dp case...
-		return internalHeadPosition(if1(n), q, tr)
+		return internalHeadPosition(if1(n), q)
 	}
 
 	if test(q /* $node[@word] */, &xPath{
@@ -3909,34 +3908,58 @@ func internalHeadPosition(nodes []interface{}, q *context, tr []trace) int {
 						},
 					},
 				}),
-				q,
-				tr)
+				q)
 		}
 		return empty_head
 	}
 
-	panic(tracer("No internal head", tr, q))
+	panic("No internal head")
 }
 
-func internalHeadPositionWithGapping(node []interface{}, q *context, tr []trace) int {
-	if len(node) == 1 {
-		tr = append(tr, trace{s: "internalHeadPositionWithGapping", node: node[0].(*nodeType)})
-	} else {
-		tr = append(tr, trace{s: fmt.Sprintf("internalHeadPositionWithGapping with %d nodes", len(node))})
-	}
-	if hdPos := internalHeadPosition(node, q, tr); hdPos == empty_head {
-		return internalHeadPositionOfGappedConstituent(node, q, tr)
+func internalHeadPositionWithGappingWithError(node []interface{}, q *context) (head int, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			head = error_no_head
+			err = fmt.Errorf("NO HEAD")
+		}
+	}()
+	head = internalHeadPositionWithGapping(node, q)
+	return // geen argumenten i.v.m. recover
+}
+
+func internalHeadPositionWithGapping(node []interface{}, q *context) int {
+
+	defer func() {
+		if r := recover(); r != nil {
+			if len(node) == 1 {
+				panic(trace(r, "internalHeadPositionWithGapping", q, node[0].(*nodeType)))
+			} else {
+				panic(trace(r, fmt.Sprintf("internalHeadPositionWithGapping with %d nodes", len(node)), q))
+			}
+		}
+	}()
+
+	//NP -> OK, werkt zoals het zou moeten
+	if hdPos := internalHeadPosition(node, q); hdPos == empty_head {
+		return internalHeadPositionOfGappedConstituent(node, q)
 	} else {
 		return hdPos
 	}
 }
 
-func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr []trace) int {
-	depthCheck(q, "internalHeadPositionOfGappedConstituent")
-	if len(node) == 1 {
-	} else {
-		tr = append(tr, trace{s: fmt.Sprintf("internalHeadPositionOfGappedConstituent with %d nodes", len(node))})
-	}
+func internalHeadPositionOfGappedConstituent(node []interface{}, q *context) int {
+
+	defer func() {
+		if r := recover(); r != nil {
+			if len(node) == 1 {
+				panic(trace(r, "internalHeadPositionOfGappedConstituent", q, node[0].(*nodeType)))
+			} else {
+				panic(trace(r, fmt.Sprintf("internalHeadPositionOfGappedConstituent with %d nodes", len(node)), q))
+			}
+		}
+	}()
+
+	depthCheck(q)
 
 	if test(q /* $node/node[@rel="hd" and (@pt or @cat) and not(@ud:pos=("AUX","ADP"))] */, &xPath{
 		arg1: &dSort{
@@ -4026,70 +4049,43 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr) // aux, prepositions
+		}), q) // aux, prepositions
 	}
 
-	if test(q /* $node[ node[@rel="hd" and @ud:pos="AUX"] and node[@rel=("vc","predc")] ] */, &xPath{
+	if test(q /* $node/node[@rel="hd" and @ud:pos="AUX"] */, &xPath{
 		arg1: &dSort{
-			arg1: &dFilter{
+			arg1: &dCollect{
+				ARG: collect__child__node,
 				arg1: &dVariable{
 					VAR: node,
 				},
-				arg2: &dSort{
+				arg2: &dPredicate{
 					arg1: &dAnd{
-						arg1: &dCollect{
-							ARG:  collect__child__node,
-							arg1: &dNode{},
-							arg2: &dPredicate{
-								arg1: &dAnd{
-									arg1: &dEqual{
-										ARG: equal__is,
-										arg1: &dCollect{
-											ARG:  collect__attributes__rel,
-											arg1: &dNode{},
-										},
-										arg2: &dElem{
-											DATA: []interface{}{"hd"},
-											arg1: &dCollect{
-												ARG:  collect__attributes__rel,
-												arg1: &dNode{},
-											},
-										},
-									},
-									arg2: &dEqual{
-										ARG: equal__is,
-										arg1: &dCollect{
-											ARG:  collect__attributes__ud_3apos,
-											arg1: &dNode{},
-										},
-										arg2: &dElem{
-											DATA: []interface{}{"AUX"},
-											arg1: &dCollect{
-												ARG:  collect__attributes__ud_3apos,
-												arg1: &dNode{},
-											},
-										},
-									},
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__rel,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"hd"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
 								},
 							},
 						},
-						arg2: &dCollect{
-							ARG:  collect__child__node,
-							arg1: &dNode{},
-							arg2: &dPredicate{
-								arg1: &dEqual{
-									ARG: equal__is,
-									arg1: &dCollect{
-										ARG:  collect__attributes__rel,
-										arg1: &dNode{},
-									},
-									arg2: &dElem{
-										DATA: []interface{}{"vc", "predc"},
-										arg1: &dCollect{
-											ARG:  collect__attributes__rel,
-											arg1: &dNode{},
-										},
-									},
+						arg2: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__ud_3apos,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"AUX"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__ud_3apos,
+									arg1: &dNode{},
 								},
 							},
 						},
@@ -4098,7 +4094,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}) {
-		return internalHeadPositionWithGapping(find(q /* $node/node[@rel=("vc","predc")] */, &xPath{
+		if test(q /* $node/node[@rel=("vc","predc") and (@pt or node[@cat or @pt])] */, &xPath{
 			arg1: &dSort{
 				arg1: &dCollect{
 					ARG: collect__child__node,
@@ -4106,24 +4102,104 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 						VAR: node,
 					},
 					arg2: &dPredicate{
-						arg1: &dEqual{
-							ARG: equal__is,
-							arg1: &dCollect{
-								ARG:  collect__attributes__rel,
-								arg1: &dNode{},
-							},
-							arg2: &dElem{
-								DATA: []interface{}{"vc", "predc"},
+						arg1: &dAnd{
+							arg1: &dEqual{
+								ARG: equal__is,
 								arg1: &dCollect{
 									ARG:  collect__attributes__rel,
 									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"vc", "predc"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+							arg2: &dSort{
+								arg1: &dOr{
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
+											arg1: &dOr{
+												arg1: &dCollect{
+													ARG:  collect__attributes__cat,
+													arg1: &dNode{},
+												},
+												arg2: &dCollect{
+													ARG:  collect__attributes__pt,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
 								},
 							},
 						},
 					},
 				},
 			},
-		}), q, tr)
+		}) {
+			return internalHeadPositionWithGapping(find(q /* $node/node[@rel=("vc","pred")] */, &xPath{
+				arg1: &dSort{
+					arg1: &dCollect{
+						ARG: collect__child__node,
+						arg1: &dVariable{
+							VAR: node,
+						},
+						arg2: &dPredicate{
+							arg1: &dEqual{
+								ARG: equal__is,
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"vc", "pred"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			}), q) // testing should be vc,pred
+		} else {
+			return internalHeadPositionWithGapping(find(q /* $node/node[@rel="hd"] */, &xPath{
+				arg1: &dSort{
+					arg1: &dCollect{
+						ARG: collect__child__node,
+						arg1: &dVariable{
+							VAR: node,
+						},
+						arg2: &dPredicate{
+							arg1: &dEqual{
+								ARG: equal__is,
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"hd"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			}), q)
+		}
 	}
 
 	if test(q /* $node/node[@rel="su" and (@pt or @cat)] */, &xPath{
@@ -4191,7 +4267,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr) // 44 van 87 in lassysmall
+		}), q) // 44 van 87 in lassysmall
 	}
 
 	if test(q /* $node[@rel="vc" and ../node[@rel="su" and (@pt or @cat)]] */, &xPath{
@@ -4287,7 +4363,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if test(q /* $node/node[@rel="obj1" and (@pt or @cat)] */, &xPath{
@@ -4355,7 +4431,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if test(q /* $node/node[@rel="predc" and (@pt or @cat)] */, &xPath{
@@ -4423,7 +4499,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if test(q /* $node/node[@rel="vc" and (@pt or @cat)] */, &xPath{
@@ -4496,7 +4572,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if test(q /* $node/node[@rel="pc" and (@pt or @cat)] */, &xPath{
@@ -4569,7 +4645,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 					},
 				},
 			},
-		}), q, tr)
+		}), q)
 	}
 
 	if n := find(q /* $node/node[@rel="mod" and (@pt or @cat)] */, &xPath{
@@ -4612,7 +4688,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 
 	if n := find(q /* $node/node[@rel="app" and (@pt or @cat)] */, &xPath{
@@ -4655,7 +4731,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 
 	if n := find(q /* $node/node[@rel="det" and (@pt or @cat)] */, &xPath{
@@ -4698,7 +4774,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 
 	if n := find(q /* $node/node[@rel="body" and (@pt or @cat)] */, &xPath{
@@ -4741,7 +4817,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 
 	if n := find(q /* $node/node[@rel="cnj" and (@pt or @cat)] */, &xPath{
@@ -4784,7 +4860,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 
 	if n := find(q /* $node/node[@rel="dp" and (@pt or @cat)] */, &xPath{
@@ -4827,7 +4903,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 {
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 	if n := find(q /* $node/node[@rel="hd" and @ud:pos="ADP"] */, &xPath{
 		arg1: &dSort{
@@ -4871,10 +4947,10 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context, tr 
 			},
 		},
 	}); len(n) > 0 { // in en rond Brussel, case not necessary in xquery code (run-time issue?)
-		return internalHeadPositionWithGapping(if1(n), q, tr)
+		return internalHeadPositionWithGapping(if1(n), q)
 	}
 
-	panic(tracer("No internal head in gapped constituent", tr, q))
+	panic("No internal head in gapped constituent")
 }
 
 /*
@@ -4883,11 +4959,16 @@ if interhdpos($node) < internalhdpos($node/..) then do something ad hoc
 because even fixing misplaced heads fails in cases like
 Het front der activisten vertoont dan wel een beeld van lusteloosheid , " aan de basis " is en wordt toch veel werk verzet .
 */
-func headPositionOfConjunction(node *nodeType, q *context, tr []trace) int {
+func headPositionOfConjunction(node *nodeType, q *context) int {
 
-	tr = append(tr, trace{s: "headPositionOfConjunction", node: node})
+	defer func() {
+		if r := recover(); r != nil {
+			panic(trace(r, "headPositionOfConjunction", q, node))
+		}
+	}()
 
-	internal_head := internalHeadPositionWithGapping([]interface{}{node}, q, tr)
+	//NP wat te doen?
+	internal_head := internalHeadPositionWithGapping([]interface{}{node}, q)
 	leftmost_conj_daughter := nLeft(find(q /* $node/../node[@rel="cnj"] */, &xPath{
 		arg1: &dSort{
 			arg1: &dCollect{
@@ -4917,7 +4998,8 @@ func headPositionOfConjunction(node *nodeType, q *context, tr []trace) int {
 			},
 		},
 	}))
-	leftmost_internal_head := internalHeadPositionWithGapping([]interface{}{leftmost_conj_daughter}, q, tr)
+	//NP wat te doen?
+	leftmost_internal_head := internalHeadPositionWithGapping([]interface{}{leftmost_conj_daughter}, q)
 
 	if leftmost_internal_head < internal_head {
 		return leftmost_internal_head
@@ -4936,8 +5018,8 @@ func headPositionOfConjunction(node *nodeType, q *context, tr []trace) int {
 	return endpos_of_leftmost_conj_constituents[len(endpos_of_leftmost_conj_constituents)-1]
 }
 
-func followingCnjSister(node *nodeType, q *context, tr []trace) []interface{} {
-	tr = append(tr, trace{s: "followingCnjSister", node: node})
+func followingCnjSister(node *nodeType, q *context) []interface{} {
+
 	/*
 	   declare function local:following-cnj-sister($node as element(node)) as element(node)
 	   { let $annotated-sisters :=

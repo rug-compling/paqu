@@ -16,6 +16,7 @@ const (
 	OPT_NO_ENHANCED                        // skip enhanced dependencies
 	OPT_NO_FIX_PUNCT                       // don't fix punctuation
 	OPT_NO_FIX_MISPLACED_HEADS             // don't fix misplaced heads in coordination
+	OPT_NO_METADATA                        // don't copy metadata to comments
 	OPT_PANIC                              // panic on error (for development)
 )
 
@@ -63,12 +64,12 @@ func ud(alpino_doc []byte, filename string, options int) (conllu string, q *cont
 		defer func() {
 			if r := recover(); r != nil {
 				conllu = ""
-				err = fmt.Errorf("%v", r)
+				err = fmt.Errorf("%v", untrace(r))
 			}
 		}()
 	}
 	conllu, q, err = udTry(alpino_doc, filename, options)
-	return
+	return // geen argumenten i.v.m. recover
 }
 
 func udTry(alpino_doc []byte, filename string, options int) (conllu string, q *context, err error) {

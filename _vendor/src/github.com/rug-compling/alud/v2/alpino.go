@@ -51,7 +51,7 @@ func Alpino(alpino_doc []byte, conllu, auto string) (alpino string, err error) {
 	alp.Conllu = &conlluType{Conllu: conllu, Auto: auto}
 	alpinoDo(conllu, &alp)
 	alpino, err = alpinoFormat(&alp), nil
-	return
+	return // geen argumenten i.v.m. recover
 }
 
 // Derive Universal Dependencies and insert into alpino_ds format.
@@ -167,6 +167,7 @@ func alpinoDo(conllu string, alpino *alpino_ds) {
 
 	udNodeList := make([]*udNodeType, 0)
 	eudNodeList := make([]*udNodeType, 0)
+	nodeDepList := make([]nodeDepType, 0)
 
 	for _, line := range lines {
 		a := strings.Split(line, "\t")
@@ -195,14 +196,16 @@ func alpinoDo(conllu string, alpino *alpino_ds) {
 				if len(dd) > 1 {
 					aux = dd[1]
 				}
-				node.Ud.Dep = append(node.Ud.Dep, depType{
+				d := depType{
 					Id:         a[0],
 					Head:       dep[0],
 					Deprel:     dep[1],
 					DeprelMain: dd[0],
 					DeprelAux:  aux,
 					Elided:     strings.Contains(a[0], "."),
-				})
+				}
+				node.Ud.Dep = append(node.Ud.Dep, d)
+				nodeDepList = append(nodeDepList, nodeDepType{node: node, dep: &d})
 			}
 		}
 
@@ -277,51 +280,53 @@ func alpinoDo(conllu string, alpino *alpino_ds) {
 			Wvorm:    node.Wvorm,
 		}
 		udNodeList = append(udNodeList, &ud)
+	}
 
-		for _, dep := range node.Ud.Dep {
+	for _, nd := range nodeDepList {
 
-			ud := udNodeType{
-				recursion: make([]string, 0),
+		node := nd.node
+		dep := nd.dep
 
-				XMLName:   xml.Name{Local: dep.DeprelMain},
-				Id:        dep.Id,
-				Form:      node.Ud.Form,
-				Lemma:     node.Ud.Lemma,
-				Upos:      node.Ud.Upos,
-				Head:      dep.Head,
-				Deprel:    dep.Deprel,
-				DeprelAux: dep.DeprelAux,
-				Ud:        "enhanced",
+		ud := udNodeType{
+			recursion: make([]string, 0),
 
-				featsType: node.Ud.featsType,
+			XMLName:   xml.Name{Local: dep.DeprelMain},
+			Id:        dep.Id,
+			Form:      node.Ud.Form,
+			Lemma:     node.Ud.Lemma,
+			Upos:      node.Ud.Upos,
+			Head:      dep.Head,
+			Deprel:    dep.Deprel,
+			DeprelAux: dep.DeprelAux,
+			Ud:        "enhanced",
 
-				Buiging:  node.Buiging,
-				Conjtype: node.Conjtype,
-				Dial:     node.Dial,
-				Genus:    node.Genus,
-				Getal:    node.Getal,
-				GetalN:   node.GetalN,
-				Graad:    node.Graad,
-				Lwtype:   node.Lwtype,
-				Naamval:  node.Naamval,
-				Npagr:    node.Npagr,
-				Ntype:    node.Ntype,
-				Numtype:  node.Numtype,
-				Pdtype:   node.Pdtype,
-				Persoon:  node.Persoon,
-				Positie:  node.Positie,
-				Pt:       node.Pt,
-				Pvagr:    node.Pvagr,
-				Pvtijd:   node.Pvtijd,
-				Spectype: node.Spectype,
-				Status:   node.Status,
-				Vwtype:   node.Vwtype,
-				Vztype:   node.Vztype,
-				Wvorm:    node.Wvorm,
-			}
-			eudNodeList = append(eudNodeList, &ud)
+			featsType: node.Ud.featsType,
+
+			Buiging:  node.Buiging,
+			Conjtype: node.Conjtype,
+			Dial:     node.Dial,
+			Genus:    node.Genus,
+			Getal:    node.Getal,
+			GetalN:   node.GetalN,
+			Graad:    node.Graad,
+			Lwtype:   node.Lwtype,
+			Naamval:  node.Naamval,
+			Npagr:    node.Npagr,
+			Ntype:    node.Ntype,
+			Numtype:  node.Numtype,
+			Pdtype:   node.Pdtype,
+			Persoon:  node.Persoon,
+			Positie:  node.Positie,
+			Pt:       node.Pt,
+			Pvagr:    node.Pvagr,
+			Pvtijd:   node.Pvtijd,
+			Spectype: node.Spectype,
+			Status:   node.Status,
+			Vwtype:   node.Vwtype,
+			Vztype:   node.Vztype,
+			Wvorm:    node.Wvorm,
 		}
-
+		eudNodeList = append(eudNodeList, &ud)
 	}
 
 	alpino.UdNodes = make([]*udNodeType, 0)

@@ -22,8 +22,16 @@ func conll(q *context, options int) string {
 			VersionID())
 
 		if options&OPT_DEBUG != 0 {
-			for i, d := range q.debugs {
-				fmt.Fprintf(&buf, "# debug_%d = %s\n", i+1, d)
+			for _, d := range q.debugs {
+				fmt.Fprintf(&buf, "# debug = %s\n", d)
+			}
+		}
+
+		if options&OPT_NO_METADATA == 0 {
+			if q.alpino.Metadata != nil && q.alpino.Metadata.Meta != nil {
+				for _, m := range q.alpino.Metadata.Meta {
+					fmt.Fprintf(&buf, "# meta_%s = %s\n", m.Name, m.Value)
+				}
 			}
 		}
 	}

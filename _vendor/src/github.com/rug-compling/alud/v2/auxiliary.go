@@ -4,6 +4,10 @@
 
 package alud
 
+import (
+	"fmt"
+)
+
 /*
 func auxiliary(nodes []*nodeType, q *context) string {
 	if len(nodes) != 1 { // TODO: in script staat: = 0
@@ -13,13 +17,13 @@ func auxiliary(nodes []*nodeType, q *context) string {
 }
 */
 
-func auxiliary1(node *nodeType, q *context) string {
+func auxiliary1(node *nodeType, q *context) (aux string, err error) {
 
 	if node.Pt != "ww" {
-		return "ERROR_NO_VERB"
+		return "", fmt.Errorf("ERROR_NO_VERB")
 	}
 	if node.Rel != "hd" {
-		return "verb"
+		return "verb", nil
 	}
 
 	if test(q, /* $node[not(../node[@rel=("obj1","se","vc")]) and
@@ -168,7 +172,7 @@ func auxiliary1(node *nodeType, q *context) string {
 				},
 			},
 		}) {
-		return "cop"
+		return "cop", nil
 	}
 
 	if test(q, /* $node[@lemma=("zijn","worden") and
@@ -586,7 +590,7 @@ func auxiliary1(node *nodeType, q *context) string {
 				},
 			},
 		}) {
-		return "aux:pass"
+		return "aux:pass", nil
 	}
 
 	// krijgen passive with iobj control
@@ -791,7 +795,7 @@ func auxiliary1(node *nodeType, q *context) string {
 				},
 			},
 		}) {
-		return "aux:pass"
+		return "aux:pass", nil
 	}
 
 	// alpino has no principled distinction between AUX and VERB, should be TAME verbs semantically, we follow ENGLISH
@@ -1011,8 +1015,8 @@ func auxiliary1(node *nodeType, q *context) string {
 				},
 			},
 		}) {
-		return "aux"
+		return "aux", nil
 	}
 
-	return "verb"
+	return "verb", nil
 }

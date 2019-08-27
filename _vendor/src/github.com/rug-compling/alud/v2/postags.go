@@ -94,7 +94,11 @@ func universalPosTags(node *nodeType, q *context) string {
 		return "SCONJ"
 	}
 	if pt == "ww" {
-		if auxiliary1(node, q) == "verb" {
+		aux, err := auxiliary1(node, q)
+		if err != nil {
+			panic(fmt.Sprintf("No pos found for %s:%s - %v", number(node.End), node.Word, err))
+		}
+		if aux == "verb" {
 			return "VERB"
 		}
 		return "AUX" // v2: cop and aux:pass --> AUX  (already in place in v1?)
