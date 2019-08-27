@@ -337,7 +337,7 @@ func doServer(info *AlpinoInfo) {
 	}
 	fmt.Fprintf(
 		&buf,
-		`{"request":"parse", "data_type":%q, "timeout":%d, "parser":%q, "max_tokens":%d. "ud":false}`,
+		`{"request":"parse", "data_type":%q, "timeout":%d, "parser":%q, "max_tokens":%d, "ud":false}`,
 		dataType,
 		*opt_t,
 		*opt_p,
