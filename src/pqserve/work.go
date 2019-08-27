@@ -824,6 +824,19 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		os.Remove(m)
 	}
 
+	if Cfg.Conllu && strings.HasPrefix(params, "xmlzip") {
+		cmd := shell(
+			`find %s -name '*.xml' | sort > %s.list; pqudep -p %s/data/ -l %s.list -o > /dev/null 2> %s.err; rm %s.list ; pqudep -v > %s.version`,
+			dirname, conllu, paqudatadir, conllu, conllu, conllu, conllu)
+		err = run(cmd, task.chKill, nil)
+		if err != nil {
+			return
+		}
+		if cu, _ := os.Stat(conllu + ".err"); cu.Size() != 0 {
+			sysErr(fmt.Errorf("CONLLU error(s) in %s.err", conllu))
+		}
+	}
+
 	cmd := shell(
 		// optie -w i.v.m. recover()
 		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
