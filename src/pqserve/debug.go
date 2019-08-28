@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"time"
 )
@@ -45,6 +46,14 @@ func environment(q *Context) {
 
 func stacktrace(q *Context) {
 	q.w.Header().Set("Content-Type", "text/plain")
+
+	cmd := shell(fmt.Sprintf("top -b -n 1 -p %d", os.Getpid()))
+	cmd.Stdout = q.w
+	cmd.Stderr = q.w
+	cmd.Run()
+
+	fmt.Fprintf(q.w, "\n\n%d goroutines\n\n", runtime.NumGoroutine())
+
 	stacktrace := make([]byte, 50000)
 	length := runtime.Stack(stacktrace, true)
 	fmt.Fprintln(q.w, string(stacktrace[:length]))
