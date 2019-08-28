@@ -280,8 +280,9 @@ corpora. Wellicht is dit handig om eenmaal per dag aan te roepen vanuit
 Info over de interne staat van de server kun je opvragen via deze paden
 op de server:
 
+    /debug/env 
+    /debug/stack
     /debug/vars
-    /debug/env
 
 ### Beheer ###
 

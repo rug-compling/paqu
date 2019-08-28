@@ -42,3 +42,10 @@ func environment(q *Context) {
 		fmt.Fprintln(q.w, e)
 	}
 }
+
+func stacktrace(q *Context) {
+	q.w.Header().Set("Content-Type", "text/plain")
+	stacktrace := make([]byte, 50000)
+	length := runtime.Stack(stacktrace, true)
+	fmt.Fprintln(q.w, string(stacktrace[:length]))
+}

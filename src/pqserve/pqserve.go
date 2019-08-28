@@ -228,6 +228,7 @@ func main() {
 	handleFunc("spodlist", spod_list, nil)
 
 	handleStatic("debug/env", environment)
+	handleStatic("debug/stack", stacktrace)
 
 	handleStatic("busy.gif", static_busy_gif)
 	handleStatic("clariah.png", static_clariah_png)
