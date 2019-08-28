@@ -11,6 +11,14 @@ import (
 	"time"
 )
 
+type LogWriter struct{}
+
+func (l LogWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	chLog <- "SERVER: " + string(p)
+	return
+}
+
 func logf(format string, v ...interface{}) {
 	chLog <- fmt.Sprintf(format, v...)
 }
