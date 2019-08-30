@@ -3,6 +3,7 @@ package main
 //. Imports
 
 import (
+	"github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
 
 	"bytes"
@@ -44,6 +45,8 @@ func init() {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	mysql.SetLogger(LogWriter{prefix: "MYSQL: "})
 
 	for _, arg := range os.Args[1:] {
 		if arg == "-v" {
@@ -264,7 +267,7 @@ func main() {
 	addr := fmt.Sprint(":", Cfg.Port)
 	server := http.Server{
 		Addr:     addr,
-		ErrorLog: log.New(LogWriter{}, "", 0),
+		ErrorLog: log.New(LogWriter{prefix: "SERVER: "}, "", 0),
 	}
 	if !Cfg.Https && !Cfg.Httpdual {
 		server.Handler = Log(http.DefaultServeMux)
