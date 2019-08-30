@@ -1353,6 +1353,7 @@ corpus: <select name="db">
 <input type="checkbox" id="cbA" name="A"%v> <label for="cbA">Alpino</label> &nbsp;
 <input type="checkbox" id="cbU" name="U"%v> <label for="cbU">Basic UD</label> &nbsp;
 <input type="checkbox" id="cbE" name="E"%v> <label for="cbE">Enhanced UD</label>
+(<a href="info.html#subset" target="_blank">uitleg</a>)
 <p>
 `,
 		ifelse(filter[0], " checked", ""),
