@@ -31,9 +31,8 @@ Inhoud:
 <li class="dbxml"><a href="#xpath" target="_self" class="dbxml">Zoeken met XPath</a>
 <ul class="dbxml">
   <li class="dbxml"><a href="#expanded" target="_self" class="dbxml">Zoeken met geëxpandeerde indexnodes</a>
-  <li class="dbxml"><a href="#ud" target="_self" class="dbxml">Zoeken met Universal Dependencies</a>
   <li class="dbxml"><a href="#subset" target="_self" class="dbxml">Zoekresultaten beperken</a>
-</ul class="dbxml">
+</ul>
 <li><a href="#corpora" target="_self">Corpora</a>
 <ul>
   <li><a href="#corplat" target="_self">Platte tekst</a>
@@ -552,7 +551,7 @@ kunnen gebruiken moet je zijn ingelogd. Klik op de knop <em>Macro's</em> om
 macro's te kunnen uploaden en/of te bewerken.
 <p>
   Voorbeelden, zie:
-  <a href="http://rug-compling.github.io/dact/cookbook/" target="_blank">Dact Cookbook</a>
+  <a href="https://urd2.let.rug.nl/~alud/" target="_blank">cookbook</a>
 </div>
 
 <h3 id="expanded" class="dbxml">Zoeken met geëxpandeerde indexnodes</h3>
@@ -576,36 +575,6 @@ met geëxpandeerde indexnodes, dan zijn de gegevens van alle lege
 indexnodes aangevuld met de gegevens &mdash; attributen en dochters
 &mdash; van de corresponderende niet-lege node. Hierdoor krijg je in dit
 geval toch een match.
-</div>
-
-<h3 id="ud" class="dbxml" style="clear:both">Zoeken met Universal Dependencies</h3>
-<div class="dbxml">
-Dit is niet beschikbaar voor de grootste corpora.
-<p>
-Informatie over <a href="https://universaldependencies.org/" target="_blank">Universal
-Dependencies</a> is opgenomen in de XML. Je kunt deze informatie
-gebruiken om bij het zoeken naar een soort node het zoeken nader in te
-perken. Bijvoorbeeld, om te zoeken naar <a href="xpath?db=_default&amp;xpath=%2F%2Fnode%5B%40cat%3D&quot;mwu&quot;+and+node%5B%40pt%3D&quot;vz&quot;%5D+and+node%2Fud%5B%40deprel%3D&quot;case&quot;%5D%5D" target="_blank">voorzetseluitdrukkingen</a>:
-<p>
-<pre>
-    //node[@cat=&quot;mwu&quot; and node[@pt=&quot;vz&quot;] and node/ud[@deprel=&quot;case&quot;]]
-</pre>
-<p>
-Je kunt ook direct in de dependencies zelf zoeken. Bijvoorbeeld om te
-zoeken naar
-<a href="xpath?db=_default&amp;xpath=%2F%2F*%5B%40lemma%3D%28&quot;eten&quot;%2C&quot;op_eten&quot;%29%5D%2Fobj%5B%40upos%3D&quot;NOUN&quot;%5D"
-target="_blank">wat men eet</a>:
-<p>
-<pre>
-    //*[@lemma=(&quot;eten&quot;,&quot;op_eten&quot;)]/obj[@upos=&quot;NOUN&quot;]
-</pre>
-<p>
-Brood <a href="xpath?db=_default&amp;xpath=%2F%2F*%5B%40lemma%3D&quot;brood&quot;%5D%2Fnmod%5B%40deprel_aux+%3D&quot;met&quot;%5D"
-target="_blank">met wat?</a> :
-<p>
-<pre>
-    //*[@lemma=&quot;brood&quot;]/nmod[@deprel_aux =&quot;met&quot;]
-</pre>
 </div>
 
 <h3 id="subset" class="dbxml" style="clear:both">Zoekresultaten beperken</h3>
