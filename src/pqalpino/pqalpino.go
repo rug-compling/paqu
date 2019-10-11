@@ -244,6 +244,7 @@ Q#%s|skipped|??|????
 				"LANG=en_US.utf8",
 				"LANGUAGE=en_US.utf8",
 				"LC_ALL=en_US.utf8",
+				"LD_LIBRARY_PATH=" + os.Getenv("LD_LIBRARY_PATH"),
 			}
 			cmd.Stderr = os.Stderr
 			cmd.Stdout = os.Stdout
