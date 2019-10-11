@@ -261,7 +261,7 @@ func shell(format string, a ...interface{}) *exec.Cmd {
 		"LANGUAGE=en_US.utf8",
 		"LC_ALL=en_US.utf8",
 	}
-	for _, e := range []string{"HOME", "PAQU", "XDG_DATA_HOME", "XDG_CONFIG_HOME"} {
+	for _, e := range []string{"HOME", "PAQU", "XDG_DATA_HOME", "XDG_CONFIG_HOME", "LD_LIBRARY_PATH"} {
 		if p := os.Getenv(e); p != "" {
 			cmd.Env = append(cmd.Env, e+"="+p)
 		}
