@@ -262,7 +262,7 @@ func doXml(document, archname, filename string) (result string) {
 	if reuse {
 		result, err = alud.Alpino([]byte(document), "", auto)
 	} else {
-		result, err = alud.UdAlpino([]byte(document), filename)
+		result, err = alud.UdAlpino([]byte(document), filename, "")
 	}
 	if err != nil {
 		if result == "" {

@@ -56,9 +56,11 @@ func Alpino(alpino_doc []byte, conllu, auto string) (alpino string, err error) {
 
 // Derive Universal Dependencies and insert into alpino_ds format.
 //
+// If sentid is "" it is derived from the filename.
+//
 // When err is not nil and alpino is not "" it contains the err in the alpino_ds format.
-func UdAlpino(alpino_doc []byte, filename string) (alpino string, err error) {
-	conllu, q, err := ud(alpino_doc, filename, OPT_NO_COMMENTS|OPT_NO_DETOKENIZE)
+func UdAlpino(alpino_doc []byte, filename, sentid string) (alpino string, err error) {
+	conllu, q, err := ud(alpino_doc, filename, sentid, OPT_NO_COMMENTS|OPT_NO_DETOKENIZE)
 
 	if err == nil {
 		alpinoRestore(q)

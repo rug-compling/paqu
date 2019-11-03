@@ -36,9 +36,18 @@ func universalPosTags(node *nodeType, q *context) string {
 			// respectievelijk
 			return "CCONJ"
 		}
+		if rel == "cmp" { // inclusief hijzelf
+			return "SCONJ"
+		}
 		return "ADJ" // exceptions forced by 2.4 validation
 	}
 	if pt == "bw" {
+		if rel == "crd" {
+			return "CCONJ"
+		}
+		if node.parent.Rel == "det" { // zo min mogelijk, genoeg geld om een ijsje te kopen
+			return "DET"
+		}
 		return "ADV"
 	}
 	if pt == "lid" {
@@ -54,7 +63,10 @@ func universalPosTags(node *nodeType, q *context) string {
 		if node.Spectype == "deeleigen" {
 			return "PROPN"
 		}
-		if node.Spectype == "symb" {
+		if node.Spectype == "symb" || node.Spectype == "enof" {
+			if node.Rel == "det" || node.parent.Rel == "det" {
+				return "DET"
+			}
 			return "SYM"
 		}
 		return "X" // afk vreemd afgebr enof meta
@@ -66,6 +78,9 @@ func universalPosTags(node *nodeType, q *context) string {
 		if node.Numtype == "rang" {
 			return "ADJ"
 		}
+		if rel == "hd" && node.parent.Rel == "mod" && (node.parent.Cat == "advp" || node.parent.Cat == "ap") { // zoveel + obcomp: zoveel mogelijk, zoveel te wensen over dat ...
+			return "ADV"
+		}
 		return "NUM"
 	}
 	if pt == "vz" {
@@ -75,6 +90,16 @@ func universalPosTags(node *nodeType, q *context) string {
 		if rel == "det" && node.Vwtype != "bez" {
 			return "DET"
 		}
+		if rel == "hd" && node.parent.Cat == "detp" { // niet veel meer dan
+			return "DET"
+		}
+		if rel == "hd" && node.parent.Rel == "mod" { // heel wat fleuriger
+			return "ADV"
+		}
+		if rel == "mod" && node.parent.Rel == "det" { // [detp/det vnw/al deze] stripreeksen] --> al wordt advmod
+			return "ADV"
+		}
+
 		if node.Pdtype == "adv-pron" {
 			if rel == "pobj1" {
 				return "PRON"

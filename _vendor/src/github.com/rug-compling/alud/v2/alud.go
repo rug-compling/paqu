@@ -14,8 +14,8 @@ const (
 	OPT_NO_COMMENTS                        // don't include comments
 	OPT_NO_DETOKENIZE                      // don't try to restore detokenized sentence
 	OPT_NO_ENHANCED                        // skip enhanced dependencies
-	OPT_NO_FIX_PUNCT                       // don't fix punctuation
 	OPT_NO_FIX_MISPLACED_HEADS             // don't fix misplaced heads in coordination
+	OPT_NO_FIX_PUNCT                       // don't fix punctuation
 	OPT_NO_METADATA                        // don't copy metadata to comments
 	OPT_PANIC                              // panic on error (for development)
 )
@@ -54,12 +54,14 @@ func VersionID() string {
 }
 
 // Derive Universal Dependencies from parsed sentence in alpino_ds format.
-func Ud(alpino_doc []byte, filename string, options int) (conllu string, err error) {
-	conllu, _, err = ud(alpino_doc, filename, options)
+//
+// If sentid is "" it is derived from the filename.
+func Ud(alpino_doc []byte, filename, sentid string, options int) (conllu string, err error) {
+	conllu, _, err = ud(alpino_doc, filename, sentid, options)
 	return
 }
 
-func ud(alpino_doc []byte, filename string, options int) (conllu string, q *context, err error) {
+func ud(alpino_doc []byte, filename, sentid string, options int) (conllu string, q *context, err error) {
 	if options&OPT_PANIC == 0 {
 		defer func() {
 			if r := recover(); r != nil {
@@ -68,11 +70,11 @@ func ud(alpino_doc []byte, filename string, options int) (conllu string, q *cont
 			}
 		}()
 	}
-	conllu, q, err = udTry(alpino_doc, filename, options)
+	conllu, q, err = udTry(alpino_doc, filename, sentid, options)
 	return // geen argumenten i.v.m. recover
 }
 
-func udTry(alpino_doc []byte, filename string, options int) (conllu string, q *context, err error) {
+func udTry(alpino_doc []byte, filename, sentid string, options int) (conllu string, q *context, err error) {
 
 	var alpino alpino_ds
 	err = xml.Unmarshal(alpino_doc, &alpino)
@@ -80,7 +82,9 @@ func udTry(alpino_doc []byte, filename string, options int) (conllu string, q *c
 		return "", nil, err
 	}
 
-	if alpino.Sentence.SentId == "" {
+	if sentid != "" {
+		alpino.Sentence.SentId = sentid
+	} else if alpino.Sentence.SentId == "" {
 		id := filepath.Base(filename)
 		if strings.HasSuffix(id, ".xml") {
 			id = id[:len(id)-4]

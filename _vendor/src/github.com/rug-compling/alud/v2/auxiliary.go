@@ -799,6 +799,7 @@ func auxiliary1(node *nodeType, q *context) (aux string, err error) {
 	}
 
 	// alpino has no principled distinction between AUX and VERB, should be TAME verbs semantically, we follow ENGLISH
+	// blijken and hoeven removed from list
 	if test(q, /* $node[not(../node[@rel="predc"]) and  (: hij heeft als opdracht stammen uit elkaar te houden  :)
 		   ( starts-with(@sc,'aux') or
 		     ( ../node[@rel="vc"  and
@@ -807,7 +808,7 @@ func auxiliary1(node *nodeType, q *context) (aux string, err error) {
 		                  ( @index and not(@pt or @cat))  (: dangling aux in gapped coordination :)
 		                )
 		              ]   and
-		       @lemma=("blijken","hebben","hoeven","kunnen","moeten","mogen","zijn","zullen")
+		       @lemma=("hebben","kunnen","moeten","mogen","zijn","zullen")
 		     )
 		   )
 		 ] */&xPath{
@@ -999,7 +1000,7 @@ func auxiliary1(node *nodeType, q *context) (aux string, err error) {
 													arg1: &dNode{},
 												},
 												arg2: &dElem{
-													DATA: []interface{}{"blijken", "hebben", "hoeven", "kunnen", "moeten", "mogen", "zijn", "zullen"},
+													DATA: []interface{}{"hebben", "kunnen", "moeten", "mogen", "zijn", "zullen"},
 													arg1: &dCollect{
 														ARG:  collect__attributes__lemma,
 														arg1: &dNode{},

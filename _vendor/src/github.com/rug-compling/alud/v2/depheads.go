@@ -2490,8 +2490,18 @@ func externalHeadPosition(nodes []interface{}, q *context) int {
 				},
 			}) {
 			//NP -> half opgelost -> zie TODO
-			tmp, err := internalHeadPositionWithGappingWithError(node.axParent, q) // testing -- dont go to vc as it has no head sometimes...
+			/* tmp, err := internalHeadPositionWithGappingWithError(node.axParent, q) // testing -- dont go to vc as it has no head sometimes...
 			if err == nil && node.Begin < tmp && tmp <= node.End {                 // maybe the different error handling in go code causes diff with xquery script?
+				return externalHeadPosition(node.axParent, q)
+			}
+			*/
+			if internalHeadPositionWithGapping(node.axParent, q) == internalHeadPositionWithGapping(find(q /* $node */, &xPath{
+				arg1: &dSort{
+					arg1: &dVariable{
+						VAR: node,
+					},
+				},
+			}), q) {
 				return externalHeadPosition(node.axParent, q)
 			}
 			// TODO: dit is gelijk aan tmp... wat als err != nil?
@@ -2768,7 +2778,7 @@ func externalHeadPosition(nodes []interface{}, q *context) int {
 		return externalHeadPosition(node.axParent, q)
 	}
 
-	if node.Rel == "mod" {
+	if node.Rel == "mod" || node.Rel == "app" {
 		if test(q /* $node/../node[@rel=("hd","su","obj1","pc","predc","body") and (@pt or @cat)] */, &xPath{
 			arg1: &dSort{
 				arg1: &dCollect{
@@ -2814,7 +2824,7 @@ func externalHeadPosition(nodes []interface{}, q *context) int {
 		}) { // gapping, as su but now su or obj1  could be head as well
 			return internalHeadPositionWithGapping(node.axParent, q)
 		}
-		if n := find(q /* $node/../node[@rel="mod" and (@cat or @pt)] */, &xPath{
+		if n := find(q /* $node/../node[@rel=("mod","app") and (@cat or @pt)] */, &xPath{
 			arg1: &dSort{
 				arg1: &dCollect{
 					ARG: collect__child__node,
@@ -2833,7 +2843,7 @@ func externalHeadPosition(nodes []interface{}, q *context) int {
 									arg1: &dNode{},
 								},
 								arg2: &dElem{
-									DATA: []interface{}{"mod"},
+									DATA: []interface{}{"mod", "app"},
 									arg1: &dCollect{
 										ARG:  collect__attributes__rel,
 										arg1: &dNode{},
@@ -2856,7 +2866,7 @@ func externalHeadPosition(nodes []interface{}, q *context) int {
 					},
 				},
 			},
-		}); len(n) > 0 {
+		}); len(n) > 0 { // whatever comes first
 			if node == nLeft(n) { // gapping with multiple mods
 				return externalHeadPosition(node.axParent, q)
 			}
@@ -3070,7 +3080,7 @@ func internalHeadPosition(nodes []interface{}, q *context) int {
 	}) {
 		// if ($node/node[@rel="hd" and @pt=("bw","n")] )  ( n --> TEMPORARY HACK to fix error where NP is erroneously tagged as PP )
 		// then $node/node[@rel="hd"]/@end
-		if n := find(q /* $node/node[@rel=("obj1","pobj1","se")][1] */, &xPath{
+		if n := find(q /* $node/node[@rel=("obj1","pobj1","se","vc")][1] */, &xPath{
 			arg1: &dSort{
 				arg1: &dCollect{
 					ARG: collect__child__node,
@@ -3086,7 +3096,7 @@ func internalHeadPosition(nodes []interface{}, q *context) int {
 									arg1: &dNode{},
 								},
 								arg2: &dElem{
-									DATA: []interface{}{"obj1", "pobj1", "se"},
+									DATA: []interface{}{"obj1", "pobj1", "se", "vc"},
 									arg1: &dCollect{
 										ARG:  collect__attributes__rel,
 										arg1: &dNode{},
@@ -3961,12 +3971,37 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context) int
 
 	depthCheck(q)
 
-	if test(q /* $node/node[@rel="hd" and (@pt or @cat) and not(@ud:pos=("AUX","ADP"))] */, &xPath{
+	if test(q /* $node[not(@cat="pp")]/node[@rel="hd" and (@pt or @cat) and not(@ud:pos=("AUX","ADP"))] */, &xPath{
 		arg1: &dSort{
 			arg1: &dCollect{
 				ARG: collect__child__node,
-				arg1: &dVariable{
-					VAR: node,
+				arg1: &dFilter{
+					arg1: &dVariable{
+						VAR: node,
+					},
+					arg2: &dSort{
+						arg1: &dFunction{
+							ARG: function__not__1__args,
+							arg1: &dArg{
+								arg1: &dSort{
+									arg1: &dEqual{
+										ARG: equal__is,
+										arg1: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"pp"},
+											arg1: &dCollect{
+												ARG:  collect__attributes__cat,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 				arg2: &dPredicate{
 					arg1: &dAnd{
@@ -4648,7 +4683,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context) int
 		}), q)
 	}
 
-	if n := find(q /* $node/node[@rel="mod" and (@pt or @cat)] */, &xPath{
+	if n := find(q /* $node/node[@rel=("mod","app") and (@pt or @cat)] */, &xPath{
 		arg1: &dSort{
 			arg1: &dCollect{
 				ARG: collect__child__node,
@@ -4664,7 +4699,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context) int
 								arg1: &dNode{},
 							},
 							arg2: &dElem{
-								DATA: []interface{}{"mod"},
+								DATA: []interface{}{"mod", "app"},
 								arg1: &dCollect{
 									ARG:  collect__attributes__rel,
 									arg1: &dNode{},
@@ -4687,7 +4722,7 @@ func internalHeadPositionOfGappedConstituent(node []interface{}, q *context) int
 				},
 			},
 		},
-	}); len(n) > 0 {
+	}); len(n) > 0 { // pick leftmost
 		return internalHeadPositionWithGapping(if1(n), q)
 	}
 

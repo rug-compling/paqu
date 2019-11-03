@@ -274,7 +274,7 @@ Q#%s|skipped|??|????
 		}
 		xml := setBuild(string(b))
 		if *opt_U || *opt_u != "" {
-			s, err := alud.UdAlpino([]byte(xml), filename)
+			s, err := alud.UdAlpino([]byte(xml), filename, "")
 			if s != "" {
 				xml = s
 			}
@@ -437,7 +437,7 @@ func doServer(info *AlpinoInfo) {
 				}
 				filename := filepath.Join(*opt_d, line.Label+".xml")
 				if *opt_U || *opt_u != "" {
-					s, err := alud.UdAlpino([]byte(line.Alpino_ds), filename)
+					s, err := alud.UdAlpino([]byte(line.Alpino_ds), filename, "")
 					if s != "" {
 						line.Alpino_ds = s
 					}

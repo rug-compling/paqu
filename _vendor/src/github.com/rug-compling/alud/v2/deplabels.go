@@ -107,7 +107,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 				},
 			},
 		}) {
-			return "orphan"
+			return "appos" //was "orphan"
 		}
 		return dependencyLabel(node.parent, q)
 	}
@@ -360,6 +360,42 @@ func dependencyLabel(node *nodeType, q *context) string {
 				}) {
 					return "acl"
 				}
+				if test(q /* $node/../../@cat="top" */, &xPath{
+					arg1: &dSort{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG: collect__attributes__cat,
+								arg1: &dCollect{
+									ARG: collect__parent__type__node,
+									arg1: &dCollect{
+										ARG: collect__parent__type__node,
+										arg1: &dVariable{
+											VAR: node,
+										},
+									},
+								},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"top"},
+								arg1: &dCollect{
+									ARG: collect__attributes__cat,
+									arg1: &dCollect{
+										ARG: collect__parent__type__node,
+										arg1: &dCollect{
+											ARG: collect__parent__type__node,
+											arg1: &dVariable{
+												VAR: node,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				}) { // met als gevolg een neiging tot...
+					return "root"
+				}
 				return "advcl"
 			}
 			return "xcomp"
@@ -376,7 +412,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 		return "expl:pv"
 	}
 	if node.Rel == "su" {
-		if test(q /* $node[../@rel="cnj" and ../node[@rel="hd" and not(@pt or @cat)] and not(../node[@rel=("vc","predc")]/node[@rel="hd"  and (@pt or @cat)])] */, &xPath{
+		if test(q /* $node[../@rel=("cnj","dp","body") and ../node[@rel="hd" and not(@pt or @cat)] and not(../node[@rel=("vc","predc") and (@pt or node[@rel=("hd","cnj")  and (@pt or @cat)] )] )] */, &xPath{
 			arg1: &dSort{
 				arg1: &dFilter{
 					arg1: &dVariable{
@@ -395,7 +431,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 										},
 									},
 									arg2: &dElem{
-										DATA: []interface{}{"cnj"},
+										DATA: []interface{}{"cnj", "dp", "body"},
 										arg1: &dCollect{
 											ARG: collect__attributes__rel,
 											arg1: &dCollect{
@@ -455,12 +491,11 @@ func dependencyLabel(node *nodeType, q *context) string {
 										arg1: &dCollect{
 											ARG: collect__child__node,
 											arg1: &dCollect{
-												ARG: collect__child__node,
-												arg1: &dCollect{
-													ARG:  collect__parent__type__node,
-													arg1: &dNode{},
-												},
-												arg2: &dPredicate{
+												ARG:  collect__parent__type__node,
+												arg1: &dNode{},
+											},
+											arg2: &dPredicate{
+												arg1: &dAnd{
 													arg1: &dEqual{
 														ARG: equal__is,
 														arg1: &dCollect{
@@ -475,24 +510,6 @@ func dependencyLabel(node *nodeType, q *context) string {
 															},
 														},
 													},
-												},
-											},
-											arg2: &dPredicate{
-												arg1: &dAnd{
-													arg1: &dEqual{
-														ARG: equal__is,
-														arg1: &dCollect{
-															ARG:  collect__attributes__rel,
-															arg1: &dNode{},
-														},
-														arg2: &dElem{
-															DATA: []interface{}{"hd"},
-															arg1: &dCollect{
-																ARG:  collect__attributes__rel,
-																arg1: &dNode{},
-															},
-														},
-													},
 													arg2: &dSort{
 														arg1: &dOr{
 															arg1: &dCollect{
@@ -500,8 +517,38 @@ func dependencyLabel(node *nodeType, q *context) string {
 																arg1: &dNode{},
 															},
 															arg2: &dCollect{
-																ARG:  collect__attributes__cat,
+																ARG:  collect__child__node,
 																arg1: &dNode{},
+																arg2: &dPredicate{
+																	arg1: &dAnd{
+																		arg1: &dEqual{
+																			ARG: equal__is,
+																			arg1: &dCollect{
+																				ARG:  collect__attributes__rel,
+																				arg1: &dNode{},
+																			},
+																			arg2: &dElem{
+																				DATA: []interface{}{"hd", "cnj"},
+																				arg1: &dCollect{
+																					ARG:  collect__attributes__rel,
+																					arg1: &dNode{},
+																				},
+																			},
+																		},
+																		arg2: &dSort{
+																			arg1: &dOr{
+																				arg1: &dCollect{
+																					ARG:  collect__attributes__pt,
+																					arg1: &dNode{},
+																				},
+																				arg2: &dCollect{
+																					ARG:  collect__attributes__cat,
+																					arg1: &dNode{},
+																				},
+																			},
+																		},
+																	},
+																},
 															},
 														},
 													},
@@ -762,6 +809,129 @@ func dependencyLabel(node *nodeType, q *context) string {
 			return "aux:pass"
 		}
 		if aux == "aux" {
+			if test(q, /* $node[../node[@rel="su" and not(@pt or @cat)] and
+				   ../node[@rel="vc" and not(@pt or @cat)] and
+				   ../@rel="cnj"] */&xPath{
+					arg1: &dSort{
+						arg1: &dFilter{
+							arg1: &dVariable{
+								VAR: node,
+							},
+							arg2: &dSort{
+								arg1: &dAnd{
+									arg1: &dAnd{
+										arg1: &dCollect{
+											ARG: collect__child__node,
+											arg1: &dCollect{
+												ARG:  collect__parent__type__node,
+												arg1: &dNode{},
+											},
+											arg2: &dPredicate{
+												arg1: &dAnd{
+													arg1: &dEqual{
+														ARG: equal__is,
+														arg1: &dCollect{
+															ARG:  collect__attributes__rel,
+															arg1: &dNode{},
+														},
+														arg2: &dElem{
+															DATA: []interface{}{"su"},
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+														},
+													},
+													arg2: &dFunction{
+														ARG: function__not__1__args,
+														arg1: &dArg{
+															arg1: &dSort{
+																arg1: &dOr{
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__pt,
+																		arg1: &dNode{},
+																	},
+																	arg2: &dCollect{
+																		ARG:  collect__attributes__cat,
+																		arg1: &dNode{},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+										arg2: &dCollect{
+											ARG: collect__child__node,
+											arg1: &dCollect{
+												ARG:  collect__parent__type__node,
+												arg1: &dNode{},
+											},
+											arg2: &dPredicate{
+												arg1: &dAnd{
+													arg1: &dEqual{
+														ARG: equal__is,
+														arg1: &dCollect{
+															ARG:  collect__attributes__rel,
+															arg1: &dNode{},
+														},
+														arg2: &dElem{
+															DATA: []interface{}{"vc"},
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+														},
+													},
+													arg2: &dFunction{
+														ARG: function__not__1__args,
+														arg1: &dArg{
+															arg1: &dSort{
+																arg1: &dOr{
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__pt,
+																		arg1: &dNode{},
+																	},
+																	arg2: &dCollect{
+																		ARG:  collect__attributes__cat,
+																		arg1: &dNode{},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									arg2: &dEqual{
+										ARG: equal__is,
+										arg1: &dCollect{
+											ARG: collect__attributes__rel,
+											arg1: &dCollect{
+												ARG:  collect__parent__type__node,
+												arg1: &dNode{},
+											},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"cnj"},
+											arg1: &dCollect{
+												ARG: collect__attributes__rel,
+												arg1: &dCollect{
+													ARG:  collect__parent__type__node,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				}) {
+				return "conj"
+			}
 			return "aux"
 		}
 		if aux == "cop" {
@@ -857,7 +1027,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 				},
 			},
 		}) { // gapping
-			return "orphan"
+			return detLabel(node, q) // was "orphan"
 		}
 		return dependencyLabel(node.parent, q) // gapping
 	}
@@ -966,31 +1136,58 @@ func dependencyLabel(node *nodeType, q *context) string {
 			}
 			return dependencyLabel(node.parent, q)
 		}
-		if test(q /* $node[@index = ../../node[@rel="su"]/@index ] */, &xPath{
+		if test(q /* $node[@index = ../../node[@rel="su"]/@index and ../node[@rel="hd" and (@pt or @cat)]] */, &xPath{
 			arg1: &dSort{
 				arg1: &dFilter{
 					arg1: &dVariable{
 						VAR: node,
 					},
 					arg2: &dSort{
-						arg1: &dEqual{
-							ARG: equal__is,
-							arg1: &dCollect{
-								ARG:  collect__attributes__index,
-								arg1: &dNode{},
-							},
-							arg2: &dCollect{
-								ARG: collect__attributes__index,
+						arg1: &dAnd{
+							arg1: &dEqual{
+								ARG: equal__is,
 								arg1: &dCollect{
-									ARG: collect__child__node,
+									ARG:  collect__attributes__index,
+									arg1: &dNode{},
+								},
+								arg2: &dCollect{
+									ARG: collect__attributes__index,
 									arg1: &dCollect{
-										ARG: collect__parent__type__node,
+										ARG: collect__child__node,
 										arg1: &dCollect{
-											ARG:  collect__parent__type__node,
-											arg1: &dNode{},
+											ARG: collect__parent__type__node,
+											arg1: &dCollect{
+												ARG:  collect__parent__type__node,
+												arg1: &dNode{},
+											},
+										},
+										arg2: &dPredicate{
+											arg1: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+												arg2: &dElem{
+													DATA: []interface{}{"su"},
+													arg1: &dCollect{
+														ARG:  collect__attributes__rel,
+														arg1: &dNode{},
+													},
+												},
+											},
 										},
 									},
-									arg2: &dPredicate{
+								},
+							},
+							arg2: &dCollect{
+								ARG: collect__child__node,
+								arg1: &dCollect{
+									ARG:  collect__parent__type__node,
+									arg1: &dNode{},
+								},
+								arg2: &dPredicate{
+									arg1: &dAnd{
 										arg1: &dEqual{
 											ARG: equal__is,
 											arg1: &dCollect{
@@ -998,9 +1195,21 @@ func dependencyLabel(node *nodeType, q *context) string {
 												arg1: &dNode{},
 											},
 											arg2: &dElem{
-												DATA: []interface{}{"su"},
+												DATA: []interface{}{"hd"},
 												arg1: &dCollect{
 													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+										arg2: &dSort{
+											arg1: &dOr{
+												arg1: &dCollect{
+													ARG:  collect__attributes__pt,
+													arg1: &dNode{},
+												},
+												arg2: &dCollect{
+													ARG:  collect__attributes__cat,
 													arg1: &dNode{},
 												},
 											},
@@ -1014,7 +1223,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 			},
 		}) {
 			return "nsubj:pass" // trees where su (with extraposed material) is spelled out at position of obj1
-		}
+		} // but not elliptic cases (with empty head) like: Boven de engel is de profeet Zacharia afgebeeld en boven Maria de profeet Micha
 		if test(q /* $node/../node[@rel="hd" and (@pt or @cat)] */, &xPath{
 			arg1: &dSort{
 				arg1: &dCollect{
@@ -1677,6 +1886,9 @@ func dependencyLabel(node *nodeType, q *context) string {
 		}
 		return dependencyLabel(node.parent, q) // gapping
 	}
+	if node.Rel == "mod" && node.parent.Rel == "det" { // [ap/det steeds vnw/meer] invloed
+		return "amod"
+	}
 	if (node.Rel == "mod" || node.Rel == "pc" || node.Rel == "ld") && node.parent.Cat == "np" { // [detp niet veel] meer
 		// modification of nomimal heads
 		// pc and ld occur in nominalizations
@@ -1770,9 +1982,10 @@ func dependencyLabel(node *nodeType, q *context) string {
 		})) { // gapping with multiple mods
 			return dependencyLabel(node.parent, q) // gapping, where this mod is the head
 		}
-		return "orphan"
+		return modLabelInsideNp(node, q) //was "orphan"
 	}
-	if test(q /* $node[@rel=("mod","pc","ld") and ../@cat=("sv1","smain","ssub","inf","ppres","ppart","oti","ap","advp")] */, &xPath{
+
+	if test(q /* $node[@rel=("mod","pc","ld") and ../@cat=("sv1","smain","ssub","inf","ppres","ppart","oti","ap","advp","cp","whrel")] */, &xPath{
 		arg1: &dSort{
 			arg1: &dFilter{
 				arg1: &dVariable{
@@ -1804,7 +2017,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 								},
 							},
 							arg2: &dElem{
-								DATA: []interface{}{"sv1", "smain", "ssub", "inf", "ppres", "ppart", "oti", "ap", "advp"},
+								DATA: []interface{}{"sv1", "smain", "ssub", "inf", "ppres", "ppart", "oti", "ap", "advp", "cp", "whrel"},
 								arg1: &dCollect{
 									ARG: collect__attributes__cat,
 									arg1: &dCollect{
@@ -1912,7 +2125,8 @@ func dependencyLabel(node *nodeType, q *context) string {
 		}) {
 			return "orphan"
 		}
-		if test(q /* $node[@rel="mod" and ../node[@rel=("pc","ld")]] */, &xPath{
+		// combined mod/ld/pc for consistency with dephead position
+		if test(q /* $node[@rel=("mod","ld","pc") and ../node[@rel=("mod","pc","ld") and (@pt or @cat)]/@begin < @begin ] */, &xPath{
 			arg1: &dSort{
 				arg1: &dFilter{
 					arg1: &dVariable{
@@ -1927,59 +2141,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 									arg1: &dNode{},
 								},
 								arg2: &dElem{
-									DATA: []interface{}{"mod"},
-									arg1: &dCollect{
-										ARG:  collect__attributes__rel,
-										arg1: &dNode{},
-									},
-								},
-							},
-							arg2: &dCollect{
-								ARG: collect__child__node,
-								arg1: &dCollect{
-									ARG:  collect__parent__type__node,
-									arg1: &dNode{},
-								},
-								arg2: &dPredicate{
-									arg1: &dEqual{
-										ARG: equal__is,
-										arg1: &dCollect{
-											ARG:  collect__attributes__rel,
-											arg1: &dNode{},
-										},
-										arg2: &dElem{
-											DATA: []interface{}{"pc", "ld"},
-											arg1: &dCollect{
-												ARG:  collect__attributes__rel,
-												arg1: &dNode{},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}) {
-			return "orphan"
-		}
-		if test(q /* $node[@rel="mod" and ../node[@rel="mod"]/@begin < @begin] */, &xPath{
-			arg1: &dSort{
-				arg1: &dFilter{
-					arg1: &dVariable{
-						VAR: node,
-					},
-					arg2: &dSort{
-						arg1: &dAnd{
-							arg1: &dEqual{
-								ARG: equal__is,
-								arg1: &dCollect{
-									ARG:  collect__attributes__rel,
-									arg1: &dNode{},
-								},
-								arg2: &dElem{
-									DATA: []interface{}{"mod"},
+									DATA: []interface{}{"mod", "ld", "pc"},
 									arg1: &dCollect{
 										ARG:  collect__attributes__rel,
 										arg1: &dNode{},
@@ -1997,17 +2159,31 @@ func dependencyLabel(node *nodeType, q *context) string {
 											arg1: &dNode{},
 										},
 										arg2: &dPredicate{
-											arg1: &dEqual{
-												ARG: equal__is,
-												arg1: &dCollect{
-													ARG:  collect__attributes__rel,
-													arg1: &dNode{},
-												},
-												arg2: &dElem{
-													DATA: []interface{}{"mod"},
+											arg1: &dAnd{
+												arg1: &dEqual{
+													ARG: equal__is,
 													arg1: &dCollect{
 														ARG:  collect__attributes__rel,
 														arg1: &dNode{},
+													},
+													arg2: &dElem{
+														DATA: []interface{}{"mod", "pc", "ld"},
+														arg1: &dCollect{
+															ARG:  collect__attributes__rel,
+															arg1: &dNode{},
+														},
+													},
+												},
+												arg2: &dSort{
+													arg1: &dOr{
+														arg1: &dCollect{
+															ARG:  collect__attributes__pt,
+															arg1: &dNode{},
+														},
+														arg2: &dCollect{
+															ARG:  collect__attributes__cat,
+															arg1: &dNode{},
+														},
 													},
 												},
 											},
@@ -2024,8 +2200,8 @@ func dependencyLabel(node *nodeType, q *context) string {
 				},
 			},
 		}) { // gapping with multiple mods
-			return "orphan"
-		}
+			return "orphan" //  added (@pt or @cat) to prevent match with an empty mod, eventhough those do not have a @begin attribute
+		} // seems like a BUG
 		return dependencyLabel(node.parent, q) // gapping, where this mod is the head
 	}
 	if test(q /* $node[@rel="mod" and ../@cat=("pp","detp","advp")] */, &xPath{
@@ -2886,34 +3062,41 @@ func dependencyLabel(node *nodeType, q *context) string {
 			}) {
 				return "mark" // absolute met constructie -- analoog aan with X being Y
 			}
-			if test(q /* not($node/../node[@rel="pc"]) */, &xPath{
+			if test(q /* $node/../node[@rel=("obj1","vc","se") and (@pt or @cat)] */, &xPath{
 				arg1: &dSort{
-					arg1: &dFunction{
-						ARG: function__not__1__args,
-						arg1: &dArg{
-							arg1: &dSort{
-								arg1: &dCollect{
-									ARG: collect__child__node,
+					arg1: &dCollect{
+						ARG: collect__child__node,
+						arg1: &dCollect{
+							ARG: collect__parent__type__node,
+							arg1: &dVariable{
+								VAR: node,
+							},
+						},
+						arg2: &dPredicate{
+							arg1: &dAnd{
+								arg1: &dEqual{
+									ARG: equal__is,
 									arg1: &dCollect{
-										ARG: collect__parent__type__node,
-										arg1: &dVariable{
-											VAR: node,
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"obj1", "vc", "se"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__rel,
+											arg1: &dNode{},
 										},
 									},
-									arg2: &dPredicate{
-										arg1: &dEqual{
-											ARG: equal__is,
-											arg1: &dCollect{
-												ARG:  collect__attributes__rel,
-												arg1: &dNode{},
-											},
-											arg2: &dElem{
-												DATA: []interface{}{"pc"},
-												arg1: &dCollect{
-													ARG:  collect__attributes__rel,
-													arg1: &dNode{},
-												},
-											},
+								},
+								arg2: &dSort{
+									arg1: &dOr{
+										arg1: &dCollect{
+											ARG:  collect__attributes__pt,
+											arg1: &dNode{},
+										},
+										arg2: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
 										},
 									},
 								},
@@ -2922,7 +3105,38 @@ func dependencyLabel(node *nodeType, q *context) string {
 					},
 				},
 			}) {
-				return "case" // er blijft weinig over van het lijk : over heads a predc and has pc as sister
+				return "case" //
+			}
+			if test(q /* $node/../node[@rel="pc"] */, &xPath{
+				arg1: &dSort{
+					arg1: &dCollect{
+						ARG: collect__child__node,
+						arg1: &dCollect{
+							ARG: collect__parent__type__node,
+							arg1: &dVariable{
+								VAR: node,
+							},
+						},
+						arg2: &dPredicate{
+							arg1: &dEqual{
+								ARG: equal__is,
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"pc"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			}) { // superfluous ??
+				return dependencyLabel(node.parent, q) // er blijft weinig over van het lijk : over heads a predc and has pc as sister
 			}
 			return dependencyLabel(node.parent, q) // not sure about this one
 		}
@@ -3713,9 +3927,9 @@ func detLabel(node *nodeType, q *context) string {
 		}
 	}()
 
-	// zijn boek, diens boek, ieders boek, aller landen, Ron's probleem, Fidel Castro's belang
+	// zijn boek, diens boek, ieders boek, aller landen, Ron's probleem, Fidel Castro's belang, zuids schoppenaas
 	if test(q, /* $node[@ud:pos = "PRON" and @vwtype="bez"] or
-		   $node[@ud:pos = ("PRON","PROPN") and @naamval="gen"] or
+		   $node[@ud:pos = ("PRON","PROPN","NOUN") and @naamval="gen"] or
 		   $node[@cat="mwu" and node[@spectype="deeleigen"]] */&xPath{
 			arg1: &dSort{
 				arg1: &dOr{
@@ -3770,7 +3984,7 @@ func detLabel(node *nodeType, q *context) string {
 											arg1: &dNode{},
 										},
 										arg2: &dElem{
-											DATA: []interface{}{"PRON", "PROPN"},
+											DATA: []interface{}{"PRON", "PROPN", "NOUN"},
 											arg1: &dCollect{
 												ARG:  collect__attributes__ud_3apos,
 												arg1: &dNode{},
@@ -4001,7 +4215,7 @@ func detLabel(node *nodeType, q *context) string {
 	}) {
 		return "nmod"
 	}
-	if test(q /* $node/@cat = ("mwu","pp","smain") */, &xPath{
+	if test(q /* $node/@cat = ("mwu","smain") */, &xPath{
 		arg1: &dSort{
 			arg1: &dEqual{
 				ARG: equal__is,
@@ -4012,7 +4226,7 @@ func detLabel(node *nodeType, q *context) string {
 					},
 				},
 				arg2: &dElem{
-					DATA: []interface{}{"mwu", "pp", "smain"},
+					DATA: []interface{}{"mwu", "smain"},
 					arg1: &dCollect{
 						ARG: collect__attributes__cat,
 						arg1: &dVariable{
@@ -4025,7 +4239,31 @@ func detLabel(node *nodeType, q *context) string {
 	}) {
 		return "det"
 	}
-	// tussen 5 en 6 .., needs more principled solution
+	// tussen 5 en 6 ..--> almost all PP cases are with tussen NUM and NUM
+	if test(q /* $node/@cat = "pp" */, &xPath{
+		arg1: &dSort{
+			arg1: &dEqual{
+				ARG: equal__is,
+				arg1: &dCollect{
+					ARG: collect__attributes__cat,
+					arg1: &dVariable{
+						VAR: node,
+					},
+				},
+				arg2: &dElem{
+					DATA: []interface{}{"pp"},
+					arg1: &dCollect{
+						ARG: collect__attributes__cat,
+						arg1: &dVariable{
+							VAR: node,
+						},
+					},
+				},
+			},
+		},
+	}) {
+		return "nummod"
+	}
 	// nog meer mensen dan anders
 	// hetzelfde tijdstip als anders , nogal wat,
 	// hij heeft ik weet niet hoeveel boeken
