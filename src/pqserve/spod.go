@@ -94,6 +94,22 @@ var (
 			"hidden1",
 		},
 		{
+			`Attributen`,
+			`//node [@pt]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"pt",
+			"pt",
+			"attr",
+		},
+		{
+			``,
+			`//node [@postag]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"postag",
+			"postag",
+			"attr",
+		},
+		{
 			`Hoofdzinnen//Bij deze queries vergelijken we de verschillende typen hoofdzinnen:
 mededelende hoofdzinnen (1), vraagzinnen die met een vraag-constituent
 beginnen (2), ja/nee vragen (3), en imperatieven (4).
@@ -1885,7 +1901,8 @@ func spod_form(q *Context) {
 	}
 
 	available := map[string]bool{
-		"": true,
+		"":     true,
+		"attr": true,
 	}
 
 	dbase, err := dbopen()
@@ -1935,6 +1952,11 @@ func spod_form(q *Context) {
 			fmt.Fprintln(q.w, "???")
 		}
 	}
+
+	inTable := false
+	inAttr := false
+	inData := false
+
 	if doHtml {
 		fmt.Fprintln(q.w, `
 <style>
@@ -2059,6 +2081,9 @@ func spod_form(q *Context) {
 function vb(i) {
     window.open("xpath?db=`+db+`&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
 }
+function vb2(i, a, v) {
+    window.open("xpath?db=`+db+`&xpath=%2f%2fnode%5b%40" + a + "%3d%22" + v + "%22%5d&mt=" + xpaths[i][1]);
+}
 
 var modal = document.getElementById('myModal');
 var span = document.getElementsByClassName("close")[0];
@@ -2153,10 +2178,7 @@ window.onclick = function(event) {
     }
 }
 </script>
-<div class="max100"><table class="spod"><tr><th colspan="2" class="r b">zinnen<th class="r b">items<th class="r b">woorden<th><th></tr>
 `)
-	} else {
-		fmt.Fprintln(q.w, "# zinnen zinnen/totaal\titems\tlabel\tomschrijving\twoordtelling")
 	}
 	worddata := make([]string, 0)
 	wordtitles := make([]string, 0)
@@ -2184,6 +2206,39 @@ window.onclick = function(event) {
 			seen = ""
 		}
 		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
+			if !inTable {
+				inTable = true
+				if doHtml {
+					fmt.Fprintln(q.w, `<div class="max100"><table class="spod">`)
+				}
+			}
+			if spod.special == "attr" {
+				if !inAttr {
+					inAttr = true
+					if doHtml {
+						fmt.Fprintln(q.w, `<tr><th colspan="2" class="r b">attributen<th colspan="2" class="r"><th colspan="2"></tr>
+`)
+					} else {
+						fmt.Fprintln(q.w, "# attributen att/totaal\t\tlabel\tomschrijving\t")
+					}
+				}
+				if doHtml {
+					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th colspan=\"2\" class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", spodEscape(spod.text))
+				}
+			} else {
+				if inAttr {
+					inAttr = false
+				}
+				if !inData {
+					inData = true
+					if doHtml {
+						fmt.Fprintln(q.w, `<tr><th colspan="2" class="r b">zinnen<th class="r b">items<th class="r b">woorden<th><th></tr>
+`)
+					} else {
+						fmt.Fprintln(q.w, "# zinnen zinnen/totaal\titems\tlabel\tomschrijving\twoordtelling")
+					}
+				}
+			}
 			if doHtml {
 				a := strings.SplitN(spodtext, "|", 2)
 				if len(a) == 2 {
@@ -2195,7 +2250,7 @@ window.onclick = function(event) {
 			} else {
 				spodtext = strings.Replace(spodtext, "|", "", 1)
 			}
-			if header != "" {
+			if header != "" && spod.special != "attr" {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th class=\"r\"><th class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", spodEscape(header))
 				} else {
@@ -2260,7 +2315,17 @@ window.onclick = function(event) {
 				allDone = false
 			} else if done && available[spod.special] {
 				if doHtml {
-					if spod.special == "parser" {
+					if spod.special == "attr" {
+						for _, line := range strings.Split(wcount, "\n") {
+							aa := strings.Fields(line)
+							if len(aa) == 4 {
+								fmt.Fprintf(q.w, `<tr><td class="right">%s<td class="right r">%s<td colspan="2" class="r">
+<td><a href="javascript:vb2(%d, '%s','%s')">vb</a><td>%s</tr>
+`,
+									aa[0], aa[2], idx, spod.lbl, url.QueryEscape(aa[3]), html.EscapeString(aa[3]))
+							}
+						}
+					} else if spod.special == "parser" {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right r\">%.2f%%",
 							lines, float64(lines)/float64(nlines)*100.0)
 					} else if spod.special == "his" {
@@ -2271,13 +2336,25 @@ window.onclick = function(event) {
 							lines, float64(lines)/float64(nlines)*100.0, items)
 					}
 				} else {
-					v := fmt.Sprintf("%.3g", float64(lines)/float64(nlines))
-					fmt.Fprintf(q.w, "%d\t%-15s\t%d", lines, v, items)
+					if spod.special == "attr" {
+						for _, line := range strings.Split(wcount, "\n") {
+							aa := strings.Fields(line)
+							if len(aa) == 4 {
+								fmt.Fprintf(q.w, "%s\t%-15s\t\t%s.%s\tattribuut %s: %s\t\n",
+									aa[0], aa[1], spod.lbl, aa[3], spod.lbl, aa[3])
+							}
+						}
+					} else {
+						v := fmt.Sprintf("%.3g", float64(lines)/float64(nlines))
+						fmt.Fprintf(q.w, "%d\t%-15s\t%d", lines, v, items)
+					}
 				}
 			} else {
 				wcount = "???"
 				if doHtml {
-					if spod.special == "parser" {
+					if spod.special == "attr" {
+						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???<td class=\"right r\" colspan=\"2\"><td><td>???</tr>")
+					} else if spod.special == "parser" {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???")
 					} else if spod.special == "his" {
 						fmt.Fprintf(q.w, "<tr><td><td class=\"r\"><td class=\"right r\">???")
@@ -2285,7 +2362,12 @@ window.onclick = function(event) {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???<td class=\"right r\">???")
 					}
 				} else {
-					fmt.Fprint(q.w, "???\t???       \t???")
+					if spod.special == "attr" {
+						fmt.Fprintf(q.w, "???\t???       \t\t%s.???\tattribuut %s: ???\n", spod.lbl, spod.lbl)
+						// TODO
+					} else {
+						fmt.Fprint(q.w, "???\t???       \t???")
+					}
 				}
 				allDone = false
 			}
@@ -2295,6 +2377,8 @@ window.onclick = function(event) {
 						q.w,
 						"<td class=\"r\"><td class=\"r\"><td><a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
 						idx, spodEscape(spodtext))
+				} else if spod.special == "attr" {
+					// niks
 				} else {
 					counts := strings.Split(wcount, ",")
 					sum := 0
@@ -2336,12 +2420,19 @@ window.onclick = function(event) {
 					}
 				}
 			} else {
-				fmt.Fprintf(q.w, "\t%s\t%s\t%s\n", spod.lbl, spodtext, wcount)
+				if spod.special == "attr" {
+					// niks
+				} else {
+					fmt.Fprintf(q.w, "\t%s\t%s\t%s\n", spod.lbl, spodtext, wcount)
+				}
 			}
 		}
 	}
 	if doHtml {
-		fmt.Fprintln(q.w, "</table></div><script>var data = [")
+		if inTable {
+			fmt.Fprintln(q.w, "</table></div>")
+		}
+		fmt.Fprintln(q.w, "<script>var data = [")
 		fmt.Fprintln(q.w, strings.Join(worddata, ",\n"))
 		fmt.Fprintln(q.w, "];\nvar titles = [")
 		fmt.Fprintln(q.w, strings.Join(wordtitles, ",\n"))
@@ -2435,27 +2526,31 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 	filename := filepath.Join(dirpath, fingerprint)
 	data, err := ioutil.ReadFile(filename)
 	if err == nil {
-		a := strings.Fields(string(data))
-		if len(a) == 3 {
-			a = append(a, "1:0")
-		}
-		if len(a) == 4 {
-			if a[0] != spods[item].lbl {
-				os.Remove(filename)
-				return 0, 0, "", false, fmt.Errorf("ERROR: invalid label %q", a[0])
-			}
-			lines, err := strconv.Atoi(a[1])
-			if err != nil {
-				return 0, 0, "", false, err
-			}
-			items, err := strconv.Atoi(a[2])
-			if err != nil {
-				return 0, 0, "", false, err
-			}
-			return lines, items, a[3], true, nil
+		if spods[item].special == "attr" {
+			return 0, 0, string(data), true, nil
 		} else {
-			os.Remove(filename)
-			return 0, 0, "", false, fmt.Errorf("ERROR: invalid data %q", string(data))
+			a := strings.Fields(string(data))
+			if len(a) == 3 {
+				a = append(a, "1:0")
+			}
+			if len(a) == 4 {
+				if a[0] != spods[item].lbl {
+					os.Remove(filename)
+					return 0, 0, "", false, fmt.Errorf("ERROR: invalid label %q", a[0])
+				}
+				lines, err := strconv.Atoi(a[1])
+				if err != nil {
+					return 0, 0, "", false, err
+				}
+				items, err := strconv.Atoi(a[2])
+				if err != nil {
+					return 0, 0, "", false, err
+				}
+				return lines, items, a[3], true, nil
+			} else {
+				os.Remove(filename)
+				return 0, 0, "", false, fmt.Errorf("ERROR: invalid data %q", string(data))
+			}
 		}
 	}
 
@@ -2478,11 +2573,18 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 
 	var u string
 	onlyone := spods[item].special == "hidden1"
+	attr := spods[item].special == "attr"
 	if onlyone {
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&xn=1",
 			db,
 			url.QueryEscape(spods[item].xpath),
 			spods[item].method)
+	} else if attr {
+		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=%s&d=1",
+			db,
+			url.QueryEscape(spods[item].xpath),
+			spods[item].method,
+			spods[item].lbl)
 	} else {
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=word_is_&d=1",
 			db,
@@ -2537,6 +2639,29 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 			fmt.Fprintf(fp, "%s\t0\t0\t\n", spods[item].lbl)
 		} else {
 			fmt.Fprintf(fp, "%s\t1\t1\t1:1\n", spods[item].lbl)
+		}
+		fp.Close()
+		return
+	}
+
+	if attr {
+		xpathstats(&myQ)
+		scanner := bufio.NewScanner(&w.buffer)
+		scanner.Scan()
+		scanner.Scan()
+		at := make([]string, 0)
+		sum := 0
+		for scanner.Scan() {
+			line := strings.Fields(scanner.Text())
+			at = append(at, line[2]+"\t"+line[0])
+			a, _ := strconv.Atoi(line[0])
+			sum += a
+		}
+		sort.Strings(at)
+		for _, line := range at {
+			aa := strings.Fields(line)
+			n, _ := strconv.Atoi(aa[1])
+			fmt.Fprintf(fp, "%d\t%.3f\t%.2f%%\t%s\n", n, float64(n)/float64(sum), float64(n)/float64(sum)*100.0, aa[0])
 		}
 		fp.Close()
 		return
