@@ -95,10 +95,10 @@ var (
 		},
 		{
 			`Attributen`,
-			`//node [@pt]`, // spatie i.v.m. mogelijk duplicaat
+			`//node [@pos]`, // spatie i.v.m. mogelijk duplicaat
 			SPOD_STD,
-			"pt",
-			"pt",
+			"pos",
+			"pos",
 			"attr",
 		},
 		{
@@ -107,6 +107,14 @@ var (
 			SPOD_STD,
 			"postag",
 			"postag",
+			"attr",
+		},
+		{
+			``,
+			`//node [@pt]`, // spatie i.v.m. mogelijk duplicaat
+			SPOD_STD,
+			"pt",
+			"pt",
 			"attr",
 		},
 		{
@@ -1612,8 +1620,6 @@ func spod_main(q *Context) {
 	writeHead(q, "Syntactic profiler of Dutch", 5)
 
 	fmt.Fprintln(q.w, "Syntactic profiler of Dutch<p>")
-
-	fmt.Fprintln(q.w, "<div class=\"warning\">In ontwikkeling</div>")
 
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>
