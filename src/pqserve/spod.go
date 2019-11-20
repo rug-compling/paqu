@@ -268,7 +268,7 @@ naamwoord (3i).
        and
        node[@rel='cmp'
             and
-            not(@lemma='of' or @lemma='dat')
+            not(@lemma=('of','dat'))
        ]
        and
        node[@rel='body' and @cat='ssub']
@@ -321,7 +321,7 @@ naamwoord (3i).
        and
        ../node[@rel="hd"
                and
-               (@pt="n" or @pt="vnw")
+               @pt=("n","vnw")
        ]
 ]`,
 			SPOD_STD,
@@ -358,7 +358,7 @@ naamwoord (3i).
 			`
 //node[@cat='ti'
        and
-       not(../@cat='oti' or ../@cat='cp')
+       not(../@cat=('oti','cp'))
 ]`,
 			SPOD_STD,
 			"tite",
@@ -496,7 +496,7 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="body" and (%PQ_s% or @cat="ssub" or @pt="ww" or @cat="cp")]
+               node[@rel="body" and (%PQ_s% or @cat=("cp","ssub") or @pt="ww")]
        ]
        and
        @pt="adj"
@@ -534,7 +534,7 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+               node[@rel="body" and (@cat=("advp","ap") or @pt=("adj","bw"))]
        ]
        and
        @pt="adj"
@@ -548,7 +548,7 @@ wordt gemaakt voor de andere hoofden.
 		},
 		{
 			"",
-			`//node[@rel="hd" and ../node[@rel="obcomp"] and (@lemma="veel" or @lemma="minder" or @lemma="weinig")]`,
+			`//node[@rel="hd" and ../node[@rel="obcomp"] and @lemma=("veel","minder","weinig")]`,
 			SPOD_STD,
 			"ccmm",
 			"met als hoofd \"meer\", \"minder\"||",
@@ -564,7 +564,7 @@ wordt gemaakt voor de andere hoofden.
                node[@rel="body" and %PQ_np%]
        ]
        and
-       (@lemma="veel" or @lemma="minder" or @lemma="weinig")
+       @lemma=("veel","minder","weinig")
 ]`,
 			SPOD_STD,
 			"ccmdnp",
@@ -578,10 +578,10 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="body" and (%PQ_s% or @cat="ssub" or @pt="ww" or @cat="cp")]
+               node[@rel="body" and (%PQ_s% or @cat=("cp","ssub") or @pt="ww")]
        ]
        and
-       (@lemma="veel" or @lemma="minder" or @lemma="weinig")
+       @lemma=("veel","minder","weinig")
 ]`,
 			SPOD_STD,
 			"ccmdvs",
@@ -598,7 +598,7 @@ wordt gemaakt voor de andere hoofden.
                node[@rel="body" and @cat="pp"]
        ]
        and
-       (@lemma="veel" or @lemma="minder" or @lemma="weinig")
+       @lemma=("veel","minder","weinig")
 ]`,
 			SPOD_STD,
 			"ccmdpp",
@@ -612,10 +612,10 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+               node[@rel="body" and (@cat=("advp","ap") or @pt=("adj","bw"))]
        ]
        and
-       (@lemma="veel" or @lemma="minder" or @lemma="weinig")
+       @lemma=("veel","minder","weinig")
 ]`,
 			SPOD_STD,
 			"ccmdav",
@@ -629,7 +629,7 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"]
        and
-       (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+       @lemma=("niet","niets","ander","anders")
 ]`,
 			SPOD_STD,
 			"ccnn",
@@ -646,7 +646,7 @@ wordt gemaakt voor de andere hoofden.
                node[@rel="body" and %PQ_np%]
        ]
        and
-       (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+       @lemma=("niet","niets","ander","anders")
 ]`,
 			SPOD_STD,
 			"ccndnp",
@@ -660,9 +660,9 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="body" and (%PQ_s% or @cat="ssub" or @pt="ww" or @cat="cp")]
+               node[@rel="body" and (%PQ_s% or @cat=("cp","ssub") or @pt="ww")]
        ]
-       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+       and @lemma=("niet","niets","ander","anders")
 ]`,
 			SPOD_STD,
 			"ccndvs",
@@ -678,7 +678,7 @@ wordt gemaakt voor de andere hoofden.
                and
                node[@rel="body" and @cat="pp"]
        ]
-       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+       and @lemma=("niet","niets","ander","anders")
 ]`,
 			SPOD_STD,
 			"ccndpp",
@@ -692,9 +692,9 @@ wordt gemaakt voor de andere hoofden.
        and
        ../node[@rel="obcomp"
                and
-               node[@rel="body" and (@cat="advp" or @cat="ap" or @pt="adj" or @pt="bw")]
+               node[@rel="body" and (@cat=("advp","ap") or @pt=("adj","bw"))]
        ]
-       and (@lemma="niet" or @lemma="niets" or @lemma="ander" or @lemma="anders")
+       and @lemma=("niet","niets","ander","anders")
 ]`,
 			SPOD_STD,
 			"ccndav",
@@ -1003,12 +1003,12 @@ VP (9) en bijzinnen (10).
        and
        node[@rel="cnj"
             and
-            (@cat="ssub" or @cat="ti" or @cat="ppart" or @cat="inf" or @pt="ww")
+            @cat=("ssub","ti","ppart","inf","ww")
        ]
        and
        not(node[@rel="cnj"
                 and
-                not(@cat="ssub" or @cat="ti" or @cat="ppart" or @cat="inf" or @pt="ww")
+                not(@cat=("ssub","ti","ppart","inf","ww"))
            ]
        )
 ]`,
@@ -1593,7 +1593,7 @@ de namenlijst) of op een nog andere manier werden behandeld.
 			`
 //node[@his
        and
-       not(@his="normal" or @his="compound" or @his="name")
+       not(@his=("normal","compound","name"))
 ]`,
 			SPOD_STD,
 			"noun",
@@ -2531,7 +2531,7 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 	fingerprint := spod_fingerprint(item)
 	filename := filepath.Join(dirpath, fingerprint)
 	data, err := ioutil.ReadFile(filename)
-	if err == nil {
+	if err == nil && len(data) > 0 {
 		if spods[item].special == "attr" {
 			return 0, 0, string(data), true, nil
 		} else {
