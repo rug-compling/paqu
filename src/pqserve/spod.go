@@ -1003,12 +1003,12 @@ VP (9) en bijzinnen (10).
        and
        node[@rel="cnj"
             and
-            @cat=("ssub","ti","ppart","inf","ww")
+            (@cat=("ssub","ti","ppart","inf") or @pt="ww")
        ]
        and
        not(node[@rel="cnj"
                 and
-                not(@cat=("ssub","ti","ppart","inf","ww"))
+                not(@cat=("ssub","ti","ppart","inf") or @pt="ww")
            ]
        )
 ]`,
