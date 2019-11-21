@@ -434,7 +434,8 @@ func enhancedDependencies1(node *nodeType, q *context) {
 	}
 	ss := make([]string, 0, len(enhanced))
 	for _, e := range enhanced {
-		if e.head == 0 && e.dep != "root" ||
+		if e.head < 0 ||
+			e.head == 0 && e.dep != "root" ||
 			e.head != 0 && e.dep == "root" ||
 			e.dep == "orphan" {
 			panic(fmt.Sprintf("Invalid EUD %s:%s", number(e.head), e.dep))
