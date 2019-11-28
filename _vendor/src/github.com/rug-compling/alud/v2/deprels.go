@@ -26,5 +26,11 @@ func addDependencyRelations(q *context) {
 				number(node.udHeadPosition),
 				node.udRelation))
 		}
+		if node.udHeadPosition == node.End {
+			panic(fmt.Sprintf(
+				"DEPREL to self %s:%s",
+				number(node.udHeadPosition),
+				node.udRelation))
+		}
 	}
 }

@@ -440,6 +440,12 @@ func enhancedDependencies1(node *nodeType, q *context) {
 			e.dep == "orphan" {
 			panic(fmt.Sprintf("Invalid EUD %s:%s", number(e.head), e.dep))
 		}
+		if e.head == node.End {
+			panic(fmt.Sprintf(
+				"EUD to self %s:%s",
+				number(e.head),
+				e.dep))
+		}
 		if e.dep != "" {
 			ss = append(ss, number(e.head)+":"+e.dep)
 		}
