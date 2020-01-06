@@ -1234,11 +1234,13 @@ TARGET:
 				n2 := np2.node
 				for _, headpath := range heads {
 					head := headpath.node
-					lassy_deprel(n2.Word, n2.Lemma, n2.Root, n2.Postag, n.Rel, // n.Rel, dus niet n2.Rel !
-						head.Word, head.Lemma, head.Root, head.Postag, node.NodeList[idx].Rel,
-						n2.Begin, n2.End, head.Begin, head.End,
-						np2.path, headpath.path)
-					n2.used = true
+					if n2.Index == 0 || n2.Index != head.Index {
+						lassy_deprel(n2.Word, n2.Lemma, n2.Root, n2.Postag, n.Rel, // n.Rel, dus niet n2.Rel !
+							head.Word, head.Lemma, head.Root, head.Postag, node.NodeList[idx].Rel,
+							n2.Begin, n2.End, head.Begin, head.End,
+							np2.path, headpath.path)
+						n2.used = true
+					}
 				}
 			}
 		}
@@ -1262,16 +1264,18 @@ TARGET:
 				o := op.node
 				for _, sup := range subjs {
 					su := sup.node
-					lassy_deprel(o.Word, o.Lemma, o.Root, o.Postag, obj.Rel,
-						su.Word, su.Lemma, su.Root, su.Postag, "su",
-						o.Begin, o.End, su.Begin, su.End,
-						op.path, sup.path)
-					o.used = true
-					lassy_deprel(su.Word, su.Lemma, su.Root, su.Postag, "su",
-						o.Word, o.Lemma, o.Root, o.Postag, obj.Rel,
-						su.Begin, su.End, o.Begin, o.End,
-						sup.path, op.path)
-					su.used = true
+					if o.Index == 0 || o.Index != su.Index {
+						lassy_deprel(o.Word, o.Lemma, o.Root, o.Postag, obj.Rel,
+							su.Word, su.Lemma, su.Root, su.Postag, "su",
+							o.Begin, o.End, su.Begin, su.End,
+							op.path, sup.path)
+						o.used = true
+						lassy_deprel(su.Word, su.Lemma, su.Root, su.Postag, "su",
+							o.Word, o.Lemma, o.Root, o.Postag, obj.Rel,
+							su.Begin, su.End, o.Begin, o.End,
+							sup.path, op.path)
+						su.used = true
+					}
 				}
 			}
 		}
@@ -1289,16 +1293,18 @@ TARGET:
 					n1 := np1.node
 					for _, np2 := range heads[j] {
 						n2 := np2.node
-						lassy_deprel(n1.Word, n1.Lemma, n1.Root, n1.Postag, node.NodeList[i].Rel,
-							n2.Word, n2.Lemma, n2.Root, n2.Postag, node.NodeList[j].Rel,
-							n1.Begin, n1.End, n2.Begin, n2.End,
-							np1.path, np2.path)
-						n1.used = true
-						lassy_deprel(n2.Word, n2.Lemma, n2.Root, n2.Postag, node.NodeList[j].Rel,
-							n1.Word, n1.Lemma, n1.Root, n1.Postag, node.NodeList[i].Rel,
-							n2.Begin, n2.End, n1.Begin, n1.End,
-							np2.path, np1.path)
-						n2.used = true
+						if n1.Index == 0 || n1.Index != n2.Index {
+							lassy_deprel(n1.Word, n1.Lemma, n1.Root, n1.Postag, node.NodeList[i].Rel,
+								n2.Word, n2.Lemma, n2.Root, n2.Postag, node.NodeList[j].Rel,
+								n1.Begin, n1.End, n2.Begin, n2.End,
+								np1.path, np2.path)
+							n1.used = true
+							lassy_deprel(n2.Word, n2.Lemma, n2.Root, n2.Postag, node.NodeList[j].Rel,
+								n1.Word, n1.Lemma, n1.Root, n1.Postag, node.NodeList[i].Rel,
+								n2.Begin, n2.End, n1.Begin, n1.End,
+								np2.path, np1.path)
+							n2.used = true
+						}
 					}
 				}
 			}
