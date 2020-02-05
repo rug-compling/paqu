@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type Corpus struct {
@@ -20,6 +21,7 @@ type Corpus struct {
 	msg         string
 	shared      string
 	params      string
+	datum       time.Time
 }
 
 var (
@@ -44,7 +46,7 @@ func corpora(q *Context) {
 
 	rows, err := q.db.Query(
 		fmt.Sprintf(
-			"SELECT `id`, `description`, `status`, `nline`, `nword`, `msg`, `shared`, `params`FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
+			"SELECT `id`, `description`, `status`, `nline`, `nword`, `msg`, `shared`, `params`, `created` FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
 			Cfg.Prefix,
 			q.user))
 	if hErr(q, err) {
@@ -55,8 +57,9 @@ func corpora(q *Context) {
 	gebruikt := 0
 	var id, desc, status, msg, shared, params string
 	var zinnen, woorden int
+	var date time.Time
 	for rows.Next() {
-		err = rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared, &params)
+		err = rows.Scan(&id, &desc, &status, &zinnen, &woorden, &msg, &shared, &params, &date)
 		if hErr(q, err) {
 			rows.Close()
 			return
@@ -70,6 +73,7 @@ func corpora(q *Context) {
 			msg:         msg,
 			shared:      tr[shared],
 			params:      params,
+			datum:       date,
 		})
 	}
 
@@ -173,6 +177,7 @@ function rm(idx) {
 <tr><th><th><th>Status
 <th>Titel
 <th>Regels
+<th>Datum
 <th>Toegang
 <th>Opmerkingen
 `)
@@ -277,15 +282,16 @@ function rm(idx) {
 
 			if corpus.status == "gereed" {
 				fmt.Fprintf(q.w, "<td class=\"odd right\">%s\n", iformat(corpus.nline))
-				fmt.Fprintf(q.w, "<td class=\"even\">%s\n", corpus.shared)
+				fmt.Fprintf(q.w, "<td class=\"even right\">%s\n", strings.Replace(datum(corpus.datum), " ", "&nbsp;", -1))
+				fmt.Fprintf(q.w, "<td class=\"odd\">%s\n", corpus.shared)
 			} else {
 				n := ""
 				if corpus.nline > 0 {
 					n = iformat(corpus.nline)
 				}
-				fmt.Fprintf(q.w, "<td class=\"odd right\">%s\n<td class=\"even\">\n", n)
+				fmt.Fprintf(q.w, "<td class=\"odd right\">%s\n<td class=\"even\">\n<td class=\"odd\">\n", n)
 			}
-			fmt.Fprintf(q.w, "<td class=\"odd\">%s\n", html.EscapeString(corpus.msg))
+			fmt.Fprintf(q.w, "<td class=\"even\">%s\n", html.EscapeString(corpus.msg))
 		}
 
 		fmt.Fprintln(q.w, "</table>")
