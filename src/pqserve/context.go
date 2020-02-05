@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // The context acts as global store for a single request
@@ -34,6 +35,7 @@ type Context struct {
 	words        map[string]int
 	shared       map[string]string
 	params       map[string]string
+	dates        map[string]time.Time
 	form         *multipart.Form
 }
 
@@ -89,6 +91,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				words:        make(map[string]int),
 				shared:       make(map[string]string),
 				params:       make(map[string]string),
+				dates:        make(map[string]time.Time),
 			}
 
 			// Maak verbinding met database
@@ -166,7 +169,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta` "+
+				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`, `i`.`created` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -181,8 +184,9 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 			}
 			var id, desc, owner, shared, params, group string
 			var zinnen, woorden, protected, hasmeta int
+			var date time.Time
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta)
+				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta, &date)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -190,26 +194,26 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 				if group == "E" {
 					if !q.ignore[id] {
-						q.opt_db = append(q.opt_db, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen", id, desc, displayEmail(owner), iformat(zinnen)))
+						q.opt_db = append(q.opt_db, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s", id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
 						q.prefixes[id] = true
 						if hasmeta > 0 {
-							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen",
-								id, desc, displayEmail(owner), iformat(zinnen)))
+							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
+								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
 						}
 						if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
-							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen",
-								id, desc, displayEmail(owner), iformat(zinnen)))
+							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
+								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
 							q.spodprefixes[id] = true
 						}
 					}
 				} else if q.auth || owner == "none" || owner == "auto" || owner == "manual" {
-					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
+					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
 					q.prefixes[id] = true
 					if hasmeta > 0 {
-						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
+						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
 					}
 					if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
-						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s \u2014 %s zinnen", group, id, desc, iformat(zinnen)))
+						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
 						q.spodprefixes[id] = true
 					}
 				}
@@ -225,6 +229,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				if q.auth && owner == q.user {
 					q.myprefixes[id] = true
 				}
+				q.dates[id] = date
 			}
 
 			if r.Method == "OPTIONS" && options.OptionsMethodHandler != nil {
@@ -276,4 +281,8 @@ func displayEmail(s string) string {
 		return s
 	}
 	return s[0:p1+1] + ".." + s[p2:len(s)]
+}
+
+func datum(t time.Time) string {
+	return fmt.Sprintf("%d %s %d", t.Day(), maanden[t.Month()], t.Year())
 }

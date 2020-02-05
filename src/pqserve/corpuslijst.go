@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type CorpusType struct {
@@ -13,6 +14,7 @@ type CorpusType struct {
 	title string
 	lines int
 	owner string
+	datum time.Time
 }
 
 func corpuslijst(q *Context) {
@@ -28,7 +30,7 @@ func corpuslijst(q *Context) {
 	}
 
 	rows, err := q.db.Query(fmt.Sprintf(
-		"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner` "+
+		"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`created` "+
 			"FROM `%s_info` `i`, `%s_corpora` `c` "+
 			"WHERE `i`.`id` = `c`.`prefix` "+
 			"AND `c`.`enabled` = 1 "+
@@ -48,7 +50,8 @@ func corpuslijst(q *Context) {
 	for rows.Next() {
 		var id, title, owner string
 		var lines int
-		err := rows.Scan(&id, &title, &lines, &owner)
+		var datum time.Time
+		err := rows.Scan(&id, &title, &lines, &owner, &datum)
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -60,6 +63,7 @@ func corpuslijst(q *Context) {
 				title: title,
 				lines: lines,
 				owner: owner,
+				datum: datum,
 			})
 		}
 	}
@@ -84,7 +88,7 @@ var reverse = false;
 var data = [`)
 	for _, c := range corpora {
 		fmt.Fprintf(q.w, `%s
-{id:%q,title:%q,lower:%q,lines:%d,liness:%q,owner:%q,show:%v}`,
+{id:%q,title:%q,lower:%q,lines:%d,liness:%q,owner:%q,show:%v,datum:"%d-%02d-%02d"}`,
 			p,
 			c.id,
 			html.EscapeString(c.title),
@@ -92,7 +96,10 @@ var data = [`)
 			c.lines,
 			iformat(c.lines),
 			html.EscapeString(displayEmail(c.owner)),
-			!q.ignore[c.id])
+			!q.ignore[c.id],
+			c.datum.Year(),
+			c.datum.Month(),
+			c.datum.Day())
 		p = ","
 	}
 	fmt.Fprint(q.w, `
@@ -140,12 +147,13 @@ function redraw () {
         if (value.show) {
             c = " checked=\"checked\"";
         }
-        lines += "<tr class=\"" + eo + "\"><td><input type=\"checkbox\"" + c + " onchange=\"toggle(" + index + ")\"><td class=\"odd first\">" + value.title + "<td class=\" even right\">" + value.liness + "<td class=\"odd\">" + value.owner + "\n";
+        lines += "<tr class=\"" + eo + "\"><td><input type=\"checkbox\"" + c + " onchange=\"toggle(" + index + ")\"><td class=\"odd first\">" + value.title + "<td class=\"even right\">" + value.liness + "<td class=\"odd\">" + value.owner + "<td class=\"even\">" + value.datum + "\n";
     });
     $("#items").html(lines);
     $("#title").html("");
     $("#lines").html("");
     $("#owner").html("");
+    $("#datum").html("");
     var pijl = "&darr;";
     if (reverse) {
         pijl = "&uarr;";
@@ -158,6 +166,9 @@ function redraw () {
     }
     if (field == "owner") {
         $("#owner").html(pijl);
+    }
+    if (field == "datum") {
+        $("#datum").html(pijl);
     }
 }
 
@@ -211,6 +222,21 @@ function doOwner() {
     redraw();
 }
 
+function doDatum() {
+    if (field == "datum") {
+        reverse = !reverse;
+    } else {
+        field = "datum";
+    }
+    var rv = reverse ? -1 : 1;
+    data.sort(function(a, b) {
+      if (a.datum > b.datum) { return rv; }
+      if (a.datum < b.datum) { return -rv; }
+      return 0;
+    });
+    redraw();
+}
+
 $(document).ready(redraw);
 
 //--></script>
@@ -222,7 +248,7 @@ Je ziet nu alleen corpora die <b>metadata</b> bevatten
 <p>
 `)
 	}
-	fmt.Fprint(q.w, `	
+	fmt.Fprint(q.w, `
 Selecteer welke corpora je in het menu wilt zien.
 <p>
 <form action="javascript:void(0)" onsubmit="javascript:opslaan()">
@@ -233,6 +259,7 @@ Selecteer welke corpora je in het menu wilt zien.
   <th><a href="javascript:void(0)" onclick="javascript:doTitle()">Titel<span id="title"></span></a>
   <th><a href="javascript:void(0)" onclick="javascript:doLines()">Regels<span id="lines"></span></a>
   <th><a href="javascript:void(0)" onclick="javascript:doOwner()">Eigenaar<span id="owner"></span></a>
+  <th><a href="javascript:void(0)" onclick="javascript:doDatum()">Datum<span id="datum"></span></a>
 </tr>
 </thead>
 <tbody id="items">

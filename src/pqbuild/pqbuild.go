@@ -114,6 +114,7 @@ var (
 	desc       string
 	owner      string
 	public     string
+	datum      string
 
 	topfile   = -1
 	toparch   = -1
@@ -177,6 +178,12 @@ func main() {
 			rePath = regexp.MustCompile(os.Args[1])
 		} else if os.Args[1] == "-d" {
 			db_decode = true
+		} else if os.Args[1] == "-D" && len(os.Args) > 2 {
+			os.Args = append(os.Args[:1], os.Args[2:]...)
+			datum = os.Args[1]
+			if !validDate(datum) {
+				return
+			}
 		} else {
 			break
 		}
@@ -185,7 +192,7 @@ func main() {
 
 	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] id description owner public < bestandnamen
 
 Opties:
 
@@ -195,6 +202,7 @@ Opties:
  -s : status niet bijwerken als klaar
  -p : prefix die van bestandnaam wordt gestript voor label
  -d : bestandnaam decoderen voor label
+ -D : datum in formaat YYYY-MM-DD
 
   id:
   description:
@@ -334,8 +342,12 @@ Opties:
 
 	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
 		Cfg.Prefix, prefix)) // negeer fout
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q WHERE `id` = %q",
-		Cfg.Prefix, desc, owner, share, prefix))
+	setDate := ""
+	if datum != "" {
+		setDate = fmt.Sprintf(", `created` = \"%s 12:00:00\"", datum)
+	}
+	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q%s WHERE `id` = %q",
+		Cfg.Prefix, desc, owner, share, setDate, prefix))
 	util.CheckErr(err)
 
 	_, err = db.Exec("DELETE FROM " + Cfg.Prefix + "_corpora WHERE `prefix` = \"" + prefix + "\";")
@@ -1928,4 +1940,13 @@ func unexpand(node *Node) {
 			unexpand(n)
 		}
 	}
+}
+
+func validDate(s string) bool {
+	_, err := time.Parse("2006-01-02", s)
+	if err == nil {
+		return true
+	}
+	fmt.Printf("Invalid date %s: %v\n", s, err)
+	return false
 }
