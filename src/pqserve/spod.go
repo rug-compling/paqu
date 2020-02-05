@@ -1698,8 +1698,6 @@ function info(id) {
     e.css("zIndex", 9999);
     queryvisible = true;
     queryid = id;
-    return false;
-
 }
 function uninfo() {
     if (queryvisible) {
