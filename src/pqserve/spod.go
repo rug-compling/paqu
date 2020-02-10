@@ -1092,6 +1092,93 @@ bijvoeglijk-naamwoordgroepen (3) en bijwoordgroepen (4).
 			"",
 		},
 		{
+			"Voorzetselgroepen",
+			`//node[@cat="pp" and @rel="mod" and ../@cat="np"]`,
+			SPOD_STD,
+			"ppnp",
+			"grammaticale functie||, bepalingen bij zelfstandige naamwoorden",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and
+       @rel="mod" and
+       (../@cat="ap" or
+        ((../@cat="ppart" or ../@cat="ppres") and
+         not(../@rel="vc") and
+         not(../@rel="cnj" and ../../@rel="vc")))]`,
+			SPOD_STD,
+			"ppap",
+			"grammaticale functie|, bepalingen bij adjectieven (en als adjectief gebruikte deelwoorden)",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and @rel="pc"]`,
+			SPOD_STD,
+			"pppc",
+			"grammaticale functie|, voorzetselvoorwerp",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and @rel="ld"]`,
+			SPOD_STD,
+			"ppld",
+			"grammaticale functie|, locatief/directioneel complement",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and @rel="predc"]`,
+			SPOD_STD,
+			"pppredc",
+			"grammaticale functie|, predicatief complement",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and
+       @rel="mod" and
+       (../@cat=("smain","sv1","whq","ssub","inf") or
+        (../@cat="ppart" and
+         (../@rel="vc" or
+          (../@rel="cnj" and
+           ../../@rel="vc"))))]`,
+			SPOD_STD,
+			"ppbep",
+			"grammaticale functie|, bijwoordelijke bepaling",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and
+       node[@rel="hd"]/%PQ_b%=%PQ_b% and
+       node[@rel="obj1"]/%PQ_e%=%PQ_e%]`,
+			SPOD_STD,
+			"ppinp",
+			"interne structuur||, P + NP",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and
+       node[@rel="hd"]/%PQ_e%=%PQ_e% and
+       node[@rel="obj1" and @pt="vnw"]/%PQ_b%=%PQ_b%]`,
+			SPOD_STD,
+			"ppirp",
+			"interne structuur|, +R-pronomen + P",
+			"",
+		},
+		{
+			"",
+			`//node[@cat="pp" and node[@rel="hd" and @cat="mwu"]]`,
+			SPOD_STD,
+			"ppimwu",
+			"interne structuur|, complexe preposition",
+			"",
+		},
+		{
 			`Werkwoorden//Onder het kopje werkwoorden worden de vaste werkwoordelijke
 uitdrukkingen geteld (1).
 <p>
