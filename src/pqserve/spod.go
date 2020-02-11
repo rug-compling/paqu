@@ -1092,7 +1092,47 @@ bijvoeglijk-naamwoordgroepen (3) en bijwoordgroepen (4).
 			"",
 		},
 		{
-			"Voorzetselgroepen",
+			`Voorzetselgroepen//Voorzetselgroepen worden onderscheiden naar grammaticale 
+functie en naar interne structuur. Voorzetselgroepen
+kunnen optreden als bepaling bij nomina (1), adjectieven (2)
+of bij werkwoorden (6). Dit laatste geval wordt in de traditionele
+grammatica een bijwoordelijke bepaling genoemd.  Voorzetselgroepen
+kunnen ook als complement optreden. Hier onderscheiden we
+voorzetselvoorwerpen (3), locatief/directinele complementen (4) en
+predicatieve complementen (5).
+<p>
+<table>
+<tr><td>(1) <td>De vrouw van de buurman
+<tr><td>&nbsp;</tr>
+<tr><td>(2a)<td>De door hem beschreven voorvallen
+<tr><td>( b)<td>De op zichzelf rationele beslissingen
+<tr><td>&nbsp;</tr>
+<tr><td>(3) <td>We rekenen op zijn steun
+<tr><td>&nbsp;</tr>
+<tr><td>(4a)<td>De ketchup vindt u bij de groenteafdeling
+<tr><td>( b)<td>We rijden wel even naar het station
+<tr><td>&nbsp;</tr>
+<tr><td>(5a)<td>Die aanpak is niet zonder risico
+<tr><td>( b)<td>Je moet in het bezit zijn van een visum
+<tr><td>( c)<td>De haven is van cruciale betekenis
+<tr><td>&nbsp;</tr>
+<tr><td>(6) <td>We gaan vissen bij de brug
+</table>
+<p>
+Voorzetselgroepen worden onderverdeeld aan de hand van hun
+interne structuur. We onderscheiden de meest gangbare structuur
+waarbij een voorzetsel direct gevolgd wordt door een NP (7)
+en de structuur waarbij een R-pronomen direct of indirect gevolgd
+wordt door het bijbehorende voorzetsel (8). Ten slotte volgt
+een aparte telling voor het aantal voorzetseluitdrukkingen.
+Dit zijn versteende combinaties zoals "ten tijde van", "door middel van",
+"naar aanleiding van" die zich als voorzetsel gedragen.
+<p>
+<table>
+<tr><td>(7)<td>in de kooi
+<tr><td>&nbsp;</tr>
+<tr><td>(8)<td>Hij houdt daar helemaal niet van
+</table>`,
 			`//node[@cat="pp" and @rel="mod" and ../@cat="np"]`,
 			SPOD_STD,
 			"ppnp",
