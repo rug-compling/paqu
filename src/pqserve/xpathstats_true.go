@@ -148,7 +148,7 @@ func getFullAttr(attr string, n, top *Node) string {
 		}
 		if v.begin > p {
 			p = v.begin
-			if v.begin > q && len(s) > 0 {
+			if v.begin > q && len(s) > 0 && !is_word {
 				s = append(s, "...")
 			}
 			q = v.end
