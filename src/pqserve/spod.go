@@ -1215,7 +1215,7 @@ Dit zijn versteende combinaties zoals "ten tijde van", "door middel van",
 			`//node[@cat="pp" and node[@rel="hd" and @cat="mwu"]]`,
 			SPOD_STD,
 			"ppimwu",
-			"interne structuur|, complexe preposition",
+			"interne structuur|, complex voorzetsel",
 			"",
 		},
 		{
