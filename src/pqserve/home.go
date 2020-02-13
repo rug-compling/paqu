@@ -1141,6 +1141,7 @@ func html_opts(q *Context, opts []string, value, title string) {
 			opt = p[0]
 			txt = strings.Join(p[1:], " ")
 		}
+		disabled := ""
 		if title == "relatie" && opt != "" {
 			if opt[0] != c {
 				c = opt[0]
@@ -1159,6 +1160,10 @@ func html_opts(q *Context, opts []string, value, title string) {
 			}
 			opt = opt[1:]
 		} else if title == "corpus" && opt != "" {
+			if opt[0] == '-' {
+				disabled = " disabled=\"disabled\""
+				opt = opt[1:]
+			}
 			if opt[0] != c {
 				c = opt[0]
 				t := ""
@@ -1185,11 +1190,11 @@ func html_opts(q *Context, opts []string, value, title string) {
 			sel = " selected=\"selected\""
 		}
 		if opt == "" {
-			fmt.Fprintf(q.w, "    <option value=\"\"%s>&mdash; %s &mdash;</option>\n", sel, title)
+			fmt.Fprintf(q.w, "    <option value=\"\"%s%s>&mdash; %s &mdash;</option>\n", sel, disabled, title)
 		} else if txt == "" {
-			fmt.Fprintf(q.w, "    <option%s>%s</option>\n", sel, opt)
+			fmt.Fprintf(q.w, "    <option%s%s>%s</option>\n", sel, disabled, opt)
 		} else {
-			fmt.Fprintf(q.w, "    <option value=\"%s\"%s>%s</option>\n", opt, sel, html.EscapeString(txt))
+			fmt.Fprintf(q.w, "    <option value=\"%s\"%s%s>%s</option>\n", opt, sel, disabled, html.EscapeString(txt))
 		}
 	}
 }

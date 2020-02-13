@@ -204,6 +204,9 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
 								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
 							q.spodprefixes[id] = true
+						} else {
+							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("-E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
+								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
 						}
 					}
 				} else if q.auth || owner == "none" || owner == "auto" || owner == "manual" {
@@ -215,6 +218,8 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 					if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
 						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
 						q.spodprefixes[id] = true
+					} else {
+						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("-%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
 					}
 				}
 				q.desc[id] = desc
