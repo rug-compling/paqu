@@ -124,11 +124,11 @@ beginnen (2), ja/nee vragen (3), en imperatieven (4).
 <p>
 <table>
 <tr><td>(1)<td> Pieter leest een boek.</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2)<td>Wie leest er een boek?</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3)<td>Lees jij een boek?</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4a)<td>Lees dat boek nou toch eens.</td>
 <tr><td>( b)<td> Lees jij dat boek nou toch eens.</tr>
 </table>
@@ -179,11 +179,11 @@ onderscheiden we relatieve bijzinnen (6) en free relatives (7).
 <p>
 <table>
 <tr><td>(1)<td>(ik vroeg) wie dat boek gelezen heeft</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2a)<td>(ik lees dat boek) omdat het door Elsschot geschreven is</tr>
 <tr><td>( b)<td>(ik denk) dat het boek door Elsschot is geschreven</tr>
 <tr><td>( c)<td>(ik vroeg) of het boek door Ellschot is geschreven</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3a)<td>(ik heb geprobeerd) om een boek te lezen</tr>
 <tr><td>( b)<td>(ik ga naar de bieb) om een boek te lezen</tr>
 <tr><td>( c)<td>(het was niet nodig) om het boek te lezen</tr>
@@ -193,13 +193,13 @@ onderscheiden we relatieve bijzinnen (6) en free relatives (7).
 <tr><td>( g)<td>(hij heeft voldoende invloed) om het boek te verkopen</tr>
 <tr><td>( h)<td>(ze was zo genadig) om het boek voor te lezen</tr>
 <tr><td>( i)<td>(een boek) om nooit te vergeten</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4)<td>(ik heb geprobeerd) een boek te lezen</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(5)<td>(ik lees dat boek) zonder mijn oordeel uit te spreken</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(6)<td>(ik lees een boek) dat door Elsschot is geschreven</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(7)<td>wie dit leest (is gek)</tr>
 </table>
 <p>
@@ -398,7 +398,7 @@ naamwoord (3i).
 <p>
 <table>
 <tr><td>(1)<td>Hoe langer, hoe beter</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2)<td>Hoe langer hij wordt, des te meer hij last van zijn rug krijgt</tr>
 </table>`,
 			`%PQ_minimal_corr_comp%`,
@@ -421,19 +421,19 @@ wordt gemaakt voor de andere hoofden.
 <p>
 <table>
 <tr><td>(1)<td>zo groen als gras</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2)<td>even dik als jij</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3a)<td>beter dan jij</tr>
 <tr><td>( b)<td>beter dan ik dacht</tr>
 <tr><td>( c)<td>beter dan bij de buren</tr>
 <tr><td>( d)<td>beter dan gisteren</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4a)<td>meer geluk dan wijsheid</tr>
 <tr><td>( b)<td>meer geluk dan ik dacht</tr>
 <tr><td>( c)<td>meer geluk dan bij de buren</tr>
 <tr><td>( d)<td>meer geluk dan gisteren</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(5a)<td>niets anders dan ellende</tr>
 <tr><td>( b)<td>niets anders dan dat hij komt</tr>
 <tr><td>( c)<td>niets anders dan bij de buren</tr>
@@ -707,14 +707,14 @@ coordinatoren. Geen (1), één (2), twee (3) of meer (4).
 <p>
 <table>
 <tr><td>(1)<td>Zij wilden inspraak , medezeggenschap , democratisering</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2a)<td>Appels en peren</tr>
 <tr><td>( b)<td>Appels of peren</tr>
 <tr><td>( c)<td>De afzijdige maar invloedrijke waarnemer</tr>
 <tr><td>( d)<td>Ze helpen eiwitten, vetten, etc. afbreken</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3)<td>Noch appels noch peren</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4)<td>U kunt gezond zijn, of ziek of arm of rijk</tr>
 </table>
 <p>
@@ -730,7 +730,7 @@ vier, vijf, zes, of meer.
 <p>
 <table>
 <tr><td>(5)<td>de milieuverontreiniging, enzovoorts</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(6)<td>cacaoboter , cacaopoeder of palmolie</tr>
 </table>
 <p>
@@ -740,12 +740,12 @@ VP (9) en bijzinnen (10).
 <p>
 <table>
 <tr><td>(7)<td>in Arnhem en in België</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(8)<td>Drie keer hadden ze dat beloofd en drie keer was die
      belofte weer ingetrokken</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(9)<td>.. die sinds 1981 in Duitsland woont en werkt</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(10)<td>(Hij zei) dat het er bij hoorde, en dat ik niet bang hoefde te zijn</tr>
 </table>`,
 			`//node[@cat="conj"]`,
@@ -1042,11 +1042,11 @@ bijvoeglijk-naamwoordgroepen (3) en bijwoordgroepen (4).
 <p>
 <table>
 <tr><td>(1)<td>een grote boom</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2)<td>op een tak</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3)<td>heel erg geliefd</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4)<td>spelenderwijs</tr>
 </table>`,
 			`//node[%PQ_np%]`,
@@ -1103,19 +1103,19 @@ predicatieve complementen (5).
 <p>
 <table>
 <tr><td>(1) <td>De vrouw van de buurman
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2a)<td>De door hem beschreven voorvallen
 <tr><td>( b)<td>De op zichzelf rationele beslissingen
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3) <td>We rekenen op zijn steun
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4a)<td>De ketchup vindt u bij de groenteafdeling
 <tr><td>( b)<td>We rijden wel even naar het station
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(5a)<td>Die aanpak is niet zonder risico
 <tr><td>( b)<td>Je moet in het bezit zijn van een visum
 <tr><td>( c)<td>De haven is van cruciale betekenis
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(6) <td>We gaan vissen bij de brug
 </table>
 <p>
@@ -1130,7 +1130,7 @@ Dit zijn versteende combinaties zoals "ten tijde van", "door middel van",
 <p>
 <table>
 <tr><td>(7)<td>in de kooi
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(8)<td>Hij houdt daar helemaal niet van
 </table>`,
 			`//node[@cat="pp" and @rel="mod" and ../@cat="np"]`,
@@ -1238,7 +1238,7 @@ hulpwerkwoord (3).
 <table>
 <tr><td>(2a)<td>zijn boek zal morgen gepresenteerd worden</tr>
 <tr><td>( b)<td>ze zouden nooit een woord met elkaar gewisseld hebben</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3a)<td>zijn boek zal morgen worden gepresenteerd</tr>
 <tr><td>( b)<td>ze zouden nooit een woord met elkaar hebben gewisseld</tr>
 </table>
@@ -1504,13 +1504,13 @@ bijzin (niet lokaal, 5).
 <p>
 <table>
 <tr><td>(1)<td>De kinderen geloven nog in Sinterklaas</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(2)<td>Sinterklaas keurden ze geen blik waardig</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(3)<td>Wie denk je dat ik tegenkwam?</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(4)<td>Welke procedure moet worden gevolgd?</tr>
-<tr><td>&nbsp;</tr>
+<tr><td>&nbsp;<td>&nbsp;</tr>
 <tr><td>(5)<td>Ze keek alleen naar wat ze dacht dat het Amerikaanse belang was</tr>
 </table>
 `,
