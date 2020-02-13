@@ -1186,7 +1186,7 @@ func html_opts(q *Context, opts []string, value, title string) {
 			opt = opt[1:]
 		}
 		sel := ""
-		if opt == value {
+		if opt == value && disabled == "" {
 			sel = " selected=\"selected\""
 		}
 		if opt == "" {
