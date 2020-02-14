@@ -199,6 +199,9 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 						if hasmeta > 0 {
 							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
 								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
+						} else {
+							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("-E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
+								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
 						}
 						if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
 							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
@@ -214,6 +217,8 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 					q.prefixes[id] = true
 					if hasmeta > 0 {
 						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
+					} else {
+						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("-%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
 					}
 					if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
 						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
