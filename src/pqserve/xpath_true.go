@@ -284,8 +284,8 @@ func xpathdl(q *Context) {
 	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	q.w.Header().Set("Content-Disposition", "attachment; filename=uitvoer.txt")
 
-	//curno, hash, loading, errval := xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step)
-	_, _, _, _ = xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step)
+	//curno, hash, methode, loading, errval := xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step)
+	_, _, _, _, _ = xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step)
 }
 
 // TAB: xpath
@@ -367,7 +367,7 @@ func xpath(q *Context) {
 	oriquery := query
 	query += filters[fff]
 	now := time.Now()
-	curno, hash, loading, errval := xpath_do_search(q, query, prefix, methode, offset, xpathmax, chClose, true, 1)
+	curno, hash, methode, loading, errval := xpath_do_search(q, query, prefix, methode, offset, xpathmax, chClose, true, 1)
 	if errval != nil {
 		return
 	}
@@ -1904,7 +1904,9 @@ func findDepId(node *Node, ID string, head string, deprel string) *Node {
 	return nil
 }
 
-func xpath_do_search(q *Context, query string, prefix string, methode string, offset int, xpathmax int, chClose <-chan bool, doHtml bool, step int) (curno int, hash string, loading bool, errval error) {
+func xpath_do_search(q *Context, query string, prefix string, methode string, offset int, xpathmax int, chClose <-chan bool, doHtml bool, step int) (curno int, hash string, methode2 string, loading bool, errval error) {
+
+	methode2 = methode
 
 	var owner string
 	var nlines uint64
@@ -2004,6 +2006,7 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 			if i == 0 {
 				if _, err := os.Stat(dactfile + "x"); err != nil {
 					methode = "std"
+					methode2 = "std"
 					if doHtml {
 						fmt.Fprintln(q.w, `<script type="text/javascript"><!--
 $('#ol').before('<div class="warning">Geen ge&euml;xpandeerde indexnodes beschikbaar voor dit corpus.<br>De standaardmethode wordt gebruikt.</div>');
