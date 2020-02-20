@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"compress/gzip"
 	"database/sql"
 	"errors"
@@ -161,6 +162,10 @@ func savez2(q *Context) {
 	var dirname, fulldirname string
 	var okall bool
 
+	var buf bytes.Buffer
+
+	fmt.Fprint(&buf, "Corpus afgeleid van de volgende corpora:\n\n")
+
 	defer func() {
 		if z != nil {
 			z.Close()
@@ -202,6 +207,8 @@ func savez2(q *Context) {
 		if q.protected[corpus] || !q.myprefixes[corpus] {
 			protected = 1
 		}
+
+		fmt.Fprintf(&buf, " * %s\n", q.desc[corpus])
 	}
 
 	if len(corpora) == 0 {
@@ -218,6 +225,25 @@ func savez2(q *Context) {
 	if word == "" && hword == "" && rel == "" && postag == "" && hpostag == "" && meta == "" {
 		writeHtml(q, "Fout", "Zoektermen ontbreken")
 		return
+	}
+	fmt.Fprint(&buf, "\n\nCriteria:\n\n")
+	if word != "" {
+		fmt.Fprintf(&buf, " * Woord: %s\n", word)
+	}
+	if postag != "" {
+		fmt.Fprintf(&buf, " * Woord, postag: %s\n", postag)
+	}
+	if rel != "" {
+		fmt.Fprintf(&buf, " * Relatie: %s\n", rel)
+	}
+	if hword != "" {
+		fmt.Fprintf(&buf, " * Hoofdwoord: %s\n", hword)
+	}
+	if hpostag != "" {
+		fmt.Fprintf(&buf, " * Hoofdwoord, postag: %s\n", hpostag)
+	}
+	if meta != "" {
+		fmt.Fprintf(&buf, " * Metadata: %s\n", strings.Join(strings.Fields(meta), " "))
 	}
 
 	title := maxtitlelen(firstf(q.form, "title"))
@@ -390,7 +416,7 @@ func savez2(q *Context) {
 	if protected != 0 {
 		s = "xmlzip-p"
 	}
-	newCorpus(q, q.db, dirname, title, s, protected, hErr, true)
+	newCorpus(q, q.db, dirname, title, buf.String(), s, protected, hErr, true)
 	okall = true
 }
 

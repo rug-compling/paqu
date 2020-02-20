@@ -404,6 +404,9 @@ Een tarbestand zelf mag wel gecomprimeerd zijn met gzip.
 	  <option value="line-lbl-tok">Een zin per regel, met labels, getokeniseerd</option>
 	</select>
       <p>
+    Optioneel, toelichting:<br>
+    <textarea rows="6" cols="80" id="infotext" name="infotext" maxlength="4000" placeholder="tekst in markdown-formaat"></textarea>
+      <p>
 	<input type="submit">
     </form>
 </body>
@@ -421,6 +424,7 @@ func submitCorpus(q *Context) {
 
 	how := firstf(q.form, "how")
 	title := maxtitlelen(firstf(q.form, "title"))
+	info := firstf(q.form, "infotext")
 
 	if title == "" {
 		http.Error(q.w, "Titel ontbreekt", http.StatusPreconditionFailed)
@@ -449,10 +453,10 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	newCorpus(q, q.db, dirname, title, how, 0, hErr, true)
+	newCorpus(q, q.db, dirname, title, info, how, 0, hErr, true)
 }
 
-func newCorpus(q *Context, db *sql.DB, dirname, title, how string, protected int, errCheck func(*Context, error) bool, htmlOutput bool) {
+func newCorpus(q *Context, db *sql.DB, dirname, title, info, how string, protected int, errCheck func(*Context, error) bool, htmlOutput bool) {
 
 	// db is niet altijd gelijk aan q.db
 
@@ -468,6 +472,7 @@ func newCorpus(q *Context, db *sql.DB, dirname, title, how string, protected int
 	logf("QUEUED: " + dirname)
 	p := &Process{
 		id:     dirname,
+		info:   strings.Replace(info, "\r\n", "\n", -1),
 		chKill: make(chan bool),
 		queued: true,
 	}

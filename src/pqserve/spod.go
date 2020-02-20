@@ -1092,7 +1092,7 @@ bijvoeglijk-naamwoordgroepen (3) en bijwoordgroepen (4).
 			"",
 		},
 		{
-			`Voorzetselgroepen//Voorzetselgroepen worden onderscheiden naar grammaticale 
+			`Voorzetselgroepen//Voorzetselgroepen worden onderscheiden naar grammaticale
 functie en naar interne structuur. Voorzetselgroepen
 kunnen optreden als bepaling bij nomina (1), adjectieven (2)
 of bij werkwoorden (6). Dit laatste geval wordt in de traditionele
@@ -1693,7 +1693,10 @@ de namenlijst) of op een nog andere manier werden behandeld.
 		},
 		{
 			"",
-			`//node[@his and not(@his="normal")]`,
+			`//node[@his
+       and
+       not(@his=("normal","robust_skip","skip"))
+]`,
 			SPOD_STD,
 			"onbeken",
 			"woorden niet direct uit het woordenboek",
@@ -1717,10 +1720,9 @@ de namenlijst) of op een nog andere manier werden behandeld.
 		},
 		{
 			"",
-			`
-//node[@his
+			`//node[@his
        and
-       not(@his=("normal","compound","name"))
+       not(@his=("normal","compound","name","robust_skip","skip"))
 ]`,
 			SPOD_STD,
 			"noun",
@@ -1747,6 +1749,10 @@ func spod_main(q *Context) {
 	writeHead(q, "Syntactic profiler of Dutch", 5)
 
 	fmt.Fprintln(q.w, "Syntactic profiler of Dutch<p>")
+
+	if Cfg.Maxspodlines > 0 {
+		fmt.Fprintf(q.w, "Corpora met meer dan %s zinnen zijn niet beschikbaar voor dit onderdeel<p>", iformat(Cfg.Maxspodlines))
+	}
 
 	fmt.Fprint(q.w, `
 <script type="text/javascript" src="jquery.js"></script>

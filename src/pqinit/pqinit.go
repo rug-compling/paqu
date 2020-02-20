@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	VERSION = 3
+	VERSION = 4
 )
 
 type Config struct {
@@ -85,6 +85,8 @@ Syntax: %s [-w]
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
         protected   boolean      NOT NULL DEFAULT 0,
         hasmeta     boolean      NOT NULL DEFAULT 0,
+		info        text         NOT NULL DEFAULT "",
+		infop       text         NOT NULL DEFAULT "",
 		UNIQUE INDEX (id),
 		INDEX (description),
 		INDEX (owner),

@@ -294,6 +294,7 @@ type TreeContext struct {
 
 type Process struct {
 	id     string
+	info   string
 	nr     int
 	chKill chan bool
 	killed bool

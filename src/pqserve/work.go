@@ -839,9 +839,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	cmd := shell(
 		// optie -w i.v.m. recover()
-		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s %s %s %s 0 >> %s 2>> %s`,
+		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s -m %s %s %s %s 0 >> %s 2>> %s`,
 		dirname,
-		quote(p), d,
+		quote(p), d, quote(task.info),
 		filepath.Base(dirname), quote(title), quote(user), stdout, stderr)
 	err = run(cmd, task.chKill, nil)
 	if err != nil {

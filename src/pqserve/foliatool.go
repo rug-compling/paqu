@@ -379,6 +379,10 @@ Is bovenstaande uitvoer naar wens? Geen onverwachte foutmeldingen? Dan kun je he
 <form action="folia#a" method="post" enctype="multipart/form-data" accept-charset="utf-8">
 <input type="hidden" name="act" value="submit">
 Naam voor corpus: <input type="text" name="naam"><p>
+<p>
+Optioneel, toelichting:<br>
+<textarea rows="6" cols="80" id="infotext" name="infotext" maxlength="4000" placeholder="tekst in markdown-formaat"></textarea>
+<p>
 <input type="submit" value="Invoeren">
 </form>
 </div>
@@ -769,6 +773,7 @@ Type = %q
 		defer db.Close()
 
 		title := firstf(q.form, "naam")
+		info := firstf(q.form, "infotext")
 
 		dirname, fulldirname, ok := beginNewCorpus(q, db, title, foliaErr)
 		if !ok {
@@ -781,7 +786,7 @@ Type = %q
 		if settings.Tokenized {
 			tok = "-tok"
 		}
-		newCorpus(q, db, dirname, title, "line-lbl"+tok, 0, foliaErr, false)
+		newCorpus(q, db, dirname, title, info, "line-lbl"+tok, 0, foliaErr, false)
 
 	}()
 }

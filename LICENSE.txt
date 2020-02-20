@@ -19,6 +19,11 @@ Source: https://github.com/beevik/etree
 Commit: 9c9d2b6e6c587cd569d4ccfcf13d997236288a4f
 Date:   Tue Jan 5 12:48:20 2016 -0800
 
+_vendor/src/github.com/chris-ramon/douceur/LICENSE
+Source: https://github.com/chris-ramon/douceur
+Commit: f3463056cd52886eda904655e1940157bf323bd7
+Date:   Fri Jun 3 18:54:19 2016 -0500
+
 _vendor/src/github.com/dchest/authcookie/LICENSE
 Source: https://github.com/dchest/authcookie
 Commit: fbdef6e998665bcb27a2227f39d840dbfc62a918
@@ -28,6 +33,16 @@ _vendor/src/github.com/go-sql-driver/mysql/LICENSE
 Source: https://github.com/go-sql-driver/mysql
 Commit: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 Date:   Tue Aug 2 13:38:42 2016 +0200
+
+_vendor/src/github.com/gorilla/css/LICENSE
+Source: https://github.com/gorilla/css
+Commit: 4940b8d7810384b58c15dbf1103a148fdf0761f2
+Date:   Wed Jun 26 21:11:19 2019 -0700
+
+_vendor/src/github.com/microcosm-cc/bluemonday/LICENSE.md
+Source: https://github.com/microcosm-cc/bluemonday
+Commit: 0a75d7616912ab9beb9cc6f7283ec1917c61b135
+Date:   Tue Nov 19 13:03:33 2019 +0000
 
 _vendor/src/github.com/pebbe/compactcorpus/LICENSE.txt
 Source: https://github.com/pebbe/compactcorpus
@@ -48,6 +63,21 @@ _vendor/src/github.com/robertkrimen/otto/LICENSE
 Source: https://github.com/robertkrimen/otto
 Commit: 610cd3ae864b5f0977234663966e6108c63b0f8e
 Date:   Mon May 30 13:32:50 2016 +1000
+
+_vendor/src/github.com/shurcooL/sanitized_anchor_name/LICENSE
+Source: https://github.com/shurcooL/sanitized_anchor_name
+Commit: 7bfe4c7ecddb3666a94b053b422cdd8f5aaa3615
+Date:   Wed Dec 26 21:49:07 2018 +0000
+
+_vendor/src/golang.org/x/net/LICENSE
+Source: https://go.googlesource.com/net
+Commit: 46282727080fcf56da5781d0a9ef2fda184be5e6
+Date:   Tue Feb 18 14:23:37 2020 +0100
+
+_vendor/src/gopkg.in/russross/blackfriday.v2/LICENSE.txt
+Source: https://gopkg.in/russross/blackfriday.v2
+Commit: d3b5b032dc8e8927d31a5071b56e14c89f045135
+Date:   Thu Sep 20 19:16:15 2018 +0200
 
 _vendor/src/gopkg.in/sourcemap.v1/LICENSE
 Source: https://gopkg.in/sourcemap.v1

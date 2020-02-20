@@ -35,6 +35,8 @@ type Context struct {
 	words        map[string]int
 	shared       map[string]string
 	params       map[string]string
+	infos        map[string]string
+	infops       map[string]string
 	dates        map[string]time.Time
 	form         *multipart.Form
 }
@@ -91,6 +93,8 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				words:        make(map[string]int),
 				shared:       make(map[string]string),
 				params:       make(map[string]string),
+				infos:        make(map[string]string),
+				infops:       make(map[string]string),
 				dates:        make(map[string]time.Time),
 			}
 
@@ -169,7 +173,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 			}
 			rows, err := q.db.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`, `i`.`created` "+
+				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`, `i`.`info`, `i`.`infop`, `i`.`created` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -182,11 +186,11 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				logerr(err)
 				return
 			}
-			var id, desc, owner, shared, params, group string
+			var id, desc, owner, shared, params, info, infop, group string
 			var zinnen, woorden, protected, hasmeta int
 			var date time.Time
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta, &date)
+				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta, &info, &infop, &date)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -232,6 +236,8 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				q.words[id] = woorden
 				q.shared[id] = shared
 				q.params[id] = params
+				q.infos[id] = info
+				q.infops[id] = infop
 				q.protected[id] = protected > 0
 				if hasmeta > 0 {
 					q.hasmeta[id] = true

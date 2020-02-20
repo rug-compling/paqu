@@ -5,8 +5,10 @@ package main
 import (
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/pebbe/compactcorpus"
 	"github.com/pebbe/util"
+	"gopkg.in/russross/blackfriday.v2"
 
 	"bufio"
 	"bytes"
@@ -115,6 +117,8 @@ var (
 	owner      string
 	public     string
 	datum      string
+	info       string
+	infop      string
 
 	topfile   = -1
 	toparch   = -1
@@ -184,6 +188,11 @@ func main() {
 			if !validDate(datum) {
 				return
 			}
+		} else if os.Args[1] == "-m" && len(os.Args) > 2 {
+			os.Args = append(os.Args[:1], os.Args[2:]...)
+			info = strings.TrimSpace(os.Args[1])
+			unsafe := blackfriday.Run([]byte(info))
+			infop = strings.TrimSpace(string(bluemonday.UGCPolicy().SanitizeBytes(unsafe)))
 		} else {
 			break
 		}
@@ -192,7 +201,7 @@ func main() {
 
 	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] [-m tekst] id description owner public < bestandnamen
 
 Opties:
 
@@ -203,6 +212,7 @@ Opties:
  -p : prefix die van bestandnaam wordt gestript voor label
  -d : bestandnaam decoderen voor label
  -D : datum in formaat YYYY-MM-DD
+ -m : toelichting (markdown)
 
   id:
   description:
@@ -346,8 +356,8 @@ Opties:
 	if datum != "" {
 		setDate = fmt.Sprintf(", `created` = \"%s 12:00:00\"", datum)
 	}
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q%s WHERE `id` = %q",
-		Cfg.Prefix, desc, owner, share, setDate, prefix))
+	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q, `info` = %q, `infop` = %q%s WHERE `id` = %q",
+		Cfg.Prefix, desc, owner, share, info, infop, setDate, prefix))
 	util.CheckErr(err)
 
 	_, err = db.Exec("DELETE FROM " + Cfg.Prefix + "_corpora WHERE `prefix` = \"" + prefix + "\";")

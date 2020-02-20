@@ -506,6 +506,17 @@ code {
     padding: 0px .3em;
 }
 
+pre code {
+    font-family: inherit;
+    white-space: pre;
+    background-color: inherit;
+    padding: 0px;
+}
+
+.corpusinfo pre {
+    padding: 0px 2em;
+}
+
 .spod {
     padding-bottom: 5em;
 }
@@ -586,4 +597,14 @@ a.spodi {
 }
 a.spodi:hover {
     text-decoration: none;
+}
+
+option[disabled] {
+    color: red;
+}
+
+div.corpusinfo {
+    margin: 1em 0px;
+    border-top: 1px solid grey;
+    border-bottom: 1px solid grey;
 }

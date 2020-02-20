@@ -64,6 +64,11 @@ func browse(q *Context) {
 	nline, _ := strconv.Atoi(a[0])
 	nerr, _ := strconv.Atoi(a[1])
 
+	infop := ""
+	if q.infops[id] != "" {
+		infop = "<div class=\"corpusinfo\">" + q.infops[id] + "</div>"
+	}
+
 	// HTML-uitvoer van begin van de pagina
 	writeHead(q, "Overzicht", 0)
 	fmt.Fprintf(q.w, `
@@ -73,10 +78,11 @@ func browse(q *Context) {
   }
 //--></script>
 Corpus: <b>%s</b>
+%s
 <p>
 Bron: %s
 <p>
-`, q.desc[id], a[2])
+`, q.desc[id], infop, a[2])
 
 	if nerr > 0 {
 		fmt.Fprintf(q.w, `

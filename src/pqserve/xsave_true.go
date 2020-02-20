@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/dbxml"
 
 	"archive/zip"
+	"bytes"
 	"compress/gzip"
 	"encoding/xml"
 	"fmt"
@@ -121,6 +122,10 @@ func xsavez2(q *Context) {
 	var dirname, fulldirname string
 	var okall bool
 
+	var buf bytes.Buffer
+
+	fmt.Fprint(&buf, "Corpus afgeleid van de volgende corpora:\n\n")
+
 	defer func() {
 		if z != nil {
 			z.Close()
@@ -172,6 +177,7 @@ func xsavez2(q *Context) {
 		if q.protected[corpus] || !q.myprefixes[corpus] {
 			protected = 1
 		}
+		fmt.Fprintf(&buf, " * %s\n", q.desc[corpus])
 	}
 
 	if len(corpora) == 0 {
@@ -184,6 +190,8 @@ func xsavez2(q *Context) {
 		writeHtml(q, "Fout", "Zoekterm ontbreekt")
 		return
 	}
+
+	fmt.Fprintf(&buf, "\n\nXPath:\n\n```\n%s\n```\n", xpath)
 
 	title := maxtitlelen(firstf(q.form, "title"))
 	if title == "" {
@@ -367,7 +375,7 @@ func xsavez2(q *Context) {
 	if protected != 0 {
 		s = "xmlzip-p"
 	}
-	newCorpus(q, q.db, dirname, title, s, protected, hErr, true)
+	newCorpus(q, q.db, dirname, title, buf.String(), s, protected, hErr, true)
 	okall = true
 }
 

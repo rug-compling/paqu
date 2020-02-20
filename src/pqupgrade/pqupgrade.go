@@ -217,13 +217,33 @@ func main() {
 
 	////////////////////////////////////////////////////////////////
 
-	// upgrade naar versie 3
+	// tabel <prefix>_info
+	// velden `info` en `infop` toevoegen
 
-	if version < 3 {
+	if version < 4 {
 
-		fmt.Printf("Upgrade from version %d to 3\n", version)
+		rows, err = db.Query("SELECT `info`, `infop` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+		if err == nil {
+			rows.Close()
+		} else {
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `info` TEXT NOT NULL DEFAULT ''")
+			util.CheckErr(err)
+			_, err = db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `infop` TEXT NOT NULL DEFAULT ''")
+			util.CheckErr(err)
+			changed = true
+		}
 
-		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 3 WHERE `id` = 1", Cfg.Prefix))
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// upgrade naar versie 4
+
+	if version < 4 {
+
+		fmt.Printf("Upgrade from version %d to 4\n", version)
+
+		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 4 WHERE `id` = 1", Cfg.Prefix))
 		util.CheckErr(err)
 		n, err := result.RowsAffected()
 		util.CheckErr(err)
@@ -231,7 +251,7 @@ func main() {
 			util.CheckErr(fmt.Errorf("Version update failed"))
 		}
 
-		version = 3
+		version = 4
 		changed = true
 	}
 
