@@ -37,6 +37,7 @@ type Context struct {
 	params       map[string]string
 	infos        map[string]string
 	infops       map[string]string
+	owners       map[string]string
 	dates        map[string]time.Time
 	form         *multipart.Form
 }
@@ -95,6 +96,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				params:       make(map[string]string),
 				infos:        make(map[string]string),
 				infops:       make(map[string]string),
+				owners:       make(map[string]string),
 				dates:        make(map[string]time.Time),
 			}
 
@@ -198,37 +200,34 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 				if group == "E" {
 					if !q.ignore[id] {
-						q.opt_db = append(q.opt_db, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s", id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
+						q.opt_db = append(q.opt_db, fmt.Sprintf("E%s %s", id, desc))
 						q.prefixes[id] = true
 						if hasmeta > 0 {
-							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
-								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
+							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("E%s %s", id, desc))
 						} else {
-							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("-E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
-								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
+							q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("-E%s %s", id, desc))
 						}
 						if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
-							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
-								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
+							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("E%s %s", id, desc))
 							q.spodprefixes[id] = true
 						} else {
-							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("-E%s %s \u2014 %s \u2014 %s zinnen \u2014 %s",
-								id, desc, displayEmail(owner), iformat(zinnen), datum(date)))
+							q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("-E%s %s", id, desc))
 						}
+						q.owners[id] = owner
 					}
 				} else if q.auth || owner == "none" || owner == "auto" || owner == "manual" {
-					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
+					q.opt_db = append(q.opt_db, fmt.Sprintf("%s%s %s", group, id, desc))
 					q.prefixes[id] = true
 					if hasmeta > 0 {
-						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
+						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("%s%s %s", group, id, desc))
 					} else {
-						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("-%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
+						q.opt_dbmeta = append(q.opt_dbmeta, fmt.Sprintf("-%s%s %s", group, id, desc))
 					}
 					if Cfg.Maxspodlines < 1 || zinnen <= Cfg.Maxspodlines {
-						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
+						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("%s%s %s", group, id, desc))
 						q.spodprefixes[id] = true
 					} else {
-						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("-%s%s %s \u2014 %s zinnen \u2014 %s", group, id, desc, iformat(zinnen), datum(date)))
+						q.opt_dbspod = append(q.opt_dbspod, fmt.Sprintf("-%s%s %s", group, id, desc))
 					}
 				}
 				q.desc[id] = desc
@@ -300,5 +299,5 @@ func displayEmail(s string) string {
 }
 
 func datum(t time.Time) string {
-	return fmt.Sprintf("%d %s %d", t.Day(), maanden[t.Month()], t.Year())
+	return fmt.Sprintf("%d&nbsp;%s&nbsp;%d", t.Day(), maanden[t.Month()], t.Year())
 }

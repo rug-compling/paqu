@@ -1335,7 +1335,7 @@ func html_xpath_form(q *Context, xpathmax int) (has_query bool, filter [3]bool) 
 
 	fmt.Fprint(q.w, `
 <form action="xpath" method="get" accept-charset="utf-8">
-corpus: <select name="db">
+<a href="corpusinfo">[?]</a> corpus: <select name="db">
 `)
 	html_opts(q, q.opt_db, getprefix(q), "corpus")
 	fmt.Fprintln(q.w, "</select>")

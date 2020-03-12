@@ -27,7 +27,7 @@ func metadata(q *Context) {
 
 	fmt.Fprint(q.w, `
 <form action="metadata" method="get" accept-charset="utf-8">
-corpus: <select name="db">
+<a href="corpusinfo">[?]</a> corpus: <select name="db">
 `)
 	html_opts(q, q.opt_dbmeta, getprefix(q), "corpus")
 	fmt.Fprintln(q.w, "</select>")

@@ -175,6 +175,8 @@ func main() {
 	handleFunc("statsmeta", statsmeta, nil)
 	handleFunc("statsrel", statsrel, nil)
 
+	handleFunc("corpusinfo", corpusinfo, nil)
+
 	handleFunc("logout", logout, nil)
 	handleFunc("login", login, nil)
 	handleFunc("login1", login1, nil)

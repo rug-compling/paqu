@@ -1021,7 +1021,7 @@ func html_form(q *Context, prefix string, maxzin int) (has_query bool) {
 
 	fmt.Fprint(q.w, `
 <form action="." method="get" accept-charset="utf-8">
-corpus: <select name="db">
+<a href="corpusinfo">[?]</a> corpus: <select name="db">
 `)
 	html_opts(q, q.opt_db, prefix, "corpus")
 	fmt.Fprintln(q.w, "</select>")

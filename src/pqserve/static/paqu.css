@@ -89,6 +89,7 @@ table.home td {
 
 div.right,
 table.right td,
+th.right,
 td.right {
   text-align: right;
 }
@@ -513,6 +514,7 @@ pre code {
     padding: 0px;
 }
 
+#infocorpus pre,
 .corpusinfo pre {
     padding: 0px 2em;
 }
@@ -607,4 +609,37 @@ div.corpusinfo {
     margin: 1em 0px;
     border-top: 1px solid grey;
     border-bottom: 1px solid grey;
+}
+
+table.corpusinfo {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+
+table.corpusinfo th,
+table.corpusinfo td {
+    vertical-align: top;
+    padding: .3em 1em;
+    margin: 0px;
+    border-left: 0px;
+    border-right: 0px;
+}
+
+table.corpusinfo tr.sub th {
+    border-top: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+
+#infocorpus>div {
+    margin: 1em 2em;
+}
+#infocorpus #title {
+    border-bottom: 1px solid lightgrey;
+    padding-bottom: 1em;
+}
+
+#infocorpus {
+    position: fixed;
+    left: 20%;
+    top: 10%;
 }

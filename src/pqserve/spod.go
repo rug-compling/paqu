@@ -1895,7 +1895,7 @@ function optload(n) {
 }
 //--></script>
 <form id="spodform" action="spodform" method="get" accept-charset="utf-8" target="_blank">
-corpus: <select name="db">
+<a href="corpusinfo">[?]</a> corpus: <select name="db">
 `)
 
 	html_opts(q, q.opt_dbspod, getprefix(q), "corpus")
