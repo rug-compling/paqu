@@ -163,7 +163,7 @@ bestaande queries niet worden gevonden als imperatief.`,
 		},
 		{
 			"",
-			`%PQ_imperatieven%`,
+			`//node[%PQ_imperatieven%]`,
 			SPOD_STD,
 			"imp",
 			"imperatieven",

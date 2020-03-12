@@ -34,6 +34,8 @@ PQ_vorfeld = """
         ( %PQ_precedes_head_of_smain%
           and
           not(parent::node[%PQ_precedes_head_of_smain%])
+          and
+          (@cat or @pt)
         ) """
 
 PQ_single_name = """
@@ -247,12 +249,12 @@ PQ_impersonal_passive_man = """
           and
           ( ( @cat="ppart"
               and
-              not(node[@rel=("obj1","su","vc")])
+              not(node[@rel=("obj1","su","vc","predc")])
             )
             or
             ( @cat="ti"
               and
-              not(node[@rel="body"]/node[@rel=("obj1","su","vc")])
+              not(node[@rel="body"]/node[@rel=("obj1","su","vc","predc")])
             )
           )
         ) """
@@ -744,7 +746,7 @@ PQ_janee_vragen = """
         ] """
 
 PQ_imperatieven = """
-        //node[@cat='sv1'
+        ( @cat='sv1'
                and
                not(node[@rel='su'])
                and
@@ -768,7 +770,7 @@ PQ_imperatieven = """
                         )
                    ]
                )
-        ] """
+        ) """
 
 PQ_ssub = """
         ( @cat="ssub"
