@@ -1241,6 +1241,9 @@ func html_xpath_header(q *Context) {
     $('#btXCopy').on('click', function() {
         var txt = $('#macroInner').text();
         if (txt.length > 1200) {
+            txt = txt.replace(/   */g, ' ');
+        }
+        if (txt.length > 1200) {
             alert("De tekst is te lang voor het invoerveld");
         } else {
             $('#xquery').val(txt);
