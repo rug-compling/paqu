@@ -1135,13 +1135,6 @@ func html_xpath_header(q *Context) {
     }
   }
 
-  function enableDeleteSave(e) {
-    var k = e.which;
-    if (k == 8 || k == 46) {
-      enableSave();
-    }
-  }
-
   function enableSave() {
     $('#macrosave').removeAttr('disabled');
     $('#macrosave').addClass('bold');
@@ -1221,8 +1214,7 @@ func html_xpath_header(q *Context) {
     qcheckdo();
     $('#openmacro').on('click', openMacro);
     $('#macroreset').on('click', disableSave);
-    $('#macrotext').on('keypress', enableSave);
-    $('#macrotext').on('keyup', enableDeleteSave);
+    $('#macrotext').on('input propertychange', enableSave);
     $('#macrofilename').on('change', function() {
         if ($('#macrofilename').val() == "") {
           $('#macrofilesave').attr('disabled', 'disabled');
