@@ -193,6 +193,13 @@ func main() {
 			info = strings.TrimSpace(os.Args[1])
 			unsafe := blackfriday.Run([]byte(info))
 			infop = strings.TrimSpace(string(bluemonday.UGCPolicy().SanitizeBytes(unsafe)))
+		} else if os.Args[1] == "-M" && len(os.Args) > 2 {
+			os.Args = append(os.Args[:1], os.Args[2:]...)
+			b, err := ioutil.ReadFile(os.Args[1])
+			util.CheckErr(err)
+			info = strings.TrimSpace(string(b))
+			unsafe := blackfriday.Run([]byte(info))
+			infop = strings.TrimSpace(string(bluemonday.UGCPolicy().SanitizeBytes(unsafe)))
 		} else {
 			break
 		}
@@ -201,7 +208,7 @@ func main() {
 
 	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] [-m tekst] id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] [-m tekst] [-M bestand] id description owner public < bestandnamen
 
 Opties:
 
@@ -213,6 +220,7 @@ Opties:
  -d : bestandnaam decoderen voor label
  -D : datum in formaat YYYY-MM-DD
  -m : toelichting (markdown)
+ -M : bestand met toelichting (markdown)
 
   id:
   description:
