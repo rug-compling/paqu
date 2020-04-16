@@ -1490,7 +1490,7 @@ finiete bijzin zelf ook een finiete bijzin bevat is er sprake van minstens
 			"",
 		},
 		{
-			`Topicalizatie en Extractie//De eerste query, "np-topic is subject", bekijkt hoe vaak in een
+			`Topicalisatie en Extractie//De eerste query, "np-topic is subject", bekijkt hoe vaak in een
 hoofdzin die met een NP begint, deze NP als subject van de
 persoonsvorm fungeert (1), terwijl de tweede query die gevallen telt
 waarbij zo'n NP een andere rol bekleedt (2). De derde query, "topic is
