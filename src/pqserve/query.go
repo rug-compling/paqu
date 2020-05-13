@@ -60,7 +60,7 @@ func makeQueryDo(q *Context, prefix, table string, chClose <-chan bool, form boo
 					return "", "", nil, errConnectionClosed
 				default:
 				}
-				rows, err := q.db.Query(fmt.Sprintf("SELECT `lemma` FROM `%s_c_%s_word` WHERE `word` = %q",
+				rows, err := sqlDB.Query(fmt.Sprintf("SELECT `lemma` FROM `%s_c_%s_word` WHERE `word` = %q",
 					Cfg.Prefix, prefix, wrd))
 				if err != nil {
 					return "", "", nil, err
@@ -164,7 +164,7 @@ func timeoutQuery(q *Context, chClose <-chan bool, query string) (*sql.Rows, err
 	defer close(chFinished)
 	go cancelQuery(id, timeout, chFinished, chClose)
 
-	return q.db.Query(query)
+	return sqlDB.Query(query)
 }
 
 // hulpfunctie voor timeoutQuery
@@ -190,15 +190,8 @@ func cancelQuery(id string, timeout bool, chFinished chan bool, chClose <-chan b
 		}
 	}
 
-	db, err := dbopen()
-	if err != nil {
-		logerr(err)
-		return
-	}
-	defer db.Close()
-
 	// deze query geeft ook zichzelf als resultaat
-	rows, err := db.Query("SELECT `ID` FROM `information_schema`.`PROCESSLIST` WHERE `INFO` LIKE \"%" + id + "%\"")
+	rows, err := sqlDB.Query("SELECT `ID` FROM `information_schema`.`PROCESSLIST` WHERE `INFO` LIKE \"%" + id + "%\"")
 	if err != nil {
 		logerr(err)
 		return
@@ -214,6 +207,6 @@ func cancelQuery(id string, timeout bool, chFinished chan bool, chClose <-chan b
 		ids = append(ids, s)
 	}
 	for _, id := range ids {
-		db.Exec("KILL QUERY " + id)
+		sqlDB.Exec("KILL QUERY " + id)
 	}
 }

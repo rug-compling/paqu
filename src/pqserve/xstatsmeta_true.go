@@ -148,7 +148,7 @@ c("0", "0");
 
 	var owner string
 	var nlines uint64
-	rows, errval = q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if logerr(errval) {
 		return
 	}
@@ -168,7 +168,7 @@ c("0", "0");
 	if strings.Contains(owner, "@") {
 		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
 	} else {
-		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+		rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if logerr(errval) {
 			return
 		}
@@ -218,7 +218,7 @@ c("0", "0");
 		metai[m.name] = m.id
 		if m.mtype == "TEXT" {
 			tranges[m.name] = make(map[string]int)
-			rows, errval = q.db.Query(fmt.Sprintf(
+			rows, errval = sqlDB.Query(fmt.Sprintf(
 				"SELECT `idx`,`text` FROM `%s_c_%s_mval` WHERE `id` = %d",
 				Cfg.Prefix, prefix, m.id))
 			if logerr(errval) {
@@ -244,7 +244,7 @@ c("0", "0");
 		var size, dtype, imin, istep int
 		var dmin, dmax time.Time
 		var fmin, fstep float64
-		row := q.db.QueryRow(fmt.Sprintf(
+		row := sqlDB.QueryRow(fmt.Sprintf(
 			"SELECT `indexed`, `size`, `dmin`, `dmax`, `dtype`, `fmin`, `fstep`, `imin`, `istep` FROM `%s_c_%s_minf` WHERE `id` = %d",
 			Cfg.Prefix, prefix, m.id))
 		errval = row.Scan(&indexed, &size, &dmin, &dmax, &dtype, &fmin, &fstep, &imin, &istep)
@@ -502,7 +502,7 @@ setvalue(%d);
 				count: [2]int{telling[meta.name][name][1], telling[meta.name][name][2]},
 			})
 		}
-		rows, errval = q.db.Query(fmt.Sprintf(
+		rows, errval = sqlDB.Query(fmt.Sprintf(
 			"SELECT `idx`, `text`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY `idx`",
 			Cfg.Prefix, prefix, metai[meta.name]))
 		if logerr(errval) {

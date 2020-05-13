@@ -29,7 +29,7 @@ func corpuslijst(q *Context) {
 		meta = true
 	}
 
-	rows, err := q.db.Query(fmt.Sprintf(
+	rows, err := sqlDB.Query(fmt.Sprintf(
 		"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`owner`, `i`.`created` "+
 			"FROM `%s_info` `i`, `%s_corpora` `c` "+
 			"WHERE `i`.`id` = `c`.`prefix` "+
@@ -288,7 +288,7 @@ func corsave(q *Context) {
 		return
 	}
 
-	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
+	_, err = sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
 	if err != nil {
 		http.Error(q.w, html.EscapeString(err.Error()), http.StatusInternalServerError)
 		logerr(err)
@@ -296,7 +296,7 @@ func corsave(q *Context) {
 	}
 
 	for _, id := range strings.Fields(string(data)) {
-		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_ignore` (`user`, `prefix`) VALUES (%q, %q)", Cfg.Prefix, q.user, id))
+		_, err = sqlDB.Exec(fmt.Sprintf("INSERT INTO `%s_ignore` (`user`, `prefix`) VALUES (%q, %q)", Cfg.Prefix, q.user, id))
 		if err != nil {
 			http.Error(q.w, html.EscapeString(err.Error()), http.StatusInternalServerError)
 			logerr(err)

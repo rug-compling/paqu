@@ -20,7 +20,7 @@ func download(q *Context) {
 	params := q.params[id]
 	if !q.myprefixes[id] {
 		// misschien een corpus dat mislukt is
-		rows, err := q.db.Query(
+		rows, err := sqlDB.Query(
 			fmt.Sprintf("SELECT `params` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
 				Cfg.Prefix,
 				id,

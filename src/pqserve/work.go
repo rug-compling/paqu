@@ -34,7 +34,7 @@ func quote(s string) string {
 	return "'" + strings.Replace(s, "'", "'\\''", -1) + "'"
 }
 
-func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
+func dowork(task *Process) (user string, title string, err error) {
 	logf("WORKING: " + task.id)
 
 	processLock.Lock()
@@ -48,7 +48,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	}
 	processLock.Unlock()
 
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"WORKING\", `nword` = 0 WHERE `id` = %q",
+	_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"WORKING\", `nword` = 0 WHERE `id` = %q",
 		Cfg.Prefix, task.id))
 	if err != nil {
 		return
@@ -57,7 +57,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	params := "unknown"
 	isArch := false
 	var rows *sql.Rows
-	rows, err = db.Query(fmt.Sprintf("SELECT `description`,`owner`,`params` FROM `%s_info` WHERE `id` = %q",
+	rows, err = sqlDB.Query(fmt.Sprintf("SELECT `description`,`owner`,`params` FROM `%s_info` WHERE `id` = %q",
 		Cfg.Prefix, task.id))
 	if err != nil {
 		return
@@ -143,7 +143,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			if !strings.HasPrefix(params, "xmlzip") {
 				params = "xmlzip"
 			}
-			setinvoer(db, params, task.id, false)
+			setinvoer(params, task.id, false)
 			ar.Close()
 		} else {
 			if strings.Contains(string(b), "<FoLiA") {
@@ -204,9 +204,9 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 
 	if params == "auto" {
 		if isArch {
-			params, err = invoersoort(db, data+".unzip", task.id)
+			params, err = invoersoort(data+".unzip", task.id)
 		} else {
-			params, err = invoersoort(db, data, task.id)
+			params, err = invoersoort(data, task.id)
 		}
 		if err != nil {
 			return
@@ -217,7 +217,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 	}
 
 	if isArch {
-		setinvoer(db, params, task.id, true)
+		setinvoer(params, task.id, true)
 	}
 
 	defer func() {
@@ -279,7 +279,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		if err != nil {
 			return
 		}
-		err = do_quotum(db, task.id, user, tokens, nlines)
+		err = do_quotum(task.id, user, tokens, nlines)
 		if err != nil {
 			os.Remove(dact)
 			os.Remove(dact + "x")
@@ -294,7 +294,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 		if err != nil {
 			return
 		}
-		err = do_quotum(db, task.id, user, tokens, nlines)
+		err = do_quotum(task.id, user, tokens, nlines)
 		if err != nil {
 			os.Remove(data + ".lines")
 			os.Remove(stderr)
@@ -352,7 +352,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 				}
 			}
 
-			_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
+			_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d WHERE `id` = %q",
 				Cfg.Prefix, nword, task.id))
 			if err != nil {
 				return
@@ -650,7 +650,7 @@ func dowork(db *sql.DB, task *Process) (user string, title string, err error) {
 			fpin.Close()
 			os.Remove(data + ".tmp")
 
-			err = do_quotum(db, task.id, user, tokens, nlines)
+			err = do_quotum(task.id, user, tokens, nlines)
 			if err != nil {
 				os.Remove(data)
 				os.Remove(data + ".lines")
@@ -967,13 +967,7 @@ func work(task *Process) {
 		processLock.Unlock()
 	}()
 
-	db, err := dbopen()
-	if err != nil {
-		logerr(err)
-		return
-	}
-	defer db.Close()
-	user, title, err := dowork(db, task)
+	user, title, err := dowork(task)
 
 	select {
 	case <-chGlobalExit:
@@ -985,7 +979,7 @@ func work(task *Process) {
 		logf("FINISHED: " + task.id)
 		sendmail(user, "Corpus klaar", fmt.Sprintf("Je corpus \"%s\" staat klaar op %s", title, urlJoin(Cfg.Url, "/?db="+task.id)))
 		var params string
-		rows, err := db.Query(fmt.Sprintf("SELECT `params` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, task.id))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `params` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, task.id))
 		if err == nil {
 			for rows.Next() {
 				rows.Scan(&params)
@@ -999,13 +993,13 @@ func work(task *Process) {
 		case "xmlzip-p":
 			msg = "afgeleid corpus, beschermd"
 		}
-		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, msg, task.id))
+		sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, msg, task.id))
 	} else {
 		logf("FAILED: %v, %v", task.id, err)
 		if !task.killed {
 			sendmail(user, "Corpus fout", fmt.Sprintf("Er ging iets fout met je corpus \"%s\": %v", title, err))
 		}
-		db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
+		sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FAILED\", `msg` = %q WHERE `id` = %q", Cfg.Prefix, err.Error(), task.id))
 	}
 }
 
@@ -1050,17 +1044,15 @@ func kill(id string) {
 }
 
 func recover() {
-	db, err := dbopen()
-	util.CheckErr(err)
 
 	ids := make([]string, 0)
 	queuing := make([]string, 0)
 
-	_, err = db.Exec(
+	_, err := sqlDB.Exec(
 		"UPDATE `" + Cfg.Prefix + "_info` SET `nword` = 0, `status` = \"QUEUED\" WHERE `status` = \"WORKING\" AND `owner` LIKE \"%@%\"")
 	util.CheckErr(err)
 
-	rows, err := db.Query("SELECT `id`,`status` FROM `" +
+	rows, err := sqlDB.Query("SELECT `id`,`status` FROM `" +
 		Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" OR `status` = \"QUEUING\"  ORDER BY `created`")
 	util.CheckErr(err)
 	for rows.Next() {
@@ -1075,15 +1067,13 @@ func recover() {
 	util.CheckErr(rows.Err())
 
 	if len(queuing) > 0 {
-		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `status` = \"QUEUING\"", Cfg.Prefix))
+		_, err = sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `status` = \"QUEUING\"", Cfg.Prefix))
 		util.CheckErr(err)
 	}
 	for _, corpus := range queuing {
 		util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "data", corpus)))
 		logf("QUEUING: rm -r %s: ok", filepath.Join(paqudatadir, "data", corpus))
 	}
-
-	db.Close()
 
 	for _, id := range ids {
 		p := &Process{
@@ -1100,13 +1090,13 @@ func recover() {
 	}
 }
 
-func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
+func do_quotum(id, user string, tokens, nlines int) error {
 	quotumLock.Lock()
 	defer quotumLock.Unlock()
 
 	quotum := 0
 	gebruikt := 0
-	rows, err := db.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `quotum` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 	if err != nil {
 		return err
 	}
@@ -1120,7 +1110,7 @@ func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
 		return fmt.Errorf("MySQL: Kan quotum niet vinden")
 	}
 	if quotum > 0 {
-		rows, err = db.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
+		rows, err = sqlDB.Query(fmt.Sprintf("SELECT `nword` FROM `%s_info` WHERE `owner` = %q", Cfg.Prefix, user))
 		if err != nil {
 			return err
 		}
@@ -1138,7 +1128,7 @@ func do_quotum(db *sql.DB, id, user string, tokens, nlines int) error {
 		return fmt.Errorf("Ruimte voor %d tokens. Nieuw corpus bevat %d tokens.", quotum-gebruikt, tokens)
 	}
 
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d, `nline` = %d WHERE `id` = %q",
+	_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nword` = %d, `nline` = %d WHERE `id` = %q",
 		Cfg.Prefix, tokens, nlines, id))
 	return err
 }

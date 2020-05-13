@@ -267,7 +267,7 @@ function init(s) {
 		if attr[i] != "" && attr[i][0] == ':' {
 			isMeta[i] = true
 			name := attr[i][1:]
-			rows, err := q.db.Query(fmt.Sprintf("SELECT `type` FROM `%s_c_%s_midx` WHERE `name` = %q",
+			rows, err := sqlDB.Query(fmt.Sprintf("SELECT `type` FROM `%s_c_%s_midx` WHERE `name` = %q",
 				Cfg.Prefix, prefix, name))
 			if err != nil {
 				updateError(q, err, !download)
@@ -279,7 +279,7 @@ function init(s) {
 				rows.Scan(&t)
 			}
 			if t == "INT" {
-				rows, err := q.db.Query(fmt.Sprintf(
+				rows, err := sqlDB.Query(fmt.Sprintf(
 					"SELECT MIN(`ival`), MAX(`ival`), COUNT(DISTINCT `ival`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q AND `idx` != 2147483647",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
@@ -299,7 +299,7 @@ function init(s) {
 					}
 				}
 			} else if t == "FLOAT" {
-				rows, err := q.db.Query(fmt.Sprintf(
+				rows, err := sqlDB.Query(fmt.Sprintf(
 					"SELECT MIN(`fval`), MAX(`fval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q AND `idx` != 2147483647",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
@@ -319,7 +319,7 @@ function init(s) {
 					}
 				}
 			} else if t == "DATE" || t == "DATETIME" {
-				rows, err := q.db.Query(fmt.Sprintf(
+				rows, err := sqlDB.Query(fmt.Sprintf(
 					"SELECT MIN(`dval`), MAX(`dval`) FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) WHERE `name` = %q AND `idx` != 2147483647",
 					Cfg.Prefix, prefix,
 					Cfg.Prefix, prefix,
@@ -368,7 +368,7 @@ function init(s) {
 
 	var owner string
 	var nlines uint64
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if err != nil {
 		updateError(q, err, !download)
 		logerr(err)
@@ -392,7 +392,7 @@ function init(s) {
 	if strings.Contains(owner, "@") {
 		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
 	} else {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if err != nil {
 			updateError(q, err, !download)
 			logerr(err)

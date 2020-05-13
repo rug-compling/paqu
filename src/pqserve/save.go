@@ -182,7 +182,7 @@ func savez2(q *Context) {
 		saveCloseDact(dact)
 		if !okall {
 			os.RemoveAll(fulldirname)
-			q.db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, dirname))
+			sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, dirname))
 		}
 	}()
 
@@ -257,7 +257,7 @@ func savez2(q *Context) {
 		maxdup = Cfg.Maxdup
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, hErr)
+	dirname, fulldirname, ok := beginNewCorpus(q, title, hErr)
 	if !ok {
 		return
 	}
@@ -301,7 +301,7 @@ func savez2(q *Context) {
 			Cfg.Prefix, prefix,
 			joins,
 			query)
-		rows, err := q.db.Query(query)
+		rows, err := sqlDB.Query(query)
 		if hErr(q, err) {
 			return
 		}
@@ -416,13 +416,13 @@ func savez2(q *Context) {
 	if protected != 0 {
 		s = "xmlzip-p"
 	}
-	newCorpus(q, q.db, dirname, title, buf.String(), s, protected, hErr, true)
+	newCorpus(q, dirname, title, buf.String(), s, protected, hErr, true)
 	okall = true
 }
 
 func isGlobal(q *Context, prefix string) (global bool, ok bool) {
 
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if hErr(q, err) {
 		return
 	}
@@ -448,7 +448,7 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 
 	if !archonly {
 
-		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT min(`file`), max(`file`) FROM `%s_c_%s_sent` WHERE `arch` = -1", Cfg.Prefix, prefix))
 		if hErr(q, err) {
 			return
 		}
@@ -465,7 +465,7 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 
 	files := make([]string, 0, 2)
 	if !archonly && min.Valid && max.Valid {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
 		if hErr(q, err) {
 			return
@@ -481,7 +481,7 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 		}
 		rows.Close()
 	} else {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT min(`id`), max(`id`) FROM `%s_c_%s_arch`", Cfg.Prefix, prefix))
 		if hErr(q, err) {
 			return
 		}
@@ -493,7 +493,7 @@ func getPathLen(q *Context, prefix string, global, archonly bool) (length int, o
 			}
 		}
 		rows.Close()
-		rows, err = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
+		rows, err = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d OR `id` = %d",
 			Cfg.Prefix, prefix, min.Int64, max.Int64))
 		if hErr(q, err) {
 			return

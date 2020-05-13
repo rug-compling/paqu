@@ -115,7 +115,7 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 	types := make(map[string]string)
 
 	hasmeta := false
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `hasmeta` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `hasmeta` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if err != nil {
 		return "", 0, nil, err
 	}
@@ -134,7 +134,7 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 		return "", 0, fmt.Errorf("Corpus %q heeft geen metadata", prefix), nil
 	}
 
-	rows, err = q.db.Query(fmt.Sprintf("SELECT `id`,`type`,`name` FROM `%s_c_%s_midx`", Cfg.Prefix, prefix))
+	rows, err = sqlDB.Query(fmt.Sprintf("SELECT `id`,`type`,`name` FROM `%s_c_%s_midx`", Cfg.Prefix, prefix))
 	if err != nil {
 		return "", 0, nil, err
 	}

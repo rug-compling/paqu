@@ -149,7 +149,7 @@ Er waren problemen met %d van de %d zinnen:
 		if nerr > 0 {
 
 			var params string
-			rows, err := q.db.Query(
+			rows, err := sqlDB.Query(
 				fmt.Sprintf(
 					"SELECT `params` FROM `%s_info` WHERE `id` = %q",
 					Cfg.Prefix,
@@ -230,7 +230,7 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 		query = fmt.Sprintf("WHERE `lbl` LIKE %q", lbl)
 	}
 
-	rows, err := q.db.Query(
+	rows, err := sqlDB.Query(
 		fmt.Sprintf(
 			"SELECT `arch`,`file`,`sent`,`lbl` FROM `%s_c_%s_sent` %s LIMIT %d,%d",
 			Cfg.Prefix,
@@ -257,7 +257,7 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 	}
 
 	for i, zin := range zinnen {
-		rows, err := q.db.Query(
+		rows, err := sqlDB.Query(
 			fmt.Sprintf(
 				"SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, id, zin.file, zin.arch))
 		if err == nil && rows.Next() {
@@ -279,7 +279,7 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 		if !q.hasmeta[id] {
 			continue
 		}
-		rows, err := q.db.Query(fmt.Sprintf(
+		rows, err := sqlDB.Query(fmt.Sprintf(
 			"SELECT `idx`,`type`,`name`,`tval`,`ival`,`fval`,`dval` FROM `%s_c_%s_meta` JOIN `%s_c_%s_midx` USING (`id`) "+
 				"WHERE `file` = %d AND `arch` = %d ORDER BY `name`,`idx`",
 			Cfg.Prefix, id,

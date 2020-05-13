@@ -123,7 +123,7 @@ func tree(q *Context) {
 			label = filepath.Base(first(q.r, "arch")) + "::" + label
 		}
 	} else {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -145,7 +145,7 @@ func tree(q *Context) {
 		archive = first(q.r, "arch")
 	} else {
 		if arch >= 0 {
-			rows, err := q.db.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
+			rows, err := sqlDB.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
 			if err != nil {
 				http.Error(q.w, err.Error(), http.StatusInternalServerError)
 				logerr(err)
@@ -167,7 +167,7 @@ func tree(q *Context) {
 	if has_names {
 		filename = first(q.r, "file")
 	} else {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)

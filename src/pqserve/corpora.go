@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"html"
 	"io"
@@ -44,7 +43,7 @@ func corpora(q *Context) {
 		return
 	}
 
-	rows, err := q.db.Query(
+	rows, err := sqlDB.Query(
 		fmt.Sprintf(
 			"SELECT `id`, `description`, `status`, `nline`, `nword`, `msg`, `shared`, `params`, `created` FROM `%s_info` WHERE `owner` = \"%s\" ORDER BY `description`",
 			Cfg.Prefix,
@@ -431,7 +430,7 @@ func submitCorpus(q *Context) {
 		return
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, hErr)
+	dirname, fulldirname, ok := beginNewCorpus(q, title, hErr)
 	if !ok {
 		return
 	}
@@ -453,14 +452,12 @@ func submitCorpus(q *Context) {
 		}
 	}
 
-	newCorpus(q, q.db, dirname, title, info, how, 0, hErr, true)
+	newCorpus(q, dirname, title, info, how, 0, hErr, true)
 }
 
-func newCorpus(q *Context, db *sql.DB, dirname, title, info, how string, protected int, errCheck func(*Context, error) bool, htmlOutput bool) {
+func newCorpus(q *Context, dirname, title, info, how string, protected int, errCheck func(*Context, error) bool, htmlOutput bool) {
 
-	// db is niet altijd gelijk aan q.db
-
-	_, err := db.Exec(fmt.Sprintf(
+	_, err := sqlDB.Exec(fmt.Sprintf(
 		"UPDATE %s_info SET `description` = %q, `owner` = %q, `status` = \"QUEUED\", `params` = %q, `msg` = %q, `protected` = %d WHERE `id` = %q;",
 		Cfg.Prefix,
 		title, q.user, how, "Bron: "+invoertabel[how], protected,
@@ -497,7 +494,7 @@ Let op: Dit kan even duren. Minuten, uren, of dagen, afhankelijk van de grootte 
 	}
 }
 
-func beginNewCorpus(q *Context, db *sql.DB, title string, errCheck func(*Context, error) bool) (dirname, fulldirname string, ok bool) {
+func beginNewCorpus(q *Context, title string, errCheck func(*Context, error) bool) (dirname, fulldirname string, ok bool) {
 
 	// db is niet altijd gelijk aan q.db
 
@@ -512,7 +509,7 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, errCheck func(*Context
 	defer dirnameLock.Unlock()
 	for i := 0; true; i++ {
 		d := dirname + abc(i)
-		rows, err := db.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT 1 FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, d))
 		if errCheck(q, err) {
 			return
 		}
@@ -529,7 +526,7 @@ func beginNewCorpus(q *Context, db *sql.DB, title string, errCheck func(*Context
 		return
 	}
 
-	_, err = db.Exec(fmt.Sprintf(
+	_, err = sqlDB.Exec(fmt.Sprintf(
 		"INSERT %s_info (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
 		Cfg.Prefix,
 		dirname))

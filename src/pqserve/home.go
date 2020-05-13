@@ -45,7 +45,7 @@ func home(q *Context) {
 		chClose = make(<-chan bool)
 	}
 
-	_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `active` = NOW() WHERE `id` = %q", Cfg.Prefix, prefix))
+	_, err := sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `active` = NOW() WHERE `id` = %q", Cfg.Prefix, prefix))
 	if doErr(q, err) {
 		return
 	}
@@ -122,7 +122,7 @@ func home(q *Context) {
 			return
 		default:
 		}
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `sent` FROM `%s_c_%s_sent` WHERE `arch` = %d AND `file`= %d",
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `sent` FROM `%s_c_%s_sent` WHERE `arch` = %d AND `file`= %d",
 			Cfg.Prefix, prefix, zin.arch, zin.file))
 		if doErr(q, err) {
 			busyClear(q)
@@ -149,7 +149,7 @@ func home(q *Context) {
 			return
 		default:
 		}
-		rows, err = q.db.Query(fmt.Sprintf(
+		rows, err = sqlDB.Query(fmt.Sprintf(
 			"SELECT `word`,`lemma`,`postag`,`rel`,`hpostag`,`hlemma`,`hword`,`begin`,`end`,`hbegin`,`hend`,`mark` FROM `%s_c_%s_deprel` "+joins+" WHERE `arch` = %d AND `file`= %d AND ( %s ) ORDER BY `begin`,`hbegin`,`rel`",
 			Cfg.Prefix, prefix, zin.arch, zin.file, query))
 		if doErr(q, err) {

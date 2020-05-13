@@ -766,16 +766,10 @@ Type = %q
 			}
 		}
 
-		db, err := dbopen()
-		if foliaErr(q, err) {
-			return
-		}
-		defer db.Close()
-
 		title := firstf(q.form, "naam")
 		info := firstf(q.form, "infotext")
 
-		dirname, fulldirname, ok := beginNewCorpus(q, db, title, foliaErr)
+		dirname, fulldirname, ok := beginNewCorpus(q, title, foliaErr)
 		if !ok {
 			return
 		}
@@ -786,7 +780,7 @@ Type = %q
 		if settings.Tokenized {
 			tok = "-tok"
 		}
-		newCorpus(q, db, dirname, title, info, "line-lbl"+tok, 0, foliaErr, false)
+		newCorpus(q, dirname, title, info, "line-lbl"+tok, 0, foliaErr, false)
 
 	}()
 }

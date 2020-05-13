@@ -147,7 +147,7 @@ func xsavez2(q *Context) {
 		}
 		if !okall {
 			os.RemoveAll(fulldirname)
-			q.db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, dirname))
+			sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, dirname))
 		}
 	}()
 
@@ -204,7 +204,7 @@ func xsavez2(q *Context) {
 		maxdup = Cfg.Maxdup
 	}
 
-	dirname, fulldirname, ok := beginNewCorpus(q, q.db, title, hErr)
+	dirname, fulldirname, ok := beginNewCorpus(q, title, hErr)
 	if !ok {
 		return
 	}
@@ -235,7 +235,7 @@ func xsavez2(q *Context) {
 		if !global {
 			dactfiles = append(dactfiles, fmt.Sprintf("%s/data/%s/data.dact", paqudatadir, prefix))
 		} else {
-			rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+			rows, err := sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 			if hErr(q, err) {
 				return
 			}
@@ -375,7 +375,7 @@ func xsavez2(q *Context) {
 	if protected != 0 {
 		s = "xmlzip-p"
 	}
-	newCorpus(q, q.db, dirname, title, buf.String(), s, protected, hErr, true)
+	newCorpus(q, dirname, title, buf.String(), s, protected, hErr, true)
 	okall = true
 }
 

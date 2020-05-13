@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/pebbe/util"
 
-	"database/sql"
 	"fmt"
 	"io"
 	"os"
@@ -34,20 +33,20 @@ var (
 	reMidPoint = regexp.MustCompile(`\pL\pL\pP*[.!?]\s+\S`)
 )
 
-func setinvoer(db *sql.DB, soort string, id string, isarch bool) error {
+func setinvoer(soort string, id string, isarch bool) error {
 	s := soort
 	if isarch {
 		s = soort + "-arch"
 	}
-	_, err := db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `params` = %q, `msg` = %q WHERE `id` = %q",
+	_, err := sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `params` = %q, `msg` = %q WHERE `id` = %q",
 		Cfg.Prefix, s, "Bron: "+invoertabel[soort], id))
 	return err
 }
 
-func invoersoort(db *sql.DB, data, id string) (string, error) {
+func invoersoort(data, id string) (string, error) {
 
 	set := func(soort string) (string, error) {
-		return soort, setinvoer(db, soort, id, false)
+		return soort, setinvoer(soort, id, false)
 	}
 
 	fp, err := os.Open(data)

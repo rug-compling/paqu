@@ -2042,12 +2042,7 @@ func spod_form(q *Context) {
 		"attr": true,
 	}
 
-	dbase, err := dbopen()
-	if sysErr(err) {
-		return
-	}
-	defer dbase.Close()
-	rows, err := dbase.Query("SELECT `nline` from `" + Cfg.Prefix + "_info` WHERE `id` = \"" + db + "\"")
+	rows, err := sqlDB.Query("SELECT `nline` from `" + Cfg.Prefix + "_info` WHERE `id` = \"" + db + "\"")
 	if sysErr(err) {
 		fmt.Fprintln(q.w, err)
 		return
@@ -2737,11 +2732,6 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 		return
 	}
 	w := spod_writer{header: make(map[string][]string)}
-	dbase, err := dbopen()
-	if sysErr(err) {
-		return
-	}
-	defer dbase.Close()
 	myQ := Context{
 		r:            r,
 		w:            &w,
@@ -2749,7 +2739,6 @@ func spod_work(q *Context, key string, filename string, db string, item int) {
 		auth:         q.auth,
 		sec:          q.sec,
 		quotum:       q.quotum,
-		db:           dbase,
 		opt_db:       q.opt_db,
 		opt_dbmeta:   q.opt_dbmeta,
 		ignore:       q.ignore,
@@ -2893,18 +2882,8 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 	runeCount := 0
 	tokens := make(map[string]bool)
 
-	db, err := dbopen()
-	if xx(err) {
-		return
-	}
-	defer func() {
-		if db != nil {
-			db.Close()
-		}
-	}()
-
 	archnames := make([]string, 0)
-	rows, err := db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch`", Cfg.Prefix, dbname))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch`", Cfg.Prefix, dbname))
 	if xx(err) {
 		return
 	}
@@ -2922,7 +2901,7 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 
 	filenames := make([]string, 0)
 	if len(archnames) == 0 {
-		rows, err := db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file`", Cfg.Prefix, dbname))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file`", Cfg.Prefix, dbname))
 		if xx(err) {
 			return
 		}
@@ -2941,9 +2920,6 @@ func spod_stats_work(q *Context, dbname string, outname string) {
 			return
 		}
 	}
-
-	db.Close()
-	db = nil
 
 	var processNode func(node *Node)
 	processNode = func(node *Node) {

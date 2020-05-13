@@ -19,7 +19,7 @@ func login(q *Context) {
 		pw = "none" // anders kan iemand zonder password inloggen
 	}
 
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `mail`,`sec` FROM `%s_users` WHERE `pw` = %q", Cfg.Prefix, pw))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `mail`,`sec` FROM `%s_users` WHERE `pw` = %q", Cfg.Prefix, pw))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -35,7 +35,7 @@ func login(q *Context) {
 			logerr(err)
 			return
 		}
-		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = '' WHERE `mail` = %q", Cfg.Prefix, mail))
+		_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = '' WHERE `mail` = %q", Cfg.Prefix, mail))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -73,7 +73,7 @@ func login1(q *Context) {
 	auth := rand16()
 	sec := rand16()
 
-	rows, err := q.db.Query(fmt.Sprintf("SELECT * from `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT * from `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
@@ -81,10 +81,10 @@ func login1(q *Context) {
 	}
 	if rows.Next() {
 		rows.Close()
-		_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `sec` = %q, `pw` = %q WHERE `mail` = %q",
+		_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_users` SET `sec` = %q, `pw` = %q WHERE `mail` = %q",
 			Cfg.Prefix, sec, auth, mail))
 	} else {
-		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `sec`, `pw`, `quotum`) VALUES (%q, %q, %q, %d)",
+		_, err = sqlDB.Exec(fmt.Sprintf("INSERT INTO `%s_users` (`mail`, `sec`, `pw`, `quotum`) VALUES (%q, %q, %q, %d)",
 			Cfg.Prefix, mail, sec, auth, Cfg.Maxwrd))
 	}
 	if err != nil {
@@ -113,7 +113,7 @@ func login1(q *Context) {
 
 func logout(q *Context) {
 	if q.auth {
-		q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `sec` = \"x\" WHERE `mail` = %q", Cfg.Prefix, q.user))
+		sqlDB.Exec(fmt.Sprintf("UPDATE `%s_users` SET `sec` = \"x\" WHERE `mail` = %q", Cfg.Prefix, q.user))
 		q.auth = false
 	}
 	http.SetCookie(q.w, &http.Cookie{Name: "paqu-auth", Path: "/", MaxAge: -1})

@@ -19,7 +19,7 @@ func remove(q *Context) {
 
 	// Kan myprefixes niet gebruiken omdat daar alleen corpora in staan die al klaar zijn
 
-	rows, err := q.db.Query(fmt.Sprintf(
+	rows, err := sqlDB.Query(fmt.Sprintf(
 		"SELECT `description` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
 		Cfg.Prefix, id, q.user))
 	if err != nil {
@@ -70,7 +70,7 @@ func remove(q *Context) {
 		}
 	}()
 
-	_, err = q.db.Exec(fmt.Sprintf(
+	_, err = sqlDB.Exec(fmt.Sprintf(
 		"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch` , `%s_c_%s_word`, "+
 			"`%s_c_%s_meta`, `%s_c_%s_midx`, `%s_c_%s_minf` , `%s_c_%s_mval`",
 		Cfg.Prefix, id,
@@ -83,11 +83,11 @@ func remove(q *Context) {
 		Cfg.Prefix, id,
 		Cfg.Prefix, id))
 	logerr(err)
-	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
+	_, err = sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
 	logerr(err)
-	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `prefix` = %q", Cfg.Prefix, id))
+	_, err = sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `prefix` = %q", Cfg.Prefix, id))
 	logerr(err)
-	_, err = q.db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, id))
+	_, err = sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, id))
 	logerr(err)
 
 	logf("DELETED: %v", id)

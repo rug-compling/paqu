@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/BurntSushi/toml"
-	_ "github.com/go-sql-driver/mysql"
 
 	"bytes"
 	"compress/gzip"
@@ -429,7 +428,7 @@ func tijd(t time.Duration) string {
 
 func getMeta(q *Context, prefix string) []MetaType {
 	result := make([]MetaType, 0)
-	rows, err := q.db.Query(fmt.Sprintf(
+	rows, err := sqlDB.Query(fmt.Sprintf(
 		"SELECT `id`,`name`,`type`,`indexed`,`dtype`,`istep` FROM `%s_c_%s_midx` LEFT JOIN `%s_c_%s_minf` USING (`id`) ORDER BY 2",
 		Cfg.Prefix, prefix,
 		Cfg.Prefix, prefix))

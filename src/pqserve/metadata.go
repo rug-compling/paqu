@@ -58,7 +58,7 @@ func metadata(q *Context) {
 			align = "left"
 			limit = fmt.Sprintf(" LIMIT 0, %d", METAMAX)
 		}
-		rows, err := q.db.Query(fmt.Sprintf(
+		rows, err := sqlDB.Query(fmt.Sprintf(
 			"SELECT `text`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY %s%s",
 			Cfg.Prefix, prefix,
 			meta.id,
@@ -119,7 +119,7 @@ func metadl(q *Context) {
 		if meta.mtype == "TEXT" {
 			o = "`n` DESC, `idx`"
 		}
-		rows, err := q.db.Query(fmt.Sprintf(
+		rows, err := sqlDB.Query(fmt.Sprintf(
 			"SELECT `text`, `n` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY %s",
 			Cfg.Prefix, prefix,
 			meta.id,
@@ -269,7 +269,7 @@ func meta2(q *Context) {
 	var keys [2][]StructIS
 	for i := 0; i < 2; i++ {
 		keys[i] = make([]StructIS, 0)
-		rows, err := q.db.Query(fmt.Sprintf(
+		rows, err := sqlDB.Query(fmt.Sprintf(
 			"SELECT `idx`,`text` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY `idx`",
 			Cfg.Prefix, prefix, met[i].id))
 		if logerrfrag(q, err) {
@@ -297,7 +297,7 @@ func meta2(q *Context) {
 	if one {
 		excl = "AND `a`.`idx` != `b`.`idx`"
 	}
-	rows, err := q.db.Query(fmt.Sprintf(
+	rows, err := sqlDB.Query(fmt.Sprintf(
 		"SELECT COUNT(*), `a`.`idx`, `b`.`idx` FROM `%s_c_%s_meta` `a` JOIN `%s_c_%s_meta` `b` "+
 			"USING (`arch`,`file`) WHERE `a`.`id` = %d AND `b`.`id` = %d %s GROUP BY `a`.`idx`, `b`.`idx`",
 		Cfg.Prefix, prefix,

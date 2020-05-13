@@ -10,7 +10,7 @@ import (
 )
 
 func saveOpenDact(q *Context, prefix string, arch int) (interface{}, string) {
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d", Cfg.Prefix, prefix, arch))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d", Cfg.Prefix, prefix, arch))
 	if doErr(q, err) {
 		return nil, ""
 	}

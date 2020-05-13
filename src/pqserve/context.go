@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/dchest/authcookie"
 
-	"database/sql"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -20,7 +19,6 @@ type Context struct {
 	auth         bool
 	sec          string
 	quotum       int
-	db           *sql.DB
 	opt_db       []string
 	opt_dbmeta   []string
 	opt_dbspod   []string
@@ -100,16 +98,6 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				dates:        make(map[string]time.Time),
 			}
 
-			// Maak verbinding met database
-			var err error
-			q.db, err = dbopen()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			defer q.db.Close()
-
 			// Is de gebruiker ingelogd?
 			if auth, err := r.Cookie("paqu-auth"); err == nil {
 				s := strings.SplitN(authcookie.Login(auth.Value, []byte(getRemote(q)+Cfg.Secret)), "|", 2)
@@ -119,7 +107,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 			}
 			if q.user != "" {
-				rows, err := q.db.Query(fmt.Sprintf(
+				rows, err := sqlDB.Query(fmt.Sprintf(
 					"SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q AND `sec` = %q", Cfg.Prefix, q.user, q.sec))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -137,7 +125,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 						return
 					}
 					q.auth = true
-					_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_users` SET `active` = NOW() WHERE `mail` = %q", Cfg.Prefix, q.user))
+					_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_users` SET `active` = NOW() WHERE `mail` = %q", Cfg.Prefix, q.user))
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						logerr(err)
@@ -150,7 +138,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 
 			q.ignore = make(map[string]bool)
 			if q.auth {
-				rows, err := q.db.Query(fmt.Sprintf("SELECT `prefix` FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
+				rows, err := sqlDB.Query(fmt.Sprintf("SELECT `prefix` FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
 				if err != nil {
 					http.Error(q.w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -174,7 +162,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				s = fmt.Sprintf("IF(`i`.`owner` = \"none\", \"C\", IF(`i`.`owner` = \"auto\", \"B\", IF(`i`.`owner` = \"manual\", \"A\", IF(`i`.`owner` = %q, \"D\", \"E\"))))", q.user)
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 			}
-			rows, err := q.db.Query(fmt.Sprintf(
+			rows, err := sqlDB.Query(fmt.Sprintf(
 				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`, `i`.`info`, `i`.`infop`, `i`.`created` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+

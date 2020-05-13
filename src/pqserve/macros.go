@@ -50,7 +50,7 @@ func downloadmacros(q *Context) {
 	q.w.Header().Set("Content-Disposition", "attachment; filename=usermacros.txt")
 	nocache(q)
 
-	rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
 	if err != nil {
 		logerr(err)
 		fmt.Fprintln(q.w, "Fout:", err)
@@ -128,14 +128,14 @@ MACROLOOP:
 			}
 		}
 
-		_, err := q.db.Exec(fmt.Sprintf("DELETE FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+		_, err := sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
 		if err != nil {
 			result.Err = "Databasefout: " + err.Error()
 			logerr(err)
 			break
 		}
 
-		_, err = q.db.Exec(fmt.Sprintf("INSERT INTO `%s_macros` (`user`, `macros`) VALUES (%q, %q)", Cfg.Prefix, q.user, macros))
+		_, err = sqlDB.Exec(fmt.Sprintf("INSERT INTO `%s_macros` (`user`, `macros`) VALUES (%q, %q)", Cfg.Prefix, q.user, macros))
 		if err != nil {
 			result.Err = "Databasefout: " + err.Error()
 			logerr(err)
@@ -201,7 +201,7 @@ func loadMacros(q *Context) {
 
 	text := ""
 	if q.auth {
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
 		if err == nil && rows.Next() {
 			rows.Scan(&text)
 			rows.Close()

@@ -53,7 +53,7 @@ func rename2(q *Context) {
 
 	d2 := maxtitlelen(strings.TrimSpace(first(q.r, "desc")))
 	if d2 != "" {
-		_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q WHERE `id` = %q", Cfg.Prefix, d2, id))
+		_, err := sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q WHERE `id` = %q", Cfg.Prefix, d2, id))
 		if err != nil {
 			http.Error(q.w, err.Error(), http.StatusInternalServerError)
 			logerr(err)
@@ -64,13 +64,13 @@ func rename2(q *Context) {
 	info := strings.Replace(first(q.r, "infotext"), "\r\n", "\n", -1)
 	unsafe := blackfriday.Run([]byte(info))
 	infop := strings.TrimSpace(string(bluemonday.UGCPolicy().SanitizeBytes(unsafe)))
-	_, err := q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `info` = %q WHERE `id` = %q", Cfg.Prefix, info, id))
+	_, err := sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `info` = %q WHERE `id` = %q", Cfg.Prefix, info, id))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
-	_, err = q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `infop` = %q WHERE `id` = %q", Cfg.Prefix, infop, id))
+	_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `infop` = %q WHERE `id` = %q", Cfg.Prefix, infop, id))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
 		logerr(err)

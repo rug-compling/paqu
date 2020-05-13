@@ -3,8 +3,11 @@ package main
 //. Imports
 
 import (
+	_ "github.com/go-sql-driver/mysql"
+
 	"bytes"
 	"crypto/tls"
+	"database/sql"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -328,6 +331,8 @@ const (
 //. Variabelen
 
 var (
+	sqlDB *sql.DB
+
 	localDynamicHandlers = []LocalHandlerType{}
 	localStaticHandlers  = []LocalHandlerType{}
 	localMenu            = []LocalMenuType{}

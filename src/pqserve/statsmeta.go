@@ -102,7 +102,7 @@ func statsmeta(q *Context) {
 		// telling van metadata in matchende zinnen
 
 		values := make([]StructIS, 0)
-		rows, err := q.db.Query(fmt.Sprintf(
+		rows, err := sqlDB.Query(fmt.Sprintf(
 			"SELECT `idx`,`text` FROM `%s_c_%s_mval` WHERE `id`=%d ORDER BY `idx`",
 			Cfg.Prefix, prefix,
 			meta.id))

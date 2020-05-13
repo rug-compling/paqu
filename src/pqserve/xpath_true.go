@@ -345,7 +345,7 @@ func xpath(q *Context) {
 		chClose = make(<-chan bool)
 	}
 
-	_, errval = q.db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `active` = NOW() WHERE `id` = %q", Cfg.Prefix, prefix))
+	_, errval = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `active` = NOW() WHERE `id` = %q", Cfg.Prefix, prefix))
 	if logerr(errval) {
 		return
 	}
@@ -1297,7 +1297,7 @@ func html_xpath_form(q *Context, xpathmax int) (has_query bool, filter [3]bool) 
 
 	if q.auth {
 		macros := ""
-		rows, err := q.db.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
+		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `macros` FROM `%s_macros` WHERE `user` = %q", Cfg.Prefix, q.user))
 		if err == nil {
 			if rows.Next() {
 				rows.Scan(&macros)
@@ -1906,7 +1906,7 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 	var owner string
 	var nlines uint64
 	var rows *sql.Rows
-	rows, errval = q.db.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
+	rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `owner`,`nline` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
 	if logerr(errval) {
 		return
 	}
@@ -1928,7 +1928,7 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
 	} else {
 		global = true
-		rows, errval = q.db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+		rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if logerr(errval) {
 			return
 		}
