@@ -483,7 +483,7 @@ func newCorpus(q *Context, dirname, title, info, how string, protected int, errC
 	if htmlOutput {
 		writeHtml(
 			q,
-			"Document word verwerkt",
+			"Document wordt verwerkt",
 			`
 Je document wordt verwerkt. Als het klaar is zie je op de hoofdpagina een nieuw corpus bij de databases.
 <p>
