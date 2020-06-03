@@ -300,6 +300,12 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 				switch mtype {
 				case "TEXT":
 					v = unHigh(tval)
+				case "BOOL":
+					if ival == 1 {
+						v = "true"
+					} else {
+						v = "false"
+					}
 				case "INT":
 					v = iformat(ival)
 				case "FLOAT":

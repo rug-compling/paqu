@@ -53,7 +53,7 @@ func metadata(q *Context) {
 		o := `idx`
 		align := "right"
 		limit := ""
-		if meta.mtype == "TEXT" {
+		if meta.mtype == "TEXT" || meta.mtype == "BOOL" {
 			o = "`n` DESC, `idx`"
 			align = "left"
 			limit = fmt.Sprintf(" LIMIT 0, %d", METAMAX)
@@ -116,7 +116,7 @@ func metadl(q *Context) {
 	for _, meta := range metas {
 		fmt.Fprintf(q.w, "# %s\n", meta.name)
 		o := `idx`
-		if meta.mtype == "TEXT" {
+		if meta.mtype == "TEXT" || meta.mtype == "BOOL" {
 			o = "`n` DESC, `idx`"
 		}
 		rows, err := sqlDB.Query(fmt.Sprintf(
@@ -320,7 +320,7 @@ func meta2(q *Context) {
 	}
 
 	yalign := "right"
-	if met[1].mtype == "TEXT" {
+	if met[1].mtype == "TEXT" || met[1].mtype == "BOOL" {
 		yalign = "left"
 	}
 

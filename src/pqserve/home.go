@@ -243,7 +243,7 @@ func home(q *Context) {
 		for m := range mark {
 			ms = append(ms, m)
 		}
-		fmt.Fprintf(q.w, "\n<a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%s&amp;gr=%s&amp;ms=%s\" class=\"ico\">&#10020;</a>\n<ul>\n",
+		fmt.Fprintf(q.w, "\n<a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%s&amp;gr=%s&amp;ms=%s\" class=\"ico\" target=\"_blank\">&#10020;</a>\n<ul>\n",
 			prefix,
 			zin.arch,
 			zin.file,
@@ -273,7 +273,7 @@ func home(q *Context) {
 				green = fmt.Sprint(item.hbegin)
 			}
 			links[s] = append(links[s],
-				fmt.Sprintf("<a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%d&amp;gr=%s&amp;ms=%s\" class=\"icol\">&#10020;</a>\n",
+				fmt.Sprintf("<a href=\"tree?db=%s&amp;arch=%d&amp;file=%d&amp;yl=%d&amp;gr=%s&amp;ms=%s\" class=\"icol\" target=\"_blank\">&#10020;</a>\n",
 					prefix,
 					zin.arch,
 					zin.file,

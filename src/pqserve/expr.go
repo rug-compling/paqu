@@ -211,9 +211,11 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 			collate = ""
 			if token == "in" {
 				cmp = token
-			} else if token == "<=" || token == ">=" || token == "<" || token == ">" || token == "=" {
+			} else if (token == "<=" || token == ">=" || token == "<" || token == ">" || token == "=") && typ != "BOOL" {
 				cmp = token
 				collate = ` COLLATE "utf8_bin"`
+			} else if token == "=" && typ == "BOOL" {
+				cmp = "="
 			} else if token == "%" && (typ == "TEXT" || typ == "DATE" || typ == "DATETIME") {
 				cmp = "LIKE"
 			} else if token == "~" && typ == "TEXT" {
@@ -249,6 +251,12 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 				switch typ {
 				case "TEXT":
 					fmt.Fprintf(&sqlbuf, "`meta%d`.`tval` %s %q%s", n, cmp, token, collate)
+				case "BOOL":
+					i := 0
+					if isTrue[token] {
+						i = 1
+					}
+					fmt.Fprintf(&sqlbuf, "`meta%d`.`ival` %s %d", n, cmp, i)
 				case "INT":
 					i, err := strconv.Atoi(token)
 					if err != nil {
@@ -316,6 +324,8 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 				case "TEXT":
 					pair[i] = fmt.Sprintf("%q", pair[i])
 					f = "tval"
+				case "BOOL":
+					f = "ival"
 				case "INT":
 					_, err := strconv.Atoi(pair[i])
 					if err != nil {

@@ -28,6 +28,16 @@ var (
 	LeegArchief = errors.New("Leeg zipbestand of tarbestand")
 
 	reTrailingSpace = regexp.MustCompile(">( |\t)*(\r\n|\n\r|\r|\n)")
+
+	isTrue = map[string]bool{
+		"true": true,
+		"yes":  true,
+		"ja":   true,
+		"1":    true,
+		"t":    true,
+		"y":    true,
+		"j":    true,
+	}
 )
 
 func quote(s string) string {
@@ -607,7 +617,15 @@ func dowork(task *Process) (user string, title string, err error) {
 								}
 							}
 							if len(f) > 3 {
-								metalines = append(metalines, fmt.Sprintf("%s\t%s\t%s", f[0], f[1], strings.Join(f[3:], " ")))
+								value := strings.Join(f[3:], " ")
+								if f[0] == "bool" {
+									if isTrue[strings.ToLower(value)] {
+										value = "true"
+									} else {
+										value = "false"
+									}
+								}
+								metalines = append(metalines, fmt.Sprintf("%s\t%s\t%s", f[0], f[1], value))
 							}
 						}
 					}

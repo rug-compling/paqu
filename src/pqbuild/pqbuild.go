@@ -434,7 +434,7 @@ Opties:
 	// als al bestaat dan fout: negeren
 	db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
 			id   int          NOT NULL,
-			type enum('TEXT','INT','FLOAT','DATE','DATETIME') NOT NULL DEFAULT 'TEXT',
+			type enum('TEXT','INT','FLOAT','DATE','DATETIME','BOOL') NOT NULL DEFAULT 'TEXT',
 			name varchar(128) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
@@ -751,6 +751,28 @@ Opties:
 				_, err = db.Exec(fmt.Sprintf(
 					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `tval` = %q",
 					Cfg.Prefix, prefix, ix, metai[meta], s))
+				util.CheckErr(err)
+				ix++
+			}
+			util.CheckErr(rows.Err())
+		case "BOOL":
+			rows, err := db.Query(fmt.Sprintf(
+				"SELECT DISTINCT `ival` FROM `%s_c_%s_meta` WHERE `id` = %d ORDER BY 1",
+				Cfg.Prefix, prefix,
+				metai[meta]))
+			util.CheckErr(err)
+			ix := 0
+			for rows.Next() {
+				var i int
+				util.CheckErr(rows.Scan(&i))
+				if i == 1 {
+					idx[ix] = "true"
+				} else {
+					idx[ix] = "false"
+				}
+				_, err = db.Exec(fmt.Sprintf(
+					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `ival` = %d",
+					Cfg.Prefix, prefix, ix, metai[meta], i))
 				util.CheckErr(err)
 				ix++
 			}
@@ -1074,7 +1096,7 @@ func do_data(archname, filename string, data []byte) {
 	wordcount += len(strings.Fields(alpino.Sentence))
 
 	for _, m := range alpino.Meta {
-		if m.Type != "text" && m.Type != "int" && m.Type != "float" && m.Type != "date" && m.Type != "datetime" {
+		if m.Type != "text" && m.Type != "int" && m.Type != "float" && m.Type != "date" && m.Type != "datetime" && m.Type != "bool" {
 			util.CheckErr(fmt.Errorf("Ongeldig type in %s||%s: %s", archname, filename, m.Type))
 		}
 		if _, ok := meta[m.Name]; !ok {
@@ -1125,6 +1147,11 @@ func do_data(archname, filename string, data []byte) {
 				util.CheckErr(fmt.Errorf("Jaartal niet in bereik 1000-9999: %d", year))
 			}
 			dateval = fmt.Sprintf("%04d-%02d-%02d %02d:%02d:00", year, t.Month(), t.Day(), t.Hour(), t.Minute())
+		} else if m.Type == "bool" {
+			v := strings.ToLower(m.Value)
+			if v == "true" || v == "yes" || v == "on" || v == "1" || v == "t" || v == "y" {
+				intval = 1
+			}
 		} else {
 			txt = m.Value
 		}

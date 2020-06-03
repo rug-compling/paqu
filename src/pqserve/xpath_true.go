@@ -1769,7 +1769,7 @@ $('ol').append(%q);
 		dactfile = strings.Replace(dactfile, paqudatadir, "$$", 1)
 	}
 
-	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s&amp;ud1=%s&amp;ud2=%s\" class=\"ico\">&#10020;</a>\n",
+	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s&amp;ud1=%s&amp;ud2=%s\" class=\"ico\" target=\"_blank\">&#10020;</a>\n",
 		prefix,
 		html.EscapeString(dactfile),
 		html.EscapeString(filename),
