@@ -851,6 +851,24 @@ VP (9) en bijzinnen (10).
 			`
 //node[@cat="conj"
        and
+       count(node[@rel="crd"])=2
+       and
+       count(node[@rel="cnj"])=2
+       and
+       node[1][@rel="crd"]
+       and
+       node[3][@rel="crd"]
+]`,
+			SPOD_STD,
+			"crd22",
+			"nevenschikkingen van de vorm crd,cnj,crd,cnj",
+			"",
+		},
+		{
+			"",
+			`
+//node[@cat="conj"
+       and
        count(node[@rel="crd"])>2
 ]`,
 			SPOD_STD,
