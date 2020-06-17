@@ -851,9 +851,9 @@ VP (9) en bijzinnen (10).
 			`
 //node[@cat="conj"
        and
-       count(node[@rel="crd"])=2
+       count(node[@rel="crd"])>=1
        and
-       count(node[@rel="cnj"])=2
+       count(node[@rel="cnj"])>=1
        and
        node[1][@rel="crd"]
        and
@@ -861,7 +861,7 @@ VP (9) en bijzinnen (10).
 ]`,
 			SPOD_STD,
 			"crd22",
-			"nevenschikkingen van de vorm crd,cnj,crd,cnj",
+			"reeksvormers (nevenschikkingen van de vorm crd,cnj,crd,cnj...)",
 			"",
 		},
 		{
