@@ -851,9 +851,7 @@ VP (9) en bijzinnen (10).
 			`
 //node[@cat="conj"
        and
-       count(node[@rel="crd"])>=1
-       and
-       count(node[@rel="cnj"])>=1
+       count(node[@rel="cnj"])>1
        and
        node[1][@rel="crd"]
        and
