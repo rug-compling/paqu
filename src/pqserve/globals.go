@@ -297,6 +297,7 @@ type TreeContext struct {
 
 type Process struct {
 	id     string
+	owner  string
 	info   string
 	nr     int
 	chKill chan bool
@@ -348,6 +349,7 @@ var (
 
 	semaphore chan struct{}
 	chWork    = make(chan *Process)
+	chDelete  = make(chan string)
 	processes = make(map[string]*Process)
 
 	dirnameLock sync.Mutex
@@ -379,9 +381,6 @@ var (
 	hasMaxExecutionTime bool
 	hasMaxStatementTime bool
 
-	taskWaitNr int
-	taskWorkNr int
-
 	started = time.Now()
 
 	wg           sync.WaitGroup
@@ -403,7 +402,7 @@ func (p ProcessMap) String() string {
 		} else if val.queued {
 			st = "queued"
 		}
-		fmt.Fprintf(&buf, "%s{\"id\":%q,\"status\":%q}", comma, key, st)
+		fmt.Fprintf(&buf, "%s{\"id\":%q,\"owner\":%q,\"status\":%q}", comma, key, val.owner, st)
 		comma = ","
 	}
 	fmt.Fprint(&buf, "]")

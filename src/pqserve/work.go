@@ -47,17 +47,6 @@ func quote(s string) string {
 func dowork(task *Process) (user string, title string, err error) {
 	logf("WORKING: " + task.id)
 
-	processLock.Lock()
-	if task.nr > taskWorkNr {
-		taskWorkNr = task.nr
-		if taskWaitNr == taskWorkNr {
-			// queue is leeg: reset counters om (ooit) overflow te voorkomen
-			taskWaitNr = 0
-			taskWorkNr = 0
-		}
-	}
-	processLock.Unlock()
-
 	_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"WORKING\", `nword` = 0 WHERE `id` = %q",
 		Cfg.Prefix, task.id))
 	if err != nil {
@@ -1022,6 +1011,7 @@ func work(task *Process) {
 }
 
 func kill(id string) {
+	chDelete <- id
 	processLock.RLock()
 	task, ok := processes[id]
 	processLock.RUnlock()
@@ -1063,21 +1053,21 @@ func kill(id string) {
 
 func recover() {
 
-	ids := make([]string, 0)
+	ids := make([][2]string, 0)
 	queuing := make([]string, 0)
 
 	_, err := sqlDB.Exec(
 		"UPDATE `" + Cfg.Prefix + "_info` SET `nword` = 0, `status` = \"QUEUED\" WHERE `status` = \"WORKING\" AND `owner` LIKE \"%@%\"")
 	util.CheckErr(err)
 
-	rows, err := sqlDB.Query("SELECT `id`,`status` FROM `" +
+	rows, err := sqlDB.Query("SELECT `id`,`status`,`owner` FROM `" +
 		Cfg.Prefix + "_info` WHERE `status` = \"QUEUED\" OR `status` = \"QUEUING\"  ORDER BY `created`")
 	util.CheckErr(err)
 	for rows.Next() {
-		var id, status string
-		util.CheckErr(rows.Scan(&id, &status))
+		var id, status, owner string
+		util.CheckErr(rows.Scan(&id, &status, &owner))
 		if status == "QUEUED" {
-			ids = append(ids, id)
+			ids = append(ids, [2]string{id, owner})
 		} else {
 			queuing = append(queuing, id)
 		}
@@ -1095,14 +1085,13 @@ func recover() {
 
 	for _, id := range ids {
 		p := &Process{
-			id:     id,
+			id:     id[0],
+			owner:  id[1],
 			chKill: make(chan bool),
 			queued: true,
 		}
 		processLock.Lock()
-		taskWaitNr++
-		p.nr = taskWaitNr
-		processes[id] = p
+		processes[id[0]] = p
 		processLock.Unlock()
 		chWork <- p
 	}

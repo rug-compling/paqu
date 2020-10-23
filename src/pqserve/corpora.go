@@ -259,13 +259,12 @@ function rm(idx) {
 			st := corpus.status
 			if st == "wachtrij" {
 				processLock.RLock()
-				n := taskWorkNr
-				m := n + 1
+				m := 0
 				if c, ok := processes[corpus.id]; ok {
 					m = c.nr
 				}
 				processLock.RUnlock()
-				st = fmt.Sprintf("%s&nbsp;#%d", st, m-n-1)
+				st = fmt.Sprintf("%s&nbsp;#%d", st, m)
 			} else if st == "bezig" {
 				if corpus.nline > 0 && (strings.HasPrefix(corpus.params, "run") ||
 					strings.HasPrefix(corpus.params, "line") ||
@@ -469,13 +468,12 @@ func newCorpus(q *Context, dirname, title, info, how string, protected int, errC
 	logf("QUEUED: " + dirname)
 	p := &Process{
 		id:     dirname,
+		owner:  q.user,
 		info:   strings.Replace(info, "\r\n", "\n", -1),
 		chKill: make(chan bool),
 		queued: true,
 	}
 	processLock.Lock()
-	taskWaitNr++
-	p.nr = taskWaitNr
 	processes[dirname] = p
 	processLock.Unlock()
 	chWork <- p
