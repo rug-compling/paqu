@@ -801,6 +801,8 @@ PQ_relatieve_bijzinnen = """
 PQ_free_relatives = """
         //node[@cat='whrel'
                and
+               not(@rel="mod")
+               and
                node[@rel='body'
                     and
                     %PQ_ssub%

@@ -65,6 +65,10 @@ rnum
 root
 sc
 sense
+sonar_ne
+sonar_ne_begin
+sonar_ne_class
+sonar_ne_end
 special
 spectype
 status
