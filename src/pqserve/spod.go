@@ -37,6 +37,11 @@ type Spod struct {
 	special string
 }
 
+type spodQueueItem struct {
+	ch    chan bool
+	owner string
+}
+
 type spod_writer struct {
 	header map[string][]string
 	buffer bytes.Buffer
@@ -1746,11 +1751,16 @@ de namenlijst) of op een nog andere manier werden behandeld.
 			"his",
 		},
 	}
-	spodMu        sync.Mutex
+
 	spodSemaphore chan bool
-	spodWorking   = make(map[string]bool)
-	spodRE        = regexp.MustCompile(`([0-9]+)[^0-9]+([0-9]+)`)
-	spodREerr     = regexp.MustCompile(`\[err:`)
+	spodNext      = make(chan bool)
+	spodQueue     = make([]*spodQueueItem, 0)
+	spodQueueMu   sync.Mutex
+
+	spodMu      sync.Mutex
+	spodWorking = make(map[string]bool)
+	spodRE      = regexp.MustCompile(`([0-9]+)[^0-9]+([0-9]+)`)
+	spodREerr   = regexp.MustCompile(`\[err:`)
 )
 
 func spod_init() {
@@ -1758,6 +1768,7 @@ func spod_init() {
 	for i, spod := range spods {
 		spods[i].xpath = strings.TrimSpace(spod.xpath)
 	}
+	go spod_starter()
 }
 
 func spod_main(q *Context) {
@@ -2058,14 +2069,15 @@ func spod_form(q *Context) {
 		"attr": true,
 	}
 
-	rows, err := sqlDB.Query("SELECT `nline` from `" + Cfg.Prefix + "_info` WHERE `id` = \"" + db + "\"")
+	rows, err := sqlDB.Query("SELECT `nline`,`owner` from `" + Cfg.Prefix + "_info` WHERE `id` = \"" + db + "\"")
 	if sysErr(err) {
 		fmt.Fprintln(q.w, err)
 		return
 	}
 	nlines := 0
+	var owner string
 	for rows.Next() {
-		err = rows.Scan(&nlines)
+		err = rows.Scan(&nlines, &owner)
 		rows.Close()
 		if sysErr(err) {
 			fmt.Fprintln(q.w, err)
@@ -2087,7 +2099,7 @@ func spod_form(q *Context) {
 	var allDone bool
 	if doHtml {
 		fmt.Fprintf(q.w, "Corpus: %s\n<p>\n", spodEscape(q.desc[db]))
-		allDone = spod_stats(q, db, true)
+		allDone = spod_stats(q, db, owner, true)
 		if !allDone {
 			fmt.Fprintln(q.w, "???<br>")
 		}
@@ -2095,7 +2107,7 @@ func spod_form(q *Context) {
 		fmt.Fprintln(q.w, "# corpus:", q.desc[db])
 		fmt.Fprintln(q.w, "# waarde\t         \tlabel\tomschrijving")
 		fmt.Fprintln(q.w, "## Stats")
-		allDone = spod_stats(q, db, false)
+		allDone = spod_stats(q, db, owner, false)
 		if !allDone {
 			fmt.Fprintln(q.w, "???")
 		}
@@ -2337,7 +2349,7 @@ window.onclick = function(event) {
 		spod_in_use[spod_fingerprint(idx)] = true
 
 		if strings.HasPrefix(spod.special, "hidden") {
-			lines, _, _, done, err := spod_get(q, db, idx)
+			lines, _, _, done, err := spod_get(q, db, idx, owner)
 			if err == nil && done {
 				available[strings.Split(spod.lbl, "_")[1]] = lines > 0
 			}
@@ -2452,7 +2464,7 @@ window.onclick = function(event) {
 			var done bool
 			var err error
 			if avail {
-				lines, items, wcount, done, err = spod_get(q, db, idx)
+				lines, items, wcount, done, err = spod_get(q, db, idx, owner)
 			}
 			if err != nil {
 				if doHtml {
@@ -2616,7 +2628,7 @@ window.onclick = function(event) {
 	}
 }
 
-func spod_stats(q *Context, db string, doHtml bool) bool {
+func spod_stats(q *Context, db string, owner string, doHtml bool) bool {
 	spodMu.Lock()
 	defer spodMu.Unlock()
 
@@ -2649,7 +2661,7 @@ func spod_stats(q *Context, db string, doHtml bool) bool {
 
 	spodWorking[key] = true
 	go func() {
-		go spod_stats_work(q, db, filename)
+		go spod_stats_work(q, db, owner, filename)
 		spodMu.Lock()
 		delete(spodWorking, key)
 		spodMu.Unlock()
@@ -2658,7 +2670,7 @@ func spod_stats(q *Context, db string, doHtml bool) bool {
 	return false
 }
 
-func spod_get(q *Context, db string, item int) (lines int, items int, wcount string, done bool, err error) {
+func spod_get(q *Context, db string, item int, owner string) (lines int, items int, wcount string, done bool, err error) {
 	spodMu.Lock()
 	defer spodMu.Unlock()
 
@@ -2704,7 +2716,7 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 
 	spodWorking[key] = true
 	go func() {
-		spod_work(q, key, filename, db, item)
+		spod_work(q, key, filename, db, owner, item)
 		spodMu.Lock()
 		delete(spodWorking, key)
 		spodMu.Unlock()
@@ -2713,10 +2725,15 @@ func spod_get(q *Context, db string, item int) (lines int, items int, wcount str
 	return 0, 0, "", false, nil
 }
 
-func spod_work(q *Context, key string, filename string, db string, item int) {
-	spodSemaphore <- true
+func spod_work(q *Context, key string, filename string, db string, owner string, item int) {
+	spod_schedule(owner)
 	defer func() {
 		<-spodSemaphore
+	}()
+
+	chLog <- fmt.Sprintf("SPOD: work: %s %s", db, spods[item].lbl)
+	defer func() {
+		chLog <- fmt.Sprintf("FINISHED SPOD: work: %s %s", db, spods[item].lbl)
 	}()
 
 	var u string
@@ -2877,10 +2894,15 @@ func (s *spod_writer) Write(b []byte) (int, error) {
 func (s *spod_writer) WriteHeader(i int) {
 }
 
-func spod_stats_work(q *Context, dbname string, outname string) {
-	spodSemaphore <- true
+func spod_stats_work(q *Context, dbname string, owner string, outname string) {
+	spod_schedule(owner)
 	defer func() {
 		<-spodSemaphore
+	}()
+
+	chLog <- fmt.Sprintf("SPOD: stats: %s", dbname)
+	defer func() {
+		chLog <- fmt.Sprintf("FINISHED SPOD: stats: %s", dbname)
 	}()
 
 	xx := func(err error) bool {
@@ -3070,4 +3092,58 @@ func spodEscape(s string) string {
 		s = "<u>" + a[0] + "</u>" + a[1]
 	}
 	return s
+}
+
+func spod_schedule(owner string) {
+
+	ch := make(chan bool)
+	item := spodQueueItem{
+		ch:    ch,
+		owner: owner,
+	}
+
+	spodQueueMu.Lock()
+	if n := len(spodQueue); n == 0 || spodQueue[n-1].owner == owner {
+		spodQueue = append(spodQueue, &item)
+	} else {
+		idx := 0
+		for i := n - 1; i >= 0; i-- {
+			if spodQueue[i].owner == owner {
+				idx = i + 1
+				break
+			}
+		}
+		seen := make(map[string]bool)
+		for i := idx; i < n; i++ {
+			if o := spodQueue[i].owner; !seen[o] {
+				seen[o] = true
+				idx = i + 1
+			}
+		}
+		if idx >= n {
+			spodQueue = append(spodQueue, &item)
+		} else {
+			spodQueue = append(spodQueue, nil)
+			copy(spodQueue[idx+1:], spodQueue[idx:n])
+			spodQueue[idx] = &item
+		}
+	}
+	spodQueueMu.Unlock()
+
+	go func() {
+		spodNext <- true
+	}()
+
+	<-ch
+}
+
+func spod_starter() {
+	for {
+		<-spodNext
+		spodSemaphore <- true
+		spodQueueMu.Lock()
+		close(spodQueue[0].ch)
+		spodQueue = spodQueue[1:]
+		spodQueueMu.Unlock()
+	}
 }
