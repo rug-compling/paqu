@@ -38,7 +38,7 @@ func scheduler() {
 			top++
 			// hernummeren
 			for i := bottom; i < top; i++ {
-				workmap[i].nr = i - bottom
+				workmap[i].nr = i - bottom + 1
 			}
 			logf("SCHEDULED: %v", task.id)
 			processLock.Unlock()
@@ -48,7 +48,7 @@ func scheduler() {
 			for i := bottom; i < top; i++ {
 				if found {
 					workmap[i] = workmap[i+1]
-					workmap[i].nr = i - bottom
+					workmap[i].nr = i - bottom + 1
 				} else {
 					if workmap[i].id == id {
 						i--
@@ -76,7 +76,7 @@ func scheduler() {
 				bottom++
 				// hernummeren
 				for i := bottom; i < top; i++ {
-					workmap[i].nr = i - bottom
+					workmap[i].nr = i - bottom + 1
 				}
 			}
 			if len(workmap) == 0 {
