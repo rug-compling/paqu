@@ -2,6 +2,7 @@ package alud
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"sort"
 )
@@ -24,7 +25,7 @@ func nLeft(nodes []interface{}) *nodeType {
 		//if ii.End != jj.End {
 		return ii.End < jj.End // ints
 		//}
-		//return ii.Id > jj.Id // ints, omgekeerd
+		//return ii.ID > jj.ID // ints, omgekeerd
 	})
 	return nodes[0].(*nodeType)
 }
@@ -97,14 +98,13 @@ func depthCheck(q *context) {
 	}
 }
 
-/*
-func dump(alpino *Alpino_ds) {
+func dump(alpino *alpino_ds) {
 	b, err := xml.MarshalIndent(alpino, "", "  ")
-	x(err)
-	s := strings.Replace(string(b), "000", "", -1)
-	fmt.Println("<?xml version=\"1.0\"?>\n" + s)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("<?xml version=\"1.0\"?>\n" + string(b))
 }
-*/
 
 // nodes[0] -> node
 // nodes[1] -> head
@@ -154,9 +154,9 @@ func untrace(r interface{}) string {
 				}
 				fmt.Fprintf(
 					&buf,
-					"\n        %s -- id:%d  begin:%s  end:%s",
+					"\n        %s -- id:%s  begin:%s  end:%s",
 					[]string{"node", "head", "gap ", "subj"}[ii],
-					n.Id,
+					number(n.ID),
 					number(n.Begin),
 					number(n.End))
 				if a := n.Word; a != "" {

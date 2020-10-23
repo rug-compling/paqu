@@ -59,6 +59,16 @@ Source: https://github.com/pebbe/util
 Commit: 075222f0069cead83665ade6989862366d9cafd3
 Date:   Fri Jun 13 12:36:12 2014 +0200
 
+_vendor/src/github.com/rug-compling/alpinods/LICENSE.txt
+Source: https://github.com/rug-compling/alpinods
+Commit: b08372b560454f8c481072e2840ad7080e9753ac
+Date:   Thu Sep 24 12:19:04 2020 +0200
+
+_vendor/src/github.com/rug-compling/alud/LICENSE.txt
+Source: https://github.com/rug-compling/alud
+Commit: 68d5df16a8cf990880ef98f99aa386c04a4d204b
+Date:   Thu Sep 24 12:11:33 2020 +0200
+
 _vendor/src/github.com/robertkrimen/otto/LICENSE
 Source: https://github.com/robertkrimen/otto
 Commit: 610cd3ae864b5f0977234663966e6108c63b0f8e
@@ -87,7 +97,7 @@ Date:   Tue May 31 11:25:40 2016 +0300
 ================================================================
 For all other stuff:
 
-Copyright (c) 2014-2019, Peter Kleiweg
+Copyright (c) 2014-2020, Peter Kleiweg
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

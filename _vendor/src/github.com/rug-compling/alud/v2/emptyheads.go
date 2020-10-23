@@ -5,6 +5,8 @@
 package alud
 
 import (
+	"github.com/rug-compling/alpinods"
+
 	"sort"
 )
 
@@ -56,14 +58,35 @@ func reconstructEmptyHead(q *context) bool {
 				},
 			},
 		})
-		if !test(q, /* $antecedent/@word (: onder andere as hd... :)
+		if !test(q, /* $antecedent[@word or @cat = "mwu"] (: onder andere as hd... :)
 			   (: and not(local:auxiliary($antecedent) = ("aux","aux:pass","cop")) skip auxiliaries and copulas, prepositions as well? :)
 			*/&xPath{
 				arg1: &dSort{
-					arg1: &dCollect{
-						ARG: collect__attributes__word,
+					arg1: &dFilter{
 						arg1: &dVariable{
 							VAR: antecedent,
+						},
+						arg2: &dSort{
+							arg1: &dOr{
+								arg1: &dCollect{
+									ARG:  collect__attributes__word,
+									arg1: &dNode{},
+								},
+								arg2: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__cat,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"mwu"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -71,6 +94,9 @@ func reconstructEmptyHead(q *context) bool {
 			continue
 		}
 		found = true
+
+		antenode := n1(antecedent)
+		mwu := validMwu(antenode)
 
 		others := find(q /* $node/../node[@pt or @cat] */, &xPath{
 			arg1: &dSort{
@@ -162,8 +188,13 @@ func reconstructEmptyHead(q *context) bool {
 			end++
 		}
 		seen[end] = true
+
+		end2 := end
+		if mwu {
+			end2 += len(antenode.Node) - 1
+		}
+
 		var copied int
-		antenode := n1(antecedent)
 		if antenode.udCopiedFrom > 0 {
 			copied = antenode.udCopiedFrom
 		} else {
@@ -171,20 +202,25 @@ func reconstructEmptyHead(q *context) bool {
 		}
 
 		node.udOldState = &nodeType{
-			Begin:  node.Begin,
-			End:    node.End,
-			Word:   node.Word,
-			Lemma:  node.Lemma,
-			Postag: node.Postag,
-			Pt:     node.Pt,
+			NodeAttributes: alpinods.NodeAttributes{
+				Begin:  node.Begin,
+				Cat:    node.Cat,
+				End:    node.End,
+				Word:   node.Word,
+				Lemma:  node.Lemma,
+				Postag: node.Postag,
+				Pt:     node.Pt,
+			},
+			Node: node.Node,
 		}
 
 		node.Begin = end - 1
-		node.End = end
+		node.End = end2
 		node.Word = antenode.Word
 		node.Lemma = antenode.Lemma
 		node.Postag = antenode.Postag
 		node.Pt = antenode.Pt
+		node.Cat = antenode.Cat
 		node.udRelation = "_"
 		node.udHeadPosition = underscore
 		node.udCopiedFrom = copied
@@ -212,8 +248,35 @@ func reconstructEmptyHead(q *context) bool {
 		node.udERelation = antenode.udERelation
 		node.udEHeadPosition = antenode.udEHeadPosition
 
-		q.ptnodes = append(q.ptnodes, node)
-		q.varptnodes = append(q.varptnodes, node)
+		if !mwu {
+			q.ptnodes = append(q.ptnodes, node)
+			q.varptnodes = append(q.varptnodes, node)
+		} else {
+			node.Node = make([]*nodeType, len(antenode.Node))
+			for i, n := range antenode.Node {
+				var copied int
+				if n.udCopiedFrom > 0 {
+					copied = n.udCopiedFrom
+				} else {
+					copied = n.End
+				}
+				if i > 0 {
+					end++
+					seen[end] = true
+				}
+				n2 := new(nodeType)
+				*n2 = *n
+				n2.Begin = end - 1
+				n2.End = end
+				n2.ID = node.ID + 1 + i
+				n2.udRelation = "_"
+				n2.udHeadPosition = underscore
+				n2.udCopiedFrom = copied
+				node.Node[i] = n2
+				q.ptnodes = append(q.ptnodes, n2)
+				q.varptnodes = append(q.varallnodes, n2)
+			}
+		}
 	}
 	if found {
 		sort.Slice(q.ptnodes, func(i, j int) bool {
@@ -249,4 +312,30 @@ func leftEdge(node *nodeType, q *context) int {
 		}
 	}
 	return left
+}
+
+func validMwu(node *nodeType) bool {
+	if node.Cat != "mwu" {
+		return false
+	}
+
+	if node.Node == nil || len(node.Node) == 0 {
+		return false
+	}
+
+	for _, n := range node.Node {
+		/*
+			if i > 0 && node.Node[i-1].End != n.Begin {
+				return false
+			}
+		*/
+		if n.Rel != "mwp" {
+			return false
+		}
+		if n.Word == "" {
+			return false
+		}
+	}
+
+	return true
 }

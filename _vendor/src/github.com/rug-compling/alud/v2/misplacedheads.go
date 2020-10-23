@@ -5,6 +5,8 @@
 package alud
 
 import (
+	"github.com/rug-compling/alpinods"
+
 	"fmt"
 )
 
@@ -644,7 +646,7 @@ START:
 					if node2.Index == node3.Index {
 
 						q.debugs = append(q.debugs, fmt.Sprintf(
-							"fixMisplacedHeadsInCoordination: %d -> %d ?", node2.Id, node3.Id))
+							"fixMisplacedHeadsInCoordination: %d -> %d ?", node2.ID, node3.ID))
 						min, max := minmaxword(node2)
 						score2 := wordwalk(q.alpino.Node, node2, node3, min, max)
 						score3 := wordwalk(q.alpino.Node, node3, node2, min, max)
@@ -657,9 +659,9 @@ START:
 						}
 						q.debugs = append(q.debugs, fmt.Sprintf("  -> accept, scores: %d %d", score2, score3))
 
-						pair := [2]int{node2.Id, node3.Id}
+						pair := [2]int{node2.ID, node3.ID}
 						if seen[pair] {
-							panic(fmt.Sprintf("Loop detected in fixMisplacedHeadsInCoordination: %d -> %d", node2.Id, node3.Id))
+							panic(fmt.Sprintf("Loop detected in fixMisplacedHeadsInCoordination: %d -> %d", node2.ID, node3.ID))
 						}
 						seen[pair] = true
 						// kopieer inhoud van node2 (niet leeg) naar node3 (leeg)
@@ -678,17 +680,19 @@ START:
 
 func swap(nietLeeg, leeg *nodeType) {
 	// kopieer nietLeeg naar leeg
-	id, rel := leeg.Id, leeg.Rel
+	id, rel := leeg.ID, leeg.Rel
 	*leeg = *nietLeeg
-	leeg.Id, leeg.Rel = id, rel
+	leeg.ID, leeg.Rel = id, rel
 	// maak nietLeeg leeg
 	*nietLeeg = nodeType{
-		Begin: nietLeeg.Begin,
-		End:   nietLeeg.End,
-		Id:    nietLeeg.Id,
-		Index: nietLeeg.Index,
-		Rel:   nietLeeg.Rel,
-		Node:  []*nodeType{},
+		NodeAttributes: alpinods.NodeAttributes{
+			Begin: nietLeeg.Begin,
+			End:   nietLeeg.End,
+			ID:    nietLeeg.ID,
+			Index: nietLeeg.Index,
+			Rel:   nietLeeg.Rel,
+		},
+		Node: []*nodeType{},
 	}
 }
 

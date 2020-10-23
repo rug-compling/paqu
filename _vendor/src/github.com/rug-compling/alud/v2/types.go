@@ -1,6 +1,8 @@
 package alud
 
 import (
+	"github.com/rug-compling/alpinods"
+
 	"encoding/xml"
 )
 
@@ -71,20 +73,6 @@ type parserType struct {
 	Cats  string `xml:"cats,attr,omitempty"`
 	Skips string `xml:"skips,attr,omitempty"`
 }
-type featsType struct {
-	Abbr     string `xml:"Abbr,attr,omitempty"`
-	Case     string `xml:"Case,attr,omitempty"`
-	Definite string `xml:"Definite,attr,omitempty"`
-	Degree   string `xml:"Degree,attr,omitempty"`
-	Foreign  string `xml:"Foreign,attr,omitempty"`
-	Gender   string `xml:"Gender,attr,omitempty"`
-	Number   string `xml:"Number,attr,omitempty"`
-	Person   string `xml:"Person,attr,omitempty"`
-	PronType string `xml:"PronType,attr,omitempty"`
-	Reflex   string `xml:"Reflex,attr,omitempty"`
-	Tense    string `xml:"Tense,attr,omitempty"`
-	VerbForm string `xml:"VerbForm,attr,omitempty"`
-}
 
 type depType struct {
 	Id         string `xml:"id,attr,omitempty"`
@@ -103,16 +91,8 @@ type conlluType struct {
 }
 
 type nodeType struct {
-	Begin  int    `xml:"begin,attr"`
-	End    int    `xml:"end,attr"`
-	Id     int    `xml:"id,attr"`
-	Index  int    `xml:"index,attr,omitempty"`
-	Lemma  string `xml:"lemma,attr,omitempty"`
-	Postag string `xml:"postag,attr,omitempty"`
-	Pt     string `xml:"pt,attr,omitempty"`
-	Rel    string `xml:"rel,attr,omitempty"`
-	Word   string `xml:"word,attr,omitempty"`
-	fullNode
+	alpinods.NodeAttributes
+	Data   []*Data     `xml:"data,omitempty"`
 	Node   []*nodeType `xml:"node"`
 	parent *nodeType
 
@@ -150,6 +130,11 @@ type nodeType struct {
 	axDescendantsOrSelf []interface{}
 }
 
+type Data struct {
+	Name string `xml:"name,attr,omitempty"`
+	Data string `xml:",chardata"`
+}
+
 type udNodeType struct {
 	XMLName xml.Name
 
@@ -162,34 +147,12 @@ type udNodeType struct {
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
-	featsType
+	alpinods.Feats
 	Head      string `xml:"head,attr,omitempty"`
 	Deprel    string `xml:"deprel,attr,omitempty"`
 	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
 
-	Buiging  string `xml:"buiging,attr,omitempty"`
-	Conjtype string `xml:"conjtype,attr,omitempty"`
-	Dial     string `xml:"dial,attr,omitempty"`
-	Genus    string `xml:"genus,attr,omitempty"`
-	Getal    string `xml:"getal,attr,omitempty"`
-	GetalN   string `xml:"getal-n,attr,omitempty"`
-	Graad    string `xml:"graad,attr,omitempty"`
-	Lwtype   string `xml:"lwtype,attr,omitempty"`
-	Naamval  string `xml:"naamval,attr,omitempty"`
-	Npagr    string `xml:"npagr,attr,omitempty"`
-	Ntype    string `xml:"ntype,attr,omitempty"`
-	Numtype  string `xml:"numtype,attr,omitempty"`
-	Pdtype   string `xml:"pdtype,attr,omitempty"`
-	Persoon  string `xml:"persoon,attr,omitempty"`
-	Positie  string `xml:"positie,attr,omitempty"`
-	Pt       string `xml:"pt,attr,omitempty"`
-	Pvagr    string `xml:"pvagr,attr,omitempty"`
-	Pvtijd   string `xml:"pvtijd,attr,omitempty"`
-	Spectype string `xml:"spectype,attr,omitempty"`
-	Status   string `xml:"status,attr,omitempty"`
-	Vwtype   string `xml:"vwtype,attr,omitempty"`
-	Vztype   string `xml:"vztype,attr,omitempty"`
-	Wvorm    string `xml:"wvorm,attr,omitempty"`
+	alpinods.DeprelAttributes
 
 	UdNodes []*udNodeType `xml:",omitempty"`
 }
@@ -199,7 +162,7 @@ type udType struct {
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
-	featsType
+	alpinods.Feats
 	Head       string    `xml:"head,attr,omitempty"`
 	Deprel     string    `xml:"deprel,attr,omitempty"`
 	DeprelMain string    `xml:"deprel_main,attr,omitempty"`

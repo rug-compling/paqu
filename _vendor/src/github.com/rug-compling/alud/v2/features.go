@@ -8,7 +8,7 @@ func addFeatures(q *context) {
 	for _, node := range q.ptnodes {
 		switch node.udPos {
 		case "NOUN", "PROPN":
-			nominalFeatues(node, q)
+			nominalFeatures(node, q)
 		case "ADJ":
 			adjectiveFeatures(node, q)
 		case "PRON":
@@ -23,7 +23,7 @@ func addFeatures(q *context) {
 	}
 }
 
-func nominalFeatues(node *nodeType, q *context) {
+func nominalFeatures(node *nodeType, q *context) {
 	switch node.Genus {
 	case "zijd":
 		node.udGender = "Com"

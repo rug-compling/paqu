@@ -1,6 +1,8 @@
 package alud
 
 import (
+	"github.com/rug-compling/alpinods"
+
 	"encoding/xml"
 	"fmt"
 	"path/filepath"
@@ -29,10 +31,12 @@ const (
 
 var (
 	noNode = &nodeType{
-		Begin:               -1000,
-		End:                 -1000,
+		NodeAttributes: alpinods.NodeAttributes{
+			Begin: -1000,
+			End:   -1000,
+			ID:    -1,
+		},
 		udCopiedFrom:        -1000,
-		Id:                  -1,
 		Node:                []*nodeType{},
 		axParent:            []interface{}{},
 		axAncestors:         []interface{}{},
@@ -96,6 +100,7 @@ func udTry(alpino_doc []byte, filename, sentid string, options int) (conllu stri
 	walk = func(node *nodeType) {
 		node.Begin *= 1000
 		node.End *= 1000
+		node.ID *= 1000
 		if node.Node == nil {
 			node.Node = make([]*nodeType, 0)
 		} else {

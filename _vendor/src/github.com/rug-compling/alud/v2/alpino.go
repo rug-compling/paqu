@@ -1,6 +1,8 @@
 package alud
 
 import (
+	"github.com/rug-compling/alpinods"
+
 	"encoding/xml"
 	"fmt"
 	"path/filepath"
@@ -10,7 +12,7 @@ import (
 )
 
 var (
-	reShorted  = regexp.MustCompile(`></(meta|parser|node|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
+	reShorted  = regexp.MustCompile(`></(meta|parser|node|data|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
 	reNoConllu = regexp.MustCompile(`><!\[CDATA\[\s*\]\]></conllu>`)
 )
 
@@ -120,12 +122,15 @@ func alpinoRestore(q *context) {
 			node.Lemma = node.udOldState.Lemma
 			node.Postag = node.udOldState.Postag
 			node.Pt = node.udOldState.Pt
+			node.Cat = node.udOldState.Cat
+			node.Node = node.udOldState.Node
 		}
 	}
 	for _, node := range q.allnodes {
 		node.Ud = &udType{Dep: make([]depType, 0)}
 		node.Begin /= 1000
 		node.End /= 1000
+		node.ID /= 1000
 	}
 	q.alpino.UdNodes = []*udNodeType{}
 	q.alpino.Conllu = &conlluType{Auto: VersionID()}
@@ -255,31 +260,33 @@ func alpinoDo(conllu string, alpino *alpino_ds) {
 			DeprelAux: node.Ud.DeprelAux,
 			Ud:        "basic",
 
-			featsType: node.Ud.featsType,
+			Feats: node.Ud.Feats,
 
-			Buiging:  node.Buiging,
-			Conjtype: node.Conjtype,
-			Dial:     node.Dial,
-			Genus:    node.Genus,
-			Getal:    node.Getal,
-			GetalN:   node.GetalN,
-			Graad:    node.Graad,
-			Lwtype:   node.Lwtype,
-			Naamval:  node.Naamval,
-			Npagr:    node.Npagr,
-			Ntype:    node.Ntype,
-			Numtype:  node.Numtype,
-			Pdtype:   node.Pdtype,
-			Persoon:  node.Persoon,
-			Positie:  node.Positie,
-			Pt:       node.Pt,
-			Pvagr:    node.Pvagr,
-			Pvtijd:   node.Pvtijd,
-			Spectype: node.Spectype,
-			Status:   node.Status,
-			Vwtype:   node.Vwtype,
-			Vztype:   node.Vztype,
-			Wvorm:    node.Wvorm,
+			DeprelAttributes: alpinods.DeprelAttributes{
+				Buiging:  node.Buiging,
+				Conjtype: node.Conjtype,
+				Dial:     node.Dial,
+				Genus:    node.Genus,
+				Getal:    node.Getal,
+				GetalN:   node.GetalN,
+				Graad:    node.Graad,
+				Lwtype:   node.Lwtype,
+				Naamval:  node.Naamval,
+				Npagr:    node.Npagr,
+				Ntype:    node.Ntype,
+				Numtype:  node.Numtype,
+				Pdtype:   node.Pdtype,
+				Persoon:  node.Persoon,
+				Positie:  node.Positie,
+				Pt:       node.Pt,
+				Pvagr:    node.Pvagr,
+				Pvtijd:   node.Pvtijd,
+				Spectype: node.Spectype,
+				Status:   node.Status,
+				Vwtype:   node.Vwtype,
+				Vztype:   node.Vztype,
+				Wvorm:    node.Wvorm,
+			},
 		}
 		udNodeList = append(udNodeList, &ud)
 	}
@@ -302,31 +309,33 @@ func alpinoDo(conllu string, alpino *alpino_ds) {
 			DeprelAux: dep.DeprelAux,
 			Ud:        "enhanced",
 
-			featsType: node.Ud.featsType,
+			Feats: node.Ud.Feats,
 
-			Buiging:  node.Buiging,
-			Conjtype: node.Conjtype,
-			Dial:     node.Dial,
-			Genus:    node.Genus,
-			Getal:    node.Getal,
-			GetalN:   node.GetalN,
-			Graad:    node.Graad,
-			Lwtype:   node.Lwtype,
-			Naamval:  node.Naamval,
-			Npagr:    node.Npagr,
-			Ntype:    node.Ntype,
-			Numtype:  node.Numtype,
-			Pdtype:   node.Pdtype,
-			Persoon:  node.Persoon,
-			Positie:  node.Positie,
-			Pt:       node.Pt,
-			Pvagr:    node.Pvagr,
-			Pvtijd:   node.Pvtijd,
-			Spectype: node.Spectype,
-			Status:   node.Status,
-			Vwtype:   node.Vwtype,
-			Vztype:   node.Vztype,
-			Wvorm:    node.Wvorm,
+			DeprelAttributes: alpinods.DeprelAttributes{
+				Buiging:  node.Buiging,
+				Conjtype: node.Conjtype,
+				Dial:     node.Dial,
+				Genus:    node.Genus,
+				Getal:    node.Getal,
+				GetalN:   node.GetalN,
+				Graad:    node.Graad,
+				Lwtype:   node.Lwtype,
+				Naamval:  node.Naamval,
+				Npagr:    node.Npagr,
+				Ntype:    node.Ntype,
+				Numtype:  node.Numtype,
+				Pdtype:   node.Pdtype,
+				Persoon:  node.Persoon,
+				Positie:  node.Positie,
+				Pt:       node.Pt,
+				Pvagr:    node.Pvagr,
+				Pvtijd:   node.Pvtijd,
+				Spectype: node.Spectype,
+				Status:   node.Status,
+				Vwtype:   node.Vwtype,
+				Vztype:   node.Vztype,
+				Wvorm:    node.Wvorm,
+			},
 		}
 		eudNodeList = append(eudNodeList, &ud)
 	}

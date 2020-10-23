@@ -15,4 +15,4 @@ Zie:
 
 */
 
-var version = "2.5.1-alpha001"
+var version = "2.5.1-alpha002"

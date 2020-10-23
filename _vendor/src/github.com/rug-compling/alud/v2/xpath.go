@@ -556,7 +556,7 @@ func (d *dSort) do(subdoc []interface{}, q *context) []interface{} {
 	switch result[0].(type) {
 	case *nodeType:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].(*nodeType).Id < result[j].(*nodeType).Id
+			return result[i].(*nodeType).ID < result[j].(*nodeType).ID
 		})
 		for i := 1; i < len(result); i++ {
 			if result[i].(*nodeType) == result[i-1].(*nodeType) {

@@ -26,6 +26,7 @@ func enhancedDependencies(q *context) {
 	}()
 
 	changed := reconstructEmptyHead(q)
+	//dump(q.alpino)
 
 	// add_Edependency_relations
 	for _, node = range q.ptnodes {
@@ -576,6 +577,7 @@ func enhanceDependencyLabel(node *nodeType, q *context) string {
 			if crd.Lemma != "" {
 				return join(label, enhancedLemmaString1(crd, q))
 			}
+
 			if crd.Cat == "mwu" {
 				return join(label, enhancedLemmaString1(n1(find(q /* ($crd/node[@rel="mwp"])[1] */, &xPath{
 					arg1: &dSort{
@@ -612,6 +614,11 @@ func enhanceDependencyLabel(node *nodeType, q *context) string {
 						},
 					},
 				})), q))
+			}
+
+			if crd.Lemma == "" { // cases where the crd element is co-indexed
+				// zon 200 joodse en 120 arabische doden en gewonden
+				return label
 			}
 			panic("Empty EUD label")
 		}

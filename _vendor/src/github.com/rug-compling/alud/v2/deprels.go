@@ -19,7 +19,8 @@ func addDependencyRelations(q *context) {
 		node.udRelation = dependencyLabel(node, q)
 		q.depth = 0
 		node.udHeadPosition = externalHeadPosition(list(node), q)
-		if node.udHeadPosition == 0 && node.udRelation != "root" ||
+		if node.udHeadPosition < 0 ||
+			node.udHeadPosition == 0 && node.udRelation != "root" ||
 			node.udHeadPosition != 0 && node.udRelation == "root" {
 			panic(fmt.Sprintf(
 				"Invalid HEAD:DEPREL combination %s:%s",

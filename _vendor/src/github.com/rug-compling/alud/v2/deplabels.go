@@ -117,7 +117,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 	if node.Rel == "crd" {
 		return "cc"
 	}
-	if node.Rel == "me" && test(q /* $node[@rel="me" and not(../node[@ud:pos="ADP"]) ] */, &xPath{
+	if node.Rel == "me" && test(q /* $node[@rel="me" and ../node[@rel="hd" and (@pt or @cat) and not(@ud:pos="ADP")]] */, &xPath{
 		arg1: &dSort{
 			arg1: &dFilter{
 				arg1: &dVariable{
@@ -139,28 +139,58 @@ func dependencyLabel(node *nodeType, q *context) string {
 								},
 							},
 						},
-						arg2: &dFunction{
-							ARG: function__not__1__args,
-							arg1: &dArg{
-								arg1: &dSort{
-									arg1: &dCollect{
-										ARG: collect__child__node,
-										arg1: &dCollect{
-											ARG:  collect__parent__type__node,
-											arg1: &dNode{},
-										},
-										arg2: &dPredicate{
-											arg1: &dEqual{
-												ARG: equal__is,
+						arg2: &dCollect{
+							ARG: collect__child__node,
+							arg1: &dCollect{
+								ARG:  collect__parent__type__node,
+								arg1: &dNode{},
+							},
+							arg2: &dPredicate{
+								arg1: &dAnd{
+									arg1: &dAnd{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"hd"},
 												arg1: &dCollect{
-													ARG:  collect__attributes__ud_3apos,
+													ARG:  collect__attributes__rel,
 													arg1: &dNode{},
 												},
-												arg2: &dElem{
-													DATA: []interface{}{"ADP"},
+											},
+										},
+										arg2: &dSort{
+											arg1: &dOr{
+												arg1: &dCollect{
+													ARG:  collect__attributes__pt,
+													arg1: &dNode{},
+												},
+												arg2: &dCollect{
+													ARG:  collect__attributes__cat,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+									arg2: &dFunction{
+										ARG: function__not__1__args,
+										arg1: &dArg{
+											arg1: &dSort{
+												arg1: &dEqual{
+													ARG: equal__is,
 													arg1: &dCollect{
 														ARG:  collect__attributes__ud_3apos,
 														arg1: &dNode{},
+													},
+													arg2: &dElem{
+														DATA: []interface{}{"ADP"},
+														arg1: &dCollect{
+															ARG:  collect__attributes__ud_3apos,
+															arg1: &dNode{},
+														},
 													},
 												},
 											},
@@ -2204,7 +2234,7 @@ func dependencyLabel(node *nodeType, q *context) string {
 		} // seems like a BUG
 		return dependencyLabel(node.parent, q) // gapping, where this mod is the head
 	}
-	if test(q /* $node[@rel="mod" and ../@cat=("pp","detp","advp")] */, &xPath{
+	if test(q /* $node[@rel="mod" and ../@cat="pp"] */, &xPath{
 		arg1: &dSort{
 			arg1: &dFilter{
 				arg1: &dVariable{
@@ -2236,7 +2266,101 @@ func dependencyLabel(node *nodeType, q *context) string {
 								},
 							},
 							arg2: &dElem{
-								DATA: []interface{}{"pp", "detp", "advp"},
+								DATA: []interface{}{"pp"},
+								arg1: &dCollect{
+									ARG: collect__attributes__cat,
+									arg1: &dCollect{
+										ARG:  collect__parent__type__node,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}) { // [mod hd/ADP obj1/empty]  --> make mod the external head
+		if test(q /* $node/../node[@rel="obj1" and (@pt or @cat)] */, &xPath{
+			arg1: &dSort{
+				arg1: &dCollect{
+					ARG: collect__child__node,
+					arg1: &dCollect{
+						ARG: collect__parent__type__node,
+						arg1: &dVariable{
+							VAR: node,
+						},
+					},
+					arg2: &dPredicate{
+						arg1: &dAnd{
+							arg1: &dEqual{
+								ARG: equal__is,
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+								arg2: &dElem{
+									DATA: []interface{}{"obj1"},
+									arg1: &dCollect{
+										ARG:  collect__attributes__rel,
+										arg1: &dNode{},
+									},
+								},
+							},
+							arg2: &dSort{
+								arg1: &dOr{
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dCollect{
+										ARG:  collect__attributes__cat,
+										arg1: &dNode{},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}) {
+			return "amod"
+		}
+		return dependencyLabel(node.parent, q)
+	}
+	if test(q /* $node[@rel="mod" and ../@cat=("detp","advp")] */, &xPath{
+		arg1: &dSort{
+			arg1: &dFilter{
+				arg1: &dVariable{
+					VAR: node,
+				},
+				arg2: &dSort{
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__rel,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"mod"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__rel,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG: collect__attributes__cat,
+								arg1: &dCollect{
+									ARG:  collect__parent__type__node,
+									arg1: &dNode{},
+								},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"detp", "advp"},
 								arg1: &dCollect{
 									ARG: collect__attributes__cat,
 									arg1: &dCollect{
@@ -3138,7 +3262,79 @@ func dependencyLabel(node *nodeType, q *context) string {
 			}) { // superfluous ??
 				return dependencyLabel(node.parent, q) // er blijft weinig over van het lijk : over heads a predc and has pc as sister
 			}
-			return dependencyLabel(node.parent, q) // not sure about this one
+			if test(q /* $node[../node[@rel="mod" and (@pt or @cat)] and ../@cat="pp"] */, &xPath{
+				arg1: &dSort{
+					arg1: &dFilter{
+						arg1: &dVariable{
+							VAR: node,
+						},
+						arg2: &dSort{
+							arg1: &dAnd{
+								arg1: &dCollect{
+									ARG: collect__child__node,
+									arg1: &dCollect{
+										ARG:  collect__parent__type__node,
+										arg1: &dNode{},
+									},
+									arg2: &dPredicate{
+										arg1: &dAnd{
+											arg1: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+												arg2: &dElem{
+													DATA: []interface{}{"mod"},
+													arg1: &dCollect{
+														ARG:  collect__attributes__rel,
+														arg1: &dNode{},
+													},
+												},
+											},
+											arg2: &dSort{
+												arg1: &dOr{
+													arg1: &dCollect{
+														ARG:  collect__attributes__pt,
+														arg1: &dNode{},
+													},
+													arg2: &dCollect{
+														ARG:  collect__attributes__cat,
+														arg1: &dNode{},
+													},
+												},
+											},
+										},
+									},
+								},
+								arg2: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG: collect__attributes__cat,
+										arg1: &dCollect{
+											ARG:  collect__parent__type__node,
+											arg1: &dNode{},
+										},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"pp"},
+										arg1: &dCollect{
+											ARG: collect__attributes__cat,
+											arg1: &dCollect{
+												ARG:  collect__parent__type__node,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}) { //
+				return "parataxis" // [mod om wat te zonnen] in [1] en bij [1 de kleine meertjes]
+			}
+			return dependencyLabel(node.parent, q) // [predc [mod het beste] af/hd,ADP] here af heads a predc --> go to parent
 		}
 		if test(q, /* $node[(@ud:pos=("ADJ","X","ADV") or @cat="mwu")
 			   and ../@cat="pp"
