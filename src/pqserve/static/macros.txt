@@ -30,10 +30,26 @@ PQ_precedes_head_of_smain = """
            )
         ) """
 
+PQ_precedes_head_of_whq = """
+        (  ancestor-or-self::node[@rel="whd"]/parent::node[@cat="whq"]/node[@rel="body" and @cat="sv1"]/node[@rel="hd"]/%PQ_b% > %PQ_begin_of_head%
+           or
+           (  ancestor-or-self::node[@rel="whd"]/parent::node[@cat="whq"]/node[@rel="body" and @cat="sv1"]/node[@rel="hd"]/%PQ_b% > %PQ_b%
+              and
+              not(node[%PQ_headrel%])
+           )
+        ) """
+
 PQ_vorfeld = """
-        ( %PQ_precedes_head_of_smain%
-          and
-          not(parent::node[%PQ_precedes_head_of_smain%])
+        ( ( (  %PQ_precedes_head_of_smain%
+               and
+               not(parent::node[%PQ_precedes_head_of_smain%])
+            )
+            or
+            (  %PQ_precedes_head_of_whq%
+               and
+               not(parent::node[%PQ_precedes_head_of_whq%])
+            )
+          )
           and
           (@cat or @pt)
         ) """
@@ -747,29 +763,29 @@ PQ_janee_vragen = """
 
 PQ_imperatieven = """
         ( @cat='sv1'
-               and
-               not(node[@rel='su'])
-               and
-               not(node[@rel='hd'
-                        and
-                        @stype
-                        and
-                        not( @stype="imparative" )
-                   ]
-               )
-               and
-               not(node[@rel='hd'
-                        and
-                        ( @tense='past'
-                          or
-                          @pvagr=('mv','met-t')
-                          or
-                          @pvtijd='verl'
-                          or
-                          @lemma=('zijn','kunnen','willen','moeten','mogen','zullen','denken','geloven','vinden','hebben')
-                        )
-                   ]
-               )
+          and
+          not(node[@rel='su'])
+          and
+          not(node[@rel='hd'
+                   and
+                   @stype
+                   and
+                   not( @stype="imparative" )
+              ]
+          )
+          and
+          not(node[@rel='hd'
+                   and
+                   ( @tense='past'
+                     or
+                     @pvagr=('mv','met-t')
+                     or
+                     @pvtijd='verl'
+                     or
+                     @lemma=('zijn','kunnen','willen','moeten','mogen','zullen','denken','geloven','vinden','hebben')
+                   )
+              ]
+          )
         ) """
 
 PQ_ssub = """
