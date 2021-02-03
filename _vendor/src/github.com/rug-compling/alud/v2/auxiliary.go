@@ -30,11 +30,11 @@ func auxiliary1(node *nodeType, q *context) (aux string, err error) {
 			        (: ud documentation suggests 1 cop per lg, van Eynde suggests much more, compromise: the traditional ones :)
 			        (: @lemma=("zijn","lijken","blijken","blijven","schijnen","heten","voorkomen","worden","dunken") and :)
 			        @lemma="zijn" and
-		                 ( contains(@sc,'copula') or
+		             (:    ( contains(@sc,'copula') or
 		                   contains(@sc,'pred')   or
-		                   contains(@sc,'cleft')  or
+		                   contains(@sc,'cleft')  or :)
 		                   ../node[@rel="predc"]
-		                 ) ] */&xPath{
+		                  ] */&xPath{
 			arg1: &dSort{
 				arg1: &dFilter{
 					arg1: &dVariable{
@@ -88,80 +88,24 @@ func auxiliary1(node *nodeType, q *context) (aux string, err error) {
 									},
 								},
 							},
-							arg2: &dSort{
-								arg1: &dOr{
-									arg1: &dOr{
-										arg1: &dOr{
-											arg1: &dFunction{
-												ARG: function__contains__2__args,
-												arg1: &dArg{
-													arg1: &dArg{
-														arg1: &dSort{
-															arg1: &dCollect{
-																ARG:  collect__attributes__sc,
-																arg1: &dNode{},
-															},
-														},
-													},
-													arg2: &dElem{
-														DATA: []interface{}{"copula"},
-													},
-												},
-											},
-											arg2: &dFunction{
-												ARG: function__contains__2__args,
-												arg1: &dArg{
-													arg1: &dArg{
-														arg1: &dSort{
-															arg1: &dCollect{
-																ARG:  collect__attributes__sc,
-																arg1: &dNode{},
-															},
-														},
-													},
-													arg2: &dElem{
-														DATA: []interface{}{"pred"},
-													},
-												},
-											},
-										},
-										arg2: &dFunction{
-											ARG: function__contains__2__args,
-											arg1: &dArg{
-												arg1: &dArg{
-													arg1: &dSort{
-														arg1: &dCollect{
-															ARG:  collect__attributes__sc,
-															arg1: &dNode{},
-														},
-													},
-												},
-												arg2: &dElem{
-													DATA: []interface{}{"cleft"},
-												},
-											},
-										},
-									},
-									arg2: &dCollect{
-										ARG: collect__child__node,
+							arg2: &dCollect{
+								ARG: collect__child__node,
+								arg1: &dCollect{
+									ARG:  collect__parent__type__node,
+									arg1: &dNode{},
+								},
+								arg2: &dPredicate{
+									arg1: &dEqual{
+										ARG: equal__is,
 										arg1: &dCollect{
-											ARG:  collect__parent__type__node,
+											ARG:  collect__attributes__rel,
 											arg1: &dNode{},
 										},
-										arg2: &dPredicate{
-											arg1: &dEqual{
-												ARG: equal__is,
-												arg1: &dCollect{
-													ARG:  collect__attributes__rel,
-													arg1: &dNode{},
-												},
-												arg2: &dElem{
-													DATA: []interface{}{"predc"},
-													arg1: &dCollect{
-														ARG:  collect__attributes__rel,
-														arg1: &dNode{},
-													},
-												},
+										arg2: &dElem{
+											DATA: []interface{}{"predc"},
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
 											},
 										},
 									},

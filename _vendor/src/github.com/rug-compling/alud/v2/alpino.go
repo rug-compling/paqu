@@ -14,6 +14,15 @@ import (
 var (
 	reShorted  = regexp.MustCompile(`></(meta|parser|node|data|dep|acl|advcl|advmod|amod|appos|aux|case|cc|ccomp|clf|compound|conj|cop|csubj|det|discourse|dislocated|expl|fixed|flat|goeswith|iobj|list|mark|nmod|nsubj|nummod|obj|obl|orphan|parataxis|punct|ref|reparandum|root|vocative|xcomp)>`)
 	reNoConllu = regexp.MustCompile(`><!\[CDATA\[\s*\]\]></conllu>`)
+
+	reEnts = regexp.MustCompile("&#(34|38|39|60|62);")
+	ents   = map[string]string{
+		"&#34;": "&quot;",
+		"&#38;": "&amp;",
+		"&#39;": "&apos;",
+		"&#60;": "&lt;",
+		"&#62;": "&gt;",
+	}
 )
 
 // Insert given Universal Dependencies into alpino_ds format.
@@ -157,6 +166,11 @@ func alpinoFormat(alpino *alpino_ds) string {
 	// shorten
 	s = reShorted.ReplaceAllString(s, "/>")
 	s = reNoConllu.ReplaceAllString(s, "/>")
+
+	// standard XML entities
+	s = reEnts.ReplaceAllStringFunc(s, func(s1 string) string {
+		return ents[s1]
+	})
 
 	return s
 }

@@ -66,8 +66,8 @@ Date:   Thu Sep 24 12:19:04 2020 +0200
 
 _vendor/src/github.com/rug-compling/alud/LICENSE.txt
 Source: https://github.com/rug-compling/alud
-Commit: 68d5df16a8cf990880ef98f99aa386c04a4d204b
-Date:   Thu Sep 24 12:11:33 2020 +0200
+Commit: 1f4de1efed7dbf1af79d8bb11e9df584986916ba
+Date:   Wed Feb 3 16:21:53 2021 +0100
 
 _vendor/src/github.com/robertkrimen/otto/LICENSE
 Source: https://github.com/robertkrimen/otto
