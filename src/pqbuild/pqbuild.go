@@ -8,7 +8,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/pebbe/compactcorpus"
 	"github.com/pebbe/util"
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/russross/blackfriday/v2"
 
 	"bufio"
 	"bytes"
