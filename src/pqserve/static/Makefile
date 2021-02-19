@@ -28,4 +28,4 @@ DEPS = \
 
 
 ../static_generated.go: Makefile mkstatic.go $(DEPS)
-	go run mkstatic.go $(DEPS) > $@
+	$(GO) run mkstatic.go $(DEPS) > $@

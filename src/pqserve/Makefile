@@ -8,8 +8,8 @@ BUILD=${if $(DEFAULT_PAQU_DIR),-ldflags "-X main.DefaultPaquDir$(IS)$(DEFAULT_PA
 all: attributes_generated.go ../../bin/pqserve
 
 attributes_generated.go: attributes.txt tools/mkattribs.go
-	go run tools/mkattribs.go attributes.txt > attributes_generated.go
+	$(GO) run tools/mkattribs.go attributes.txt > attributes_generated.go
 
 ../../bin/pqserve: *.go static/*.* static/Makefile attributes.txt tools/mkattribs.go
 	make -C static
-	CGO_LDFLAGS="-Wl,-rpath=$(LIBRARY_PATH)" go build $(BUILD) -o $@ $(TAGS) $(OPTS) .
+	$(GO) build $(BUILD) -o $@ $(TAGS) $(OPTS) .

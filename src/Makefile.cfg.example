@@ -14,15 +14,13 @@ DEFAULT_PAQU_DIR=
 #TAGS = -tags nodbxml
 TAGS =
 
+# Het 'go' commando
+GO = go
+
 # Extra opties voor 'go'
 OPTS = -v
 
 #### Environment-variabelen
-
-# Als de Go-pakketten die nodig zijn niet al aanwezig zijn kun je de
-# versies die bij PaQu zijn meegeleverd gebruiken. Zet dan GOPATH
-# naar de directory '_vendor'
-export GOPATH=$(HOME)/paqu/_vendor
 
 # Zonodig extra paden naar C-headers en C-libraries
 # Bijvoorbeeld als DbXML of Graphviz niet op een standaardlokatie staat

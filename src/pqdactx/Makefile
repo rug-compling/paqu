@@ -4,7 +4,7 @@ include ../Makefile.cfg
 SRC = attributes_generated.go pqdactx_true.go pqdactx_false.go
 
 ../../bin/pqdactx: $(SRC)
-	CGO_LDFLAGS="-Wl,-rpath=$(LIBRARY_PATH)" go build $(BUILD) -o $@ $(TAGS) $(OPTS) .
+	$(GO) build $(BUILD) -o $@ $(TAGS) $(OPTS) .
 
 attributes_generated.go: ../pqserve/attributes_generated.go
 	echo '// +build !nodbxml' > attributes_generated.go
