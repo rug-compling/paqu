@@ -53,7 +53,7 @@ What happens if a file already contains CoNLL-U data?
 With option -i the data is ignored.
 With option -k the data is kept.
 In other cases, the data is ignored only if it was generated with
-an older version of the pqudep program.
+the pqudep program or the alud package.
 
 More options:
 
