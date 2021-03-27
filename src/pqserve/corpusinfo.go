@@ -64,7 +64,7 @@ $(document).mouseup(
 <div id="content"></div>
 </div>
 <table class="corpusinfo">
-<tr><th><th class="left">Titel<th class="right">Regels<th class="right">Datum<th class="left">Metadata<th class="left">Eigenaar</tr>
+<tr><th><th class="left">Titel<th class="right">Regels<th class="right">Datum<th class="left">Metadata<th class="left">UD<th class="left">Eigenaar</tr>
 `)
 
 	t := ""
@@ -90,7 +90,7 @@ $(document).mouseup(
 				t = "corpora gedeeld door anderen"
 			}
 			if c != 'Z' {
-				fmt.Fprintf(q.w, "<tr class=\"sub\"><th><th colspan=\"5\" class=\"left\">%s</tr>\n", t)
+				fmt.Fprintf(q.w, "<tr class=\"sub\"><th><th colspan=\"6\" class=\"left\">%s</tr>\n", t)
 			}
 		}
 		db := opt[1:]
@@ -103,8 +103,12 @@ $(document).mouseup(
 		if q.hasmeta[db] {
 			metadata = "ja"
 		}
-		fmt.Fprintf(q.w, "<td>%s<td class=\"right\">%s<td class=\"right\">%s<td>%s<td>%s</tr>\n",
-			html.EscapeString(a[1]), iformat(q.lines[db]), datum(q.dates[db]), metadata, html.EscapeString(displayEmail(q.owners[db])))
+		ud := "nee"
+		if q.hasud[db] {
+			ud = "ja"
+		}
+		fmt.Fprintf(q.w, "<td>%s<td class=\"right\">%s<td class=\"right\">%s<td>%s<td>%s<td>%s</tr>\n",
+			html.EscapeString(a[1]), iformat(q.lines[db]), datum(q.dates[db]), metadata, ud, html.EscapeString(displayEmail(q.owners[db])))
 	}
 
 	fmt.Fprint(q.w, `

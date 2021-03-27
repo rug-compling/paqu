@@ -1962,6 +1962,16 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 			ff.Flush()
 		}
 		loading = true
+
+		if !q.hasud[prefix] {
+			fmt.Fprintln(q.w, `<script type="text/javascript"><!--
+$('#ol').before('<div class="warning">Zoeken naar <b>Universal Dependencies</b> is <b>niet beschikbaar</b> voor dit corpus.</div>');
+//--></script>`)
+			if ff, ok := q.w.(http.Flusher); ok {
+				ff.Flush()
+			}
+		}
+
 	}
 
 	found := false

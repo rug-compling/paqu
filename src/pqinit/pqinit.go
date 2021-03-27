@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	VERSION = 4
+	VERSION = 5
 )
 
 type Config struct {
@@ -83,8 +83,9 @@ Syntax: %s [-w]
 		shared      enum('PRIVATE','PUBLIC','SHARED') NOT NULL DEFAULT 'PRIVATE',
 		created     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		active      datetime     NOT NULL DEFAULT "1000-01-01 00:00:00",
-        protected   boolean      NOT NULL DEFAULT 0,
-        hasmeta     boolean      NOT NULL DEFAULT 0,
+		protected   boolean      NOT NULL DEFAULT 0,
+		hasmeta     boolean      NOT NULL DEFAULT 0,
+		hasud       boolean      NOT NULL DEFAULT 0,
 		info        text         NOT NULL DEFAULT "",
 		infop       text         NOT NULL DEFAULT "",
 		UNIQUE INDEX (id),

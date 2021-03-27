@@ -5,7 +5,7 @@ IS=${if ${shell sh -c 'case `go version` in go1.[01234].*) ;; *) echo yes; ;; es
 
 BUILD=${if $(DEFAULT_PAQU_DIR),-ldflags "-X main.DefaultPaquDir$(IS)$(DEFAULT_PAQU_DIR)", }
 
-../../bin/pqupgrade: directories_generated.go pqupgrade.go
+../../bin/pqupgrade: directories_generated.go pqupgrade.go dbxml_false.go dbxml_true.go
 	$(GO) build $(BUILD) -o $@ $(OPTS) .
 
 directories_generated.go: ../pqserve/directories.go

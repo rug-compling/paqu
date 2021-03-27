@@ -6,6 +6,7 @@ import (
 	"github.com/pebbe/util"
 
 	"bytes"
+	"compress/gzip"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
@@ -19,17 +20,21 @@ type Config struct {
 	Prefix string
 }
 
+var (
+	x = util.CheckErr
+)
+
 func main() {
 
 	var Cfg Config
 	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
-	util.CheckErr(err)
+	x(err)
 
 	if Cfg.Login[0] == '$' {
 		Cfg.Login = os.Getenv(Cfg.Login[1:])
 	}
 	db, err := sql.Open("mysql", Cfg.Login+"?charset=utf8&parseTime=true&loc=Europe%2FAmsterdam&sql_mode=''")
-	util.CheckErr(err)
+	x(err)
 	defer db.Close()
 
 	changed := false
@@ -43,16 +48,16 @@ func main() {
 	rows, err := db.Query("SELECT `version` FROM `" + Cfg.Prefix + "_version` WHERE `id` = 1 LIMIT 0, 1")
 	if err == nil {
 		if rows.Next() {
-			util.CheckErr(rows.Scan(&version))
+			x(rows.Scan(&version))
 			rows.Close()
 		} else {
-			util.CheckErr(fmt.Errorf("Missing row"))
+			x(fmt.Errorf("Missing row"))
 		}
 	} else {
 		_, err = db.Exec("CREATE TABLE " + Cfg.Prefix + "_version (id int NOT NULL, version int NOT NULL DEFAULT 0, UNIQUE INDEX (id))")
-		util.CheckErr(err)
+		x(err)
 		_, err = db.Exec("INSERT `" + Cfg.Prefix + "_version` (`id`,`version`) VALUES (1,0);")
-		util.CheckErr(err)
+		x(err)
 		changed = true
 	}
 
@@ -68,7 +73,7 @@ func main() {
 			rows.Close()
 		} else {
 			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `protected` BOOLEAN NOT NULL DEFAULT '0'")
-			util.CheckErr(err)
+			x(err)
 			changed = true
 		}
 
@@ -86,7 +91,7 @@ func main() {
 			rows.Close()
 		} else {
 			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `hasmeta` BOOLEAN NOT NULL DEFAULT '0'")
-			util.CheckErr(err)
+			x(err)
 			changed = true
 		}
 
@@ -102,10 +107,10 @@ func main() {
 		ok := false
 		rows, err = db.Query("SELECT `COLUMN_TYPE`,`COLUMN_DEFAULT` FROM `information_schema`.`COLUMNS` WHERE `TABLE_NAME` = \"" +
 			Cfg.Prefix + "_info\" AND `COLUMN_NAME` = \"status\"")
-		util.CheckErr(err)
+		x(err)
 		for rows.Next() {
 			var tp, def string
-			util.CheckErr(rows.Scan(&tp, &def))
+			x(rows.Scan(&tp, &def))
 			if def == "QUEUING" && strings.Contains(tp, "QUEUING") {
 				ok = true
 			}
@@ -113,7 +118,7 @@ func main() {
 		if !ok {
 			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix +
 				"_info` CHANGE `status` `status` ENUM('QUEUED', 'WORKING', 'FINISHED', 'FAILED', 'QUEUING') NOT NULL DEFAULT 'QUEUING'")
-			util.CheckErr(err)
+			x(err)
 			changed = true
 
 		}
@@ -131,7 +136,7 @@ func main() {
 		if err == nil {
 			rows.Close()
 			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` DROP `attr`")
-			util.CheckErr(err)
+			x(err)
 			changed = true
 		}
 
@@ -146,13 +151,13 @@ func main() {
 
 		tables := make([]string, 0)
 		rows, err = db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info`")
-		util.CheckErr(err)
+		x(err)
 		for rows.Next() {
 			var t string
-			util.CheckErr(rows.Scan(&t))
+			x(rows.Scan(&t))
 			tables = append(tables, t)
 		}
-		util.CheckErr(rows.Err())
+		x(rows.Err())
 
 		for _, table := range tables {
 			tb := Cfg.Prefix + "_c_" + table + "_deprel"
@@ -164,7 +169,7 @@ func main() {
 			fmt.Print("Toevoegen van kolom `idd` aan tabel ", tb, "...")
 			_, err := db.Exec("ALTER TABLE `" + tb + "` ADD `idd` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST")
 			fmt.Println()
-			if util.WarnErr(err) != nil {
+			if util.WarnErr(err, tb) != nil {
 				// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
 				continue
 			}
@@ -181,36 +186,36 @@ func main() {
 
 		tables := make([]string, 0)
 		rows, err = db.Query("SELECT `id`,`owner` FROM `" + Cfg.Prefix + "_info`")
-		util.CheckErr(err)
+		x(err)
 		for rows.Next() {
 			var id, o string
-			util.CheckErr(rows.Scan(&id, &o))
+			x(rows.Scan(&id, &o))
 			if strings.Contains(o, "@") {
 				tables = append(tables, id)
 			}
 		}
-		util.CheckErr(rows.Err())
+		x(rows.Err())
 
 		for _, table := range tables {
 			tb := Cfg.Prefix + "_c_" + table + "_file"
 			rows, err = db.Query("SELECT `id`,`file` FROM `" + tb + "`")
 			fmt.Println("Upgrade prefix in tabel", tb, "...")
-			if util.WarnErr(err) == nil {
+			if util.WarnErr(err, tb) == nil {
 				// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
 				p := "/data/" + table + "/xml"
 				ln := len(p)
 				for rows.Next() {
 					var id, filename string
-					util.CheckErr(rows.Scan(&id, &filename))
+					x(rows.Scan(&id, &filename))
 					i := strings.Index(filename, p)
 					if i >= 0 {
 						name := "$$" + filename[i+ln:]
 						_, err = db.Exec(fmt.Sprintf("UPDATE `%s` SET `file` = %q WHERE `id` = %q", tb, name, id))
-						util.CheckErr(err)
+						x(err)
 						changed = true
 					}
 				}
-				util.CheckErr(rows.Err())
+				x(rows.Err())
 			}
 		}
 	}
@@ -227,9 +232,9 @@ func main() {
 			rows.Close()
 		} else {
 			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `info` TEXT NOT NULL DEFAULT ''")
-			util.CheckErr(err)
+			x(err)
 			_, err = db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `infop` TEXT NOT NULL DEFAULT ''")
-			util.CheckErr(err)
+			x(err)
 			changed = true
 		}
 
@@ -237,21 +242,107 @@ func main() {
 
 	////////////////////////////////////////////////////////////////
 
-	// upgrade naar versie 4
+	// tabel <prefix>_info
+	// veld `hasud` toevoegen
 
-	if version < 4 {
+	if version < 5 {
+		rows, err = db.Query("SELECT `hasud` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+		if err == nil {
+			rows.Close()
+		} else {
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `hasud` BOOLEAN NOT NULL DEFAULT 0 AFTER `hasmeta`")
+			x(err)
+			changed = true
 
-		fmt.Printf("Upgrade from version %d to 4\n", version)
+			IDs := make([]string, 0)
+			rows, err = db.Query("SELECT `id` FROM `" + Cfg.Prefix + "_info`")
+			x(err)
+			for rows.Next() {
+				var id string
+				x(rows.Scan(&id))
+				IDs = append(IDs, id)
+			}
+			for _, id := range IDs {
+				archID := -1
+				fileID := -1
+				rows, err := db.Query("SELECT `arch`,`file` FROM `" + Cfg.Prefix + "_c_" + id + "_sent` LIMIT 0, 1")
+				if util.WarnErr(err, id) != nil {
+					// Misschien bestaat de tabel helemaal niet, omdat er een fout was met het corpus
+					continue
+				}
+				for rows.Next() {
+					x(rows.Scan(&archID, &fileID))
+				}
+				if fileID < 0 {
+					x(fmt.Errorf("No sentence found for %s", id))
+				}
+				var archname, filename string
+				if archID >= 0 {
+					rows, err := db.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` WHERE `id` = %d", Cfg.Prefix, id, archID))
+					x(err)
+					for rows.Next() {
+						x(rows.Scan(&archname))
+					}
+					if archname == "" {
+						x(fmt.Errorf("No arch %d found for %s", archID, id))
+					}
+				}
+				rows, err = db.Query(fmt.Sprintf("SELECT `file` FROM `%s_c_%s_file` WHERE `id` = %d", Cfg.Prefix, id, fileID))
+				x(err)
+				for rows.Next() {
+					x(rows.Scan(&filename))
+				}
+				if filename == "" {
+					x(fmt.Errorf("No file found for %s", id))
+				}
+				if strings.HasPrefix(filename, "$$") {
+					filename = paqudatadir + "/data/" + id + "/xml" + filename[2:]
+				}
 
-		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 4 WHERE `id` = 1", Cfg.Prefix))
-		util.CheckErr(err)
+				var b []byte
+				if archname != "" {
+					b, err = get_dact(archname, filename)
+					if util.WarnErr(err, id, archname, filename) != nil {
+						continue
+					}
+				} else {
+					b, err = ioutil.ReadFile(filename)
+					if err != nil {
+						fp, err := os.Open(filename + ".gz")
+						x(err)
+						rd, err := gzip.NewReader(fp)
+						x(err)
+						b, err = ioutil.ReadAll(rd)
+						x(err)
+						x(rd.Close())
+						x(fp.Close())
+					}
+				}
+				if bytes.Contains(b, []byte("<conllu")) {
+					_, err := db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `hasud` = 1 WHERE `id` = %q", Cfg.Prefix, id))
+					x(err)
+				}
+			}
+		}
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// upgrade naar versie 5
+
+	if version < 5 {
+
+		fmt.Printf("Upgrade from version %d to 5\n", version)
+
+		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 5 WHERE `id` = 1", Cfg.Prefix))
+		x(err)
 		n, err := result.RowsAffected()
-		util.CheckErr(err)
+		x(err)
 		if n < 1 {
-			util.CheckErr(fmt.Errorf("Version update failed"))
+			x(fmt.Errorf("Version update failed"))
 		}
 
-		version = 4
+		version = 5
 		changed = true
 	}
 

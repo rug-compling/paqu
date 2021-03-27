@@ -36,6 +36,11 @@ type Alpino_ds struct {
 	Meta     []MetaT  `xml:"metadata>meta"`
 	Node0    *Node    `xml:"node"`
 	Sentence string   `xml:"sentence"`
+	Connlu   ConnluT  `xml:"conllu"`
+}
+
+type ConnluT struct {
+	Status string `xml:"status,attr"`
 }
 
 type MetaT struct {
@@ -119,6 +124,7 @@ var (
 	datum      string
 	info       string
 	infop      string
+	hasUD      int
 
 	topfile   = -1
 	toparch   = -1
@@ -1019,11 +1025,11 @@ Opties:
 			prefix))
 	}
 	if db_updatestatus {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d WHERE `id` = %q",
-			Cfg.Prefix, lines, hasmeta, prefix))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d WHERE `id` = %q",
+			Cfg.Prefix, lines, hasmeta, hasud, prefix))
 	} else {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW(), `hasmeta` = %d WHERE `id` = %q",
-			Cfg.Prefix, lines, hasmeta, prefix))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d WHERE `id` = %q",
+			Cfg.Prefix, lines, hasmeta, hasud, prefix))
 	}
 	util.CheckErr(err)
 
@@ -1094,6 +1100,9 @@ func do_data(archname, filename string, data []byte) {
 	util.CheckErr(err)
 	unexpand(alpino.Node0)
 	wordcount += len(strings.Fields(alpino.Sentence))
+	if alpino.Connlu.Status != "" {
+		hasUD = 1
+	}
 
 	for _, m := range alpino.Meta {
 		if m.Type != "text" && m.Type != "int" && m.Type != "float" && m.Type != "date" && m.Type != "datetime" && m.Type != "bool" {
