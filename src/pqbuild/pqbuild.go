@@ -1024,12 +1024,13 @@ Opties:
 			Cfg.Prefix,
 			prefix))
 	}
+
 	if db_updatestatus {
 		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d WHERE `id` = %q",
-			Cfg.Prefix, lines, hasmeta, hasud, prefix))
+			Cfg.Prefix, lines, hasmeta, hasUD, prefix))
 	} else {
 		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d WHERE `id` = %q",
-			Cfg.Prefix, lines, hasmeta, hasud, prefix))
+			Cfg.Prefix, lines, hasmeta, hasUD, prefix))
 	}
 	util.CheckErr(err)
 
