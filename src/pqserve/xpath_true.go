@@ -273,6 +273,7 @@ func xpathdl(q *Context) {
 	if err != nil || step < 1 {
 		step = 1
 	}
+	gettextcount := firstf(q.form, "what") == "textcount"
 
 	var chClose <-chan bool
 	if f, ok := q.w.(http.CloseNotifier); ok {
@@ -284,8 +285,8 @@ func xpathdl(q *Context) {
 	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	q.w.Header().Set("Content-Disposition", "attachment; filename=uitvoer.txt")
 
-	//curno, hash, methode, loading, errval := xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step)
-	_, _, _, _, _ = xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step)
+	//curno, hash, methode, loading, errval := xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step, textcount)
+	_, _, _, _, _ = xpath_do_search(q, query, prefix, methode, 0, 99999999, chClose, false, step, gettextcount)
 }
 
 // TAB: xpath
@@ -367,7 +368,7 @@ func xpath(q *Context) {
 	oriquery := query
 	query += filters[fff]
 	now := time.Now()
-	curno, hash, methode, loading, errval := xpath_do_search(q, query, prefix, methode, offset, xpathmax, chClose, true, 1)
+	curno, hash, methode, loading, errval := xpath_do_search(q, query, prefix, methode, offset, xpathmax, chClose, true, 1, false)
 	if errval != nil {
 		return
 	}
@@ -425,7 +426,11 @@ func xpath(q *Context) {
 <option value="5000">1 per `+iformat(5000)+`</option>
 <option value="10000">1 per `+iformat(10000)+`</option>
 </select>
-<input type="submit" value="zinnen downloaden">
+<select name="what">
+<option value="text">zinnen</option>
+<option value="textcount">zinnen met telling</option>
+</select>
+<input type="submit" value="downloaden">
 </form>
 `,
 			html.EscapeString(query),
@@ -1899,7 +1904,7 @@ func findDepId(node *Node, ID string, head string, deprel string) *Node {
 	return nil
 }
 
-func xpath_do_search(q *Context, query string, prefix string, methode string, offset int, xpathmax int, chClose <-chan bool, doHtml bool, step int) (curno int, hash string, methode2 string, loading bool, errval error) {
+func xpath_do_search(q *Context, query string, prefix string, methode string, offset int, xpathmax int, chClose <-chan bool, doHtml bool, step int, gettextcount bool) (curno int, hash string, methode2 string, loading bool, errval error) {
 
 	methode2 = methode
 
@@ -2073,6 +2078,8 @@ $('#loading span').html('%.1f%%');
 			return
 		}
 		filename = ""
+		prevresult := ""
+		var variants map[string]bool
 	NEXTDOC:
 		for docs.Next() {
 			name := docs.Name()
@@ -2095,6 +2102,16 @@ $('#loading span').html('%.1f%%');
 				curdac = dactfile
 				filename = name
 				newdoc = true
+				if gettextcount {
+					if prevresult != "" {
+						fmt.Fprintf(q.w, prevresult, len(variants))
+						if ff, ok := q.w.(http.Flusher); ok {
+							ff.Flush()
+						}
+						prevresult = ""
+					}
+					variants = make(map[string]bool)
+				}
 			}
 			if len(queryparts) == 1 {
 				if doHtml {
@@ -2108,6 +2125,9 @@ $('#loading span').html('%.1f%%');
 						}
 					}
 				} else {
+					if gettextcount {
+						variants[docs.Match()] = true
+					}
 					if newdoc {
 						textcount++
 						if (textcount % step) == 0 {
@@ -2118,12 +2138,22 @@ $('#loading span').html('%.1f%%');
 								name = name[:len(name)-4]
 							}
 							if err == nil {
-								fmt.Fprintf(q.w, "%s%s|%s\n", dactname, name, alpino.Sentence)
+								if gettextcount {
+									prevresult = fmt.Sprintf("%s%s\t%%d\t%s\n", dactname, name, alpino.Sentence)
+								} else {
+									fmt.Fprintf(q.w, "%s%s|%s\n", dactname, name, alpino.Sentence)
+								}
 							} else {
-								fmt.Fprintf(q.w, "%s%s|%v\n", dactname, name, err)
+								if gettextcount {
+									prevresult = fmt.Sprintf("%s%s\t%%d\t%v\n", dactname, name, err)
+								} else {
+									fmt.Fprintf(q.w, "%s%s|%v\n", dactname, name, err)
+								}
 							}
-							if ff, ok := q.w.(http.Flusher); ok {
-								ff.Flush()
+							if !gettextcount {
+								if ff, ok := q.w.(http.Flusher); ok {
+									ff.Flush()
+								}
 							}
 						}
 					}
@@ -2165,6 +2195,9 @@ $('#loading span').html('%.1f%%');
 							docs2.Close()
 						}
 					} else {
+						if gettextcount {
+							variants[docs2.Match()] = true
+						}
 						textcount++
 						if (textcount % step) == 0 {
 							var alpino Alpino_ds
@@ -2174,12 +2207,22 @@ $('#loading span').html('%.1f%%');
 								name = name[:len(name)-4]
 							}
 							if err == nil {
-								fmt.Fprintf(q.w, "%s%s|%s\n", dactname, name, alpino.Sentence)
+								if gettextcount {
+									prevresult = fmt.Sprintf("%s%s\t%%d\t%s\n", dactname, name, alpino.Sentence)
+								} else {
+									fmt.Fprintf(q.w, "%s%s|%s\n", dactname, name, alpino.Sentence)
+								}
 							} else {
-								fmt.Fprintf(q.w, "%s%s|%v\n", dactname, name, err)
+								if gettextcount {
+									prevresult = fmt.Sprintf("%s%s\t%%d\t%v\n", dactname, name, err)
+								} else {
+									fmt.Fprintf(q.w, "%s%s|%v\n", dactname, name, err)
+								}
 							}
-							if ff, ok := q.w.(http.Flusher); ok {
-								ff.Flush()
+							if !gettextcount {
+								if ff, ok := q.w.(http.Flusher); ok {
+									ff.Flush()
+								}
 							}
 						}
 						docs2.Close()
@@ -2187,6 +2230,16 @@ $('#loading span').html('%.1f%%');
 				}
 			}
 		} // for docs.Next()
+
+		if gettextcount {
+			if prevresult != "" {
+				fmt.Fprintf(q.w, prevresult, len(variants))
+				if ff, ok := q.w.(http.Flusher); ok {
+					ff.Flush()
+				}
+			}
+		}
+
 		errval = docs.Error()
 		docs = nil
 		if logerr(errval) {

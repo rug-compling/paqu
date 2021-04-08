@@ -350,6 +350,7 @@ func home(q *Context) {
 </select>
 <select name="what">
 <option value="text">zinnen</option>
+<option value="textcount">zinnen met telling</option>
 <option value="data">alle data</option>
 </select>
 <input type="submit" value="downloaden">
@@ -1303,7 +1304,17 @@ func homedl(q *Context) {
 	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	q.w.Header().Set("Content-Disposition", "attachment; filename=uitvoer.txt")
 
-	alldata := firstf(q.form, "what") != "text"
+	var alldata, textcount bool
+	var t1, t2 string
+	var cc int
+	if what := firstf(q.form, "what"); what == "data" {
+		alldata = true
+	} else if what == "textcount" {
+		textcount = true
+		t1 = ", count(*)"
+		t2 = " GROUP BY `arch`,`file`"
+		cc = 1
+	}
 
 	columns := []string{
 		"word", "begin", "end", "postag",
@@ -1313,8 +1324,8 @@ func homedl(q *Context) {
 	}
 
 	rows, err := timeoutQuery(q, chClose,
-		"SELECT `"+strings.Join(columns, "`,`")+"` FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+
-			joins+" JOIN `"+Cfg.Prefix+"_c_"+prefix+"_sent` USING (`arch`,`file`) WHERE "+query)
+		"SELECT `"+strings.Join(columns, "`,`")+"`"+t1+" FROM `"+Cfg.Prefix+"_c_"+prefix+"_deprel` "+
+			joins+" JOIN `"+Cfg.Prefix+"_c_"+prefix+"_sent` USING (`arch`,`file`) WHERE "+query+t2)
 	if doErr(q, err) {
 		return
 	}
@@ -1329,8 +1340,8 @@ func homedl(q *Context) {
 	}
 	lineno := 0
 
-	items := make([]string, len(columns))
-	fields := make([]interface{}, len(columns))
+	items := make([]string, len(columns)+cc)
+	fields := make([]interface{}, len(columns)+cc)
 	for i := range items {
 		fields[i] = &items[i]
 	}
@@ -1348,7 +1359,11 @@ func homedl(q *Context) {
 			if alldata {
 				fmt.Fprintln(q.w, strings.Join(items, "\t"))
 			} else {
-				fmt.Fprintln(q.w, items[9]+"|"+items[10])
+				if textcount {
+					fmt.Fprintln(q.w, items[9]+"\t"+items[11]+"\t"+items[10])
+				} else {
+					fmt.Fprintln(q.w, items[9]+"|"+items[10])
+				}
 			}
 		}
 		if !alldata {
