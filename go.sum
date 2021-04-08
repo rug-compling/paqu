@@ -35,8 +35,8 @@ github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac h1:kYPjbEN6YPYWW
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac/go.mod h1:xvqspoSXJTIpemEonrMDFq6XzwHYYgToXWj5eRX1OtY=
 github.com/rug-compling/alpinods v1.12.4 h1:SkNFEcNhS8oD7QwaCdMOEfkUGtbW16ghdDFr+f0xX+k=
 github.com/rug-compling/alpinods v1.12.4/go.mod h1:R3BBX8RIw9InVqHZ+1W+MsX8WX8uBkoVNNGE38mqF1Q=
-github.com/rug-compling/alud/v2 v2.5.4 h1:EuvV+iqG7HL9zqTntRxZZx3CNEN+MepJBf3jfg5EDXA=
-github.com/rug-compling/alud/v2 v2.5.4/go.mod h1:M+vSatnGuun2IZWgfCSHO0lZre4aIN3w/kwVhPow5QU=
+github.com/rug-compling/alud/v2 v2.5.5 h1:s0MtwQrjiLWBU1rbd8Y8LIgvVc2YnrI/YJvmz2SKZnM=
+github.com/rug-compling/alud/v2 v2.5.5/go.mod h1:M+vSatnGuun2IZWgfCSHO0lZre4aIN3w/kwVhPow5QU=
 github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 golang.org/x/image v0.0.0-20210216034530-4410531fe030 h1:lP9pYkih3DUSC641giIXa2XqfTIbbbRr0w2EOTA7wHA=
