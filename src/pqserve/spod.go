@@ -99,7 +99,19 @@ var (
 			"hidden1",
 		},
 		{
-			`Attributen`,
+			`Attributen//Hier worden de woordsoorten geteld. De Lassy part-of-speech labels
+worden geteld via het attribuut <b>postag</b>. Er is daarnaast een
+attribuut <b>pt</b> dat de vereenvoudigde weergave geeft van
+dezelfde informatie: het deel van de postag tot aan het
+openingshaakje. De documentatie van postag is te vinden in: Frank van
+Eynde,
+<a href="http://www.let.rug.nl/vannoord/Lassy/POS_manual.pdf">Part of
+speech tagging en lemmatisering van het D-Coi corpus</a>, 2005.
+<p>
+Vanwege historische redenen wordt hier ook het attribuut <b>pos</b>
+opgenomen, maar dit attribuut wordt niet langer onderhouden, is ook
+niet gedocumenteerd en wordt ook niet gecorrigeerd in de handmatig
+geannoteerde corpora.`,
 			`//node [@pos]`, // spatie i.v.m. mogelijk duplicaat
 			SPOD_STD,
 			"pos",
