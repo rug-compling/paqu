@@ -205,7 +205,7 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 			tokenlen += len(node.Word)
 		}
 	}
-	_, err = fmt.Fprintf(q.w, "%s\t%d\t%.1f", alpino.Sentence.SentId, tokens, float64(tokenlen)/float64(tokens))
+	_, err = fmt.Fprintf(q.w, "%s\t%d\t%s", alpino.Sentence.SentId, tokens, spodfloat(float64(tokenlen)/float64(tokens)))
 	if logerr(err) {
 		return false
 	}
@@ -272,7 +272,7 @@ SPODS:
 			fmt.Fprint(q.w, "\t0\tNA")
 			continue
 		}
-		fmt.Fprintf(q.w, "\t%d\t%.1f", len(seen), float64(totalSize)/float64(len(seen)))
+		fmt.Fprintf(q.w, "\t%d\t%s", len(seen), spodfloat(float64(totalSize)/float64(len(seen))))
 	}
 
 	return true
@@ -377,4 +377,17 @@ func inspect(q *context) {
 	q.ptnodes = ptnodes
 	q.varptnodes = varptnodes
 
+}
+
+func spodfloat(f float64) string {
+	s := fmt.Sprintf("%.3f", f)
+	n := len(s)
+	for i := 1; i < 3; i++ {
+		if s[n-i] == '0' {
+			s = s[:n-i]
+		} else {
+			break
+		}
+	}
+	return s
 }

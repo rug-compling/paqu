@@ -330,12 +330,15 @@ func spod_form(q *Context) {
 	seen := ""
 
 	doHtml := first(q.r, "out") == "html"
+	doTable := first(q.r, "out") == "tbl"
 
 	if doHtml {
 		writeHead(q, "SPOD -- Resultaat", 0)
 		defer func() {
 			fmt.Fprintf(q.w, "</body>\n</html>\n")
 		}()
+	} else if doTable {
+		contentType(q, "text/plain; charset=utf-8")
 	} else {
 		contentType(q, "text/plain; charset=utf-8")
 		nocache(q)
@@ -347,7 +350,8 @@ func spod_form(q *Context) {
 		return
 	}
 
-	if first(q.r, "out") == "tbl" {
+	if doTable {
+		q.w.Header().Set("Content-Disposition", "attachment; filename=spod-table.txt")
 		spod_table(q, db)
 		return
 	}
