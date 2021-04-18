@@ -161,7 +161,7 @@ func main() {
 		wg.Done()
 	}()
 
-	go recover()
+	go recover_work()
 
 	go clearMacros()
 

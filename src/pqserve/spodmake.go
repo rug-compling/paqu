@@ -91,6 +91,12 @@ var spod2xpath = map[string]*xPath{
 		// [1] -> [first()]
 		s2 = strings.Replace(s2, "[1]", "[first()]", -1)
 
+		// [3] -> [third()]
+		s2 = strings.Replace(s2, "[3]", "[third()]", -1)
+
+		// node[3][bla] -> node[3]/self::node[bla]
+		s2 = strings.Replace(s2, "][", "]/self::node[", -1)
+
 		// =("aap","noot","mies")  ->  ="hashcode"
 		s2 = reSet.ReplaceAllStringFunc(s2, func(s string) string {
 			mm := reSet.FindStringSubmatch(s)

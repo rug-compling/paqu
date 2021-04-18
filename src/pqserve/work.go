@@ -845,7 +845,7 @@ func dowork(task *Process) (user string, title string, err error) {
 	}
 
 	cmd := shell(
-		// optie -w i.v.m. recover()
+		// optie -w i.v.m. recover_work()
 		`find %s -name '*.xml' | sort | pqbuild -w -p %s %s -s -m %s %s %s %s 0 >> %s 2>> %s`,
 		dirname,
 		quote(p), d, quote(task.info),
@@ -1051,7 +1051,7 @@ func kill(id string) {
 	}
 }
 
-func recover() {
+func recover_work() {
 
 	ids := make([][2]string, 0)
 	queuing := make([]string, 0)

@@ -302,6 +302,7 @@ bewaren<br>
 uitvoer: <select name="out">
 <option value="html">HTML</option>
 <option value="text">Teksttabel</option>
+<option value="tbl">Gedetailleerde tabel</option>
 </select>
 <p>
 <input type="submit" value="verzenden">
@@ -343,6 +344,11 @@ func spod_form(q *Context) {
 	db := first(q.r, "db")
 	if !q.spodprefixes[db] {
 		fmt.Fprintln(q.w, "Ongeldig corpus:", db)
+		return
+	}
+
+	if first(q.r, "out") == "tbl" {
+		spod_table(q, db)
 		return
 	}
 

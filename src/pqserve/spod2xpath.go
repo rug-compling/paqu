@@ -6389,15 +6389,18 @@ var spod2xpath = map[string]*xPath{
 								},
 							},
 							arg2: &dCollect{
-								ARG:  collect__child__node,
-								arg1: &dNode{},
-								arg2: &dPredicate{
-									arg1: &dPredicate{
+								ARG: collect__self__node,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
 										arg1: &dFunction{
 											ARG: function__first__0__args,
 										},
 									},
-									arg2: &dEqual{
+								},
+								arg2: &dPredicate{
+									arg1: &dEqual{
 										ARG: equal__is,
 										arg1: &dCollect{
 											ARG:  collect__attributes__rel,
@@ -6415,15 +6418,18 @@ var spod2xpath = map[string]*xPath{
 							},
 						},
 						arg2: &dCollect{
-							ARG:  collect__child__node,
-							arg1: &dNode{},
-							arg2: &dPredicate{
-								arg1: &dPredicate{
-									arg1: &dElem{
-										DATA: []interface{}{3},
+							ARG: collect__self__node,
+							arg1: &dCollect{
+								ARG:  collect__child__node,
+								arg1: &dNode{},
+								arg2: &dPredicate{
+									arg1: &dFunction{
+										ARG: function__third__0__args,
 									},
 								},
-								arg2: &dEqual{
+							},
+							arg2: &dPredicate{
+								arg1: &dEqual{
 									ARG: equal__is,
 									arg1: &dCollect{
 										ARG:  collect__attributes__rel,
