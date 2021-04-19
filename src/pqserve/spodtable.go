@@ -52,6 +52,24 @@ func spod_table(q *Context, prefix string) {
 		return
 	}
 
+	metalist := make([]string, 0)
+	rows, err = sqlDB.Query(fmt.Sprintf("SELECT `name` FROM `%s_c_%s_midx` order by `name`", Cfg.Prefix, prefix))
+	if err == nil {
+		for rows.Next() {
+			var name string
+			err = rows.Scan(&name)
+			if logerr(err) {
+				rows.Close()
+				return
+			}
+			metalist = append(metalist, name)
+		}
+		err = rows.Err()
+		if logerr(err) {
+			return
+		}
+	}
+
 	opts := make(map[string]bool)
 	optlist := make([]string, 0)
 	cats := false
@@ -93,7 +111,14 @@ func spod_table(q *Context, prefix string) {
 		}
 	}
 
-	fmt.Fprintf(q.w, "sentence.id\ttokens\ttokens.len\t%s\n", strings.Join(optlist, "\t"))
+	fmt.Fprint(q.w, "sentence.id\ttokens\ttokens.len")
+	if len(optlist) > 0 {
+		fmt.Fprint(q.w, "\t"+strings.Join(optlist, "\t"))
+	}
+	if len(metalist) > 0 {
+		fmt.Fprint(q.w, "\tmeta."+strings.Join(metalist, "\tmeta."))
+	}
+	fmt.Fprintln(q.w)
 
 	dactfiles := make([]string, 0)
 	//global := false
@@ -122,8 +147,6 @@ func spod_table(q *Context, prefix string) {
 		}
 	}
 
-	//n := 0
-
 	for _, dactfile := range dactfiles {
 		db, err := dbxml.OpenRead(dactfile)
 		if logerr(err) {
@@ -135,28 +158,26 @@ func spod_table(q *Context, prefix string) {
 			return
 		}
 		for docs.Next() {
-			if !spod_table_file(q, docs.Name(), docs.Value(), opts) {
+			if !spod_table_file(q, docs.Name(), docs.Value(), opts, metalist) {
 				db.Close()
 				return
 			}
 			if ff, ok := q.w.(http.Flusher); ok {
 				ff.Flush()
 			}
-			//	n++
-			//	if n == 10 {
-			//		db.Close()
-			//		return
-			//	}
 		}
-
 		db.Close()
 	}
-
 }
 
-func spod_table_file(q *Context, filename string, contents string, opts map[string]bool) bool {
+func spod_table_file(q *Context, filename string, contents string, opts map[string]bool, metalist []string) bool {
 
 	defer fmt.Fprintln(q.w)
+
+	meta := make(map[string][]string)
+	for _, m := range metalist {
+		meta[m] = make([]string, 0)
+	}
 
 	var alpino alpino_ds
 	err := xml.Unmarshal([]byte(contents), &alpino)
@@ -170,6 +191,12 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 			id = id[:len(id)-4]
 		}
 		alpino.Sentence.SentId = id
+	}
+
+	if alpino.Metadata != nil && alpino.Metadata.Meta != nil {
+		for _, m := range alpino.Metadata.Meta {
+			meta[m.Name] = append(meta[m.Name], m.Value)
+		}
 	}
 
 	ptCount := make(map[string]int)
@@ -273,6 +300,10 @@ SPODS:
 			continue
 		}
 		fmt.Fprintf(q.w, "\t%d\t%s", len(seen), spodfloat(float64(totalSize)/float64(len(seen))))
+	}
+
+	for _, m := range metalist {
+		fmt.Fprintf(q.w, "\t%s", strings.Join(meta[m], "|"))
 	}
 
 	return true
