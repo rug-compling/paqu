@@ -15,7 +15,8 @@ import (
 )
 
 var (
-	ptlist = []string{"adj", "bw", "let", "lid", "n", "na", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
+	// niet "na" (staat voor ontbrekend, oude bug in Alpino)
+	ptlist = []string{"adj", "bw", "let", "lid", "n", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
 
 	noNode = &nodeType{
 		NodeAttributes: alpinods.NodeAttributes{
