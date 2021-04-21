@@ -171,41 +171,43 @@ func (d *dCmp) do(subdoc []interface{}, q *context) []interface{} {
 	arg2 := d.arg2.do(subdoc, q)
 	switch d.ARG {
 	case cmp__lt: // <
+		result := make([]interface{}, 0)
 		for _, a1 := range arg1 {
 			for _, a2 := range arg2 {
 				switch a1t := a1.(type) {
 				case int:
 					if a1t < a2.(int) {
-						return nTRUE
+						result = append(result, true)
 					}
 				case string:
 					if a1t < a2.(string) {
-						return nTRUE
+						result = append(result, true)
 					}
 				default:
 					panic(fmt.Sprintf("Cmp<: Missing case for type %T in %s", a1, q.filename))
 				}
 			}
 		}
-		return nFALSE
+		return result
 	case cmp__gt: // >
+		result := make([]interface{}, 0)
 		for _, a1 := range arg1 {
 			for _, a2 := range arg2 {
 				switch a1t := a1.(type) {
 				case int:
 					if a1t > a2.(int) {
-						return nTRUE
+						result = append(result, true)
 					}
 				case string:
 					if a1t > a2.(string) {
-						return nTRUE
+						result = append(result, true)
 					}
 				default:
 					panic(fmt.Sprintf("Cmp>: Missing case for type %T in %s", a1, q.filename))
 				}
 			}
 		}
-		return nFALSE
+		return result
 	default:
 		panic("Cmp: Missing case in " + q.filename)
 	}
@@ -345,28 +347,6 @@ func (d *dCollect) do(subdoc []interface{}, q *context) []interface{} {
 	}
 
 	result2 := []interface{}{}
-
-	/*
-			if pred, ok := d.arg2.(*dPredicate); ok {
-				result2 := []interface{}{}
-				for _, list := range lists {
-					ll := pred.do(list, q)
-					if len(ll) == 0 {
-						continue
-					}
-					if _, ok := ll[0].(*nodeType); ok {
-						result2 = append(result2, ll...)
-					} else {
-						result2 = append(result2, list...)
-					}
-				}
-				return flatten(result2)
-			}
-
-		panic("NOT HERE")
-		// TODO: panic????
-
-	*/
 
 	if p, ok := d.arg2.(*dPredicate); ok {
 		if f, ok := p.arg2.(*dFunction); ok {
@@ -559,14 +539,6 @@ func (d *dFunction) do(subdoc []interface{}, q *context) []interface{} {
 		return []interface{}{indexType(3)}
 	case function__last__0__args:
 		return []interface{}{indexType(-1)}
-		/*
-			case function__local__internal__head__position__1__args:
-				head, err := internalHeadPositionWithError(r[0].([]interface{}), q)
-				if err == nil {
-					return []interface{}{head}
-				}
-				return []interface{}{}
-		*/
 	case function__not__1__args:
 		if len(r[0].([]interface{})) == 0 {
 			return nTRUE
@@ -680,55 +652,6 @@ func (d *dPredicate) do(subdoc []interface{}, q *context) []interface{} {
 	default:
 		panic(fmt.Sprintf("Predicate arg2: Missing case for index %d in %s", int(idx), q.filename))
 	}
-
-	/*
-		result2 := make([]interface{}, 0)
-		for _, r := range result {
-			result2 = append(result2, d.arg2.do([]interface{}{r}, q)...)
-		}
-		return result2
-	*/
-
-	result2 := d.arg2.do(result, q)
-	return result2
-
-	/*
-
-		if r, ok := result[0].(indexType); ok {
-			idx := int(r)
-			if idx < 0 {
-				idx = len(subdoc) + idx
-			} else {
-				idx--
-			}
-			if idx < 0 || idx >= len(subdoc) {
-				return []interface{}{}
-			}
-			result = []interface{}{subdoc[idx]}
-		}
-
-	*/
-
-	/*
-		if _, ok := d.arg1.(*dPredicate); ok {
-			var idx int
-			switch t := result[0].(type) {
-			case indexType:
-				idx = int(t)
-			case int:
-				idx = t
-			default:
-				panic(fmt.Sprintf("invalid type %T", result[0]))
-			}
-
-
-			if idx > len(subdoc) {
-				return []interface{}{}
-			}
-			return d.arg2.do([]interface{}{subdoc[idx-1]}, q)
-		}
-	*/
-
 }
 
 type dRoot struct {
