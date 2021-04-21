@@ -118,7 +118,6 @@ const (
 	function__first__0__args // LET OP: extra gebruik in (*dCollect).do()
 	function__third__0__args // LET OP: extra gebruik in (*dCollect).do()
 	function__last__0__args  // LET OP: extra gebruik in (*dCollect).do()
-	// function__local__internal__head__position__1__args
 	function__not__1__args
 	function__starts__with__2__args
 	plus__plus
@@ -341,9 +340,8 @@ func (d *dCollect) do(subdoc []interface{}, q *context) []interface{} {
 	}
 
 	if len(result1) > 0 {
-		l := lists
-		lists = [][]interface{}{result1}
-		lists = append(lists, l...)
+		l := [][]interface{}{result1}
+		lists = append(l, lists...)
 	}
 
 	result2 := []interface{}{}
@@ -401,7 +399,6 @@ func (d *dCollect) do(subdoc []interface{}, q *context) []interface{} {
 			}
 		}
 	}
-
 	return result2
 }
 
@@ -508,8 +505,6 @@ func (d *dFunction) do(subdoc []interface{}, q *context) []interface{} {
 	var r []interface{}
 	if d.arg1 != nil {
 		r = d.arg1.do(subdoc, q)
-	} else {
-		r = subdoc
 	}
 
 	switch d.ARG {
@@ -620,24 +615,9 @@ type dPredicate struct {
 func (d *dPredicate) do(subdoc []interface{}, q *context) []interface{} {
 
 	result := d.arg1.do(subdoc, q)
-
 	if d.arg2 == nil || len(result) == 0 {
 		return result
 	}
-
-	p := make([]interface{}, 0)
-	switch result[0].(indexType) {
-	case 1:
-		p = append(p, subdoc[0])
-	case 3:
-		if len(subdoc) > 2 {
-			p = append(p, subdoc[2])
-		}
-	case -1:
-		p = append(p, subdoc[len(subdoc)-1])
-	}
-	return d.arg2.do(p, q)
-
 	idx := d.arg2.do(result, q)[0].(indexType) // TODO: altijd een index?
 	switch idx {
 	case 1:
@@ -693,6 +673,8 @@ func (d *dSort) do(subdoc []interface{}, q *context) []interface{} {
 				i--
 			}
 		}
+	case bool:
+		result = result[:1]
 	case string:
 		sort.Slice(result, func(i, j int) bool {
 			return result[i].(string) < result[j].(string)
