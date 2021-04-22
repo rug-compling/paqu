@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/kr/pretty"
 	"github.com/pebbe/dbxml"
 	"github.com/rug-compling/alpinods"
 
@@ -12,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
@@ -230,7 +230,7 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 	for _, node := range qq.ptnodes {
 		if node.Pt != "let" {
 			tokens++
-			tokenlen += len(node.Word)
+			tokenlen += utf8.RuneCountInString(strings.Replace(node.Word, "ij", "y", -1))
 		}
 	}
 	_, err = fmt.Fprintf(q.w, "%s\t%d\t%s", alpino.Sentence.SentId, tokens, spodfloat(float64(tokenlen)/float64(tokens)))

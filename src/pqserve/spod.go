@@ -1255,7 +1255,7 @@ func spod_stats_work(q *Context, dbname string, owner string, outname string) {
 	processNode = func(node *Node) {
 		if node.Word != "" && node.Pt != "let" {
 			wordCount++
-			runeCount += utf8.RuneCountInString(node.Word)
+			runeCount += utf8.RuneCountInString(strings.Replace(node.Word, "ij", "y", -1))
 			tokens[node.Word] = true
 		}
 		for _, n := range node.NodeList {
