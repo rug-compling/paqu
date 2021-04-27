@@ -1,4 +1,4 @@
-// +build spodmake linux
+// +build spodmake !spodmake
 
 package main
 
