@@ -34,7 +34,7 @@ var (
 	}
 )
 
-func spod_table(q *Context, prefix string) {
+func spod_table(q *Context, prefix string, length bool) {
 
 	var owner string
 	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
@@ -106,7 +106,7 @@ func spod_table(q *Context, prefix string) {
 			}
 			opts[spod.lbl] = true
 			optlist = append(optlist, spod.lbl)
-			if spod.special != "attr" && spod.special != "parser" {
+			if length && spod.special != "attr" && spod.special != "parser" {
 				optlist = append(optlist, spod.lbl+".len")
 			}
 		}
@@ -159,7 +159,7 @@ func spod_table(q *Context, prefix string) {
 			return
 		}
 		for docs.Next() {
-			if !spod_table_file(q, docs.Name(), docs.Value(), opts, metalist) {
+			if !spod_table_file(q, docs.Name(), docs.Value(), opts, metalist, length) {
 				db.Close()
 				return
 			}
@@ -171,7 +171,7 @@ func spod_table(q *Context, prefix string) {
 	}
 }
 
-func spod_table_file(q *Context, filename string, contents string, opts map[string]bool, metalist []string) bool {
+func spod_table_file(q *Context, filename string, contents string, opts map[string]bool, metalist []string, length bool) bool {
 
 	defer fmt.Fprintln(q.w)
 
@@ -198,6 +198,16 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 		for _, m := range alpino.Metadata.Meta {
 			meta[m.Name] = append(meta[m.Name], m.Value)
 		}
+	}
+
+	// Extra node bovenaan vanwege gedoe met //node
+	alpino.Node = &nodeType{
+		NodeAttributes: alpinods.NodeAttributes{
+			Begin: alpino.Node.Begin,
+			End:   alpino.Node.End,
+			ID:    -2, // ??? TODO
+		},
+		Node: []*nodeType{alpino.Node},
 	}
 
 	ptCount := make(map[string]int)
@@ -233,7 +243,11 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 			tokenlen += utf8.RuneCountInString(strings.Replace(node.Word, "ij", "y", -1))
 		}
 	}
-	_, err = fmt.Fprintf(q.w, "%s\t%d\t%s", alpino.Sentence.SentId, tokens, spodfloat(float64(tokenlen)/float64(tokens)))
+	if tokens == 0 {
+		_, err = fmt.Fprintf(q.w, "%s\t0\tNA", alpino.Sentence.SentId)
+	} else {
+		_, err = fmt.Fprintf(q.w, "%s\t%d\t%s", alpino.Sentence.SentId, tokens, spodfloat(float64(tokenlen)/float64(tokens)))
+	}
 	if logerr(err) {
 		return false
 	}
@@ -296,11 +310,15 @@ SPODS:
 				}
 			}
 		}
-		if len(seen) == 0 {
-			fmt.Fprint(q.w, "\t0\tNA")
-			continue
+		if length {
+			if len(seen) == 0 {
+				fmt.Fprint(q.w, "\t0\tNA")
+				continue
+			}
+			fmt.Fprintf(q.w, "\t%d\t%s", len(seen), spodfloat(float64(totalSize)/float64(len(seen))))
+		} else {
+			fmt.Fprintf(q.w, "\t%d", len(seen))
 		}
-		fmt.Fprintf(q.w, "\t%d\t%s", len(seen), spodfloat(float64(totalSize)/float64(len(seen))))
 	}
 
 	for _, m := range metalist {

@@ -303,6 +303,7 @@ uitvoer: <select name="out">
 <option value="html">HTML</option>
 <option value="text">Teksttabel</option>
 <option value="tbl">Gedetailleerde tabel</option>
+<option value="tbllen">Gedetailleerde tabel, inclusief lengtes</option>
 </select>
 <p>
 <input type="submit" value="verzenden">
@@ -329,8 +330,10 @@ func spod_form(q *Context) {
 
 	seen := ""
 
-	doHtml := first(q.r, "out") == "html"
-	doTable := first(q.r, "out") == "tbl"
+	outFormat := first(q.r, "out")
+
+	doHtml := outFormat == "html"
+	doTable := outFormat == "tbl" || outFormat == "tbllen"
 
 	if doHtml {
 		writeHead(q, "SPOD -- Resultaat", 0)
@@ -338,7 +341,7 @@ func spod_form(q *Context) {
 			fmt.Fprintf(q.w, "</body>\n</html>\n")
 		}()
 	} else if doTable {
-		contentType(q, "text/plain; charset=utf-8")
+		contentType(q, "text/tab-separated-values; charset=utf-8")
 	} else {
 		contentType(q, "text/plain; charset=utf-8")
 		nocache(q)
@@ -351,8 +354,8 @@ func spod_form(q *Context) {
 	}
 
 	if doTable {
-		q.w.Header().Set("Content-Disposition", "attachment; filename=spod-table.txt")
-		spod_table(q, db)
+		q.w.Header().Set("Content-Disposition", "attachment; filename=spod-table.tsv")
+		spod_table(q, db, outFormat == "tbllen")
 		return
 	}
 
