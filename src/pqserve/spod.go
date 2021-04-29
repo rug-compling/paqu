@@ -646,7 +646,7 @@ window.onclick = function(event) {
 		if strings.HasPrefix(spod.special, "hidden") {
 			lines, _, _, done, err := spod_get(q, db, idx, owner)
 			if err == nil && done {
-				available[strings.Split(spod.lbl, "_")[1]] = lines > 0
+				available[strings.SplitN(spod.lbl, "_", 2)[1]] = lines > 0
 			}
 			continue
 		}

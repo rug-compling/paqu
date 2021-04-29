@@ -512,6 +512,8 @@ Opties:
 	buf_flush(META)
 	buf_flush(MIDX)
 
+	spod_save()
+
 	_, err = db.Exec("COMMIT;")
 	util.CheckErr(err)
 
@@ -1073,6 +1075,8 @@ func utfFunc(b []byte) []byte {
 
 // Verwerk een enkel xml-bestand
 func do_data(archname, filename string, data []byte) {
+
+	do_spod(data)
 
 	// MySQL tot versie 5.5.3 kan niet met tekens boven U+FFFF overweg
 	data = utfRE.ReplaceAllFunc(data, utfFunc)

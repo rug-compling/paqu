@@ -1316,7 +1316,7 @@ vaak "er" als plaatsonderwerp gebruikt.
 		SPOD_STD,
 		"accinf",
 		"accusativus cum infinitivo",
-		"pos",
+		"pos_verb",
 	},
 	{
 		"",
@@ -1324,7 +1324,7 @@ vaak "er" als plaatsonderwerp gebruikt.
 		SPOD_STD,
 		"passive",
 		"passief",
-		"pos",
+		"pos_verb",
 	},
 	{
 		"",
@@ -1332,7 +1332,7 @@ vaak "er" als plaatsonderwerp gebruikt.
 		SPOD_STD,
 		"nppas",
 		"niet-persoonlijke passief",
-		"pos",
+		"pos_verb",
 	},
 	{
 		`Scheidbare werkwoorden//De queries voor scheidbare werkwoorden zijn niet beschikbaar voor de
@@ -1678,7 +1678,7 @@ De drie volgende queries geven vervolgens aan hoevaak een onbekend
 woord als samenstelling werd gezien, of als naam (maar niet uit
 de namenlijst) of op een nog andere manier werden behandeld.
 `,
-		`//node[@his]`,
+		`//node[@his and not(node[@his])]`,
 		SPOD_STD,
 		"his",
 		"\"alle\" woorden (nodes met attribuut @his)",
@@ -1686,7 +1686,7 @@ de namenlijst) of op een nog andere manier werden behandeld.
 	},
 	{
 		"",
-		`//node[@his="normal"]`,
+		`//node[@his="normal" and not(node[@his])]`,
 		SPOD_STD,
 		"normal",
 		"woorden uit het woordenboek of de namenlijst",
@@ -1697,6 +1697,8 @@ de namenlijst) of op een nog andere manier werden behandeld.
 		`//node[@his
        and
        not(@his=("normal","robust_skip","skip"))
+       and
+       not(node[@his])
 ]`,
 		SPOD_STD,
 		"onbeken",
@@ -1705,7 +1707,7 @@ de namenlijst) of op een nog andere manier werden behandeld.
 	},
 	{
 		"",
-		`//node[@his="compound"]`,
+		`//node[@his="compound" and not(node[@his])]`,
 		SPOD_STD,
 		"compoun",
 		"woorden herkend als samenstelling",
@@ -1713,7 +1715,7 @@ de namenlijst) of op een nog andere manier werden behandeld.
 	},
 	{
 		"",
-		`//node[@his="name"]`,
+		`//node[@his="name" and not(node[@his])]`,
 		SPOD_STD,
 		"name",
 		"woorden herkend als naam (maar niet uit namenlijst)",
@@ -1724,6 +1726,8 @@ de namenlijst) of op een nog andere manier werden behandeld.
 		`//node[@his
        and
        not(@his=("normal","compound","name","robust_skip","skip"))
+       and
+       not(node[@his])
 ]`,
 		SPOD_STD,
 		"noun",

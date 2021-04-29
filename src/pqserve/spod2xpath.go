@@ -18074,9 +18074,28 @@ var spod2xpath = map[string]*xPath{
 					arg1: &dRoot{},
 				},
 				arg2: &dPredicate{
-					arg1: &dCollect{
-						ARG:  collect__attributes__his,
-						arg1: &dNode{},
+					arg1: &dAnd{
+						arg1: &dCollect{
+							ARG:  collect__attributes__his,
+							arg1: &dNode{},
+						},
+						arg2: &dFunction{
+							ARG: function__not__1__args,
+							arg1: &dArg{
+								arg1: &dSort{
+									arg1: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
+											arg1: &dCollect{
+												ARG:  collect__attributes__his,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -18091,17 +18110,36 @@ var spod2xpath = map[string]*xPath{
 					arg1: &dRoot{},
 				},
 				arg2: &dPredicate{
-					arg1: &dEqual{
-						ARG: equal__is,
-						arg1: &dCollect{
-							ARG:  collect__attributes__his,
-							arg1: &dNode{},
-						},
-						arg2: &dElem{
-							DATA: []interface{}{"normal"},
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
 							arg1: &dCollect{
 								ARG:  collect__attributes__his,
 								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"normal"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__his,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dFunction{
+							ARG: function__not__1__args,
+							arg1: &dArg{
+								arg1: &dSort{
+									arg1: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
+											arg1: &dCollect{
+												ARG:  collect__attributes__his,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
@@ -18119,22 +18157,41 @@ var spod2xpath = map[string]*xPath{
 				},
 				arg2: &dPredicate{
 					arg1: &dAnd{
-						arg1: &dCollect{
-							ARG:  collect__attributes__his,
-							arg1: &dNode{},
+						arg1: &dAnd{
+							arg1: &dCollect{
+								ARG:  collect__attributes__his,
+								arg1: &dNode{},
+							},
+							arg2: &dFunction{
+								ARG: function__not__1__args,
+								arg1: &dArg{
+									arg1: &dSort{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__his,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"normal", "robust_skip", "skip"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__his,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 						arg2: &dFunction{
 							ARG: function__not__1__args,
 							arg1: &dArg{
 								arg1: &dSort{
-									arg1: &dEqual{
-										ARG: equal__is,
-										arg1: &dCollect{
-											ARG:  collect__attributes__his,
-											arg1: &dNode{},
-										},
-										arg2: &dElem{
-											DATA: []interface{}{"normal", "robust_skip", "skip"},
+									arg1: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
 											arg1: &dCollect{
 												ARG:  collect__attributes__his,
 												arg1: &dNode{},
@@ -18158,17 +18215,36 @@ var spod2xpath = map[string]*xPath{
 					arg1: &dRoot{},
 				},
 				arg2: &dPredicate{
-					arg1: &dEqual{
-						ARG: equal__is,
-						arg1: &dCollect{
-							ARG:  collect__attributes__his,
-							arg1: &dNode{},
-						},
-						arg2: &dElem{
-							DATA: []interface{}{"compound"},
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
 							arg1: &dCollect{
 								ARG:  collect__attributes__his,
 								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"compound"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__his,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dFunction{
+							ARG: function__not__1__args,
+							arg1: &dArg{
+								arg1: &dSort{
+									arg1: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
+											arg1: &dCollect{
+												ARG:  collect__attributes__his,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
@@ -18185,17 +18261,36 @@ var spod2xpath = map[string]*xPath{
 					arg1: &dRoot{},
 				},
 				arg2: &dPredicate{
-					arg1: &dEqual{
-						ARG: equal__is,
-						arg1: &dCollect{
-							ARG:  collect__attributes__his,
-							arg1: &dNode{},
-						},
-						arg2: &dElem{
-							DATA: []interface{}{"name"},
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
 							arg1: &dCollect{
 								ARG:  collect__attributes__his,
 								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"name"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__his,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dFunction{
+							ARG: function__not__1__args,
+							arg1: &dArg{
+								arg1: &dSort{
+									arg1: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
+											arg1: &dCollect{
+												ARG:  collect__attributes__his,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
@@ -18213,22 +18308,41 @@ var spod2xpath = map[string]*xPath{
 				},
 				arg2: &dPredicate{
 					arg1: &dAnd{
-						arg1: &dCollect{
-							ARG:  collect__attributes__his,
-							arg1: &dNode{},
+						arg1: &dAnd{
+							arg1: &dCollect{
+								ARG:  collect__attributes__his,
+								arg1: &dNode{},
+							},
+							arg2: &dFunction{
+								ARG: function__not__1__args,
+								arg1: &dArg{
+									arg1: &dSort{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__his,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"normal", "compound", "name", "robust_skip", "skip"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__his,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 						arg2: &dFunction{
 							ARG: function__not__1__args,
 							arg1: &dArg{
 								arg1: &dSort{
-									arg1: &dEqual{
-										ARG: equal__is,
-										arg1: &dCollect{
-											ARG:  collect__attributes__his,
-											arg1: &dNode{},
-										},
-										arg2: &dElem{
-											DATA: []interface{}{"normal", "compound", "name", "robust_skip", "skip"},
+									arg1: &dCollect{
+										ARG:  collect__child__node,
+										arg1: &dNode{},
+										arg2: &dPredicate{
 											arg1: &dCollect{
 												ARG:  collect__attributes__his,
 												arg1: &dNode{},
