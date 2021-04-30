@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"github.com/pebbe/dbxml"
 
@@ -35,15 +36,15 @@ type ValueItem struct {
 type ValueItems []*ValueItem
 
 type Alpino_ds_full_node struct {
-	XMLName xml.Name  `xml:"alpino_ds"`
-	Node0   *FullNode `xml:"node"`
+	XMLName xml.Name         `xml:"alpino_ds"`
+	Node0   *pqnode.FullNode `xml:"node"`
 }
 
 func (s StructIS) String() string {
 	return fmt.Sprintf("%12d%s", int64(s.i)-math.MinInt32, s.s)
 }
 
-func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
+func getDeepAttr(attr string, n *pqnode.Node, values *[]*ValueItem) {
 	if n.Index != "" && len(n.NodeList) == 0 && n.Word == "" {
 		*values = append(*values, &ValueItem{-1, -1, n.Index})
 		return
@@ -67,7 +68,7 @@ func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
 			return
 		}
 	} else {
-		if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
+		if s := strings.TrimSpace(pqnode.GetAttr(attr, &n.FullNode)); s != "" {
 			*values = append(*values, &ValueItem{n.Begin, n.End, s})
 			return
 		}
@@ -77,7 +78,7 @@ func getDeepAttr(attr string, n *Node, values *[]*ValueItem) {
 	}
 }
 
-func getIndexValue(idx, attr string, n *Node, values *[]*ValueItem) bool {
+func getIndexValue(idx, attr string, n *pqnode.Node, values *[]*ValueItem) bool {
 	if n.Index == idx && (len(n.NodeList) > 0 || n.Word != "") {
 		getDeepAttr(attr, n, values)
 		return true
@@ -90,7 +91,7 @@ func getIndexValue(idx, attr string, n *Node, values *[]*ValueItem) bool {
 	return false
 }
 
-func getFullAttr(attr string, n, top *Node) string {
+func getFullAttr(attr string, n, top *pqnode.Node) string {
 
 	if n == nil || top == nil {
 		return ""
@@ -117,7 +118,7 @@ func getFullAttr(attr string, n, top *Node) string {
 		}
 	} else {
 		// als leeg, dan dieper kijken
-		if s := strings.TrimSpace(getAttr(attr, &n.FullNode)); s != "" {
+		if s := strings.TrimSpace(pqnode.GetAttr(attr, &n.FullNode)); s != "" {
 			if is_word {
 				return "+"
 			}
@@ -640,14 +641,14 @@ init({
 			var at [5]StructIS
 			for _, match := range matches {
 
-				node := &Node{}
+				node := &pqnode.Node{}
 				var sid string
 				var err error
 				if strings.HasPrefix(match, "<node") {
 					err = xml.Unmarshal([]byte(match), node)
 					sid = node.Id
 				} else if strings.HasPrefix(match, "<ud") {
-					var ud UdType
+					var ud pqnode.UdType
 					err = xml.Unmarshal([]byte(match), &ud)
 					node = findUdId(alpino.Node0, ud.Id)
 					sid = "UD:" + ud.Id
@@ -655,7 +656,7 @@ init({
 						node.Rel = "???"
 					}
 				} else if strings.HasPrefix(match, "<dep") {
-					var dep DepType
+					var dep pqnode.DepType
 					err = xml.Unmarshal([]byte(match), &dep)
 					node = findDepId(alpino.Node0, dep.Id, dep.Head, dep.Deprel)
 					sid = "EUD:" + dep.Id + ":" + dep.Head + ":" + dep.Deprel

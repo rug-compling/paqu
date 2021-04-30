@@ -1,12 +1,12 @@
 
 include ../Makefile.cfg
 
-SRC = attributes_generated.go pqdactx_true.go pqdactx_false.go
+INTERNAL = \
+	../internal/node/attribs.go \
+	../internal/node/node.go
 
-../../bin/pqdactx: $(SRC)
-	$(GO) build $(BUILD) -o $@ $(TAGS) $(OPTS) .
+../../bin/pqdactx: *.go $(INTERNAL)
+	$(GO) build -o $@ $(TAGS) $(OPTS) .
 
-attributes_generated.go: ../pqserve/attributes_generated.go
-	echo '// +build !nodbxml' > attributes_generated.go
-	echo >> attributes_generated.go
-	cat ../pqserve/attributes_generated.go >> attributes_generated.go
+../internal/node/attribs.go: ../internal/node/attribs.txt ../internal/node/mkattribs.go
+	make -C ../internal/node

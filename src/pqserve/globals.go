@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	pqnode "github.com/rug-compling/paqu/internal/node"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"bytes"
@@ -138,7 +140,7 @@ type Alpino_ds_complete struct {
 	Version  string        `xml:"version,attr,omitempty"`
 	Metadata *MetadataType `xml:"metadata,omitempty"`
 	Parser   *ParserT      `xml:"parser,omitempty"`
-	Node0    *Node         `xml:"node,omitempty"`
+	Node0    *pqnode.Node  `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
 	Root     []*UdNodeType `xml:"root,omitempty"`
@@ -150,11 +152,11 @@ type MetadataType struct {
 }
 
 type Alpino_ds struct {
-	XMLName  xml.Name `xml:"alpino_ds"`
-	Meta     []MetaT  `xml:"metadata>meta"`
-	Parser   ParserT  `xml:"parser,omitempty"`
-	Node0    *Node    `xml:"node"`
-	Sentence string   `xml:"sentence"`
+	XMLName  xml.Name     `xml:"alpino_ds"`
+	Meta     []MetaT      `xml:"metadata>meta"`
+	Parser   ParserT      `xml:"parser,omitempty"`
+	Node0    *pqnode.Node `xml:"node"`
+	Sentence string       `xml:"sentence"`
 }
 
 type Alpino_ds_meta struct {
@@ -199,7 +201,7 @@ type UdNodeType struct {
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
-	FeatsType
+	pqnode.FeatsType
 	Head      string `xml:"head,attr,omitempty"`
 	Deprel    string `xml:"deprel,attr,omitempty"`
 	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
@@ -236,50 +238,6 @@ type ConlluType struct {
 	Status string `xml:"status,attr,omitempty"`
 	Error  string `xml:"error,attr,omitempty"`
 	Auto   string `xml:"auto,attr,omitempty"`
-}
-
-type Node struct {
-	FullNode
-	Ud       *UdType `xml:"ud,omitempty"`
-	NodeList []*Node `xml:"node"`
-	skip     bool
-}
-
-type UdType struct {
-	Id    string `xml:"id,attr,omitempty"`
-	Form  string `xml:"form,attr,omitempty"`
-	Lemma string `xml:"lemma,attr,omitempty"`
-	Upos  string `xml:"upos,attr,omitempty"`
-	FeatsType
-	Head       string    `xml:"head,attr,omitempty"`
-	Deprel     string    `xml:"deprel,attr,omitempty"`
-	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
-	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
-	Dep        []DepType `xml:"dep,omitempty"`
-}
-
-type FeatsType struct {
-	Abbr     string `xml:"Abbr,attr,omitempty"`
-	Case     string `xml:"Case,attr,omitempty"`
-	Definite string `xml:"Definite,attr,omitempty"`
-	Degree   string `xml:"Degree,attr,omitempty"`
-	Foreign  string `xml:"Foreign,attr,omitempty"`
-	Gender   string `xml:"Gender,attr,omitempty"`
-	Number   string `xml:"Number,attr,omitempty"`
-	Person   string `xml:"Person,attr,omitempty"`
-	PronType string `xml:"PronType,attr,omitempty"`
-	Reflex   string `xml:"Reflex,attr,omitempty"`
-	Tense    string `xml:"Tense,attr,omitempty"`
-	VerbForm string `xml:"VerbForm,attr,omitempty"`
-}
-
-type DepType struct {
-	Id         string `xml:"id,attr,omitempty"`
-	Head       string `xml:"head,attr,omitempty"`
-	Deprel     string `xml:"deprel,attr,omitempty"`
-	DeprelMain string `xml:"deprel_main,attr,omitempty"`
-	DeprelAux  string `xml:"deprel_aux,attr,omitempty"`
-	Elided     bool   `xml:"elided,attr,omitempty"`
 }
 
 type TreeContext struct {

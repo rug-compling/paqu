@@ -37,6 +37,7 @@ import "C"
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"github.com/pebbe/compactcorpus"
 
@@ -512,7 +513,7 @@ func tree(q *Context) {
 // aangepast, maar ook de globale variabele 'words'
 // Hier wordt node.Root niet aangepast, omdat Root niet gebruikt wordt.
 // Verder worden hier postags verzameld voor de tooltip, waarbij Lemma leeg gemaakt wordt.
-func mwu(ctx *TreeContext, node *Node) {
+func mwu(ctx *TreeContext, node *pqnode.Node) {
 	for _, n := range node.NodeList {
 		mwu(ctx, n)
 	}
@@ -577,7 +578,7 @@ func mwu(ctx *TreeContext, node *Node) {
 // Als node X gemarkeerd is, en deze node wijst naar node X, dan deze node ook
 // markeren voor weergave in vet (maar niet voor een vette egde naar de parent node).
 // (Een node met inhoud EN index verwijst naar zichzelf.)
-func set_refs(ctx *TreeContext, node *Node) {
+func set_refs(ctx *TreeContext, node *pqnode.Node) {
 	if node.Index != "" && ctx.marks[node.Id] {
 		ctx.refs[node.Index] = true
 	}
@@ -586,7 +587,7 @@ func set_refs(ctx *TreeContext, node *Node) {
 	}
 }
 
-func print_nodes(q *Context, ctx *TreeContext, node *Node) {
+func print_nodes(q *Context, ctx *TreeContext, node *pqnode.Node) {
 	idx := ""
 	style := ""
 
@@ -622,10 +623,10 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 	if node.OtherId != "" || (node.Word == "" && len(node.NodeList) == 0) {
 		nt = []string{"id", "other_id", "rel"}
 	} else {
-		nt = NodeTags
+		nt = pqnode.NodeTags
 	}
 	for _, attr := range nt {
-		if value := getAttr(attr, &node.FullNode); value != "" {
+		if value := pqnode.GetAttr(attr, &node.FullNode); value != "" {
 			tooltip.WriteString(fmt.Sprintf("<tr><td class=\"lbl\">%s:<td>%s", html.EscapeString(attr), html.EscapeString(value)))
 		}
 	}
@@ -650,7 +651,7 @@ func print_nodes(q *Context, ctx *TreeContext, node *Node) {
 
 // Geeft een lijst terminals terug die op hetzelfde niveau moeten komen te staan,
 // met "|" ingevoegd voor onderbrekingen in niveaus.
-func print_terms(ctx *TreeContext, node *Node) []string {
+func print_terms(ctx *TreeContext, node *pqnode.Node) []string {
 	terms := make([]string, 0)
 
 	if len(node.NodeList) == 0 {
@@ -673,7 +674,7 @@ func print_terms(ctx *TreeContext, node *Node) []string {
 				// Onzichtbare node invoegen om te scheiden van node die links staat
 				ctx.graph.WriteString(fmt.Sprintf("    e%v [label=\" \", tooltip=\" \", style=invis];\n", node.Id))
 				terms = append(terms, fmt.Sprintf("e%v", node.Id))
-				node.skip = true
+				node.SkipThis = true
 			}
 			ctx.start = node.End
 			terms = append(terms, fmt.Sprintf("t%v", node.Id))
@@ -696,9 +697,9 @@ func print_terms(ctx *TreeContext, node *Node) []string {
 	return terms
 }
 
-func print_edges(ctx *TreeContext, node *Node) {
+func print_edges(ctx *TreeContext, node *pqnode.Node) {
 	if len(node.NodeList) == 0 {
-		if node.skip {
+		if node.SkipThis {
 			// Extra: Onzichtbare edge naar extra onzichtbare terminal
 			ctx.graph.WriteString(fmt.Sprintf("    n%v -- e%v [style=invis];\n", node.Id, node.Id))
 		}
@@ -754,7 +755,7 @@ func indexes(s string) map[int]bool {
 	return m
 }
 
-func unexpand(node *Node) {
+func unexpand(node *pqnode.Node) {
 	if node.OtherId != "" {
 		node.Word = ""
 		node.NodeList = node.NodeList[0:0]

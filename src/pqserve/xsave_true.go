@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"github.com/pebbe/dbxml"
 
@@ -401,7 +402,7 @@ func unexpandDact(data []byte) ([]byte, error) {
 			"  <comments></comments>\n", "", 1) + "\n"), nil
 }
 
-func unexpandDactNode(node *Node) {
+func unexpandDactNode(node *pqnode.Node) {
 	if node.NodeList == nil {
 		return
 	}
@@ -409,8 +410,8 @@ func unexpandDactNode(node *Node) {
 		if n.OtherId == "" {
 			unexpandDactNode(n)
 		} else {
-			node.NodeList[i] = &Node{
-				FullNode: FullNode{
+			node.NodeList[i] = &pqnode.Node{
+				FullNode: pqnode.FullNode{
 					Begin: n.Begin,
 					End:   n.End,
 					Id:    n.Id,

@@ -3,6 +3,8 @@
 package main
 
 import (
+	pqnode "github.com/rug-compling/paqu/internal/node"
+
 	"github.com/pebbe/dbxml"
 	"github.com/pebbe/util"
 
@@ -17,7 +19,7 @@ type Alpino_ds struct {
 	Version  string        `xml:"version,attr,omitempty"`
 	Metadata *MetadataType `xml:"metadata,omitempty"`
 	Parser   *ParserType   `xml:"parser,omitempty"`
-	Node     *Node         `xml:"node,omitempty"`
+	Node     *pqnode.Node  `xml:"node,omitempty"`
 	Sentence *SentType     `xml:"sentence,omitempty"`
 	Comments *CommentsType `xml:"comments,omitempty"`
 	Root     []*UdNodeType `xml:"root,omitempty"`
@@ -35,7 +37,7 @@ type UdNodeType struct {
 	Form  string `xml:"form,attr,omitempty"`
 	Lemma string `xml:"lemma,attr,omitempty"`
 	Upos  string `xml:"upos,attr,omitempty"`
-	FeatsType
+	pqnode.FeatsType
 	Head      string `xml:"head,attr,omitempty"`
 	Deprel    string `xml:"deprel,attr,omitempty"`
 	DeprelAux string `xml:"deprel_aux,attr,omitempty"`
@@ -93,48 +95,6 @@ type ParserType struct {
 	Skips string `xml:"skips,attr,omitempty"`
 }
 
-type Node struct {
-	FullNode
-	Ud       *UdType `xml:"ud,omitempty"`
-	NodeList []*Node `xml:"node"`
-}
-
-type UdType struct {
-	Id    string `xml:"id,attr,omitempty"`
-	Form  string `xml:"form,attr,omitempty"`
-	Lemma string `xml:"lemma,attr,omitempty"`
-	Upos  string `xml:"upos,attr,omitempty"`
-	FeatsType
-	Head       string    `xml:"head,attr,omitempty"`
-	Deprel     string    `xml:"deprel,attr,omitempty"`
-	DeprelMain string    `xml:"deprel_main,attr,omitempty"`
-	DeprelAux  string    `xml:"deprel_aux,attr,omitempty"`
-	Dep        []DepType `xml:"dep,omitempty"`
-}
-
-type FeatsType struct {
-	Abbr     string `xml:"Abbr,attr,omitempty"`
-	Case     string `xml:"Case,attr,omitempty"`
-	Definite string `xml:"Definite,attr,omitempty"`
-	Degree   string `xml:"Degree,attr,omitempty"`
-	Foreign  string `xml:"Foreign,attr,omitempty"`
-	Gender   string `xml:"Gender,attr,omitempty"`
-	Number   string `xml:"Number,attr,omitempty"`
-	Person   string `xml:"Person,attr,omitempty"`
-	PronType string `xml:"PronType,attr,omitempty"`
-	Reflex   string `xml:"Reflex,attr,omitempty"`
-	Tense    string `xml:"Tense,attr,omitempty"`
-	VerbForm string `xml:"VerbForm,attr,omitempty"`
-}
-
-type DepType struct {
-	Id         string `xml:"id,attr,omitempty"`
-	Head       string `xml:"head,attr,omitempty"`
-	Deprel     string `xml:"deprel,attr,omitempty"`
-	DeprelMain string `xml:"deprel_main,attr,omitempty"`
-	DeprelAux  string `xml:"deprel_aux,attr,omitempty"`
-}
-
 type ConlluType struct {
 	Conllu string `xml:",cdata"`
 	Status string `xml:"status,attr,omitempty"`
@@ -184,7 +144,7 @@ Syntax: %s infile.dact outfile.dactx
 }
 
 func expand(alpino *Alpino_ds) bool {
-	refs := make(map[string]*Node)
+	refs := make(map[string]*pqnode.Node)
 	getIndexed(alpino.Node, refs)
 	if len(refs) == 0 {
 		return false
@@ -194,7 +154,7 @@ func expand(alpino *Alpino_ds) bool {
 	return true
 }
 
-func getIndexed(node *Node, nodes map[string]*Node) {
+func getIndexed(node *pqnode.Node, nodes map[string]*pqnode.Node) {
 	if node.Index != "" && (node.NodeList != nil || node.Word != "") {
 		nodes[node.Index] = node
 	}
@@ -205,7 +165,7 @@ func getIndexed(node *Node, nodes map[string]*Node) {
 	}
 }
 
-func expandNode(n *Node, nodes map[string]*Node) {
+func expandNode(n *pqnode.Node, nodes map[string]*pqnode.Node) {
 	if n.NodeList != nil {
 		for _, node := range n.NodeList {
 			expandNode(node, nodes)
@@ -225,7 +185,7 @@ func expandNode(n *Node, nodes map[string]*Node) {
 	n.OtherId = o.Id
 	n.Ud = o.Ud
 
-	copyNodeOnEmpty(n, o)
+	pqnode.CopyNodeOnEmpty(n, o)
 }
 
 func format(alpino Alpino_ds) string {

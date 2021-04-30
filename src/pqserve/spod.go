@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"github.com/pebbe/dbxml"
 
@@ -1256,8 +1257,8 @@ func spod_stats_work(q *Context, dbname string, owner string, outname string) {
 		}
 	}
 
-	var processNode func(node *Node)
-	processNode = func(node *Node) {
+	var processNode func(node *pqnode.Node)
+	processNode = func(node *pqnode.Node) {
 		if node.Word != "" && node.Pt != "let" {
 			wordCount++
 			runeCount += utf8.RuneCountInString(strings.Replace(node.Word, "ij", "y", -1))

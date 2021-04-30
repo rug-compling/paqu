@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rug-compling/alud/v2"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"bytes"
 	"fmt"
@@ -115,7 +116,7 @@ var (
 	}
 )
 
-func getUdAttr(attr string, n *UdType) string {
+func getUdAttr(attr string, n *pqnode.UdType) string {
 	switch attr {
 	case "id":
 		return n.Id
@@ -161,7 +162,7 @@ func getUdAttr(attr string, n *UdType) string {
 	return ""
 }
 
-func getDepAttr(attr string, n *DepType) string {
+func getDepAttr(attr string, n *pqnode.DepType) string {
 	switch attr {
 	case "id":
 		return n.Id

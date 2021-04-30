@@ -1,6 +1,8 @@
 package main
 
 import (
+	pqnode "github.com/rug-compling/paqu/internal/node"
+
 	"fmt"
 	"html"
 	"net/http"
@@ -26,7 +28,7 @@ func updateError(q *Context, err error, is_html bool) {
 }
 
 func init() {
-	for _, tag := range NodeTags {
+	for _, tag := range pqnode.NodeTags {
 		keyTags[tag] = true
 	}
 }

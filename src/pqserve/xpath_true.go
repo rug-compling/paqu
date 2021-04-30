@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"github.com/pebbe/dbxml"
 
@@ -491,7 +492,7 @@ func xpath(q *Context) {
 			fmt.Fprintln(q.w, "</optgroup>")
 		}
 		fmt.Fprintln(q.w, "<optgroup label=\"&mdash; node: attributen &mdash;\">")
-		for _, s := range NodeTags {
+		for _, s := range pqnode.NodeTags {
 			fmt.Fprintf(q.w, "<option>%s</option>\n", s)
 		}
 		fmt.Fprintln(q.w, "<optgroup label=\"&mdash; ud: attributen &mdash;\">")
@@ -1398,7 +1399,7 @@ func html_xpath_form(q *Context, xpathmax int) (has_query bool, filter [3]bool) 
 	fmt.Fprint(q.w, `<script type="text/javascript" src="jquery.textcomplete.js"></script>
 <script type="text/javascript"><!--
 var attribs = ["@cats","@skips","@name","@value","@sentid"`)
-	for _, a := range NodeTags {
+	for _, a := range pqnode.NodeTags {
 		fmt.Fprintf(q.w, ",\n%q", "@"+a)
 	}
 	for a := range udTags {
@@ -1796,7 +1797,7 @@ $('ol').append(%q);
 }
 
 // zet de waarde voor alle woorden onder node op true
-func alpscan(node, node0 *Node, lvl1 []bool) {
+func alpscan(node, node0 *pqnode.Node, lvl1 []bool) {
 	if node == nil {
 		return
 	}
@@ -1812,7 +1813,7 @@ func alpscan(node, node0 *Node, lvl1 []bool) {
 }
 
 // vind de node met een index
-func alpindex(idx int, node *Node) *Node {
+func alpindex(idx int, node *pqnode.Node) *pqnode.Node {
 	if i, err := strconv.Atoi(node.Index); err == nil && i == idx && (strings.TrimSpace(node.Word) != "" || len(node.NodeList) > 1) {
 		return node
 	}
@@ -1870,7 +1871,7 @@ func bugtest(filename, xpath string) error {
 	return e
 }
 
-func findUdId(node *Node, ID string) *Node {
+func findUdId(node *pqnode.Node, ID string) *pqnode.Node {
 	if node.Ud != nil && node.Ud.Id == ID {
 		return node
 	}
@@ -1882,7 +1883,7 @@ func findUdId(node *Node, ID string) *Node {
 	return nil
 }
 
-func findDepId(node *Node, ID string, head string, deprel string) *Node {
+func findDepId(node *pqnode.Node, ID string, head string, deprel string) *pqnode.Node {
 	if node.Ud != nil && node.Ud.Dep != nil {
 		for _, d := range node.Ud.Dep {
 			if d.Id == ID && d.Head == head && d.Deprel == deprel {
@@ -1892,7 +1893,7 @@ func findDepId(node *Node, ID string, head string, deprel string) *Node {
 				n := *node // kopie
 				n.NodeList = nil
 				ud := *node.Ud // kopie
-				ud.Dep = []DepType{d}
+				ud.Dep = []pqnode.DepType{d}
 				n.Ud = &ud
 				return &n
 			}

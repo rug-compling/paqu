@@ -1,6 +1,8 @@
 package main
 
 import (
+	pqnode "github.com/rug-compling/paqu/internal/node"
+
 	"github.com/BurntSushi/toml"
 
 	"bytes"
@@ -507,7 +509,7 @@ func format(alpino Alpino_ds_complete) (string, error) {
 	return s, nil
 }
 
-func minifyNode(node *Node) {
+func minifyNode(node *pqnode.Node) {
 	if node == nil {
 		return
 	}

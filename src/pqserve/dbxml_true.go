@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 
 	"github.com/pebbe/dbxml"
 
@@ -243,7 +244,7 @@ func dactExpand(data []byte) (string, error) {
 		return "", err
 	}
 
-	refs := make(map[string]*Node)
+	refs := make(map[string]*pqnode.Node)
 	getIndexed(alpino.Node0, refs)
 	if len(refs) == 0 {
 		return "", nil
@@ -258,7 +259,7 @@ func dactExpand(data []byte) (string, error) {
 	return format(alpino)
 }
 
-func getIndexed(node *Node, nodes map[string]*Node) {
+func getIndexed(node *pqnode.Node, nodes map[string]*pqnode.Node) {
 	if node.Index != "" && (node.NodeList != nil || node.Word != "") {
 		nodes[node.Index] = node
 	}
@@ -269,7 +270,7 @@ func getIndexed(node *Node, nodes map[string]*Node) {
 	}
 }
 
-func expandNode(n *Node, nodes map[string]*Node) error {
+func expandNode(n *pqnode.Node, nodes map[string]*pqnode.Node) error {
 	if n.NodeList != nil {
 		for _, node := range n.NodeList {
 			err := expandNode(node, nodes)
@@ -290,7 +291,7 @@ func expandNode(n *Node, nodes map[string]*Node) error {
 
 	n.OtherId = o.Id
 
-	copyNodeOnEmpty(n, o)
+	pqnode.CopyNodeOnEmpty(n, o)
 
 	return nil
 }

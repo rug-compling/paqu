@@ -1,3 +1,5 @@
+// +build ignore
+
 package main
 
 import (
@@ -19,7 +21,7 @@ func main() {
 // THIS IS A GENERATED FILE. DO NOT EDIT.
 //
 
-package main
+package node
 
 import (
 	"fmt"
@@ -48,7 +50,7 @@ var NodeTags = []string{
 	}
 	fmt.Print(`}
 
-func getAttr(attr string, n *FullNode) string {
+func GetAttr(attr string, n *FullNode) string {
 	switch attr {
 `)
 	for _, attrib := range attribs {
@@ -65,7 +67,7 @@ func getAttr(attr string, n *FullNode) string {
 	return ""
 }
 
-func copyNodeOnEmpty(dst, src *Node) {
+func CopyNodeOnEmpty(dst, src *Node) {
 `)
 	for _, attrib := range attribs {
 		up := upper(attrib)
