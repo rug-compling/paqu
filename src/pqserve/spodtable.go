@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	pqspod "github.com/rug-compling/paqu/internal/spod"
 
 	"github.com/pebbe/dbxml"
 	"github.com/rug-compling/alpinods"
@@ -20,19 +21,19 @@ var (
 	// niet "na" (staat voor ontbrekend, oude bug in Alpino)
 	ptlist = []string{"adj", "bw", "let", "lid", "n", "spec", "tsw", "tw", "vg", "vnw", "vz", "ww"}
 
-	noNode = &nodeType{
+	noNode = &pqspod.NodeType{
 		NodeAttributes: alpinods.NodeAttributes{
 			Begin: -1,
 			End:   -1,
 			ID:    -1,
 		},
-		Node:                []*nodeType{},
-		axParent:            []interface{}{},
-		axAncestors:         []interface{}{},
-		axAncestorsOrSelf:   []interface{}{},
-		axChildren:          []interface{}{},
-		axDescendants:       []interface{}{},
-		axDescendantsOrSelf: []interface{}{},
+		Node:                []*pqspod.NodeType{},
+		AxParent:            []interface{}{},
+		AxAncestors:         []interface{}{},
+		AxAncestorsOrSelf:   []interface{}{},
+		AxChildren:          []interface{}{},
+		AxDescendants:       []interface{}{},
+		AxDescendantsOrSelf: []interface{}{},
 	}
 )
 
@@ -77,20 +78,20 @@ func spod_table(q *Context, prefix string, length bool) {
 	optlist := make([]string, 0)
 	cats := false
 	skips := false
-	for idx, spod := range spods {
-		if spod.special == "hidden1" {
+	for idx, spod := range pqspod.Spods {
+		if spod.Special == "hidden1" {
 			continue
 		}
-		if spod.lbl == "postag" || spod.lbl == "pos" {
+		if spod.Lbl == "postag" || spod.Lbl == "pos" {
 			continue
 		}
 		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
-			if spod.lbl == "pt" {
+			if spod.Lbl == "pt" {
 				opts["pt"] = true
 				optlist = append(optlist, "pt."+strings.Join(ptlist, "\tpt."))
 				continue
 			}
-			if spod.special == "parser" && strings.HasPrefix(spod.lbl, "cats") {
+			if spod.Special == "parser" && strings.HasPrefix(spod.Lbl, "cats") {
 				if !cats {
 					cats = true
 					opts["cats1"] = true
@@ -98,7 +99,7 @@ func spod_table(q *Context, prefix string, length bool) {
 				}
 				continue
 			}
-			if spod.special == "parser" && strings.HasPrefix(spod.lbl, "skips") {
+			if spod.Special == "parser" && strings.HasPrefix(spod.Lbl, "skips") {
 				if !skips {
 					skips = true
 					opts["skips1"] = true
@@ -106,10 +107,10 @@ func spod_table(q *Context, prefix string, length bool) {
 				}
 				continue
 			}
-			opts[spod.lbl] = true
-			optlist = append(optlist, spod.lbl)
-			if length && spod.special != "attr" && spod.special != "parser" {
-				optlist = append(optlist, spod.lbl+".len")
+			opts[spod.Lbl] = true
+			optlist = append(optlist, spod.Lbl)
+			if length && spod.Special != "attr" && spod.Special != "parser" {
+				optlist = append(optlist, spod.Lbl+".len")
 			}
 		}
 	}
@@ -182,7 +183,7 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 		meta[m] = make([]string, 0)
 	}
 
-	var alpino alpino_ds
+	var alpino pqspod.Alpino_ds
 	err := xml.Unmarshal([]byte(contents), &alpino)
 	if logerr(err) {
 		return false
@@ -203,22 +204,22 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 	}
 
 	// Extra node bovenaan vanwege gedoe met //node
-	alpino.Node = &nodeType{
+	alpino.Node = &pqspod.NodeType{
 		NodeAttributes: alpinods.NodeAttributes{
 			Begin: alpino.Node.Begin,
 			End:   alpino.Node.End,
 			ID:    -2, // ??? TODO
 		},
-		Node: []*nodeType{alpino.Node},
+		Node: []*pqspod.NodeType{alpino.Node},
 	}
 
 	ptCount := make(map[string]int)
 
-	var walk func(*nodeType)
-	walk = func(node *nodeType) {
+	var walk func(*pqspod.NodeType)
+	walk = func(node *pqspod.NodeType) {
 		ptCount[node.Pt] = ptCount[node.Pt] + 1
 		if node.Node == nil {
-			node.Node = make([]*nodeType, 0)
+			node.Node = make([]*pqspod.NodeType, 0)
 		} else {
 			for _, n := range node.Node {
 				walk(n)
@@ -227,19 +228,19 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 	}
 	walk(alpino.Node)
 
-	qq := &context{
-		alpino:   &alpino,
-		filename: filename,
-		sentence: alpino.Sentence.Sent,
-		sentid:   alpino.Sentence.SentId,
-		varroot:  []interface{}{alpino.Node},
+	qq := &pqspod.Context{
+		Alpino:   &alpino,
+		Filename: filename,
+		Sentence: alpino.Sentence.Sent,
+		Sentid:   alpino.Sentence.SentId,
+		Varroot:  []interface{}{alpino.Node},
 	}
 
 	inspect(qq)
 
 	tokens := 0
 	tokenlen := 0
-	for _, node := range qq.ptnodes {
+	for _, node := range qq.Ptnodes {
 		if node.Pt != "let" {
 			tokens++
 			tokenlen += utf8.RuneCountInString(strings.Replace(node.Word, "ij", "y", -1))
@@ -255,17 +256,17 @@ func spod_table_file(q *Context, filename string, contents string, opts map[stri
 	}
 
 SPODS:
-	for _, spod := range spods {
-		if !opts[spod.lbl] {
+	for _, spod := range pqspod.Spods {
+		if !opts[spod.Lbl] {
 			continue
 		}
-		if spod.lbl == "pt" {
+		if spod.Lbl == "pt" {
 			for _, attr := range ptlist {
 				fmt.Fprintf(q.w, "\t%d", ptCount[attr])
 			}
 			continue
 		}
-		if spod.special == "parser" {
+		if spod.Special == "parser" {
 			if alpino.Parser == nil {
 				fmt.Fprint(q.w, "\tNA")
 				continue
@@ -276,7 +277,7 @@ SPODS:
 				fmt.Fprint(q.w, "\tNA")
 				continue
 			}
-			switch spod.lbl {
+			switch spod.Lbl {
 			case "ok":
 				if cats == 1 && skips == 0 {
 					fmt.Fprint(q.w, "\t1")
@@ -292,23 +293,23 @@ SPODS:
 			continue
 		}
 
-		results, err := spod2xpath[spod.lbl].do(qq)
+		results, err := pqspod.Spod2xpath[spod.Lbl].Do(qq)
 		if err != nil {
 			fmt.Fprint(q.w, "\tERROR\tNA")
 			continue SPODS
 		}
-		seen := make(map[int]*nodeType)
+		seen := make(map[int]*pqspod.NodeType)
 		totalSize := 0
 		if results != nil {
 			for _, result := range results {
-				node, ok := result.(*nodeType)
+				node, ok := result.(*pqspod.NodeType)
 				if !ok {
 					fmt.Fprintf(q.w, "\tNA\t%T", result)
 					continue SPODS
 				}
 				if _, ok := seen[node.ID]; !ok {
 					seen[node.ID] = node
-					totalSize += node.size
+					totalSize += node.NodeSize
 				}
 			}
 		}
@@ -330,16 +331,16 @@ SPODS:
 	return true
 }
 
-func inspect(q *context) {
-	allnodes := make([]*nodeType, 0)
+func inspect(q *pqspod.Context) {
+	allnodes := make([]*pqspod.NodeType, 0)
 	varallnodes := make([]interface{}, 0)
-	ptnodes := make([]*nodeType, 0)
+	ptnodes := make([]*pqspod.NodeType, 0)
 	varindexnodes := make([]interface{}, 0)
 
-	indextable := make(map[int]*nodeType)
+	indextable := make(map[int]*pqspod.NodeType)
 
-	var walk func(*nodeType)
-	walk = func(node *nodeType) {
+	var walk func(*pqspod.NodeType)
+	walk = func(node *pqspod.NodeType) {
 
 		if node.Index > 0 && (node.Word != "" || len(node.Node) > 0) {
 			indextable[node.Index] = node
@@ -362,27 +363,27 @@ func inspect(q *context) {
 			varindexnodes = append(varindexnodes, node)
 		}
 		for _, n := range node.Node {
-			n.parent = node
-			n.axParent = []interface{}{node}
+			n.Parent = node
+			n.AxParent = []interface{}{node}
 			walk(n)
 		}
-		node.axChildren = make([]interface{}, 0)
-		node.axDescendants = make([]interface{}, 0)
-		node.axDescendantsOrSelf = make([]interface{}, 1)
-		node.axDescendantsOrSelf[0] = node
+		node.AxChildren = make([]interface{}, 0)
+		node.AxDescendants = make([]interface{}, 0)
+		node.AxDescendantsOrSelf = make([]interface{}, 1)
+		node.AxDescendantsOrSelf[0] = node
 		for _, n := range node.Node {
-			node.axChildren = append(node.axChildren, n)
-			node.axDescendants = append(node.axDescendants, n)
-			node.axDescendants = append(node.axDescendants, n.axDescendants...)
-			node.axDescendantsOrSelf = append(node.axDescendantsOrSelf, n.axDescendantsOrSelf...) // niet n
+			node.AxChildren = append(node.AxChildren, n)
+			node.AxDescendants = append(node.AxDescendants, n)
+			node.AxDescendants = append(node.AxDescendants, n.AxDescendants...)
+			node.AxDescendantsOrSelf = append(node.AxDescendantsOrSelf, n.AxDescendantsOrSelf...) // niet n
 		}
 	}
-	walk(q.alpino.Node)
-	q.alpino.Node.parent = noNode
-	q.alpino.Node.axParent = []interface{}{}
+	walk(q.Alpino.Node)
+	q.Alpino.Node.Parent = noNode
+	q.Alpino.Node.AxParent = []interface{}{}
 
 	var found map[int]bool
-	walk = func(node *nodeType) {
+	walk = func(node *pqspod.NodeType) {
 		if node.Index > 0 {
 			node = indextable[node.Index]
 		}
@@ -397,21 +398,21 @@ func inspect(q *context) {
 	for _, node := range allnodes {
 		found = make(map[int]bool)
 		walk(node)
-		node.size = len(found)
+		node.NodeSize = len(found)
 	}
 
 	for _, node := range allnodes {
-		node.axAncestors = make([]interface{}, 0)
-		node.axAncestorsOrSelf = make([]interface{}, 0)
-		node.axAncestorsOrSelf = append(node.axAncestorsOrSelf, node)
-		if node != q.alpino.Node {
-			node.axAncestors = append(node.axAncestors, node.parent)
-			node.axAncestors = append(node.axAncestors, node.parent.axAncestors...)
-			if node.axAncestors[len(node.axAncestors)-1] != q.alpino.Node {
+		node.AxAncestors = make([]interface{}, 0)
+		node.AxAncestorsOrSelf = make([]interface{}, 0)
+		node.AxAncestorsOrSelf = append(node.AxAncestorsOrSelf, node)
+		if node != q.Alpino.Node {
+			node.AxAncestors = append(node.AxAncestors, node.Parent)
+			node.AxAncestors = append(node.AxAncestors, node.Parent.AxAncestors...)
+			if node.AxAncestors[len(node.AxAncestors)-1] != q.Alpino.Node {
 				// zou niet mogelijk moeten zijn
-				panic("Missing ancestors in " + q.filename)
+				panic("Missing ancestors in " + q.Filename)
 			}
-			node.axAncestorsOrSelf = append(node.axAncestorsOrSelf, node.parent.axAncestorsOrSelf...)
+			node.AxAncestorsOrSelf = append(node.AxAncestorsOrSelf, node.Parent.AxAncestorsOrSelf...)
 		}
 	}
 
@@ -423,11 +424,11 @@ func inspect(q *context) {
 		varptnodes[i] = node
 	}
 
-	q.allnodes = allnodes
-	q.varallnodes = varallnodes
-	q.varindexnodes = varindexnodes
-	q.ptnodes = ptnodes
-	q.varptnodes = varptnodes
+	q.Allnodes = allnodes
+	q.Varallnodes = varallnodes
+	q.Varindexnodes = varindexnodes
+	q.Ptnodes = ptnodes
+	q.Varptnodes = varptnodes
 
 }
 

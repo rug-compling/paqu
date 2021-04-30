@@ -1,8 +1,8 @@
 // GENERATED FILE. DO NOT EDIT.
 
-package main
+package spod
 
-var spod2xpath = map[string]*xPath{
+var Spod2xpath = map[string]*xPath{
 	"smain": &xPath{
 		arg1: &dSort{
 			arg1: &dCollect{

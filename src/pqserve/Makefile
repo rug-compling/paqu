@@ -7,15 +7,13 @@ INTERNAL = \
 	../internal/file/file.go \
 	../internal/node/attribs.go \
 	../internal/node/node.go \
-	../internal/ranges/ranges.go
+	../internal/ranges/ranges.go \
+	../internal/spod/spod2xpath.go \
+	../internal/spod/spoddata.go \
+	../internal/spod/xpath.go
 
 
-all: spod2xpath.go ../../bin/pqserve
-
-
-spod2xpath.go: spoddata.go ../internal/file/data/macros.txt spodmake.go
-	$(GO) run -tags spodmake spodmake.go spoddata.go ../internal/file/data/macros.txt > spod2xpath.tmp && mv spod2xpath.tmp spod2xpath.go || touch spod2xpath.go
-	gofmt -w spod2xpath.go
+all: ../../bin/pqserve
 
 ../../bin/pqserve: *.go $(INTERNAL)
 	$(GO) build -o $@ $(TAGS) $(OPTS) .
@@ -29,3 +27,5 @@ spod2xpath.go: spoddata.go ../internal/file/data/macros.txt spodmake.go
 ../internal/node/attribs.go: ../internal/node/attribs.txt ../internal/node/mkattribs.go
 	make -C ../internal/node
 
+../internal/spod/spod2xpath.go: ../internal/spod/spoddata.go ../internal/file/data/macros.txt ../internal/spod/spodmake/spodmake.go
+	make -C ../internal/spod

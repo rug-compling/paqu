@@ -1,6 +1,4 @@
-// +build spodmake !spodmake
-
-package main
+package spod
 
 const (
 	SPOD_STD = "std"
@@ -8,15 +6,15 @@ const (
 )
 
 type Spod struct {
-	header  string
-	xpath   string
-	method  string
-	lbl     string
-	text    string
-	special string
+	Header  string
+	Xpath   string
+	Method  string
+	Lbl     string
+	Text    string
+	Special string
 }
 
-var spods = []Spod{
+var Spods = []Spod{
 	// hidden objecten moeten aan het begin, omdat anderen ervan afhankelijk zijn
 	{
 		"",

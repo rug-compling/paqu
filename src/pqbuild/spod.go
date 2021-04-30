@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/rug-compling/paqu/internal/dir"
 	"github.com/rug-compling/paqu/internal/file"
+	pqspod "github.com/rug-compling/paqu/internal/spod"
 
 	"github.com/pebbe/util"
 	"github.com/rug-compling/alpinods"
@@ -20,19 +21,19 @@ import (
 )
 
 var (
-	noNode = &nodeType{
+	noNode = &pqspod.NodeType{
 		NodeAttributes: alpinods.NodeAttributes{
 			Begin: -1,
 			End:   -1,
 			ID:    -1,
 		},
-		Node:                []*nodeType{},
-		axParent:            []interface{}{},
-		axAncestors:         []interface{}{},
-		axAncestorsOrSelf:   []interface{}{},
-		axChildren:          []interface{}{},
-		axDescendants:       []interface{}{},
-		axDescendantsOrSelf: []interface{}{},
+		Node:                []*pqspod.NodeType{},
+		AxParent:            []interface{}{},
+		AxAncestors:         []interface{}{},
+		AxAncestorsOrSelf:   []interface{}{},
+		AxChildren:          []interface{}{},
+		AxDescendants:       []interface{}{},
+		AxDescendantsOrSelf: []interface{}{},
 	}
 
 	posCount    = make(map[string]int)
@@ -69,21 +70,21 @@ var (
 func do_spod(data []byte) {
 	sentenceCount++
 
-	var alpino alpino_ds
+	var alpino pqspod.Alpino_ds
 	x(xml.Unmarshal(data, &alpino))
 
 	// Extra node bovenaan vanwege gedoe met //node
-	alpino.Node = &nodeType{
+	alpino.Node = &pqspod.NodeType{
 		NodeAttributes: alpinods.NodeAttributes{
 			Begin: alpino.Node.Begin,
 			End:   alpino.Node.End,
 			ID:    -2, // ??? TODO
 		},
-		Node: []*nodeType{alpino.Node},
+		Node: []*pqspod.NodeType{alpino.Node},
 	}
 
-	var walk func(*nodeType)
-	walk = func(node *nodeType) {
+	var walk func(*pqspod.NodeType)
+	walk = func(node *pqspod.NodeType) {
 		if p := node.Pos; p != "" {
 			posCount[p] = posCount[p] + 1
 		}
@@ -96,7 +97,7 @@ func do_spod(data []byte) {
 			ptCount["na"] = ptCount["na"] + 1
 		}
 		if node.Node == nil {
-			node.Node = make([]*nodeType, 0)
+			node.Node = make([]*pqspod.NodeType, 0)
 		} else {
 			for _, n := range node.Node {
 				walk(n)
@@ -105,16 +106,16 @@ func do_spod(data []byte) {
 	}
 	walk(alpino.Node)
 
-	qq := &context{
-		alpino:   &alpino,
-		sentence: alpino.Sentence.Sent,
-		sentid:   alpino.Sentence.SentId,
-		varroot:  []interface{}{alpino.Node},
+	qq := &pqspod.Context{
+		Alpino:   &alpino,
+		Sentence: alpino.Sentence.Sent,
+		Sentid:   alpino.Sentence.SentId,
+		Varroot:  []interface{}{alpino.Node},
 	}
 
 	inspect(qq)
 
-	for _, node := range qq.ptnodes {
+	for _, node := range qq.Ptnodes {
 		if node.Pt != "let" {
 			types[node.Word] = true
 			tokens++
@@ -122,17 +123,17 @@ func do_spod(data []byte) {
 		}
 	}
 
-	for _, spod := range spods {
+	for _, spod := range pqspod.Spods {
 
-		if spod.special == "hidden1" || spod.special == "attr" {
+		if spod.Special == "hidden1" || spod.Special == "attr" {
 			continue
 		}
 
 		if first {
-			lengths[spod.lbl] = make(map[int]int)
+			lengths[spod.Lbl] = make(map[int]int)
 		}
 
-		if spod.special == "parser" {
+		if spod.Special == "parser" {
 			if alpino.Parser == nil {
 				continue
 			}
@@ -145,76 +146,76 @@ func do_spod(data []byte) {
 			if err != nil {
 				skips = -1
 			}
-			switch spod.lbl {
+			switch spod.Lbl {
 			case "ok":
 				if cats == 1 && skips == 0 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "cats0":
 				if cats == 0 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "cats1":
 				if cats == 1 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "cats2":
 				if cats == 2 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "cats3":
 				if cats == 3 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "cats4":
 				if cats > 3 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "skips0":
 				if skips == 0 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "skips1":
 				if skips == 1 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "skips2":
 				if skips == 2 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "skips3":
 				if skips == 3 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			case "skips4":
 				if skips > 3 {
-					sentences[spod.lbl] = sentences[spod.lbl] + 1
-					items[spod.lbl] = items[spod.lbl] + 1
+					sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+					items[spod.Lbl] = items[spod.Lbl] + 1
 				}
 			}
 			continue
 		}
 
-		results, err := spod2xpath[spod.lbl].do(qq)
+		results, err := pqspod.Spod2xpath[spod.Lbl].Do(qq)
 		x(err)
 		if results == nil || len(results) == 0 {
 			continue
 		}
-		sentences[spod.lbl] = sentences[spod.lbl] + 1
-		items[spod.lbl] = items[spod.lbl] + len(results)
+		sentences[spod.Lbl] = sentences[spod.Lbl] + 1
+		items[spod.Lbl] = items[spod.Lbl] + len(results)
 		for _, r := range results {
-			node := r.(*nodeType)
-			lengths[spod.lbl][node.size] = lengths[spod.lbl][node.size] + 1
+			node := r.(*pqspod.NodeType)
+			lengths[spod.Lbl][node.NodeSize] = lengths[spod.Lbl][node.NodeSize] + 1
 		}
 
 	}
@@ -222,20 +223,20 @@ func do_spod(data []byte) {
 
 }
 
-func inspect(q *context) {
-	allnodes := make([]*nodeType, 0)
+func inspect(q *pqspod.Context) {
+	allnodes := make([]*pqspod.NodeType, 0)
 	varallnodes := make([]interface{}, 0)
-	ptnodes := make([]*nodeType, 0)
+	Ptnodes := make([]*pqspod.NodeType, 0)
 	varindexnodes := make([]interface{}, 0)
 
-	indextable := make(map[int]*nodeType)
+	indextable := make(map[int]*pqspod.NodeType)
 
-	if q.alpino.Parser != nil && q.alpino.Parser.Cats != "" && q.alpino.Parser.Skips != "" {
+	if q.Alpino.Parser != nil && q.Alpino.Parser.Cats != "" && q.Alpino.Parser.Skips != "" {
 		has_parser = true
 	}
 
-	var walk func(*nodeType)
-	walk = func(node *nodeType) {
+	var walk func(*pqspod.NodeType)
+	walk = func(node *pqspod.NodeType) {
 
 		if node.Pos == "verb" {
 			has_pos_verb = true
@@ -268,33 +269,33 @@ func inspect(q *context) {
 		allnodes = append(allnodes, node)
 		varallnodes = append(varallnodes, node)
 		if node.Pt != "" {
-			ptnodes = append(ptnodes, node)
+			Ptnodes = append(Ptnodes, node)
 		}
 		if node.Index > 0 {
 			varindexnodes = append(varindexnodes, node)
 		}
 		for _, n := range node.Node {
-			n.parent = node
-			n.axParent = []interface{}{node}
+			n.Parent = node
+			n.AxParent = []interface{}{node}
 			walk(n)
 		}
-		node.axChildren = make([]interface{}, 0)
-		node.axDescendants = make([]interface{}, 0)
-		node.axDescendantsOrSelf = make([]interface{}, 1)
-		node.axDescendantsOrSelf[0] = node
+		node.AxChildren = make([]interface{}, 0)
+		node.AxDescendants = make([]interface{}, 0)
+		node.AxDescendantsOrSelf = make([]interface{}, 1)
+		node.AxDescendantsOrSelf[0] = node
 		for _, n := range node.Node {
-			node.axChildren = append(node.axChildren, n)
-			node.axDescendants = append(node.axDescendants, n)
-			node.axDescendants = append(node.axDescendants, n.axDescendants...)
-			node.axDescendantsOrSelf = append(node.axDescendantsOrSelf, n.axDescendantsOrSelf...) // niet n
+			node.AxChildren = append(node.AxChildren, n)
+			node.AxDescendants = append(node.AxDescendants, n)
+			node.AxDescendants = append(node.AxDescendants, n.AxDescendants...)
+			node.AxDescendantsOrSelf = append(node.AxDescendantsOrSelf, n.AxDescendantsOrSelf...) // niet n
 		}
 	}
-	walk(q.alpino.Node)
-	q.alpino.Node.parent = noNode
-	q.alpino.Node.axParent = []interface{}{}
+	walk(q.Alpino.Node)
+	q.Alpino.Node.Parent = noNode
+	q.Alpino.Node.AxParent = []interface{}{}
 
 	var found map[int]bool
-	walk = func(node *nodeType) {
+	walk = func(node *pqspod.NodeType) {
 		if node.Index > 0 {
 			node = indextable[node.Index]
 		}
@@ -309,37 +310,37 @@ func inspect(q *context) {
 	for _, node := range allnodes {
 		found = make(map[int]bool)
 		walk(node)
-		node.size = len(found)
+		node.NodeSize = len(found)
 	}
 
 	for _, node := range allnodes {
-		node.axAncestors = make([]interface{}, 0)
-		node.axAncestorsOrSelf = make([]interface{}, 0)
-		node.axAncestorsOrSelf = append(node.axAncestorsOrSelf, node)
-		if node != q.alpino.Node {
-			node.axAncestors = append(node.axAncestors, node.parent)
-			node.axAncestors = append(node.axAncestors, node.parent.axAncestors...)
-			if node.axAncestors[len(node.axAncestors)-1] != q.alpino.Node {
+		node.AxAncestors = make([]interface{}, 0)
+		node.AxAncestorsOrSelf = make([]interface{}, 0)
+		node.AxAncestorsOrSelf = append(node.AxAncestorsOrSelf, node)
+		if node != q.Alpino.Node {
+			node.AxAncestors = append(node.AxAncestors, node.Parent)
+			node.AxAncestors = append(node.AxAncestors, node.Parent.AxAncestors...)
+			if node.AxAncestors[len(node.AxAncestors)-1] != q.Alpino.Node {
 				// zou niet mogelijk moeten zijn
-				panic("Missing ancestors in " + q.filename)
+				panic("Missing ancestors in " + q.Filename)
 			}
-			node.axAncestorsOrSelf = append(node.axAncestorsOrSelf, node.parent.axAncestorsOrSelf...)
+			node.AxAncestorsOrSelf = append(node.AxAncestorsOrSelf, node.Parent.AxAncestorsOrSelf...)
 		}
 	}
 
-	sort.Slice(ptnodes, func(i, j int) bool {
-		return ptnodes[i].End < ptnodes[j].End
+	sort.Slice(Ptnodes, func(i, j int) bool {
+		return Ptnodes[i].End < Ptnodes[j].End
 	})
-	varptnodes := make([]interface{}, len(ptnodes))
-	for i, node := range ptnodes {
+	varptnodes := make([]interface{}, len(Ptnodes))
+	for i, node := range Ptnodes {
 		varptnodes[i] = node
 	}
 
-	q.allnodes = allnodes
-	q.varallnodes = varallnodes
-	q.varindexnodes = varindexnodes
-	q.ptnodes = ptnodes
-	q.varptnodes = varptnodes
+	q.Allnodes = allnodes
+	q.Varallnodes = varallnodes
+	q.Varindexnodes = varindexnodes
+	q.Ptnodes = Ptnodes
+	q.Varptnodes = varptnodes
 
 }
 
@@ -360,13 +361,13 @@ func spod_save() {
 
 	loadMacros()
 
-	for _, spod := range spods {
-		filename := filepath.Join(dir, spod_fingerprint(spod.xpath, spod.method))
+	for _, spod := range pqspod.Spods {
+		filename := filepath.Join(dir, spod_fingerprint(spod.Xpath, spod.Method))
 		fp, err := os.Create(filename)
 		x(err)
-		if spod.special == "hidden1" {
+		if spod.Special == "hidden1" {
 			var found bool
-			switch spod.lbl {
+			switch spod.Lbl {
 			case "has_his":
 				found = has_his
 			case "has_parser":
@@ -381,16 +382,16 @@ func spod_save() {
 				found = has_yn
 			}
 			if found {
-				fmt.Fprintf(fp, "%s\t1\t1\t1:1\n", spod.lbl)
+				fmt.Fprintf(fp, "%s\t1\t1\t1:1\n", spod.Lbl)
 			} else {
-				fmt.Fprintf(fp, "%s\t0\t0\t\n", spod.lbl)
+				fmt.Fprintf(fp, "%s\t0\t0\t\n", spod.Lbl)
 			}
 			fp.Close()
 			continue
 		}
-		if spod.special == "attr" {
+		if spod.Special == "attr" {
 			var count map[string]int
-			switch spod.lbl {
+			switch spod.Lbl {
 			case "pos":
 				count = posCount
 			case "postag":
@@ -413,37 +414,37 @@ func spod_save() {
 			fp.Close()
 			continue
 		}
-		if spod.special == "parser" {
+		if spod.Special == "parser" {
 			if !has_parser {
 				fp.Close()
 				os.Remove(filename)
 				continue
 			}
-		} else if spod.special == "qm -yn" {
+		} else if spod.Special == "qm -yn" {
 			if !(has_qm || !has_yn) {
 				fp.Close()
 				os.Remove(filename)
 				continue
 			}
-		} else if spod.special == "pos_verb" {
+		} else if spod.Special == "pos_verb" {
 			if !has_pos_verb {
 				fp.Close()
 				os.Remove(filename)
 				continue
 			}
-		} else if spod.special == "sc" {
+		} else if spod.Special == "sc" {
 			if !has_sc {
 				fp.Close()
 				os.Remove(filename)
 				continue
 			}
-		} else if spod.special == "parser" {
+		} else if spod.Special == "parser" {
 			if !has_parser {
 				fp.Close()
 				os.Remove(filename)
 				continue
 			}
-		} else if spod.special == "his" {
+		} else if spod.Special == "his" {
 			if !has_his {
 				fp.Close()
 				os.Remove(filename)
@@ -451,22 +452,22 @@ func spod_save() {
 			}
 		}
 		fmt.Fprintf(fp, "%s\t%d\t%d\t",
-			spod.lbl,
-			sentences[spod.lbl],
-			items[spod.lbl])
-		if spod.special == "parser" {
-			if sentences[spod.lbl] > 0 {
-				fmt.Fprintf(fp, "0:%d", sentences[spod.lbl])
+			spod.Lbl,
+			sentences[spod.Lbl],
+			items[spod.Lbl])
+		if spod.Special == "parser" {
+			if sentences[spod.Lbl] > 0 {
+				fmt.Fprintf(fp, "0:%d", sentences[spod.Lbl])
 			}
 		} else {
 			lens := make([]int, 0)
-			for key := range lengths[spod.lbl] {
+			for key := range lengths[spod.Lbl] {
 				lens = append(lens, key)
 			}
 			sort.Ints(lens)
 			p := ""
 			for _, key := range lens {
-				fmt.Fprintf(fp, "%s%d:%d", p, key, lengths[spod.lbl][key])
+				fmt.Fprintf(fp, "%s%d:%d", p, key, lengths[spod.Lbl][key])
 				p = ","
 			}
 		}

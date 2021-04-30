@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/rug-compling/paqu/internal/dir"
 	pqnode "github.com/rug-compling/paqu/internal/node"
+	pqspod "github.com/rug-compling/paqu/internal/spod"
 
 	"github.com/pebbe/dbxml"
 
@@ -50,8 +51,8 @@ var (
 
 func spod_init() {
 	spodSemaphore = make(chan bool, Cfg.Maxspodjob)
-	for i, spod := range spods {
-		spods[i].xpath = strings.TrimSpace(spod.xpath)
+	for i, spod := range pqspod.Spods {
+		pqspod.Spods[i].Xpath = strings.TrimSpace(spod.Xpath)
 	}
 	go spod_starter()
 }
@@ -74,10 +75,10 @@ func spod_main(q *Context) {
 
 	p := ""
 	first := -1
-	for i, spod := range spods {
-		fmt.Fprintf(q.w, "%s['%s', '%s', '%s']", p, url.QueryEscape(spod.xpath), spod.method, spod.lbl)
+	for i, spod := range pqspod.Spods {
+		fmt.Fprintf(q.w, "%s['%s', '%s', '%s']", p, url.QueryEscape(spod.Xpath), spod.Method, spod.Lbl)
 		p = ",\n"
-		if first < 0 && !strings.HasPrefix(spod.special, "hidden") {
+		if first < 0 && !strings.HasPrefix(spod.Special, "hidden") {
 			first = i
 		}
 	}
@@ -86,8 +87,8 @@ func spod_main(q *Context) {
   var indexen = {
 `)
 	p = ""
-	for i, spod := range spods {
-		fmt.Fprintf(q.w, "%s'%s': %d", p, spod.lbl, i)
+	for i, spod := range pqspod.Spods {
+		fmt.Fprintf(q.w, "%s'%s': %d", p, spod.Lbl, i)
 		p = ",\n"
 	}
 	fmt.Fprint(q.w, `
@@ -158,7 +159,7 @@ $(document).mouseup(
   });
 function getChoices() {
   var res = [];
-  for (var i = `, first, `; i < `, len(spods), `; i++) {
+  for (var i = `, first, `; i < `, len(pqspod.Spods), `; i++) {
     var e = document.getElementById('i' + i);
     if (e.checked) {
       res.push(xpaths[i][2]);
@@ -174,7 +175,7 @@ function setChoices(c) {
     }
   }
   var e = document.getElementById("spodform").elements;
-  for (var i = `, first, `; i < `, len(spods), `; i++) {
+  for (var i = `, first, `; i < `, len(pqspod.Spods), `; i++) {
     e[i+1].checked = false;
   }
   for (var i = 0; i < c.length; i++) {
@@ -223,20 +224,20 @@ function optload(n) {
 <a href="javascript:alles(%d, %d, true)">alles</a> &mdash;
 <a href="javascript:niets(%d, %d, true)">niets</a> &mdash;
 <a href="javascript:omkeren(%d, %d)">omkeren</a>
-`, first, len(spods), first, len(spods), first, len(spods))
+`, first, len(pqspod.Spods), first, len(pqspod.Spods), first, len(pqspod.Spods))
 
 	inTable := false
 	blocknum := 0
-	for i, spod := range spods {
-		if strings.HasPrefix(spod.special, "hidden") {
+	for i, spod := range pqspod.Spods {
+		if strings.HasPrefix(spod.Special, "hidden") {
 			fmt.Fprintf(q.w, `
 <input type="hidden" name="i%d" value="t">
 `,
 				i)
 			continue
 		}
-		spodtext := strings.Replace(spod.text, "|", "", -1)
-		if spod.header != "" {
+		spodtext := strings.Replace(spod.Text, "|", "", -1)
+		if spod.Header != "" {
 			if inTable {
 				fmt.Fprintln(q.w, "</table></div></div>")
 			} else {
@@ -244,13 +245,13 @@ function optload(n) {
 			}
 
 			var j int
-			for j = i + 1; j < len(spods); j++ {
-				if spods[j].header != "" {
+			for j = i + 1; j < len(pqspod.Spods); j++ {
+				if pqspod.Spods[j].Header != "" {
 					break
 				}
 			}
 			blocknum++
-			a := strings.SplitN(spod.header, "//", 2)
+			a := strings.SplitN(spod.Header, "//", 2)
 			extra := ""
 			if len(a) == 2 {
 				// we kunnen hier geen <button> gebruiken omdat die de nummering in de war schopt
@@ -643,22 +644,22 @@ window.onclick = function(event) {
 	header := ""
 	spod_in_use := make(map[string]bool)
 
-	for idx, spod := range spods {
+	for idx, spod := range pqspod.Spods {
 		spod_in_use[spod_fingerprint(idx)] = true
 
-		if strings.HasPrefix(spod.special, "hidden") {
+		if strings.HasPrefix(spod.Special, "hidden") {
 			lines, _, _, done, err := spod_get(q, db, idx, owner)
 			if err == nil && done {
-				available[strings.SplitN(spod.lbl, "_", 2)[1]] = lines > 0
+				available[strings.SplitN(spod.Lbl, "_", 2)[1]] = lines > 0
 			}
 			continue
 		}
 
-		if spod.header != "" {
-			a := strings.SplitN(spod.header, "//", 2)
+		if spod.Header != "" {
+			a := strings.SplitN(spod.Header, "//", 2)
 			header = strings.TrimSpace(a[0])
 		}
-		spodtext := spod.text
+		spodtext := spod.Text
 		if strings.Contains(spodtext, "||") || !strings.Contains(spodtext, "|") {
 			spodtext = strings.Replace(spodtext, "||", "|", 1)
 			seen = ""
@@ -670,7 +671,7 @@ window.onclick = function(event) {
 					fmt.Fprintln(q.w, `<div class="max100"><table class="spod">`)
 				}
 			}
-			if spod.special == "attr" {
+			if spod.Special == "attr" {
 				if !inAttr {
 					inAttr = true
 					if doHtml {
@@ -681,7 +682,7 @@ window.onclick = function(event) {
 					}
 				}
 				if doHtml {
-					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th colspan=\"2\" class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", spodEscape(spod.text))
+					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th colspan=\"2\" class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", spodEscape(spod.Text))
 				}
 			} else {
 				if inAttr {
@@ -708,7 +709,7 @@ window.onclick = function(event) {
 			} else {
 				spodtext = strings.Replace(spodtext, "|", "", 1)
 			}
-			if header != "" && spod.special != "attr" {
+			if header != "" && spod.Special != "attr" {
 				if doHtml {
 					fmt.Fprintf(q.w, "<tr><th colspan=\"2\" class=\"r\"><th class=\"r\"><th class=\"r\"><th colspan=\"2\" class=\"left\">%s</tr>\n", spodEscape(header))
 				} else {
@@ -716,8 +717,8 @@ window.onclick = function(event) {
 				}
 				header = ""
 			}
-			avail, ok := available[spod.special]
-			if specials := strings.Fields(spod.special); !ok && len(specials) > 1 {
+			avail, ok := available[spod.Special]
+			if specials := strings.Fields(spod.Special); !ok && len(specials) > 1 {
 				allok := true
 				someavail := false
 				for _, spec := range specials {
@@ -740,11 +741,11 @@ window.onclick = function(event) {
 					}
 				}
 				if someavail {
-					available[spod.special] = true
+					available[spod.Special] = true
 					avail = true
 					ok = true
 				} else if allok {
-					available[spod.special] = false
+					available[spod.Special] = false
 					avail = false
 					ok = true
 				}
@@ -771,22 +772,22 @@ window.onclick = function(event) {
 					fmt.Fprint(q.w, "#", err)
 				}
 				allDone = false
-			} else if done && available[spod.special] {
+			} else if done && available[spod.Special] {
 				if doHtml {
-					if spod.special == "attr" {
+					if spod.Special == "attr" {
 						for _, line := range strings.Split(wcount, "\n") {
 							aa := strings.Fields(line)
 							if len(aa) == 4 {
 								fmt.Fprintf(q.w, `<tr><td class="right">%s<td class="right r">%s<td colspan="2" class="r">
 <td><a href="javascript:vb2(%d, '%s','%s')">vb</a><td>%s</tr>
 `,
-									aa[0], aa[2], idx, spod.lbl, url.QueryEscape(aa[3]), html.EscapeString(aa[3]))
+									aa[0], aa[2], idx, spod.Lbl, url.QueryEscape(aa[3]), html.EscapeString(aa[3]))
 							}
 						}
-					} else if spod.special == "parser" {
+					} else if spod.Special == "parser" {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">%d<td class=\"right r\">%.2f%%",
 							lines, float64(lines)/float64(nlines)*100.0)
-					} else if spod.special == "his" {
+					} else if spod.Special == "his" {
 						fmt.Fprintf(q.w, "<tr><td><td class=\"r\"><td class=\"right r\">%d",
 							items)
 					} else {
@@ -794,12 +795,12 @@ window.onclick = function(event) {
 							lines, float64(lines)/float64(nlines)*100.0, items)
 					}
 				} else {
-					if spod.special == "attr" {
+					if spod.Special == "attr" {
 						for _, line := range strings.Split(wcount, "\n") {
 							aa := strings.Fields(line)
 							if len(aa) == 4 {
 								fmt.Fprintf(q.w, "%s\t%-15s\t\t%s.%s\tattribuut %s: %s\t\n",
-									aa[0], aa[1], spod.lbl, aa[3], spod.lbl, aa[3])
+									aa[0], aa[1], spod.Lbl, aa[3], spod.Lbl, aa[3])
 							}
 						}
 					} else {
@@ -810,18 +811,18 @@ window.onclick = function(event) {
 			} else {
 				wcount = "???"
 				if doHtml {
-					if spod.special == "attr" {
+					if spod.Special == "attr" {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???<td class=\"right r\" colspan=\"2\"><td><td>???</tr>")
-					} else if spod.special == "parser" {
+					} else if spod.Special == "parser" {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???")
-					} else if spod.special == "his" {
+					} else if spod.Special == "his" {
 						fmt.Fprintf(q.w, "<tr><td><td class=\"r\"><td class=\"right r\">???")
 					} else {
 						fmt.Fprintf(q.w, "<tr><td class=\"right\">???<td class=\"right r\">???<td class=\"right r\">???")
 					}
 				} else {
-					if spod.special == "attr" {
-						fmt.Fprintf(q.w, "???\t???       \t\t%s.???\tattribuut %s: ???\n", spod.lbl, spod.lbl)
+					if spod.Special == "attr" {
+						fmt.Fprintf(q.w, "???\t???       \t\t%s.???\tattribuut %s: ???\n", spod.Lbl, spod.Lbl)
 						// TODO
 					} else {
 						fmt.Fprint(q.w, "???\t???       \t???")
@@ -830,12 +831,12 @@ window.onclick = function(event) {
 				allDone = false
 			}
 			if doHtml {
-				if spod.special == "parser" {
+				if spod.Special == "parser" {
 					fmt.Fprintf(
 						q.w,
 						"<td class=\"r\"><td class=\"r\"><td><a href=\"javascript:vb(%d)\">vb</a><td>%s\n",
 						idx, spodEscape(spodtext))
-				} else if spod.special == "attr" {
+				} else if spod.Special == "attr" {
 					// niks
 				} else {
 					counts := strings.Split(wcount, ",")
@@ -874,14 +875,14 @@ window.onclick = function(event) {
 							strings.Replace(
 								strings.Replace(wcount, ",", "],[", -1),
 								":", ",", -1)+"]]")
-						wordtitles = append(wordtitles, jsstringsEscape(spod.text))
+						wordtitles = append(wordtitles, jsstringsEscape(spod.Text))
 					}
 				}
 			} else {
-				if spod.special == "attr" {
+				if spod.Special == "attr" {
 					// niks
 				} else {
-					fmt.Fprintf(q.w, "\t%s\t%s\t%s\n", spod.lbl, spodtext, wcount)
+					fmt.Fprintf(q.w, "\t%s\t%s\t%s\n", spod.Lbl, spodtext, wcount)
 				}
 			}
 		}
@@ -896,8 +897,8 @@ window.onclick = function(event) {
 		fmt.Fprintln(q.w, strings.Join(wordtitles, ",\n"))
 		fmt.Fprintln(q.w, "];\nvar xpaths = [")
 		p := ""
-		for _, spod := range spods {
-			fmt.Fprintf(q.w, "%s['%s', '%s']", p, url.QueryEscape(spod.xpath), spod.method)
+		for _, spod := range pqspod.Spods {
+			fmt.Fprintf(q.w, "%s['%s', '%s']", p, url.QueryEscape(spod.Xpath), spod.Method)
 			p = ",\n"
 		}
 		fmt.Fprintln(q.w, "];</script>")
@@ -984,7 +985,7 @@ func spod_get(q *Context, db string, item int, owner string) (lines int, items i
 	filename := filepath.Join(dirpath, fingerprint)
 	data, err := ioutil.ReadFile(filename)
 	if err == nil && len(data) > 0 {
-		if spods[item].special == "attr" {
+		if pqspod.Spods[item].Special == "attr" {
 			return 0, 0, string(data), true, nil
 		} else {
 			a := strings.Fields(string(data))
@@ -992,7 +993,7 @@ func spod_get(q *Context, db string, item int, owner string) (lines int, items i
 				a = append(a, "1:0")
 			}
 			if len(a) == 4 {
-				if a[0] != spods[item].lbl {
+				if a[0] != pqspod.Spods[item].Lbl {
 					os.Remove(filename)
 					return 0, 0, "", false, fmt.Errorf("ERROR: invalid label %q", a[0])
 				}
@@ -1029,30 +1030,30 @@ func spod_work(q *Context, key string, filename string, db string, owner string,
 		<-spodSemaphore
 	}()
 
-	chLog <- fmt.Sprintf("SPOD: work: %s %s", db, spods[item].lbl)
+	chLog <- fmt.Sprintf("SPOD: work: %s %s", db, pqspod.Spods[item].Lbl)
 	defer func() {
-		chLog <- fmt.Sprintf("FINISHED SPOD: work: %s %s", db, spods[item].lbl)
+		chLog <- fmt.Sprintf("FINISHED SPOD: work: %s %s", db, pqspod.Spods[item].Lbl)
 	}()
 
 	var u string
-	onlyone := spods[item].special == "hidden1"
-	attr := spods[item].special == "attr"
+	onlyone := pqspod.Spods[item].Special == "hidden1"
+	attr := pqspod.Spods[item].Special == "attr"
 	if onlyone {
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&xn=1",
 			db,
-			url.QueryEscape(spods[item].xpath),
-			spods[item].method)
+			url.QueryEscape(pqspod.Spods[item].Xpath),
+			pqspod.Spods[item].Method)
 	} else if attr {
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=%s&d=1",
 			db,
-			url.QueryEscape(spods[item].xpath),
-			spods[item].method,
-			spods[item].lbl)
+			url.QueryEscape(pqspod.Spods[item].Xpath),
+			pqspod.Spods[item].Method,
+			pqspod.Spods[item].Lbl)
 	} else {
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=word_is_&d=1",
 			db,
-			url.QueryEscape(spods[item].xpath),
-			spods[item].method)
+			url.QueryEscape(pqspod.Spods[item].Xpath),
+			pqspod.Spods[item].Method)
 	}
 
 	r, err := http.NewRequest("GET", u, nil)
@@ -1093,9 +1094,9 @@ func spod_work(q *Context, key string, filename string, db string, owner string,
 	if onlyone {
 		xpath(&myQ)
 		if strings.Contains(w.buffer.String(), "<!--NOMATCH-->") {
-			fmt.Fprintf(fp, "%s\t0\t0\t\n", spods[item].lbl)
+			fmt.Fprintf(fp, "%s\t0\t0\t\n", pqspod.Spods[item].Lbl)
 		} else {
-			fmt.Fprintf(fp, "%s\t1\t1\t1:1\n", spods[item].lbl)
+			fmt.Fprintf(fp, "%s\t1\t1\t1:1\n", pqspod.Spods[item].Lbl)
 		}
 		fp.Close()
 		return
@@ -1137,7 +1138,7 @@ func spod_work(q *Context, key string, filename string, db string, owner string,
 	} else {
 		match := spodRE.FindStringSubmatch(s)
 		if len(match) == 3 {
-			fmt.Fprintf(fp, "%s\t%s\t%s\t", spods[item].lbl, match[1], match[2])
+			fmt.Fprintf(fp, "%s\t%s\t%s\t", pqspod.Spods[item].Lbl, match[1], match[2])
 			// skip regel
 			scanner.Scan()
 			counts := make(map[int]int)
@@ -1344,33 +1345,33 @@ func spod_list(q *Context) {
 	contentType(q, "text/plain; charset=utf-8")
 	nocache(q)
 
-	for _, spod := range spods {
-		if strings.HasPrefix(spod.special, "hidden") {
+	for _, spod := range pqspod.Spods {
+		if strings.HasPrefix(spod.Special, "hidden") {
 			continue
 		}
-		header := spod.header
+		header := spod.Header
 		if i := strings.Index(header, "//"); i > 0 {
 			header = header[:i]
 		}
-		spodtext := strings.Replace(spod.text, "|", "", -1)
+		spodtext := strings.Replace(spod.Text, "|", "", -1)
 		if header != "" {
 			fmt.Fprint(q.w, "\n\n", header, "\n", strings.Repeat("=", len(header)), "\n\n")
 		}
 		fmt.Fprint(q.w,
 			"\n",
-			spod.lbl, ": ", spodtext, "\n",
-			strings.Repeat("-", len(spod.lbl)+2+len(spodtext)), "\n\n",
-			spod.xpath, "\n\n")
+			spod.Lbl, ": ", spodtext, "\n",
+			strings.Repeat("-", len(spod.Lbl)+2+len(spodtext)), "\n\n",
+			spod.Xpath, "\n\n")
 	}
 }
 
 func spod_fingerprint(item int) string {
 	rules := getMacrosRules(&Context{})
-	query := macroKY.ReplaceAllStringFunc(spods[item].xpath, func(s string) string {
+	query := macroKY.ReplaceAllStringFunc(pqspod.Spods[item].Xpath, func(s string) string {
 		return rules[s[1:len(s)-1]]
 	})
 	query = strings.Join(strings.Fields(query), " ")
-	return fmt.Sprintf("%x", md5.Sum([]byte(query+spods[item].method)))
+	return fmt.Sprintf("%x", md5.Sum([]byte(query+pqspod.Spods[item].Method)))
 }
 
 func jsstringsEscape(s string) string {

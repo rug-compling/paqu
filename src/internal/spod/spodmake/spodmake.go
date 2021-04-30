@@ -1,8 +1,8 @@
-// +build spodmake
-
 package main
 
 import (
+	spoddata "github.com/rug-compling/paqu/internal/spod"
+
 	"github.com/pebbe/util"
 
 	"bytes"
@@ -39,9 +39,9 @@ func main() {
 
 	fmt.Print(`// GENERATED FILE. DO NOT EDIT.
 
-package main
+package spod
 
-var spod2xpath = map[string]*xPath{
+var Spod2xpath = map[string]*xPath{
 `)
 
 	macros := make(map[string]string)
@@ -71,15 +71,15 @@ var spod2xpath = map[string]*xPath{
 		}
 	}
 
-	for _, spod := range spods {
-		if spod.special == "hidden1" || spod.special == "attr" || spod.special == "parser" {
+	for _, spod := range spoddata.Spods {
+		if spod.Special == "hidden1" || spod.Special == "attr" || spod.Special == "parser" {
 			continue
 		}
 
-		if spod.method != SPOD_STD {
-			x(fmt.Errorf("Method not supported in %s", spod.lbl))
+		if spod.Method != spoddata.SPOD_STD {
+			x(fmt.Errorf("Method not supported in %s", spod.Lbl))
 		}
-		query := macroKY.ReplaceAllStringFunc(spod.xpath, func(s string) string {
+		query := macroKY.ReplaceAllStringFunc(spod.Xpath, func(s string) string {
 			return macros[s[1:len(s)-1]]
 		})
 
@@ -122,7 +122,7 @@ var spod2xpath = map[string]*xPath{
 			x(fmt.Errorf("%s\n\n%s\n", se, s2))
 		}
 
-		fmt.Printf("%q: %s,\n", spod.lbl, parse(so))
+		fmt.Printf("%q: %s,\n", spod.Lbl, parse(so))
 
 	}
 
