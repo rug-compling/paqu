@@ -142,6 +142,7 @@ var (
 	db_updatestatus bool
 	db_strippath    bool
 	db_decode       bool
+	onlySPOD        bool
 
 	rePath      *regexp.Regexp
 	reFilecodes = regexp.MustCompile("_[0-9A-F][0-9A-F]|__")
@@ -206,6 +207,8 @@ func main() {
 			info = strings.TrimSpace(string(b))
 			unsafe := blackfriday.Run([]byte(info))
 			infop = strings.TrimSpace(string(bluemonday.UGCPolicy().SanitizeBytes(unsafe)))
+		} else if os.Args[1] == "-o" {
+			onlySPOD = true
 		} else {
 			break
 		}
@@ -214,7 +217,7 @@ func main() {
 
 	if len(os.Args) != 5 || util.IsTerminal(os.Stdin) {
 		fmt.Printf(`
-Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] [-m tekst] [-M bestand] id description owner public < bestandnamen
+Syntax: %s [-a] [-w] [-i] [-s] [-p regexp] [-d] [-D datum] [-m tekst] [-M bestand] [-o] id description owner public < bestandnamen
 
 Opties:
 
@@ -227,6 +230,7 @@ Opties:
  -D : datum in formaat YYYY-MM-DD
  -m : toelichting (markdown)
  -M : bestand met toelichting (markdown)
+ -o : alleen SPOD
 
   id:
   description:
@@ -268,58 +272,60 @@ Opties:
 		}
 	}
 
-	db = connect()
-	defer func() {
-		fmt.Println("Verbinding met database wordt gesloten...")
-		util.CheckErr(db.Close())
-	}()
+	if !onlySPOD {
 
-	//
-	// kijk of de database al bestaat
-	//
+		db = connect()
+		defer func() {
+			fmt.Println("Verbinding met database wordt gesloten...")
+			util.CheckErr(db.Close())
+		}()
 
-	rows, err := db.Query("SELECT `begin` FROM `" + Cfg.Prefix + "_c_" + prefix + "_deprel` LIMIT 0, 1;")
-	if err == nil && rows.Next() {
-		rows.Close()
-		if !(db_append || db_overwrite) {
-			util.CheckErr(fmt.Errorf("De database bestaat al, en er is geen optie -a of -w"))
-		}
-		db_exists = true
+		//
+		// kijk of de database al bestaat
+		//
 
-		if db_append {
-			rows, err := db.Query("SELECT `nword` FROM " + Cfg.Prefix + "_info WHERE `id`=\"" + prefix + "\"")
-			util.CheckErr(err)
-			if rows.Next() {
-				if rows.Scan(&wordcount) != nil {
-					wordcount = 0
-				}
-				rows.Close()
+		rows, err := db.Query("SELECT `begin` FROM `" + Cfg.Prefix + "_c_" + prefix + "_deprel` LIMIT 0, 1;")
+		if err == nil && rows.Next() {
+			rows.Close()
+			if !(db_append || db_overwrite) {
+				util.CheckErr(fmt.Errorf("De database bestaat al, en er is geen optie -a of -w"))
 			}
-			rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_arch")
-			util.CheckErr(err)
-			if rows.Next() {
-				if rows.Scan(&toparch) != nil {
-					toparch = -1
+			db_exists = true
+
+			if db_append {
+				rows, err := db.Query("SELECT `nword` FROM " + Cfg.Prefix + "_info WHERE `id`=\"" + prefix + "\"")
+				util.CheckErr(err)
+				if rows.Next() {
+					if rows.Scan(&wordcount) != nil {
+						wordcount = 0
+					}
+					rows.Close()
 				}
-				rows.Close()
-			}
-			rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_file")
-			util.CheckErr(err)
-			if rows.Next() {
-				if rows.Scan(&topfile) != nil {
-					topfile = -1
+				rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_arch")
+				util.CheckErr(err)
+				if rows.Next() {
+					if rows.Scan(&toparch) != nil {
+						toparch = -1
+					}
+					rows.Close()
 				}
-				rows.Close()
-			}
-			rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_midx")
-			if err == nil && rows.Next() {
-				if rows.Scan(&topmidx) != nil {
-					topmidx = -1
+				rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_file")
+				util.CheckErr(err)
+				if rows.Next() {
+					if rows.Scan(&topfile) != nil {
+						topfile = -1
+					}
+					rows.Close()
 				}
-				rows.Close()
-			}
-			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_deprel ...")
-			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel
+				rows, err = db.Query("SELECT MAX(id) FROM " + Cfg.Prefix + "_c_" + prefix + "_midx")
+				if err == nil && rows.Next() {
+					if rows.Scan(&topmidx) != nil {
+						topmidx = -1
+					}
+					rows.Close()
+				}
+				fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_deprel ...")
+				db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel
 				DROP INDEX word,
 				DROP INDEX lemma,
 				DROP INDEX root,
@@ -331,19 +337,19 @@ Opties:
 				DROP INDEX hpostag,
 				DROP INDEX file,
 				DROP INDEX arch;`)
-			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_sent ...")
-			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent
+				fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_sent ...")
+				db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent
 				DROP INDEX file,
 				DROP INDEX arch,
 				DROP INDEX lbl;`)
-			fmt.Println("Verwijderen index uit " + Cfg.Prefix + "_c_" + prefix + "_file ...")
-			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_file
+				fmt.Println("Verwijderen index uit " + Cfg.Prefix + "_c_" + prefix + "_file ...")
+				db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_file
 				DROP INDEX id`)
-			fmt.Println("Verwijderen index uit " + Cfg.Prefix + "_c_" + prefix + "_arch ...")
-			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_arch
+				fmt.Println("Verwijderen index uit " + Cfg.Prefix + "_c_" + prefix + "_arch ...")
+				db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_arch
 				DROP INDEX id;`)
-			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
-			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta
+				fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_meta ...")
+				db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta
 				DROP INDEX id,
 				DROP INDEX file,
 				DROP INDEX arch,
@@ -352,50 +358,50 @@ Opties:
 				DROP INDEX fval,
 				DROP INDEX dval,
 				DROP INDEX idx;`)
-			fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
-			db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
+				fmt.Println("Verwijderen indexen uit " + Cfg.Prefix + "_c_" + prefix + "_midx ...")
+				db.Exec(`ALTER TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx
 				DROP INDEX id,
 				DROP INDEX name;`)
+			}
 		}
-	}
 
-	share := "PRIVATE"
-	if public == "1" {
-		share = "PUBLIC"
-	}
+		share := "PRIVATE"
+		if public == "1" {
+			share = "PUBLIC"
+		}
 
-	db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
-		Cfg.Prefix, prefix)) // negeer fout
-	setDate := ""
-	if datum != "" {
-		setDate = fmt.Sprintf(", `created` = \"%s 12:00:00\"", datum)
-	}
-	_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q, `info` = %q, `infop` = %q%s WHERE `id` = %q",
-		Cfg.Prefix, desc, owner, share, info, infop, setDate, prefix))
-	util.CheckErr(err)
-
-	_, err = db.Exec("DELETE FROM " + Cfg.Prefix + "_corpora WHERE `prefix` = \"" + prefix + "\";")
-	util.CheckErr(err)
-
-	// oude tabellen weggooien
-	if !db_exists || db_overwrite {
-		_, err := db.Exec(fmt.Sprintf(
-			"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_meta`, `%s_c_%s_midx`;",
-			Cfg.Prefix,
-			prefix,
-			Cfg.Prefix,
-			prefix,
-			Cfg.Prefix,
-			prefix,
-			Cfg.Prefix,
-			prefix,
-			Cfg.Prefix,
-			prefix,
-			Cfg.Prefix,
-			prefix))
+		db.Exec(fmt.Sprintf("INSERT `%s_info` (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
+			Cfg.Prefix, prefix)) // negeer fout
+		setDate := ""
+		if datum != "" {
+			setDate = fmt.Sprintf(", `created` = \"%s 12:00:00\"", datum)
+		}
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q, `owner` = %q, `status` = \"WORKING\", `shared` = %q, `info` = %q, `infop` = %q%s WHERE `id` = %q",
+			Cfg.Prefix, desc, owner, share, info, infop, setDate, prefix))
 		util.CheckErr(err)
-		// nieuwe tabellen aanmaken
-		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel (
+
+		_, err = db.Exec("DELETE FROM " + Cfg.Prefix + "_corpora WHERE `prefix` = \"" + prefix + "\";")
+		util.CheckErr(err)
+
+		// oude tabellen weggooien
+		if !db_exists || db_overwrite {
+			_, err := db.Exec(fmt.Sprintf(
+				"DROP TABLE IF EXISTS `%s_c_%s_deprel`, `%s_c_%s_sent`, `%s_c_%s_file`, `%s_c_%s_arch`, `%s_c_%s_meta`, `%s_c_%s_midx`;",
+				Cfg.Prefix,
+				prefix,
+				Cfg.Prefix,
+				prefix,
+				Cfg.Prefix,
+				prefix,
+				Cfg.Prefix,
+				prefix,
+				Cfg.Prefix,
+				prefix,
+				Cfg.Prefix,
+				prefix))
+			util.CheckErr(err)
+			// nieuwe tabellen aanmaken
+			_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_deprel (
             idd     int          NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			word    varchar(128) NOT NULL,
 			lemma   varchar(128) NOT NULL,
@@ -415,36 +421,36 @@ Opties:
 			mark    varchar(128) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
-		util.CheckErr(err)
-		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent (
+			util.CheckErr(err)
+			_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_sent (
 			arch int          NOT NULL,
 			file int          NOT NULL,
 			sent text         NOT NULL,
 			lbl  varchar(190) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
-		util.CheckErr(err)
-		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_file (
+			util.CheckErr(err)
+			_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_file (
 			id   int          NOT NULL,
 			file varchar(260) NOT NULL)
 			DEFAULT CHARACTER SET utf8;`)
-		util.CheckErr(err)
-		_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_arch (
+			util.CheckErr(err)
+			_, err = db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_arch (
 			id   int          NOT NULL,
 			arch varchar(260) NOT NULL)
 			DEFAULT CHARACTER SET utf8;`)
-		util.CheckErr(err)
-	}
+			util.CheckErr(err)
+		}
 
-	// deze tabellen altijd aanmaken
-	// als al bestaat dan fout: negeren
-	db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
+		// deze tabellen altijd aanmaken
+		// als al bestaat dan fout: negeren
+		db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_midx (
 			id   int          NOT NULL,
 			type enum('TEXT','INT','FLOAT','DATE','DATETIME','BOOL') NOT NULL DEFAULT 'TEXT',
 			name varchar(128) NOT NULL)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
-	db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
+		db.Exec(`CREATE TABLE ` + Cfg.Prefix + "_c_" + prefix + `_meta (
 			id   int          NOT NULL,
 			arch int          NOT NULL,
 			file int          NOT NULL,
@@ -455,6 +461,8 @@ Opties:
 			idx  int          NOT NULL DEFAULT -1)
 			DEFAULT CHARACTER SET utf8
 			DEFAULT COLLATE utf8_unicode_ci;`)
+
+	} // if !onlySPOD
 
 	//
 	// Bestandnamen van stdin inlezen en verwerken.
@@ -504,15 +512,23 @@ Opties:
 	}
 	util.CheckErr(scanner.Err())
 
-	// stuur laatste data uit buffers naar de database
-	buf_flush(DPRL)
-	buf_flush(SENT)
-	buf_flush(FILE)
-	buf_flush(ARCH)
-	buf_flush(META)
-	buf_flush(MIDX)
+	if !onlySPOD {
+
+		// stuur laatste data uit buffers naar de database
+		buf_flush(DPRL)
+		buf_flush(SENT)
+		buf_flush(FILE)
+		buf_flush(ARCH)
+		buf_flush(META)
+		buf_flush(MIDX)
+
+	}
 
 	spod_save()
+
+	if onlySPOD {
+		return
+	}
 
 	_, err = db.Exec("COMMIT;")
 	util.CheckErr(err)
@@ -605,7 +621,7 @@ Opties:
 		Nu maar hopen dat de complete woordenlijst in het geheugen past.
 	*/
 	fmt.Println("Tellingen van woorden opvragen ...")
-	rows, err = db.Query("SELECT count(*), `word` FROM `" + Cfg.Prefix + "_c_" + prefix +
+	rows, err := db.Query("SELECT count(*), `word` FROM `" + Cfg.Prefix + "_c_" + prefix +
 		"_deprel` WHERE `postag` IN (\"adj\", \"n\", \"ww\") GROUP BY `word` HAVING count(*) >= 10 ORDER BY `word`")
 	util.CheckErr(err)
 	woorden := make([]string, 0)
@@ -1077,6 +1093,9 @@ func utfFunc(b []byte) []byte {
 func do_data(archname, filename string, data []byte) {
 
 	do_spod(data)
+	if onlySPOD {
+		return
+	}
 
 	// MySQL tot versie 5.5.3 kan niet met tekens boven U+FFFF overweg
 	data = utfRE.ReplaceAllFunc(data, utfFunc)
