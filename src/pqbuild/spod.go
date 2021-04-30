@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	"github.com/rug-compling/paqu/internal/file"
 
 	"github.com/pebbe/util"
 	"github.com/rug-compling/alpinods"
@@ -485,7 +486,7 @@ func spod_fingerprint(xpath string, method string) string {
 
 func loadMacros() {
 
-	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file__macros__txt, ""), -1) {
+	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file.File__macros__txt, ""), -1) {
 		s := strings.Replace(set[2], "\r\n", "\n", -1)
 		s = strings.Replace(s, "\n\r", "\n", -1)
 		s = strings.Replace(s, "\r", "\n", -1)

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/file"
+
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -77,7 +79,7 @@ func savemacros(q *Context) {
 	macros = strings.Replace(macros, "\n\r", "\n", -1)
 	macros = strings.Replace(macros, "\r", "\n", -1)
 
-	sysmacros := macroCOM.ReplaceAllLiteralString(file__macros__txt, "")
+	sysmacros := macroCOM.ReplaceAllLiteralString(file.File__macros__txt, "")
 
 	result := MacroResult{Keys: make([]string, 0)}
 
@@ -214,7 +216,7 @@ func loadMacros(q *Context) {
 		time:  time.Now(),
 	}
 
-	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file__macros__txt, ""), -1) {
+	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file.File__macros__txt, ""), -1) {
 		s := strings.Replace(set[2], "\r\n", "\n", -1)
 		s = strings.Replace(s, "\n\r", "\n", -1)
 		s = strings.Replace(s, "\r", "\n", -1)

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/file"
+
 	"fmt"
 	"strings"
 )
@@ -21,31 +23,31 @@ func nocache(q *Context) {
 func static_busy_gif(q *Context) {
 	contentType(q, "image/gif")
 	cache(q)
-	fmt.Fprint(q.w, file__busy__gif)
+	fmt.Fprint(q.w, file.File__busy__gif)
 }
 
 func static_clariah_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__clariah__png)
+	fmt.Fprint(q.w, file.File__clariah__png)
 }
 
 func static_clarinnl_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__clarinnl__png)
+	fmt.Fprint(q.w, file.File__clarinnl__png)
 }
 
 func static_expanded_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__expanded__png)
+	fmt.Fprint(q.w, file.File__expanded__png)
 }
 
 func static_favicon_ico(q *Context) {
 	contentType(q, "image/x-icon")
 	cache(q)
-	fmt.Fprint(q.w, file__favicon__ico)
+	fmt.Fprint(q.w, file.File__favicon__ico)
 }
 
 func static_info_html(q *Context) {
@@ -54,8 +56,8 @@ func static_info_html(q *Context) {
 	if !has_dbxml {
 		s = "<div class=\"nodbxml\">\n"
 	}
-	i := strings.Index(file__info__html, "<!--##START-->")
-	s += file__info__html[i+15:]
+	i := strings.Index(file.File__info__html, "<!--##START-->")
+	s += file.File__info__html[i+15:]
 	s = strings.Replace(s, "<!--##CONTACT##-->", string(Cfg.Contact), 1)
 	fmt.Fprint(q.w, s)
 }
@@ -68,39 +70,39 @@ func static_foliahelp(q *Context, html, title string) {
 }
 
 func static_foliahelp0_html(q *Context) {
-	static_foliahelp(q, file__foliahelp0__html, "Offline verwerking")
+	static_foliahelp(q, file.File__foliahelp0__html, "Offline verwerking")
 }
 
 func static_foliahelp1_html(q *Context) {
-	static_foliahelp(q, file__foliahelp1__html, "Upload FoLiA-bestanden")
+	static_foliahelp(q, file.File__foliahelp1__html, "Upload FoLiA-bestanden")
 }
 
 func static_foliahelp2_html(q *Context) {
-	static_foliahelp(q, file__foliahelp2__html, "Upload metadata")
+	static_foliahelp(q, file.File__foliahelp2__html, "Upload metadata")
 }
 
 func static_foliahelp3_html(q *Context) {
-	static_foliahelp(q, file__foliahelp3__html, "Soort invoer")
+	static_foliahelp(q, file.File__foliahelp3__html, "Soort invoer")
 }
 
 func static_foliahelp4_html(q *Context) {
-	static_foliahelp(q, file__foliahelp4__html, "Label in uitvoer")
+	static_foliahelp(q, file.File__foliahelp4__html, "Label in uitvoer")
 }
 
 func static_foliahelp5_html(q *Context) {
-	static_foliahelp(q, file__foliahelp5__html, "Metadata")
+	static_foliahelp(q, file.File__foliahelp5__html, "Metadata")
 }
 
 func static_jquery_js(q *Context) {
 	contentType(q, "application/javascript")
 	cache(q)
-	fmt.Fprint(q.w, file__jquery__js)
+	fmt.Fprint(q.w, file.File__jquery__js)
 }
 
 func static_jquery_textcomplete_js(q *Context) {
 	contentType(q, "application/javascript")
 	cache(q)
-	fmt.Fprint(q.w, file__jquery__textcomplete__js)
+	fmt.Fprint(q.w, file.File__jquery__textcomplete__js)
 }
 
 func static_leeg_html(q *Context) {
@@ -112,53 +114,53 @@ func static_leeg_html(q *Context) {
 func static_macros_txt(q *Context) {
 	contentType(q, "text/plain")
 	cache(q)
-	fmt.Fprintln(q.w, file__macros__txt)
+	fmt.Fprintln(q.w, file.File__macros__txt)
 }
 
 func static_paqu_css(q *Context) {
 	contentType(q, "text/css")
 	cache(q)
-	fmt.Fprint(q.w, file__paqu__css)
+	fmt.Fprint(q.w, file.File__paqu__css)
 }
 
 func static_paqu_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__paqu__png)
+	fmt.Fprint(q.w, file.File__paqu__png)
 }
 
 func static_relhead_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__relhead__png)
+	fmt.Fprint(q.w, file.File__relhead__png)
 }
 
 func static_relnone_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__relnone__png)
+	fmt.Fprint(q.w, file.File__relnone__png)
 }
 
 func static_relother_png(q *Context) {
 	contentType(q, "image/png")
 	cache(q)
-	fmt.Fprint(q.w, file__relother__png)
+	fmt.Fprint(q.w, file.File__relother__png)
 }
 
 func static_robots_txt(q *Context) {
 	contentType(q, "text/plain")
 	cache(q)
-	fmt.Fprint(q.w, file__robots__txt)
+	fmt.Fprint(q.w, file.File__robots__txt)
 }
 
 func static_tooltip_css(q *Context) {
 	contentType(q, "text/css")
 	cache(q)
-	fmt.Fprint(q.w, file__tooltip__css)
+	fmt.Fprint(q.w, file.File__tooltip__css)
 }
 
 func static_tooltip_js(q *Context) {
 	contentType(q, "application/javascript")
 	cache(q)
-	fmt.Fprint(q.w, file__tooltip__js)
+	fmt.Fprint(q.w, file.File__tooltip__js)
 }

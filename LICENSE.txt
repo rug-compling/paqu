@@ -1,9 +1,9 @@
 ================================================================
 For parts written by others, see:
 
-src/pqserve/static/jquery.LICENSE.txt
+src/internal/file/data/jquery.LICENSE.txt
 
-src/pqserve/static/jquery.textcomplete.LICENSE.txt
+src/internal/file/data/jquery.textcomplete.LICENSE.txt
 
 src/pqudep/fixpunct.py.LICENSE.txt
 

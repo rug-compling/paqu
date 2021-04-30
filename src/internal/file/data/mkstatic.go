@@ -14,7 +14,7 @@ func main() {
 // THIS IS A GENERATED FILE. DO NOT EDIT.
 //
 
-package main
+package file
 
 import (
 	"github.com/pebbe/util"
@@ -52,5 +52,5 @@ import (
 }
 
 func varname(s string) string {
-	return "file__" + strings.Replace(strings.Replace(s, ".", "__", -1), "-", "__", -1)
+	return "File__" + strings.Replace(strings.Replace(s, ".", "__", -1), "-", "__", -1)
 }

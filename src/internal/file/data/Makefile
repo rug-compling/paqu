@@ -1,5 +1,5 @@
 
-include ../../Makefile.cfg
+include ../../../Makefile.cfg
 
 DEPS = \
 	busy.gif \
@@ -27,5 +27,5 @@ DEPS = \
 	tooltip.js \
 
 
-../static_generated.go: Makefile mkstatic.go $(DEPS)
+../file.go: Makefile mkstatic.go $(DEPS)
 	$(GO) run mkstatic.go $(DEPS) > $@

@@ -3,9 +3,10 @@ include ../Makefile.cfg
 
 INTERNAL = \
 	../internal/dir/default.go \
-	../internal/dir/dir.go
+	../internal/dir/dir.go \
+	../internal/file/file.go
 
-SRC = dbxml_false.go dbxml_true.go ranges_generated.go pqbuild.go spod.go spoddata_generated.go xpath_generated.go spod2xpath_generated.go static_generated.go
+SRC = dbxml_false.go dbxml_true.go ranges_generated.go pqbuild.go spod.go spoddata_generated.go xpath_generated.go spod2xpath_generated.go
 
 ../../bin/pqbuild: $(SRC) $(INTERNAL)
 	$(GO) build -o $@ $(TAGS) $(OPTS) .
@@ -36,10 +37,8 @@ spod2xpath_generated.go: ../pqserve/spod2xpath.go
 	cp ../pqserve/spod2xpath.go spod2xpath_generated.go
 	chmod 444 spod2xpath_generated.go
 
-static_generated.go: ../pqserve/static_generated.go
-	rm -f static_generated.go
-	cp ../pqserve/static_generated.go static_generated.go
-	chmod 444 static_generated.go
-
 ../internal/dir/default.go:
 	make -C ../internal/dir
+
+../internal/file/file.go: ../internal/file/data/*
+	make -C ../internal/file/data
