@@ -3,6 +3,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 
 	"encoding/xml"
@@ -99,7 +101,7 @@ func unpackDact(data, xmldir, dact, conllu, stderr string, chKill chan bool) (to
 	if Cfg.Conllu {
 		cmd := shell(
 			`pqudep -p %s/data/ -o %s > /dev/null 2> %s.err`,
-			paqudatadir, dact, conllu)
+			dir.Data, dact, conllu)
 		err = run(cmd, chKill, nil)
 		if err != nil {
 			return 0, 0, err

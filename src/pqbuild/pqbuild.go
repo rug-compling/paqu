@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/microcosm-cc/bluemonday"
@@ -251,7 +253,7 @@ Opties:
 	owner = strings.TrimSpace(os.Args[3])
 	public = strings.TrimSpace(os.Args[4])
 
-	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if desc == "" {
@@ -1650,7 +1652,7 @@ func arch_buf_put(name string, n int) {
 // Zet een xml-filenaam in de buffer.
 // Als de buffer vol raakt, stuur alles naar de database.
 func file_buf_put(name string, n int) {
-	p := paqudatadir + "/data/" + prefix + "/xml"
+	p := dir.Data + "/data/" + prefix + "/xml"
 	if strings.HasPrefix(name, p) {
 		name = strings.Replace(name, p, "$$", 1)
 	}

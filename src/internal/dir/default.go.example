@@ -1,0 +1,27 @@
+package dir
+
+//
+// Pas aan naar eigen wens, en kopieer dit bestand naar default.go
+//
+
+/*
+Waar staan de gegevens van PaQu? De eerste waarde die niet leeg is.
+
+Data:
+
+ 1. $PAQU
+ 2. Onderstaande variabele DefaultDir
+ 3. $XDG_DATA_HOME/paqu
+ 4. $HOME/.local/share/paqu
+ 5. /usr/local/share/paqu
+
+Config:
+
+ 1. $PAQU
+ 2. Onderstaande variabele DefaultDir
+ 3. $XDG_CONFIG_HOME/paqu
+ 4. $HOME/.config/paqu
+ 5. /etc/xdg/paqu
+
+*/
+var DefaultDir = ""

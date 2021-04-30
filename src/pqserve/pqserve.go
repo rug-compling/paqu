@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
 
@@ -54,7 +56,7 @@ func main() {
 		}
 	}
 
-	tom := filepath.Join(paquconfigdir, "setup.toml")
+	tom := filepath.Join(dir.Config, "setup.toml")
 	md, err := TomlDecodeFile(tom, &Cfg)
 	util.CheckErr(err)
 	if un := md.Undecoded(); len(un) > 0 {
@@ -274,7 +276,7 @@ func main() {
 		errserve = server.ListenAndServe()
 	} else if Cfg.Https && !Cfg.Httpdual {
 		server.Handler = Log(http.DefaultServeMux)
-		errserve = server.ListenAndServeTLS(filepath.Join(paquconfigdir, "cert.pem"), filepath.Join(paquconfigdir, "key.pem"))
+		errserve = server.ListenAndServeTLS(filepath.Join(dir.Config, "cert.pem"), filepath.Join(dir.Config, "key.pem"))
 	} else {
 
 		// De ingewikkelde oplossing: acepteer zowel http als https.
@@ -284,7 +286,7 @@ func main() {
 			tlsConfig.NextProtos = []string{"http/1.1"}
 		}
 		tlsConfig.Certificates = make([]tls.Certificate, 1)
-		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(filepath.Join(paquconfigdir, "cert.pem"), filepath.Join(paquconfigdir, "key.pem"))
+		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(filepath.Join(dir.Config, "cert.pem"), filepath.Join(dir.Config, "key.pem"))
 		util.CheckErr(err)
 		ln, err := net.Listen("tcp", addr)
 		util.CheckErr(err)

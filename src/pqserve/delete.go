@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"fmt"
 	"net/http"
 	"os"
@@ -50,8 +52,8 @@ func remove(q *Context) {
 	kill(id)
 
 	go func() {
-		p := filepath.Join(paqudatadir, "data", id)
-		p2 := filepath.Join(paqudatadir, "data", "_invalid_"+id+"_"+rand16())
+		p := filepath.Join(dir.Data, "data", id)
+		p2 := filepath.Join(dir.Data, "data", "_invalid_"+id+"_"+rand16())
 		err := os.Rename(p, p2)
 		if err != nil {
 			logf("os.Rename(%q, %q) error: %v", p, p2, err)

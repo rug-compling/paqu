@@ -5,6 +5,10 @@ info:
 	@echo
 	@echo Kopieer Makefile.cfg.example naar Makefile.cfg
 	@echo Pas Makefile.cfg aan aan de lokale situatie
+	@echo
+	@echo Kopieer internal/dir/default.go.example naar internal/dir/default.go
+	@echo Pas internal/dir/default.go aan aan de lokale situatie
+	@echo
 	@echo Run daarna: make all
 	@echo
 
@@ -29,9 +33,6 @@ all:
 	make -C pqxok
 	make -C pqudupgrade
 	make -C pqudep
-
-# pqserve moet als eerste gecompileerd worden omdat
-# sommige andere programma's ervan afhankelijk zijn.
 
 # pqudep moet als laatst, voor het geval dat libxqilla
 # niet aanwezig is en dit faalt.

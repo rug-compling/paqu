@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	"github.com/pebbe/util"
 
@@ -78,10 +80,10 @@ type AccessType struct {
 
 func main() {
 
-	fmt.Printf("data dir: %s\nconfig dir: %s\n\n", paqudatadir, paquconfigdir)
+	fmt.Printf("data dir: %s\nconfig dir: %s\n\n", dir.Data, dir.Config)
 
 	cfg := Config{}
-	md, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &cfg)
+	md, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &cfg)
 	util.CheckErr(err)
 
 	for _, un := range md.Undecoded() {

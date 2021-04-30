@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
@@ -45,7 +47,7 @@ Syntax: %s [-w]
 	}
 
 	var Cfg Config
-	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {

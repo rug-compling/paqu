@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/util"
 	"github.com/rug-compling/alud/v2"
 
@@ -73,7 +75,7 @@ func dowork(task *Process) (user string, title string, err error) {
 		}
 	}
 
-	dirname := filepath.Join(paqudatadir, "data", task.id)
+	dirname := filepath.Join(dir.Data, "data", task.id)
 	data := filepath.Join(dirname, "data")
 	xml := filepath.Join(dirname, "xml")
 	dact := filepath.Join(dirname, "data.dact")
@@ -834,7 +836,7 @@ func dowork(task *Process) (user string, title string, err error) {
 	if Cfg.Conllu && strings.HasPrefix(params, "xmlzip") {
 		cmd := shell(
 			`find %s -name '*.xml' | sort > %s.list; pqudep -p %s/data/ -l %s.list -o > /dev/null 2> %s.err; rm %s.list ; pqudep -v > %s.version`,
-			dirname, conllu, paqudatadir, conllu, conllu, conllu, conllu)
+			dirname, conllu, dir.Data, conllu, conllu, conllu, conllu)
 		err = run(cmd, task.chKill, nil)
 		if err != nil {
 			return
@@ -1079,8 +1081,8 @@ func recover_work() {
 		util.CheckErr(err)
 	}
 	for _, corpus := range queuing {
-		util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "data", corpus)))
-		logf("QUEUING: rm -r %s: ok", filepath.Join(paqudatadir, "data", corpus))
+		util.CheckErr(os.RemoveAll(filepath.Join(dir.Data, "data", corpus)))
+		logf("QUEUING: rm -r %s: ok", filepath.Join(dir.Data, "data", corpus))
 	}
 
 	for _, id := range ids {

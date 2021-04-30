@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/util"
 
 	"archive/zip"
@@ -49,7 +51,7 @@ func download(q *Context) {
 		return
 	}
 
-	datadir := filepath.Join(paqudatadir, "data", id)
+	datadir := filepath.Join(dir.Data, "data", id)
 	var filename string
 	switch dl {
 	case "summary":

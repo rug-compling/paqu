@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
@@ -40,7 +42,7 @@ func main() {
 		return
 	}
 
-	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	db, err := dbopen()
@@ -87,7 +89,7 @@ func main() {
 		util.CheckErr(err)
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 		util.CheckErr(err)
-		util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "folia", hex.EncodeToString([]byte(user)))))
+		util.CheckErr(os.RemoveAll(filepath.Join(dir.Data, "folia", hex.EncodeToString([]byte(user)))))
 	}
 }
 

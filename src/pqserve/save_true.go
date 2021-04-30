@@ -3,6 +3,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 
 	"fmt"
@@ -30,7 +32,7 @@ func saveOpenDact(q *Context, prefix string, arch int) (interface{}, string) {
 	}
 
 	if strings.HasPrefix(filename, "$$") {
-		filename = paqudatadir + filename[2:]
+		filename = dir.Data + filename[2:]
 	}
 	db, err := dbxml.OpenRead(filename)
 	if doErr(q, err) {

@@ -36,6 +36,8 @@ import "C"
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/compactcorpus"
 
 	"bytes"
@@ -184,13 +186,13 @@ func tree(q *Context) {
 		}
 	}
 	if strings.HasPrefix(filename, "$$") {
-		filename = paqudatadir + "/data/" + prefix + "/xml" + filename[2:]
+		filename = dir.Data + "/data/" + prefix + "/xml" + filename[2:]
 	}
 
 	// xml-bestand inlezen
 	if archive != "" {
 		if strings.HasPrefix(archive, "$$") {
-			archive = paqudatadir + archive[2:]
+			archive = dir.Data + archive[2:]
 		}
 		if strings.HasSuffix(archive, ".dact") || strings.HasSuffix(archive, ".dactx") {
 			var err error

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/util"
 
 	"compress/gzip"
@@ -42,7 +44,7 @@ func browse(q *Context) {
 		return
 	}
 
-	datadir := filepath.Join(paqudatadir, "data", id)
+	datadir := filepath.Join(dir.Data, "data", id)
 	fp, err := os.Open(filepath.Join(datadir, "summary.txt.gz"))
 	if err != nil {
 		http.Error(q.w, err.Error(), http.StatusInternalServerError)
@@ -370,7 +372,7 @@ func browserr(q *Context) {
 
 	contentType(q, "text/plain; charset=utf-8")
 
-	datadir := filepath.Join(paqudatadir, "data", db)
+	datadir := filepath.Join(dir.Data, "data", db)
 
 	fp, err := os.Open(filepath.Join(datadir, "stderr.txt.gz"))
 	if err != nil {
@@ -458,7 +460,7 @@ func browserrud(q *Context) {
 		fullname = filepath.Join(db, "xml", filename)
 	}
 
-	fp, err := os.Open(filepath.Join(paqudatadir, "data", db, "conllu.err"))
+	fp, err := os.Open(filepath.Join(dir.Data, "data", db, "conllu.err"))
 	if err != nil {
 		sysErr(err)
 		fmt.Fprintln(q.w, err)

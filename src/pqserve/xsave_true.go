@@ -3,6 +3,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 
 	"archive/zip"
@@ -233,7 +235,7 @@ func xsavez2(q *Context) {
 
 		dactfiles := make([]string, 0)
 		if !global {
-			dactfiles = append(dactfiles, fmt.Sprintf("%s/data/%s/data.dact", paqudatadir, prefix))
+			dactfiles = append(dactfiles, fmt.Sprintf("%s/data/%s/data.dact", dir.Data, prefix))
 		} else {
 			rows, err := sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 			if hErr(q, err) {

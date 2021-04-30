@@ -3,12 +3,6 @@
 
 #### Variabelen voor Make zelf
 
-# Waar staat de data van PaQu? De eerste waarde die niet leeg is:
-#  1. Run-time waarde van de environment-variabele PAQU
-#  2. Compile-time waarde van onderstaande DEFAULT_PAQU_DIR
-#  3. Run-time waarde van $HOME/.paqu
-DEFAULT_PAQU_DIR=
-
 # Als je geen DbXML hebt, gebruik dan -tags nodbxml
 # Zonder DbXML kunnen gebruikers geen XPATH-query's uitvoeren
 #TAGS = -tags nodbxml

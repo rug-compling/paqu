@@ -3,6 +3,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 
 	"bytes"
@@ -166,7 +168,7 @@ c("0", "0");
 
 	dactfiles := make([]string, 0)
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, filepath.Join(dir.Data, "data", prefix, "data.dact"))
 	} else {
 		rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if logerr(errval) {

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 	"github.com/rug-compling/alpinods"
 
@@ -124,7 +126,7 @@ func spod_table(q *Context, prefix string, length bool) {
 	dactfiles := make([]string, 0)
 	//global := false
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, filepath.Join(dir.Data, "data", prefix, "data.dact"))
 	} else {
 		//global = true
 		rows, err = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))

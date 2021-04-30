@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
@@ -36,10 +38,10 @@ var (
 //. Main
 
 func main() {
-	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
-	util.CheckErr(os.Chdir(filepath.Join(paqudatadir, "data")))
+	util.CheckErr(os.Chdir(filepath.Join(dir.Data, "data")))
 
 	disk := make(map[string]bool)
 	files, err := ioutil.ReadDir(".")
@@ -131,7 +133,7 @@ func main() {
 		fmt.Println()
 	}
 
-	if os.Chdir(filepath.Join(paqudatadir, "folia")) != nil {
+	if os.Chdir(filepath.Join(dir.Data, "folia")) != nil {
 		return
 	}
 	dirnames = dirnames[0:0]

@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
@@ -32,7 +34,7 @@ func main() {
 	}
 
 	var Cfg Config
-	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
 	util.CheckErr(err)
 
 	if Cfg.Login[0] == '$' {
@@ -84,7 +86,7 @@ func main() {
 			Cfg.Prefix, corpus))
 		util.CheckErr(err)
 
-		util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "data", corpus)))
+		util.CheckErr(os.RemoveAll(filepath.Join(dir.Data, "data", corpus)))
 
 		// deze pas als de rest goed ging
 		_, err = db.Exec(fmt.Sprintf("DELETE FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, corpus))
@@ -108,7 +110,7 @@ func main() {
 		fmt.Printf("Gebruiker niet gevonden: %s\n", user)
 	}
 
-	util.CheckErr(os.RemoveAll(filepath.Join(paqudatadir, "folia", hex.EncodeToString([]byte(user)))))
+	util.CheckErr(os.RemoveAll(filepath.Join(dir.Data, "folia", hex.EncodeToString([]byte(user)))))
 }
 
 func TomlDecodeFile(fpath string, v interface{}) (toml.MetaData, error) {

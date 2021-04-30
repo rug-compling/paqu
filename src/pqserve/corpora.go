@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"fmt"
 	"html"
 	"io"
@@ -270,7 +272,7 @@ function rm(idx) {
 					strings.HasPrefix(corpus.params, "line") ||
 					strings.HasPrefix(corpus.params, "folia") ||
 					strings.HasPrefix(corpus.params, "tei")) {
-					files := countXML(filepath.Join(paqudatadir, "data", corpus.id, "xml"))
+					files := countXML(filepath.Join(dir.Data, "data", corpus.id, "xml"))
 					p := 1 + int(float64(files)/float64(corpus.nline)*98+.5)
 					st = fmt.Sprintf("%s&nbsp;%d%%", st, p)
 				}
@@ -518,7 +520,7 @@ func beginNewCorpus(q *Context, title string, errCheck func(*Context, error) boo
 		dirname = d
 		break
 	}
-	fulldirname = filepath.Join(paqudatadir, "data", dirname)
+	fulldirname = filepath.Join(dir.Data, "data", dirname)
 	err := os.Mkdir(fulldirname, 0700)
 	if errCheck(q, err) {
 		return

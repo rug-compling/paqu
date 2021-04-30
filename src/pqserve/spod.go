@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 
 	"bufio"
@@ -908,7 +910,7 @@ window.onclick = function(event) {
 	}
 
 	// oude varianten verwijderen
-	dirpath := filepath.Join(paqudatadir, "data", db, "spod")
+	dirpath := filepath.Join(dir.Data, "data", db, "spod")
 	files, err := ioutil.ReadDir(dirpath)
 	if sysErr(err) {
 		return
@@ -932,7 +934,7 @@ func spod_stats(q *Context, db string, owner string, doHtml bool) bool {
 		return false
 	}
 
-	dirpath := filepath.Join(paqudatadir, "data", db, "spod")
+	dirpath := filepath.Join(dir.Data, "data", db, "spod")
 	os.MkdirAll(dirpath, 0700)
 	filename := filepath.Join(dirpath, "stats")
 
@@ -974,7 +976,7 @@ func spod_get(q *Context, db string, item int, owner string) (lines int, items i
 		return 0, 0, "", false, nil
 	}
 
-	dirpath := filepath.Join(paqudatadir, "data", db, "spod")
+	dirpath := filepath.Join(dir.Data, "data", db, "spod")
 	os.MkdirAll(dirpath, 0700)
 
 	fingerprint := spod_fingerprint(item)
@@ -1245,7 +1247,7 @@ func spod_stats_work(q *Context, dbname string, owner string, outname string) {
 				return
 			}
 			if strings.HasPrefix(s, "$$/") {
-				s = filepath.Join(paqudatadir, "data", dbname, "xml", s[3:])
+				s = filepath.Join(dir.Data, "data", dbname, "xml", s[3:])
 			}
 			filenames = append(filenames, s)
 		}

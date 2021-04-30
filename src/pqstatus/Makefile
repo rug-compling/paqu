@@ -1,16 +1,12 @@
 
 include ../Makefile.cfg
 
-IS=${if ${shell sh -c 'case `go version` in go1.[01234].*) ;; *) echo yes; ;; esac'},=, }
+INTERNAL = \
+	../internal/dir/default.go \
+	../internal/dir/dir.go
 
-BUILD=${if $(DEFAULT_PAQU_DIR),-ldflags "-X main.DefaultPaquDir$(IS)$(DEFAULT_PAQU_DIR)", }
-
-../../bin/pqstatus: directories_generated.go pqstatus.go
+../../bin/pqstatus: *.go $(INTERNAL)
 	$(GO) build $(BUILD) -o $@ $(OPTS) .
 
-directories_generated.go: ../pqserve/directories.go
-	rm -f directories_generated.go
-	echo '// GENERATED FILE. DO NOT EDIT.' > directories_generated.go
-	echo >> directories_generated.go
-	cat ../pqserve/directories.go >> directories_generated.go
-	chmod 444 directories_generated.go
+../internal/dir/default.go:
+	make -C ../internal/dir

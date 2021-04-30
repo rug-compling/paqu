@@ -3,6 +3,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/dbxml"
 
 	"bytes"
@@ -1770,8 +1772,8 @@ $('ol').append(%q);
 		fmt.Fprint(&buf, " ")
 	}
 
-	if strings.HasPrefix(dactfile, paqudatadir+"/") {
-		dactfile = strings.Replace(dactfile, paqudatadir, "$$", 1)
+	if strings.HasPrefix(dactfile, dir.Data+"/") {
+		dactfile = strings.Replace(dactfile, dir.Data, "$$", 1)
 	}
 
 	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s&amp;ud1=%s&amp;ud2=%s\" class=\"ico\" target=\"_blank\">&#10020;</a>\n",
@@ -1930,7 +1932,7 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 	dactfiles := make([]string, 0)
 	global := false
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, filepath.Join(paqudatadir, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, filepath.Join(dir.Data, "data", prefix, "data.dact"))
 	} else {
 		global = true
 		rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))

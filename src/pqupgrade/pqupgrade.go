@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/util"
@@ -27,7 +29,7 @@ var (
 func main() {
 
 	var Cfg Config
-	_, err := TomlDecodeFile(filepath.Join(paquconfigdir, "setup.toml"), &Cfg)
+	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
 	x(err)
 
 	if Cfg.Login[0] == '$' {
@@ -296,7 +298,7 @@ func main() {
 					x(fmt.Errorf("No file found for %s", id))
 				}
 				if strings.HasPrefix(filename, "$$") {
-					filename = paqudatadir + "/data/" + id + "/xml" + filename[2:]
+					filename = dir.Data + "/data/" + id + "/xml" + filename[2:]
 				}
 
 				var b []byte

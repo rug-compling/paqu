@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 
 	"archive/zip"
@@ -642,7 +644,7 @@ Type = %q
 }
 
 func foliadir(q *Context) string {
-	return filepath.Join(paqudatadir, "folia", hex.EncodeToString([]byte(q.user)))
+	return filepath.Join(dir.Data, "folia", hex.EncodeToString([]byte(q.user)))
 }
 
 func foliamax(settings *FoliaSettings) (int, int) {
@@ -846,7 +848,7 @@ func foliaErr(q *Context, err error) bool {
 }
 
 func foliaclean() {
-	fdir := filepath.Join(paqudatadir, "folia")
+	fdir := filepath.Join(dir.Data, "folia")
 	for {
 		// clean up
 		then := time.Now().AddDate(0, 0, -Cfg.Foliadays)

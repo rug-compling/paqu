@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"archive/zip"
 	"bytes"
 	"compress/gzip"
@@ -320,7 +322,7 @@ func savez2(q *Context) {
 				return
 			}
 			if strings.HasPrefix(filename, "$$") {
-				filename = paqudatadir + "/data/" + prefix + "/xml" + filename[2:]
+				filename = dir.Data + "/data/" + prefix + "/xml" + filename[2:]
 			}
 
 			var data []byte
@@ -441,7 +443,7 @@ func isGlobal(q *Context, prefix string) (global bool, ok bool) {
 func getPathLen(q *Context, prefix string, global, archonly bool) (length int, ok bool) {
 
 	if !global {
-		return len(filepath.Join(paqudatadir, "data", prefix, "xml")) + 1, true
+		return len(filepath.Join(dir.Data, "data", prefix, "xml")) + 1, true
 	}
 
 	var min, max sql.NullInt64

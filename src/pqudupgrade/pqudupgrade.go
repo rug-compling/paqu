@@ -3,6 +3,8 @@ package main
 //. Imports
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pebbe/dbxml"
@@ -69,7 +71,7 @@ Usage: %s regexp
 	re, err := regexp.Compile(os.Args[1])
 	x(err)
 
-	configfile := filepath.Join(paquconfigdir, "setup.toml")
+	configfile := filepath.Join(dir.Config, "setup.toml")
 	_, err = TomlDecodeFile(configfile, &Cfg)
 	x(err)
 
@@ -77,7 +79,7 @@ Usage: %s regexp
 		x(fmt.Errorf("Option 'conllu' in '%s' is false", configfile))
 	}
 
-	x(os.Chdir(filepath.Join(paqudatadir, "data")))
+	x(os.Chdir(filepath.Join(dir.Data, "data")))
 
 	corporall := make([]Corpus, 0)
 	db, err := dbopen()

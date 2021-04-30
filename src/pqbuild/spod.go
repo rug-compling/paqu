@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/util"
 	"github.com/rug-compling/alpinods"
 
@@ -342,7 +344,7 @@ func inspect(q *context) {
 
 func spod_save() {
 
-	dir := filepath.Join(paqudatadir, "data", prefix, "spod")
+	dir := filepath.Join(dir.Data, "data", prefix, "spod")
 
 	x(os.MkdirAll(dir, 0o777))
 

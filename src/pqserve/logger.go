@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/dir"
+
 	"github.com/pebbe/util"
 
 	"fmt"
@@ -63,7 +65,7 @@ func logerrfrag(q *Context, err error) bool {
 
 func logger() {
 
-	logfile := filepath.Join(paqudatadir, "pqserve.log")
+	logfile := filepath.Join(dir.Data, "pqserve.log")
 
 	rotate := func() {
 		for i := 4; i > 1; i-- {

@@ -1,4 +1,4 @@
-package main
+package dir
 
 import (
 	"os"
@@ -6,9 +6,8 @@ import (
 )
 
 var (
-	DefaultPaquDir string
-	paqudatadir    string
-	paquconfigdir  string
+	Data   string
+	Config string
 )
 
 func init() {
@@ -17,14 +16,14 @@ func init() {
 
 	d = os.Getenv("PAQU")
 	if d != "" {
-		paqudatadir = d
-		paquconfigdir = d
+		Data = d
+		Config = d
 		return
 	}
 
-	if DefaultPaquDir != "" {
-		paqudatadir = DefaultPaquDir
-		paquconfigdir = DefaultPaquDir
+	if DefaultDir != "" {
+		Data = DefaultDir
+		Config = DefaultDir
 		return
 	}
 
@@ -38,7 +37,7 @@ func init() {
 			d = filepath.Join(home, ".local", "share")
 		}
 	}
-	paqudatadir = filepath.Join(d, "paqu")
+	Data = filepath.Join(d, "paqu")
 
 	d = os.Getenv("XDG_CONFIG_HOME")
 	if d == "" {
@@ -48,6 +47,6 @@ func init() {
 			d = filepath.Join(home, ".config")
 		}
 	}
-	paquconfigdir = filepath.Join(d, "paqu")
+	Config = filepath.Join(d, "paqu")
 
 }
