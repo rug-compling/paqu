@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rug-compling/paqu/internal/ranges"
+
 	"github.com/dchest/authcookie"
 
 	"fmt"
@@ -292,5 +294,5 @@ func displayEmail(s string) string {
 }
 
 func datum(t time.Time) string {
-	return fmt.Sprintf("%d&nbsp;%s&nbsp;%d", t.Day(), maanden[t.Month()], t.Year())
+	return fmt.Sprintf("%d&nbsp;%s&nbsp;%d", t.Day(), ranges.Maanden[t.Month()], t.Year())
 }

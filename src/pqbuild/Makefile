@@ -4,19 +4,13 @@ include ../Makefile.cfg
 INTERNAL = \
 	../internal/dir/default.go \
 	../internal/dir/dir.go \
-	../internal/file/file.go
+	../internal/file/file.go \
+	../internal/ranges/ranges.go
 
-SRC = dbxml_false.go dbxml_true.go ranges_generated.go pqbuild.go spod.go spoddata_generated.go xpath_generated.go spod2xpath_generated.go
+SRC = dbxml_false.go dbxml_true.go pqbuild.go spod.go spoddata_generated.go xpath_generated.go spod2xpath_generated.go
 
 ../../bin/pqbuild: $(SRC) $(INTERNAL)
 	$(GO) build -o $@ $(TAGS) $(OPTS) .
-
-ranges_generated.go: ../pqserve/ranges.go
-	rm -f ranges_generated.go
-	echo '// GENERATED FILE. DO NOT EDIT.' > ranges_generated.go
-	echo >> ranges_generated.go
-	cat ../pqserve/ranges.go >> ranges_generated.go
-	chmod 444 ranges_generated.go
 
 spoddata_generated.go: ../pqserve/spoddata.go
 	rm -f spoddata_generated.go

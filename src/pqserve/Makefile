@@ -6,7 +6,8 @@ INTERNAL = \
 	../internal/dir/dir.go \
 	../internal/file/file.go \
 	../internal/node/attribs.go \
-	../internal/node/node.go
+	../internal/node/node.go \
+	../internal/ranges/ranges.go
 
 
 all: spod2xpath.go ../../bin/pqserve

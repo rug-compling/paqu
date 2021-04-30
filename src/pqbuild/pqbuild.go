@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	"github.com/rug-compling/paqu/internal/ranges"
 
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
@@ -813,15 +814,15 @@ Opties:
 			for rows.Next() {
 				rows.Scan(&v1, &v2, &vx)
 			}
-			ir := newIrange(v1, v2, vx)
+			ir := ranges.NewIrange(v1, v2, vx)
 			indexed := 0
-			if ir.indexed {
+			if ir.Indexed {
 				indexed = 1
 			}
 			_, err = db.Exec(fmt.Sprintf(
 				"INSERT `%s_c_%s_minf` (`id`,`imin`,`istep`,`indexed`,`size`) VALUES (%d,%d,%d,%d,%d)",
 				Cfg.Prefix, prefix,
-				metai[meta], ir.min, ir.step, indexed, len(ir.s)))
+				metai[meta], ir.Min, ir.Step, indexed, len(ir.S)))
 			util.CheckErr(err)
 			rows, err = db.Query(fmt.Sprintf(
 				"SELECT DISTINCT `ival` FROM `%s_c_%s_meta` WHERE `id` = %d",
@@ -832,7 +833,7 @@ Opties:
 			iis := make([][2]int, 0)
 			for rows.Next() {
 				util.CheckErr(rows.Scan(&v))
-				s, ix := ir.value(v)
+				s, ix := ir.Value(v)
 				idx[ix] = s
 				iis = append(iis, [2]int{ix, v})
 			}
@@ -856,22 +857,22 @@ Opties:
 			for rows.Next() {
 				rows.Scan(&v1, &v2)
 			}
-			fr := newFrange(v1, v2)
+			fr := ranges.NewFrange(v1, v2)
 			indexed := 0
-			if fr.indexed {
+			if fr.Indexed {
 				indexed = 1
 			}
 			_, err = db.Exec(fmt.Sprintf(
 				"INSERT `%s_c_%s_minf` (`id`,`fmin`,`fstep`,`indexed`,`size`) VALUES (%d,%g,%g,%d,%d)",
 				Cfg.Prefix, prefix,
-				metai[meta], fr.min, fr.step, indexed, len(fr.s)))
+				metai[meta], fr.Min, fr.Step, indexed, len(fr.S)))
 			util.CheckErr(err)
-			if fr.indexed {
+			if fr.Indexed {
 				_, err = db.Exec(fmt.Sprintf(
 					"UPDATE `%s_c_%s_meta` SET `idx` = FLOOR((`fval` - %g) / %g) WHERE `id` = %d",
 					Cfg.Prefix, prefix,
-					fr.min,
-					fr.step,
+					fr.Min,
+					fr.Step,
 					metai[meta]))
 				util.CheckErr(err)
 			} else {
@@ -889,7 +890,7 @@ Opties:
 			for rows.Next() {
 				var i int
 				util.CheckErr(rows.Scan(&i))
-				idx[i] = fr.s[i]
+				idx[i] = fr.S[i]
 			}
 			util.CheckErr(rows.Err())
 		case "DATE", "DATETIME":
@@ -908,18 +909,18 @@ Opties:
 			for rows.Next() {
 				rows.Scan(&v1, &v2, &i)
 			}
-			dr := newDrange(v1, v2, i, metat[meta] == "DATETIME")
+			dr := ranges.NewDrange(v1, v2, i, metat[meta] == "DATETIME")
 			indexed := 0
-			if dr.indexed {
+			if dr.Indexed {
 				indexed = 1
 			}
 			_, err = db.Exec(fmt.Sprintf(
 				"INSERT `%s_c_%s_minf` (`id`,`dmin`,`dmax`,`dtype`,`indexed`,`size`) VALUES (%d,\"%04d-%02d-%02d %02d:%02d:%02d\",\"%04d-%02d-%02d %02d:%02d:%02d\",%d,%d,%d)",
 				Cfg.Prefix, prefix,
 				metai[meta],
-				dr.min.Year(), dr.min.Month(), dr.min.Day(), dr.min.Hour(), dr.min.Minute(), dr.min.Second(),
-				dr.max.Year(), dr.max.Month(), dr.max.Day(), dr.max.Hour(), dr.max.Minute(), dr.max.Second(),
-				dr.r, indexed, len(dr.s)))
+				dr.Min.Year(), dr.Min.Month(), dr.Min.Day(), dr.Min.Hour(), dr.Min.Minute(), dr.Min.Second(),
+				dr.Max.Year(), dr.Max.Month(), dr.Max.Day(), dr.Max.Hour(), dr.Max.Minute(), dr.Max.Second(),
+				dr.R, indexed, len(dr.S)))
 			util.CheckErr(err)
 			rows, err = db.Query(fmt.Sprintf(
 				"SELECT `dval` FROM `%s_c_%s_meta` WHERE `id` = %d",
@@ -929,7 +930,7 @@ Opties:
 			var v time.Time
 			for rows.Next() {
 				util.CheckErr(rows.Scan(&v))
-				s, ix := dr.value(v)
+				s, ix := dr.Value(v)
 				idx[ix] = s
 				_, err = db.Exec(fmt.Sprintf(
 					"UPDATE `%s_c_%s_meta` SET `idx` = %d WHERE `id` = %d AND `dval` = \"%04d-%02d-%02d %02d-%02d-%02d\"",

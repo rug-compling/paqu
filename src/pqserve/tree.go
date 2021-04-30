@@ -38,6 +38,7 @@ import "C"
 import (
 	"github.com/rug-compling/paqu/internal/dir"
 	pqnode "github.com/rug-compling/paqu/internal/node"
+	"github.com/rug-compling/paqu/internal/ranges"
 
 	"github.com/pebbe/compactcorpus"
 
@@ -381,14 +382,14 @@ func tree(q *Context) {
 					if err != nil {
 						v = err.Error()
 					} else {
-						v = printDate(t, false)
+						v = ranges.PrintDate(t, false)
 					}
 				} else if m.Type == "datetime" {
 					t, err := time.Parse("2006-01-02 15:04", m.Value)
 					if err != nil {
 						v = err.Error()
 					} else {
-						v = printDate(t, true)
+						v = ranges.PrintDate(t, true)
 					}
 				} else {
 					v = m.Value

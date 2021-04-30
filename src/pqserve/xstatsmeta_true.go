@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	"github.com/rug-compling/paqu/internal/ranges"
 
 	"github.com/pebbe/dbxml"
 
@@ -212,9 +213,9 @@ c("0", "0");
 	metat := make(map[string]string)
 	metai := make(map[string]int)
 	tranges := make(map[string]map[string]int)
-	dranges := make(map[string]*drange)
-	franges := make(map[string]*frange)
-	iranges := make(map[string]*irange)
+	dranges := make(map[string]*ranges.Drange)
+	franges := make(map[string]*ranges.Frange)
+	iranges := make(map[string]*ranges.Irange)
 	for _, m := range metas {
 		metat[m.name] = m.mtype
 		metai[m.name] = m.id
@@ -255,11 +256,11 @@ c("0", "0");
 		}
 		switch m.mtype {
 		case "INT":
-			iranges[m.name] = oldIrange(imin, istep, size, indexed)
+			iranges[m.name] = ranges.OldIrange(imin, istep, size, indexed)
 		case "FLOAT":
-			franges[m.name] = oldFrange(fmin, fstep, size)
+			franges[m.name] = ranges.OldFrange(fmin, fstep, size)
 		case "DATE", "DATETIME":
-			dranges[m.name] = oldDrange(dmin, dmax, dtype, indexed)
+			dranges[m.name] = ranges.OldDrange(dmin, dmax, dtype, indexed)
 		}
 	} // for _, m := range metas
 
@@ -444,16 +445,16 @@ c("0", "0");
 							idx = tranges[name][value]
 						case "INT":
 							v, _ := strconv.Atoi(value)
-							value, idx = iranges[name].value(v)
+							value, idx = iranges[name].Value(v)
 						case "FLOAT":
 							v, _ := strconv.ParseFloat(value, 32) // 32 is dezelfde precisie als gebruikt door MySQL
-							value, idx = franges[name].value(v)
+							value, idx = franges[name].Value(v)
 						case "DATE":
 							v, _ := time.Parse("2006-01-02", value)
-							value, idx = dranges[name].value(v)
+							value, idx = dranges[name].Value(v)
 						case "DATETIME":
 							v, _ := time.Parse("2006-01-02 15:04", value)
-							value, idx = dranges[name].value(v)
+							value, idx = dranges[name].Value(v)
 						}
 					}
 					telling[name][value] = [3]int{idx, telling[name][value][1] + matches, telling[name][value][2] + c}

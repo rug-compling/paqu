@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
+	"github.com/rug-compling/paqu/internal/ranges"
 
 	"github.com/pebbe/util"
 
@@ -313,9 +314,9 @@ Label: <input type="text" name="lbl" size="20" value="%s">
 				case "FLOAT":
 					v = fmt.Sprintf("%g", fval)
 				case "DATE":
-					v = printDate(dval, false)
+					v = ranges.PrintDate(dval, false)
 				case "DATETIME":
-					v = printDate(dval, true)
+					v = ranges.PrintDate(dval, true)
 				}
 				fmt.Fprintf(q.w, "%s&nbsp; %s: %s\n", pre, html.EscapeString(name), html.EscapeString(v))
 				pre = "<br>"

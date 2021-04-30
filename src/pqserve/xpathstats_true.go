@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/rug-compling/paqu/internal/dir"
 	pqnode "github.com/rug-compling/paqu/internal/node"
+	"github.com/rug-compling/paqu/internal/ranges"
 
 	"github.com/pebbe/dbxml"
 
@@ -260,9 +261,9 @@ function init(s) {
 	var isFloat [5]bool
 	var isDate [5]bool
 	var isDateTime [5]bool
-	var iranges [5]*irange
-	var franges [5]*frange
-	var dranges [5]*drange
+	var iranges [5]*ranges.Irange
+	var franges [5]*ranges.Frange
+	var dranges [5]*ranges.Drange
 	var isidx [5]bool
 	var aligns [5]string
 	for i := 0; i < 5; i++ {
@@ -295,7 +296,7 @@ function init(s) {
 				var min, max, count int
 				for rows.Next() {
 					if rows.Scan(&min, &max, &count) == nil {
-						iranges[i] = newIrange(min, max, count)
+						iranges[i] = ranges.NewIrange(min, max, count)
 						isInt[i] = true
 						aligns[i] = "right"
 						isidx[i] = true
@@ -315,7 +316,7 @@ function init(s) {
 				var min, max float64
 				for rows.Next() {
 					if rows.Scan(&min, &max) == nil {
-						franges[i] = newFrange(min, max)
+						franges[i] = ranges.NewFrange(min, max)
 						isFloat[i] = true
 						aligns[i] = "right"
 						isidx[i] = true
@@ -338,10 +339,10 @@ function init(s) {
 						aligns[i] = "right"
 						isidx[i] = true
 						if t == "DATE" {
-							dranges[i] = newDrange(min, max, 0, false)
+							dranges[i] = ranges.NewDrange(min, max, 0, false)
 							isDate[i] = true
 						} else {
-							dranges[i] = newDrange(min, max, 0, true)
+							dranges[i] = ranges.NewDrange(min, max, 0, true)
 							isDateTime[i] = true
 						}
 					}
@@ -596,7 +597,7 @@ init({
 							if isInt[i] {
 								v, err := strconv.Atoi(m.Value)
 								if err == nil {
-									vv, idx := iranges[i].value(v)
+									vv, idx := iranges[i].Value(v)
 									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
 									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
@@ -604,7 +605,7 @@ init({
 							} else if isFloat[i] {
 								v, err := strconv.ParseFloat(m.Value, 64)
 								if err == nil {
-									vv, idx := franges[i].value(v)
+									vv, idx := franges[i].Value(v)
 									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
 									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
@@ -612,7 +613,7 @@ init({
 							} else if isDate[i] {
 								v, err := time.Parse("2006-01-02", m.Value)
 								if err == nil {
-									vv, idx := dranges[i].value(v)
+									vv, idx := dranges[i].Value(v)
 									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
 									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})
@@ -620,7 +621,7 @@ init({
 							} else if isDateTime[i] {
 								v, err := time.Parse("2006-01-02 15:04", m.Value)
 								if err == nil {
-									vv, idx := dranges[i].value(v)
+									vv, idx := dranges[i].Value(v)
 									mm[i] = append(mm[i], StructIS{idx, vv})
 								} else {
 									mm[i] = append(mm[i], StructIS{math.MinInt32, err.Error()})

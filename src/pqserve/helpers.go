@@ -2,6 +2,7 @@ package main
 
 import (
 	pqnode "github.com/rug-compling/paqu/internal/node"
+	"github.com/rug-compling/paqu/internal/ranges"
 
 	"github.com/BurntSushi/toml"
 
@@ -459,17 +460,17 @@ func getMeta(q *Context, prefix string) []MetaType {
 			}
 		case "DATE", "DATETIME":
 			switch int(dtype.Int64) {
-			case dr_hour:
+			case ranges.Dr_hour:
 				v = "datum + uur"
-			case dr_day:
+			case ranges.Dr_day:
 				v = "datum"
-			case dr_month:
+			case ranges.Dr_month:
 				v = "maand"
-			case dr_year:
+			case ranges.Dr_year:
 				v = "jaar"
-			case dr_dec:
+			case ranges.Dr_dec:
 				v = "decennium"
-			case dr_cent:
+			case ranges.Dr_cent:
 				v = "eeuw"
 			}
 		}
