@@ -1,6 +1,8 @@
 
 include ../Makefile.cfg
 
+# internal/file is nodig voor internal/spod
+
 INTERNAL = \
 	../internal/dir/default.go \
 	../internal/dir/dir.go \
@@ -8,6 +10,7 @@ INTERNAL = \
 	../internal/ranges/ranges.go \
 	../internal/spod/spod2xpath.go \
 	../internal/spod/spoddata.go \
+	../internal/spod/util.go \
 	../internal/spod/xpath.go
 
 ../../bin/pqbuild: *.go $(INTERNAL)

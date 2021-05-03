@@ -2,13 +2,11 @@ package main
 
 import (
 	"github.com/rug-compling/paqu/internal/dir"
-	"github.com/rug-compling/paqu/internal/file"
 	pqspod "github.com/rug-compling/paqu/internal/spod"
 
 	"github.com/pebbe/util"
 	"github.com/rug-compling/alpinods"
 
-	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -359,10 +357,8 @@ func spod_save() {
 	fmt.Fprintf(fp, "%8.4f\t\t\tlw\tletters per woord\n", float64(tokenlen)/float64(tokens))
 	fp.Close()
 
-	loadMacros()
-
 	for _, spod := range pqspod.Spods {
-		filename := filepath.Join(dir, spod_fingerprint(spod.Xpath, spod.Method))
+		filename := filepath.Join(dir, pqspod.Hash(spod.Lbl))
 		fp, err := os.Create(filename)
 		x(err)
 		if spod.Special == "hidden1" {
@@ -473,41 +469,6 @@ func spod_save() {
 		}
 		fmt.Fprintln(fp)
 		fp.Close()
-	}
-
-}
-
-func spod_fingerprint(xpath string, method string) string {
-	query := macroKY.ReplaceAllStringFunc(xpath, func(s string) string {
-		return rules[s[1:len(s)-1]]
-	})
-	query = strings.Join(strings.Fields(query), " ")
-	return fmt.Sprintf("%x", md5.Sum([]byte(query+method)))
-}
-
-func loadMacros() {
-
-	for _, set := range macroRE.FindAllStringSubmatch(macroCOM.ReplaceAllLiteralString(file.File__macros__txt, ""), -1) {
-		s := strings.Replace(set[2], "\r\n", "\n", -1)
-		s = strings.Replace(s, "\n\r", "\n", -1)
-		s = strings.Replace(s, "\r", "\n", -1)
-		rules[set[1]] = s
-	}
-
-	for key := range rules {
-		for {
-			rule := macroKY.ReplaceAllStringFunc(rules[key], func(s string) string {
-				return rules[s[1:len(s)-1]]
-			})
-			if rule == rules[key] {
-				break
-			}
-			if len(rule) > 100000 {
-				rules[key] = "RECURSIONLIMIT"
-				break
-			}
-			rules[key] = rule
-		}
 	}
 
 }

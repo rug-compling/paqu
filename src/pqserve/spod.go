@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"bytes"
 	"compress/gzip"
-	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -645,7 +644,7 @@ window.onclick = function(event) {
 	spod_in_use := make(map[string]bool)
 
 	for idx, spod := range pqspod.Spods {
-		spod_in_use[spod_fingerprint(idx)] = true
+		spod_in_use[pqspod.Hash(spod.Lbl)] = true
 
 		if strings.HasPrefix(spod.Special, "hidden") {
 			lines, _, _, done, err := spod_get(q, db, idx, owner)
@@ -981,7 +980,7 @@ func spod_get(q *Context, db string, item int, owner string) (lines int, items i
 	dirpath := filepath.Join(dir.Data, "data", db, "spod")
 	os.MkdirAll(dirpath, 0700)
 
-	fingerprint := spod_fingerprint(item)
+	fingerprint := pqspod.Hash(pqspod.Spods[item].Lbl)
 	filename := filepath.Join(dirpath, fingerprint)
 	data, err := ioutil.ReadFile(filename)
 	if err == nil && len(data) > 0 {
@@ -1363,15 +1362,6 @@ func spod_list(q *Context) {
 			strings.Repeat("-", len(spod.Lbl)+2+len(spodtext)), "\n\n",
 			spod.Xpath, "\n\n")
 	}
-}
-
-func spod_fingerprint(item int) string {
-	rules := getMacrosRules(&Context{})
-	query := macroKY.ReplaceAllStringFunc(pqspod.Spods[item].Xpath, func(s string) string {
-		return rules[s[1:len(s)-1]]
-	})
-	query = strings.Join(strings.Fields(query), " ")
-	return fmt.Sprintf("%x", md5.Sum([]byte(query+pqspod.Spods[item].Method)))
 }
 
 func jsstringsEscape(s string) string {

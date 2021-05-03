@@ -231,6 +231,7 @@ func main() {
 
 	handleFunc("spod", spod_main, nil)
 	handleFunc("spodform", spod_form, nil)
+	handleFunc("spodinfo", spod_info, nil)
 	handleFunc("spodlist", spod_list, nil)
 
 	handleStatic("debug/env", environment)

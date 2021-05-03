@@ -37,6 +37,79 @@ var (
 	}
 )
 
+func spod_info(q *Context) {
+	q.w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	cache(q)
+
+	fmt.Fprint(q.w, `Beschrijving van kolommen in gedetailleerde SPOD-tabel
+
+    sentence.id     sentence ID
+
+    tokens          aantal tokens in de zin, zonder leestekens
+    tokens.len      gemiddeld aantal letters per token, zonder leestekens
+
+De volgende kolommen bevatten het aantal woorden met het betreffende attribuut @pt per zin (ook leestekens)
+
+    adj             bijvoeglijk naamwoord
+    bw              bijwoord
+    let             leesteken
+    lid             lidwoord
+    n               zelfstandig naamwoord
+    spec            ?     TODO
+    tsw             tussenwerpsel
+    tw              telwoord
+    vg              voegwoord
+    vnw             voornaamwoord
+    vz              voorzetsel
+    ww              werkwoord
+
+De volgende kolommen bevatten het aantal nodes per zin (label zonder toevoeging .len)
+en het gemiddeld aantal woorden onder elke gevonden node (label met toevoeging .len)
+Het laatste alleen voor een gedetailleerde tabel inclusief lengtes.
+`)
+
+	for _, spod := range pqspod.Spods {
+		if spod.Special == "parser" {
+			break
+		}
+		if spod.Special == "hidden1" || spod.Special == "attr" {
+			continue
+		}
+		if spod.Header != "" {
+			h := spod.Header
+			if i := strings.Index(h, "//"); i > 0 {
+				h = h[:i]
+			}
+			fmt.Fprintf(q.w, "\n    %s\n\n", h)
+		}
+		fmt.Fprintf(q.w, "    %-16s%s\n", spod.Lbl, strings.Replace(spod.Text, "|", "", -1))
+	}
+
+	fmt.Fprint(q.w, `
+Parser succes:
+
+    ok              de waarde 1 als de zin correct geparst is (parse bestaat uit een enkel deel, en geen woord is overgeslagen)
+    cats            parse bestaat uit dit aantal losse delen
+    skips           aantal overgeslagen woorden
+
+Onbekende woorden per zin:
+
+`)
+	for _, spod := range pqspod.Spods {
+		if spod.Special != "his" {
+			continue
+		}
+		fmt.Fprintf(q.w, "    %-16s%s\n", spod.Lbl, strings.Replace(spod.Text, "|", "", -1))
+	}
+
+	fmt.Fprint(q.w, `
+Tot slot, afhankelijk van het corpus volgt alle metadata van de zin
+
+    meta.*
+
+`)
+}
+
 func spod_table(q *Context, prefix string, length bool) {
 
 	var owner string
@@ -74,18 +147,28 @@ func spod_table(q *Context, prefix string, length bool) {
 		}
 	}
 
+	directory := filepath.Join(dir.Data, "data", prefix, "spod")
 	opts := make(map[string]bool)
 	optlist := make([]string, 0)
+	skiplist := make([]string, 0)
+	unknown := make([]string, 0)
+	unavail := make([]string, 0)
 	cats := false
 	skips := false
 	for idx, spod := range pqspod.Spods {
 		if spod.Special == "hidden1" {
 			continue
 		}
-		if spod.Lbl == "postag" || spod.Lbl == "pos" {
-			continue
+		has, err := pqspod.Has(spod.Lbl, directory)
+		haserr := err != nil
+		if err != nil {
+			has = true
 		}
 		if first(q.r, fmt.Sprintf("i%d", idx)) == "t" {
+			if spod.Lbl == "postag" || spod.Lbl == "pos" {
+				unavail = append(unavail, spod.Lbl)
+				continue
+			}
 			if spod.Lbl == "pt" {
 				opts["pt"] = true
 				optlist = append(optlist, "pt."+strings.Join(ptlist, "\tpt."))
@@ -94,26 +177,59 @@ func spod_table(q *Context, prefix string, length bool) {
 			if spod.Special == "parser" && strings.HasPrefix(spod.Lbl, "cats") {
 				if !cats {
 					cats = true
-					opts["cats1"] = true
-					optlist = append(optlist, "cats")
+					if has {
+						opts["cats1"] = true
+						optlist = append(optlist, "cats")
+						if haserr {
+							unknown = append(unknown, "cats")
+						}
+					} else {
+						skiplist = append(skiplist, "cats")
+					}
 				}
 				continue
 			}
 			if spod.Special == "parser" && strings.HasPrefix(spod.Lbl, "skips") {
 				if !skips {
 					skips = true
-					opts["skips1"] = true
-					optlist = append(optlist, "skips")
+					if has {
+						opts["skips1"] = true
+						optlist = append(optlist, "skips")
+						if haserr {
+							unknown = append(unknown, "skips")
+						}
+					} else {
+						skiplist = append(skiplist, "skips")
+					}
 				}
 				continue
 			}
-			opts[spod.Lbl] = true
-			optlist = append(optlist, spod.Lbl)
-			if length && spod.Special != "attr" && spod.Special != "parser" {
-				optlist = append(optlist, spod.Lbl+".len")
+			if has {
+				opts[spod.Lbl] = true
+				optlist = append(optlist, spod.Lbl)
+				if length && spod.Special != "attr" && spod.Special != "parser" {
+					optlist = append(optlist, spod.Lbl+".len")
+				}
+				if haserr {
+					unknown = append(unknown, spod.Lbl)
+				}
+			} else {
+				skiplist = append(skiplist, spod.Lbl)
 			}
 		}
 	}
+
+	fmt.Fprintln(q.w, "# corpus:", q.desc[prefix])
+	if len(unavail) > 0 {
+		fmt.Fprintln(q.w, "# niet beschikbaar:", strings.Join(unavail, " "))
+	}
+	if len(skiplist) > 0 {
+		fmt.Fprintln(q.w, "# niet voor dit corpus:", strings.Join(skiplist, " "))
+	}
+	if len(unknown) > 0 {
+		fmt.Fprintln(q.w, "# beschikbaarheid nog onbekend:", strings.Join(unknown, " "))
+	}
+	fmt.Fprintf(q.w, "# beschrijving van kolommen: %sspodinfo\n", Cfg.Url)
 
 	fmt.Fprint(q.w, "sentence.id\ttokens\ttokens.len")
 	if len(optlist) > 0 {
