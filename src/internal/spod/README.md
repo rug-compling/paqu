@@ -48,3 +48,12 @@ In `pqbuild/spod.go` speelt dit voor de **specials** `hidden1`, `attr`,
 In `pqserve/spodtable.go` speelt dit voor de **specials** `hidden1`,
 `attr`, `parser`, `his` en voor de **labels** `pos`, `postag`, `pt`,
 `cats0` t/m `cats4`, `skips0` t/m `skips4`.
+
+----
+
+De parser voor XPath, `spodmake/spodmake.go`, die XPath-expressies omzet naar Go-code, maakt
+gebruik van een gehackte versie van `testXPath` (onderdeel van
+`libxml2` versie 2.9.9), waarin de indentatie van de uitvoer met optie
+`--tree` niet beperkt is tot 25 niveaus.
+
+Sources: [hier](https://github.com/rug-compling/alud/tree/master/libxml2/2.9.9).
