@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -55,12 +54,6 @@ var (
 
 	tokens   = 0
 	tokenlen = 0
-
-	macroRE  = regexp.MustCompile(`([a-zA-Z][_a-zA-Z0-9]*)\s*=\s*"""((?s:.*?))"""`)
-	macroKY  = regexp.MustCompile(`%[a-zA-Z][_a-zA-Z0-9]*%`)
-	macroCOM = regexp.MustCompile(`(?m:^\s*#.*)`)
-
-	rules = make(map[string]string)
 
 	x = util.CheckErr
 )
@@ -430,12 +423,6 @@ func spod_save() {
 			}
 		} else if spod.Special == "sc" {
 			if !has_sc {
-				fp.Close()
-				os.Remove(filename)
-				continue
-			}
-		} else if spod.Special == "parser" {
-			if !has_parser {
 				fp.Close()
 				os.Remove(filename)
 				continue
