@@ -57,3 +57,5 @@ gebruik van een gehackte versie van `testXPath` (onderdeel van
 `--tree` niet beperkt is tot 25 niveaus.
 
 Sources: [hier](https://github.com/rug-compling/alud/tree/master/libxml2/2.9.9).
+
+Zie ook: [feature request](https://gitlab.gnome.org/GNOME/libxml2/-/issues/241).
