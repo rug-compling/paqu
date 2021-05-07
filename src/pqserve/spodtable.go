@@ -50,18 +50,18 @@ func spod_info(q *Context) {
 
 De volgende kolommen bevatten het aantal woorden met het betreffende attribuut @pt per zin (ook leestekens)
 
-    adj             bijvoeglijk naamwoord
-    bw              bijwoord
-    let             leesteken
-    lid             lidwoord
-    n               zelfstandig naamwoord
-    spec            ?     TODO
-    tsw             tussenwerpsel
-    tw              telwoord
-    vg              voegwoord
-    vnw             voornaamwoord
-    vz              voorzetsel
-    ww              werkwoord
+    pt.adj          bijvoeglijk naamwoord
+    pt.bw           bijwoord
+    pt.let          leesteken
+    pt.lid          lidwoord
+    pt.n            zelfstandig naamwoord
+    pt.spec         speciale woordsoorten
+    pt.tsw          tussenwerpsel
+    pt.tw           telwoord
+    pt.vg           voegwoord
+    pt.vnw          voornaamwoord
+    pt.vz           voorzetsel
+    pt.ww           werkwoord
 
 De volgende kolommen bevatten het aantal nodes per zin (label zonder toevoeging .len)
 en het gemiddeld aantal woorden onder elke gevonden node (label met toevoeging .len)
