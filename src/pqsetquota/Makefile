@@ -5,7 +5,7 @@ INTERNAL = \
 	../internal/dir/default.go \
 	../internal/dir/dir.go
 
-../../bin/pqsetquota: *.go $(INTERNAL)
+../../bin/pqsetquota: *.go ../go.mod $(INTERNAL)
 	$(GO) build $(BUILD) -o $@ $(OPTS) .
 
 ../internal/dir/default.go:

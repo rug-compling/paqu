@@ -5,7 +5,7 @@ INTERNAL = \
 	../internal/node/attribs.go \
 	../internal/node/node.go
 
-../../bin/pqdactx: *.go $(INTERNAL)
+../../bin/pqdactx: *.go ../go.mod $(INTERNAL)
 	$(GO) build -o $@ $(TAGS) $(OPTS) .
 
 ../internal/node/attribs.go: ../internal/node/attribs.txt ../internal/node/mkattribs.go

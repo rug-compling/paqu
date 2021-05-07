@@ -18,7 +18,7 @@ INTERNAL = \
 
 all: ../../bin/pqserve
 
-../../bin/pqserve: *.go $(INTERNAL)
+../../bin/pqserve: *.go ../go.mod $(INTERNAL)
 	$(GO) build -o $@ $(TAGS) $(OPTS) .
 
 ../internal/dir/default.go:

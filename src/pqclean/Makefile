@@ -5,7 +5,7 @@ INTERNAL = \
 	../internal/dir/default.go \
 	../internal/dir/dir.go
 
-../../bin/pqclean: *.go $(INTERNAL)
+../../bin/pqclean: *.go ../go.mod $(INTERNAL)
 	$(GO) build -o $@ $(OPTS) .
 
 ../internal/dir/default.go:

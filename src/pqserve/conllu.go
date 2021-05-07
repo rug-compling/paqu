@@ -583,7 +583,6 @@ function unmrk(id, i, j) {
 `)
 	fmt.Fprintf(fp, `
 <div class="break"></div>
-<div class="warning">In ontwikkeling</div>
 <div class="unidep">
 <svg id="%s" width="%d" height="%d">
 `, svgID, width, height)

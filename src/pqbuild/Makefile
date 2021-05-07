@@ -13,7 +13,7 @@ INTERNAL = \
 	../internal/spod/util.go \
 	../internal/spod/xpath.go
 
-../../bin/pqbuild: *.go $(INTERNAL)
+../../bin/pqbuild: *.go ../go.mod $(INTERNAL)
 	$(GO) build -o $@ $(TAGS) $(OPTS) .
 
 ../internal/dir/default.go:
