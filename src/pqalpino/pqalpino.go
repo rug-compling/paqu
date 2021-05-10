@@ -61,12 +61,11 @@ var (
 	opt_u = flag.String("u", "", "output file for UD errors (impliceert -U)")
 	opt_U = flag.Bool("U", false, "true: derive Universal Dependencies")
 
-	x             = util.CheckErr
-	reParser      = regexp.MustCompile(`<parser.*?>`)
-	reParserBuild = regexp.MustCompile(`<parser[^>]*?build=.*?>`)
-	alpino_build  string
-	filename      string
-	lastdir       string
+	x            = util.CheckErr
+	reParser     = regexp.MustCompile(`<parser.*?>`)
+	alpino_build string
+	filename     string
+	lastdir      string
 )
 
 func usage() {
@@ -269,9 +268,6 @@ Q#%s|skipped|??|????
 	for _, filename := range filenames {
 		b, err := ioutil.ReadFile(filename)
 		x(err)
-		if reParserBuild.Match(b) {
-			continue
-		}
 		xml := setBuild(string(b))
 		if *opt_U || *opt_u != "" {
 			s, err := alud.UdAlpino([]byte(xml), filename, "")
