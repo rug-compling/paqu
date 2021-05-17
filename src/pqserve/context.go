@@ -112,7 +112,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 			}
 			if q.user != "" {
 				rows, err := sqlDB.Query(fmt.Sprintf(
-					"SELECT SQL_CACHE `quotum` FROM `%s_users` WHERE `mail` = %q AND `sec` = %q", Cfg.Prefix, q.user, q.sec))
+					"SELECT `quotum` FROM `%s_users` WHERE `mail` = %q AND `sec` = %q", Cfg.Prefix, q.user, q.sec))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -167,7 +167,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 			}
 			rows, err := sqlDB.Query(fmt.Sprintf(
-				"SELECT SQL_CACHE `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`,`i`.`hasud`, `i`.`info`, `i`.`infop`, `i`.`created` "+
+				"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`,`i`.`hasud`, `i`.`info`, `i`.`infop`, `i`.`created` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
