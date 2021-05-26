@@ -4,7 +4,7 @@ type Node struct {
 	FullNode
 	Ud       *UdType `xml:"ud,omitempty"`
 	NodeList []*Node `xml:"node"`
-	SkipThis bool
+	SkipThis bool    `xml:"-"`
 }
 
 type UdType struct {
