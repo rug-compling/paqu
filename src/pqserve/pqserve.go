@@ -12,6 +12,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"expvar"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -43,18 +44,31 @@ func init() {
 	expvar.Publish("info", expvar.Func(GetInfo))
 }
 
+var (
+	opt_v = flag.Bool("v", false, "verbose")
+	opt_p = flag.String("p", "", "PID-file")
+)
+
 //. Main
 
 func main() {
+
+	flag.Parse()
+	if *opt_v {
+		verbose = true
+	}
+
+	if *opt_p != "" {
+		fp, err := os.Create(*opt_p)
+		util.CheckErr(err)
+		fmt.Fprintln(fp, os.Getpid())
+		fp.Close()
+		defer os.Remove(*opt_p)
+	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	mysql.SetLogger(LogWriter{prefix: "MYSQL: "})
-
-	for _, arg := range os.Args[1:] {
-		if arg == "-v" {
-			verbose = true
-		}
-	}
 
 	tom := filepath.Join(dir.Config, "setup.toml")
 	md, err := TomlDecodeFile(tom, &Cfg)
@@ -90,6 +104,10 @@ func main() {
 		time.Sleep(time.Second)
 		close(chLoggerExit)
 		wgLogger.Wait()
+
+		if *opt_p != "" {
+			os.Remove(*opt_p)
+		}
 
 		os.Exit(0)
 	}()
