@@ -73,7 +73,7 @@ func accessView(addr string) bool {
 	ip := net.ParseIP(ad)
 	if ip == nil {
 		logf("Kan IP-adres niet parsen: %v", addr)
-		return true
+		return false
 	}
 
 	for _, a := range Cfg.View {
