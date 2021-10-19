@@ -8,7 +8,7 @@ require (
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/microcosm-cc/bluemonday v1.0.5
+	github.com/microcosm-cc/bluemonday v1.0.16
 	github.com/pebbe/compactcorpus v1.0.0
 	github.com/pebbe/dbxml v1.3.0
 	github.com/pebbe/util v0.0.0-20140716220158-e0e04dfe647c
