@@ -913,3 +913,20 @@ PQ_minimal_corr_comp = """
                and
                not(.//node[%PQ_corr_comp%])
         ] """
+
+PQ_ott = """ ( @pvtijd="tgw" and not(%PQ_voltooid%) ) """
+
+PQ_ovt = """ ( @pvtijd="verl" and not(%PQ_voltooid%) ) """
+
+PQ_vtt = """ ( @pvtijd="tgw" and %PQ_voltooid% ) """
+
+PQ_vvt = """ ( @pvtijd="verl" and %PQ_voltooid% ) """
+
+PQ_voltooid = """
+        (
+            @rel="hd"
+            and
+            (  @lemma="hebben" or @lemma="zijn" )
+            and
+            ../node[@rel="vc" and @cat="ppart"]
+        ) """
