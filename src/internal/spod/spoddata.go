@@ -1412,7 +1412,16 @@ waarbij het partikel in het werkwoord geincorporeerd is (1a).`,
 		"sc",
 	},
 	{
-		"Werkwoordstijden",
+		`Werkwoordstijden//We onderscheiden de vier klassieke werkwoordstijden: onvoltooid
+tegenwoordige tijd (1), onvoltooid verleden tijd (2), voltooid
+tegenwoordige tijd (3) en voltooid verleden tijd (4).
+<p>
+<table>
+<tr><td>(1)<td>De bakker bakt het brood</tr>
+<tr><td>(2)<td>De bakker bakte het brood</tr>
+<tr><td>(3)<td>De bakker heeft het brood gebakken</td>
+<tr><td>(4)<td>De bakker had het brood gebakken</td>
+</table`,
 		`//node[%PQ_ott%]`,
 		SPOD_STD,
 		"ott",
@@ -1444,7 +1453,20 @@ waarbij het partikel in het werkwoord geincorporeerd is (1a).`,
 		"",
 	},
 	{
-		"Volgorde van werkwoordstijden",
+		`Volgorde van werkwoordstijden//Deze queries onderscheiden finiete zinnen die zelf een finiet
+zinscomplement bevatten. Hierbij kijken we naar de combinaties van de
+(onvoltooide) werkwoordstijd van de persoonsvorm in de dominerende zin en
+de (onvoltooide) werkwoordstijd van de persoonsvorm in de zin die als
+complement optreedt.  De combinaties zijn dan tegenwoordige tijd met
+tegenwoordige tijd (1), tegenwoordige tijd met verleden tijd (2), verleden
+tijd met tegenwoordige tijd (3) en verleden tijd met verleden tijd (4).
+<p>
+<table>
+<tr><td>(1)<td>De minister verklaart dat de economie blijft groeien</tr>
+<tr><td>(2)<td>De minister verklaart dat hij het dossier in de trein liet liggen</tr>
+<tr><td>(3)<td>De minister verklaarde dat de economie blijft groeien</tr>
+<tr><td>(4)<td>De minister verklaarde dat hij het dossier in de trein liet liggen</tr>
+</table>`,
 		`//node[@rel="hd" and %PQ_ott% and ../node[@rel="vc"]/node[@rel="body"]/node[@rel="hd" and %PQ_ott%]]`,
 		SPOD_STD,
 		"ottott",
