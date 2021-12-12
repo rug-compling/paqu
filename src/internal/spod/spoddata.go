@@ -1421,7 +1421,7 @@ tegenwoordige tijd (3) en voltooid verleden tijd (4).
 <tr><td>(2)<td>De bakker bakte het brood</tr>
 <tr><td>(3)<td>De bakker heeft het brood gebakken</td>
 <tr><td>(4)<td>De bakker had het brood gebakken</td>
-</table`,
+</table>`,
 		`//node[%PQ_ott%]`,
 		SPOD_STD,
 		"ott",
