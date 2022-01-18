@@ -210,12 +210,12 @@ func doLocal() {
 			if *opt_n > 0 {
 				if n := len(strings.Fields(line)); n > *opt_n {
 					fmt.Fprintf(os.Stderr, `**** parsing %s (line number %d)
-line too long: %d tokens
+line too long: %d tokens (%d allowed)
 Q#%s|skipped|??|????
 **** parsed %s (line number %d)
 `,
 						label, lineno,
-						n,
+						n, *opt_n,
 						line,
 						label, lineno)
 					continue
