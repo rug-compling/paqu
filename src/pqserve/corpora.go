@@ -459,7 +459,7 @@ func submitCorpus(q *Context) {
 func newCorpus(q *Context, dirname, title, info, how string, protected int, errCheck func(*Context, error) bool, htmlOutput bool) {
 
 	_, err := sqlDB.Exec(fmt.Sprintf(
-		"UPDATE %s_info SET `description` = %q, `owner` = %q, `status` = \"QUEUED\", `params` = %q, `msg` = %q, `protected` = %d WHERE `id` = %q;",
+		"UPDATE %s_info SET `description` = %q, `owner` = %q, `status` = \"QUEUED\", `params` = %q, `msg` = %q, `protected` = %d WHERE `id` = %q",
 		Cfg.Prefix,
 		title, q.user, how, "Bron: "+invoertabel[how], protected,
 		dirname))
@@ -527,7 +527,7 @@ func beginNewCorpus(q *Context, title string, errCheck func(*Context, error) boo
 	}
 
 	_, err = sqlDB.Exec(fmt.Sprintf(
-		"INSERT %s_info (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\");",
+		"INSERT %s_info (`id`,`description`,`msg`,`params`) VALUES (%q,\"\",\"\",\"\")",
 		Cfg.Prefix,
 		dirname))
 

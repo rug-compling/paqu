@@ -567,10 +567,22 @@ func make_query_string(word, postag, rel, hpostag, hword, meta, db string) strin
 		urlencode(db))
 }
 
+func make_query_string_js(word, postag, rel, hpostag, hword, meta, db string) string {
+	return fmt.Sprintf(
+		"word=%s&postag=%s&rel=%s&hpostag=%s&hword=%s&meta=%s&db=%s",
+		urlencode(unHigh(word)),
+		urlencode(postag),
+		urlencode(rel),
+		urlencode(hpostag),
+		urlencode(unHigh(hword)),
+		urlencode(meta),
+		urlencode(db))
+}
+
 //. HTML
 
 func html_header(q *Context) {
-	qs := make_query_string(
+	qs := make_query_string_js(
 		first(q.r, "word"),
 		first(q.r, "postag"),
 		first(q.r, "rel"),
