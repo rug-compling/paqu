@@ -7,13 +7,13 @@ import (
 )
 
 func sendmail(to, subject, body string) (err error) {
-	msg := fmt.Sprintf(`From: PaQu <%s>
+	msg := strings.Replace(fmt.Sprintf(`From: PaQu <%s>
 To: %s
 Subject: %s
 Content-type: text/plain; charset=UTF-8
 
 %s
-`, Cfg.Mailfrom, to, subject, body)
+`, Cfg.Mailfrom, to, subject, body), "\n", "\r\n", -1)
 
 	if Cfg.Smtpuser != "" {
 		auth := smtp.PlainAuth("", Cfg.Smtpuser, Cfg.Smtppass, strings.Split(Cfg.Smtpserv, ":")[0])
