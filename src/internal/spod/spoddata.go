@@ -1218,6 +1218,113 @@ Dit zijn versteende combinaties zoals "ten tijde van", "door middel van",
 		"",
 	},
 	{
+		`Adjectiefgroepen//Adjectiefgroepen worden onderscheiden naar grammaticale functie en naar
+interne structuur. Adjectiefgroepen kunnen optreden als bepaling bij nomina (1), (2),
+traditioneel &quot;bijvoegelijke bepaling&quot; genoemd, en bij werkwoorden of andere bijvoeglijke
+naamwoorden (3), (4), traditioneel bijwoordelijke bepaling genoemd. Adjectiefgroepen kunnen
+ook optreden met als relatie &quot;predm&quot;, en dat zijn gevallen die traditionaal bekend staan als
+bepaling van gesteldheid (5) (6). Ten slotte kan een adjectiefgroep optreden als predicatief
+complement (naamwoordelijk deel van het gezegde), zoals in (7), (8).
+<p>
+<table>
+<tr><td>(1)<td>De <em>aardige</em> buurman</tr>
+<tr><td>(2)<td>De <em>nogal vervelende</em> vergadering</tr>
+<tr><td><td>&nbsp;<td>&nbsp;</tr>
+<tr><td>(3)<td>Hij trapte de bal <em>hard</em> over het doel</tr>
+<tr><td>(4)<td>De dienst is <em>volledig</em> kosteloos</tr>
+<tr><td><td>&nbsp;<td>&nbsp;</tr>
+<tr><td>(5)<td>Hij kwam <em>ziek</em> binnen</tr>
+<tr><td>(6)<td>Hij liet het knipsel <em>dol van trots</em> aan iedereen zien</tr>
+<tr><td><td>&nbsp;<td>&nbsp;</tr>
+<tr><td>(7)<td>Ik vind dat <em>idioot</em></tr>
+<tr><td>(8)<td>De dienst is <em>volledig kosteloos</em></tr>
+<tr><td><td>&nbsp;<td>&nbsp;</tr>
+<tr><td>(9)<td>Het boek is <em>beschikbaar via de uitgever</em></tr>
+<tr><td><td>&nbsp;<td>&nbsp;</tr>
+<tr><td>(10)<td>Het boek werd <em>tien jaar later</em> gepubliceerd</tr>
+<tr><td>(11)<td>De <em>mij onbekende</em> schrijver bleek een natuurtalent</tr>
+<tr><td><td>&nbsp;<td>&nbsp;</tr>
+<tr><td>(12)<td>De schat is <em>afkomstig uit Japan</em></tr>
+<tr><td>(13)<td>Ron is <em>bang dat dit iets te maken heeft met Sirius Zwarts</em></tr>
+</table>
+<p>
+Adjectiefgroepen kunnen ook onderverdeel worden aan de hand van hun interne structuur.
+We onderscheiden adjectieven die hun eentje optreden (1), (3), (4), (5), (7); adjectieven die voorkomen
+met een bepaling ter linkerzijde (2), (8); adjectieven die voorkomen met een bepaling rechts van
+het adjectief (9); adjectieven die voorkomen met een complement, links van het adjectief (10), (11) en
+ten slotte de gevallen waarbij het adjectief optreedt met een complement ter rechterzijde (12), (13).`,
+		`//node[(@cat="ap" or @pt="adj") and ((@rel="mod" and ../@cat="np") or (@rel="cnj" and ../@rel="mod" and ../../@cat="np"))]`,
+		SPOD_STD,
+		"ajbepn",
+		"grammaticale functie||, bijvoegelijke bepaling (bepaling bij zelfstandig naamwoord)",
+		"",
+	},
+	{
+		"",
+		`//node[(@cat="ap" or @pt="adj") and ((@rel="mod" and not(../@cat="np")) or (@rel="cnj" and ../@rel="mod" and not(../../@cat="np")))]`,
+		SPOD_STD,
+		"ajbepva",
+		"grammaticale functie|, bijwoordelijke bepaling (bepaling bij werkwoord, adjectief, ...)",
+		"",
+	},
+	{
+		"",
+		`//node[(@cat="ap" or @pt="adj") and ((@rel="predm") or (@rel="cnj" and ../@rel="predm"))]`,
+		SPOD_STD,
+		"ajpredm",
+		"grammaticale functie|, bepaling van gesteldheid etc.",
+		"",
+	},
+	{
+		"",
+		`//node[(@cat="ap" or @pt="adj") and ((@rel="predc") or (@rel="cnj" and ../@rel="predc"))]`,
+		SPOD_STD,
+		"ajpredc",
+		"grammaticale functie|, predicatief complement",
+		"",
+	},
+	{
+		"",
+		`//node[@pt="adj" and not(@rel="hd")]`,
+		SPOD_STD,
+		"ajaj",
+		"interne structuur||, ADJ",
+		"",
+	},
+	{
+		"",
+		`//node[@cat="ap" and node[@rel="mod"]/number(@begin) < node[@rel="hd"]/number(@begin)]`,
+		SPOD_STD,
+		"ajmodaj",
+		"interne structuur|, MOD ADJ",
+		"",
+	},
+	{
+		"",
+		`//node[@cat="ap" and node[(@rel="predc" or @rel="obj1" or @rel="obj2" or @rel="pc" or @rel="me" or @rel="vc" ) and not(%PQ_vorfeld%)]/number(@begin) < node[@rel="hd"]/number(@begin)]`,
+		SPOD_STD,
+		"ajcaj",
+		"interne structuur|, COMPL ADJ",
+		"",
+	},
+	{
+		"",
+		`//node[@cat="ap" and node[@rel="mod"]/number(@begin) > node[@rel="hd"]/number(@begin)]`,
+		SPOD_STD,
+		"ajajmod",
+		"interne structuur|, ADJ MOD",
+		"",
+	},
+	{
+		"",
+		`//node[@cat="ap" and node[(@rel="predc" or @rel="obj1" or @rel="obj2" or @rel="pc" or @rel="me" or @rel="vc") and not(%PQ_nachfeld%)]/number(@begin) > node[@rel="hd"]/number(@begin)]`,
+		SPOD_STD,
+		"ajajc",
+		"interne structuur|, ADJ COMPL",
+		"",
+	},
+
+	{
 		`Werkwoorden//Onder het kopje werkwoorden worden de vaste werkwoordelijke
 uitdrukkingen geteld (1).
 <p>

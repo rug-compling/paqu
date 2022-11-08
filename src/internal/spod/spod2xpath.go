@@ -10074,6 +10074,2361 @@ var Spod2xpath = map[string]*xPath{
 			},
 		},
 	},
+	"ajbepn": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dSort{
+							arg1: &dOr{
+								arg1: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__cat,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"ap"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
+										},
+									},
+								},
+								arg2: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"adj"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__pt,
+											arg1: &dNode{},
+										},
+									},
+								},
+							},
+						},
+						arg2: &dSort{
+							arg1: &dOr{
+								arg1: &dSort{
+									arg1: &dAnd{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"mod"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+										arg2: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG: collect__attributes__cat,
+												arg1: &dCollect{
+													ARG:  collect__parent__type__node,
+													arg1: &dNode{},
+												},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"np"},
+												arg1: &dCollect{
+													ARG: collect__attributes__cat,
+													arg1: &dCollect{
+														ARG:  collect__parent__type__node,
+														arg1: &dNode{},
+													},
+												},
+											},
+										},
+									},
+								},
+								arg2: &dSort{
+									arg1: &dAnd{
+										arg1: &dAnd{
+											arg1: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+												arg2: &dElem{
+													DATA: []interface{}{"cnj"},
+													arg1: &dCollect{
+														ARG:  collect__attributes__rel,
+														arg1: &dNode{},
+													},
+												},
+											},
+											arg2: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG: collect__attributes__rel,
+													arg1: &dCollect{
+														ARG:  collect__parent__type__node,
+														arg1: &dNode{},
+													},
+												},
+												arg2: &dElem{
+													DATA: []interface{}{"mod"},
+													arg1: &dCollect{
+														ARG: collect__attributes__rel,
+														arg1: &dCollect{
+															ARG:  collect__parent__type__node,
+															arg1: &dNode{},
+														},
+													},
+												},
+											},
+										},
+										arg2: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG: collect__attributes__cat,
+												arg1: &dCollect{
+													ARG: collect__parent__type__node,
+													arg1: &dCollect{
+														ARG:  collect__parent__type__node,
+														arg1: &dNode{},
+													},
+												},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"np"},
+												arg1: &dCollect{
+													ARG: collect__attributes__cat,
+													arg1: &dCollect{
+														ARG: collect__parent__type__node,
+														arg1: &dCollect{
+															ARG:  collect__parent__type__node,
+															arg1: &dNode{},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajbepva": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dSort{
+							arg1: &dOr{
+								arg1: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__cat,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"ap"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
+										},
+									},
+								},
+								arg2: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"adj"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__pt,
+											arg1: &dNode{},
+										},
+									},
+								},
+							},
+						},
+						arg2: &dSort{
+							arg1: &dOr{
+								arg1: &dSort{
+									arg1: &dAnd{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"mod"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+										arg2: &dFunction{
+											ARG: function__not__1__args,
+											arg1: &dArg{
+												arg1: &dSort{
+													arg1: &dEqual{
+														ARG: equal__is,
+														arg1: &dCollect{
+															ARG: collect__attributes__cat,
+															arg1: &dCollect{
+																ARG:  collect__parent__type__node,
+																arg1: &dNode{},
+															},
+														},
+														arg2: &dElem{
+															DATA: []interface{}{"np"},
+															arg1: &dCollect{
+																ARG: collect__attributes__cat,
+																arg1: &dCollect{
+																	ARG:  collect__parent__type__node,
+																	arg1: &dNode{},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								arg2: &dSort{
+									arg1: &dAnd{
+										arg1: &dAnd{
+											arg1: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+												arg2: &dElem{
+													DATA: []interface{}{"cnj"},
+													arg1: &dCollect{
+														ARG:  collect__attributes__rel,
+														arg1: &dNode{},
+													},
+												},
+											},
+											arg2: &dEqual{
+												ARG: equal__is,
+												arg1: &dCollect{
+													ARG: collect__attributes__rel,
+													arg1: &dCollect{
+														ARG:  collect__parent__type__node,
+														arg1: &dNode{},
+													},
+												},
+												arg2: &dElem{
+													DATA: []interface{}{"mod"},
+													arg1: &dCollect{
+														ARG: collect__attributes__rel,
+														arg1: &dCollect{
+															ARG:  collect__parent__type__node,
+															arg1: &dNode{},
+														},
+													},
+												},
+											},
+										},
+										arg2: &dFunction{
+											ARG: function__not__1__args,
+											arg1: &dArg{
+												arg1: &dSort{
+													arg1: &dEqual{
+														ARG: equal__is,
+														arg1: &dCollect{
+															ARG: collect__attributes__cat,
+															arg1: &dCollect{
+																ARG: collect__parent__type__node,
+																arg1: &dCollect{
+																	ARG:  collect__parent__type__node,
+																	arg1: &dNode{},
+																},
+															},
+														},
+														arg2: &dElem{
+															DATA: []interface{}{"np"},
+															arg1: &dCollect{
+																ARG: collect__attributes__cat,
+																arg1: &dCollect{
+																	ARG: collect__parent__type__node,
+																	arg1: &dCollect{
+																		ARG:  collect__parent__type__node,
+																		arg1: &dNode{},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajpredm": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dSort{
+							arg1: &dOr{
+								arg1: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__cat,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"ap"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
+										},
+									},
+								},
+								arg2: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"adj"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__pt,
+											arg1: &dNode{},
+										},
+									},
+								},
+							},
+						},
+						arg2: &dSort{
+							arg1: &dOr{
+								arg1: &dSort{
+									arg1: &dEqual{
+										ARG: equal__is,
+										arg1: &dCollect{
+											ARG:  collect__attributes__rel,
+											arg1: &dNode{},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"predm"},
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
+								arg2: &dSort{
+									arg1: &dAnd{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"cnj"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+										arg2: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG: collect__attributes__rel,
+												arg1: &dCollect{
+													ARG:  collect__parent__type__node,
+													arg1: &dNode{},
+												},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"predm"},
+												arg1: &dCollect{
+													ARG: collect__attributes__rel,
+													arg1: &dCollect{
+														ARG:  collect__parent__type__node,
+														arg1: &dNode{},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajpredc": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dSort{
+							arg1: &dOr{
+								arg1: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__cat,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"ap"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__cat,
+											arg1: &dNode{},
+										},
+									},
+								},
+								arg2: &dEqual{
+									ARG: equal__is,
+									arg1: &dCollect{
+										ARG:  collect__attributes__pt,
+										arg1: &dNode{},
+									},
+									arg2: &dElem{
+										DATA: []interface{}{"adj"},
+										arg1: &dCollect{
+											ARG:  collect__attributes__pt,
+											arg1: &dNode{},
+										},
+									},
+								},
+							},
+						},
+						arg2: &dSort{
+							arg1: &dOr{
+								arg1: &dSort{
+									arg1: &dEqual{
+										ARG: equal__is,
+										arg1: &dCollect{
+											ARG:  collect__attributes__rel,
+											arg1: &dNode{},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"predc"},
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
+								arg2: &dSort{
+									arg1: &dAnd{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"cnj"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+										arg2: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG: collect__attributes__rel,
+												arg1: &dCollect{
+													ARG:  collect__parent__type__node,
+													arg1: &dNode{},
+												},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"predc"},
+												arg1: &dCollect{
+													ARG: collect__attributes__rel,
+													arg1: &dCollect{
+														ARG:  collect__parent__type__node,
+														arg1: &dNode{},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajaj": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__pt,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"adj"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__pt,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dFunction{
+							ARG: function__not__1__args,
+							arg1: &dArg{
+								arg1: &dSort{
+									arg1: &dEqual{
+										ARG: equal__is,
+										arg1: &dCollect{
+											ARG:  collect__attributes__rel,
+											arg1: &dNode{},
+										},
+										arg2: &dElem{
+											DATA: []interface{}{"hd"},
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajmodaj": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__cat,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"ap"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__cat,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dCmp{
+							ARG: cmp__lt,
+							arg1: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"mod"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+							arg2: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"hd"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajcaj": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__cat,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"ap"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__cat,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dCmp{
+							ARG: cmp__lt,
+							arg1: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dAnd{
+											arg1: &dSort{
+												arg1: &dOr{
+													arg1: &dOr{
+														arg1: &dOr{
+															arg1: &dOr{
+																arg1: &dOr{
+																	arg1: &dEqual{
+																		ARG: equal__is,
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dElem{
+																			DATA: []interface{}{"predc"},
+																			arg1: &dCollect{
+																				ARG:  collect__attributes__rel,
+																				arg1: &dNode{},
+																			},
+																		},
+																	},
+																	arg2: &dEqual{
+																		ARG: equal__is,
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dElem{
+																			DATA: []interface{}{"obj1"},
+																			arg1: &dCollect{
+																				ARG:  collect__attributes__rel,
+																				arg1: &dNode{},
+																			},
+																		},
+																	},
+																},
+																arg2: &dEqual{
+																	ARG: equal__is,
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__rel,
+																		arg1: &dNode{},
+																	},
+																	arg2: &dElem{
+																		DATA: []interface{}{"obj2"},
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																	},
+																},
+															},
+															arg2: &dEqual{
+																ARG: equal__is,
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
+																arg2: &dElem{
+																	DATA: []interface{}{"pc"},
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__rel,
+																		arg1: &dNode{},
+																	},
+																},
+															},
+														},
+														arg2: &dEqual{
+															ARG: equal__is,
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+															arg2: &dElem{
+																DATA: []interface{}{"me"},
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
+															},
+														},
+													},
+													arg2: &dEqual{
+														ARG: equal__is,
+														arg1: &dCollect{
+															ARG:  collect__attributes__rel,
+															arg1: &dNode{},
+														},
+														arg2: &dElem{
+															DATA: []interface{}{"vc"},
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+														},
+													},
+												},
+											},
+											arg2: &dFunction{
+												ARG: function__not__1__args,
+												arg1: &dArg{
+													arg1: &dSort{
+														arg1: &dSort{
+															arg1: &dAnd{
+																arg1: &dSort{
+																	arg1: &dOr{
+																		arg1: &dSort{
+																			arg1: &dAnd{
+																				arg1: &dSort{
+																					arg1: &dOr{
+																						arg1: &dCmp{
+																							ARG: cmp__gt,
+																							arg1: &dCollect{
+																								ARG: collect__attributes__begin,
+																								arg1: &dCollect{
+																									ARG: collect__child__node,
+																									arg1: &dCollect{
+																										ARG:  collect__ancestors__node,
+																										arg1: &dNode{},
+																										arg2: &dPredicate{
+																											arg1: &dEqual{
+																												ARG: equal__is,
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__cat,
+																													arg1: &dNode{},
+																												},
+																												arg2: &dElem{
+																													DATA: []interface{}{"smain"},
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__cat,
+																														arg1: &dNode{},
+																													},
+																												},
+																											},
+																										},
+																									},
+																									arg2: &dPredicate{
+																										arg1: &dEqual{
+																											ARG: equal__is,
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__rel,
+																												arg1: &dNode{},
+																											},
+																											arg2: &dElem{
+																												DATA: []interface{}{"hd"},
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__rel,
+																													arg1: &dNode{},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																							arg2: &dCollect{
+																								ARG: collect__attributes__begin,
+																								arg1: &dCollect{
+																									ARG:  collect__child__node,
+																									arg1: &dNode{},
+																									arg2: &dPredicate{
+																										arg1: &dEqual{
+																											ARG: equal__is,
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__rel,
+																												arg1: &dNode{},
+																											},
+																											arg2: &dElem{
+																												DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__rel,
+																													arg1: &dNode{},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																						arg2: &dSort{
+																							arg1: &dAnd{
+																								arg1: &dCmp{
+																									ARG: cmp__gt,
+																									arg1: &dCollect{
+																										ARG: collect__attributes__begin,
+																										arg1: &dCollect{
+																											ARG: collect__child__node,
+																											arg1: &dCollect{
+																												ARG:  collect__ancestors__node,
+																												arg1: &dNode{},
+																												arg2: &dPredicate{
+																													arg1: &dEqual{
+																														ARG: equal__is,
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__cat,
+																															arg1: &dNode{},
+																														},
+																														arg2: &dElem{
+																															DATA: []interface{}{"smain"},
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__cat,
+																																arg1: &dNode{},
+																															},
+																														},
+																													},
+																												},
+																											},
+																											arg2: &dPredicate{
+																												arg1: &dEqual{
+																													ARG: equal__is,
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__rel,
+																														arg1: &dNode{},
+																													},
+																													arg2: &dElem{
+																														DATA: []interface{}{"hd"},
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																									arg2: &dCollect{
+																										ARG:  collect__attributes__begin,
+																										arg1: &dNode{},
+																									},
+																								},
+																								arg2: &dFunction{
+																									ARG: function__not__1__args,
+																									arg1: &dArg{
+																										arg1: &dSort{
+																											arg1: &dCollect{
+																												ARG:  collect__child__node,
+																												arg1: &dNode{},
+																												arg2: &dPredicate{
+																													arg1: &dEqual{
+																														ARG: equal__is,
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																														arg2: &dElem{
+																															DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																				arg2: &dFunction{
+																					ARG: function__not__1__args,
+																					arg1: &dArg{
+																						arg1: &dSort{
+																							arg1: &dCollect{
+																								ARG:  collect__parent__node,
+																								arg1: &dNode{},
+																								arg2: &dPredicate{
+																									arg1: &dSort{
+																										arg1: &dOr{
+																											arg1: &dCmp{
+																												ARG: cmp__gt,
+																												arg1: &dCollect{
+																													ARG: collect__attributes__begin,
+																													arg1: &dCollect{
+																														ARG: collect__child__node,
+																														arg1: &dCollect{
+																															ARG:  collect__ancestors__node,
+																															arg1: &dNode{},
+																															arg2: &dPredicate{
+																																arg1: &dEqual{
+																																	ARG: equal__is,
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__cat,
+																																		arg1: &dNode{},
+																																	},
+																																	arg2: &dElem{
+																																		DATA: []interface{}{"smain"},
+																																		arg1: &dCollect{
+																																			ARG:  collect__attributes__cat,
+																																			arg1: &dNode{},
+																																		},
+																																	},
+																																},
+																															},
+																														},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"hd"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__rel,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																												arg2: &dCollect{
+																													ARG: collect__attributes__begin,
+																													arg1: &dCollect{
+																														ARG:  collect__child__node,
+																														arg1: &dNode{},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__rel,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																											arg2: &dSort{
+																												arg1: &dAnd{
+																													arg1: &dCmp{
+																														ARG: cmp__gt,
+																														arg1: &dCollect{
+																															ARG: collect__attributes__begin,
+																															arg1: &dCollect{
+																																ARG: collect__child__node,
+																																arg1: &dCollect{
+																																	ARG:  collect__ancestors__node,
+																																	arg1: &dNode{},
+																																	arg2: &dPredicate{
+																																		arg1: &dEqual{
+																																			ARG: equal__is,
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__cat,
+																																				arg1: &dNode{},
+																																			},
+																																			arg2: &dElem{
+																																				DATA: []interface{}{"smain"},
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__cat,
+																																					arg1: &dNode{},
+																																				},
+																																			},
+																																		},
+																																	},
+																																},
+																																arg2: &dPredicate{
+																																	arg1: &dEqual{
+																																		ARG: equal__is,
+																																		arg1: &dCollect{
+																																			ARG:  collect__attributes__rel,
+																																			arg1: &dNode{},
+																																		},
+																																		arg2: &dElem{
+																																			DATA: []interface{}{"hd"},
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__rel,
+																																				arg1: &dNode{},
+																																			},
+																																		},
+																																	},
+																																},
+																															},
+																														},
+																														arg2: &dCollect{
+																															ARG:  collect__attributes__begin,
+																															arg1: &dNode{},
+																														},
+																													},
+																													arg2: &dFunction{
+																														ARG: function__not__1__args,
+																														arg1: &dArg{
+																															arg1: &dSort{
+																																arg1: &dCollect{
+																																	ARG:  collect__child__node,
+																																	arg1: &dNode{},
+																																	arg2: &dPredicate{
+																																		arg1: &dEqual{
+																																			ARG: equal__is,
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__rel,
+																																				arg1: &dNode{},
+																																			},
+																																			arg2: &dElem{
+																																				DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__rel,
+																																					arg1: &dNode{},
+																																				},
+																																			},
+																																		},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																		arg2: &dSort{
+																			arg1: &dAnd{
+																				arg1: &dSort{
+																					arg1: &dOr{
+																						arg1: &dCmp{
+																							ARG: cmp__gt,
+																							arg1: &dCollect{
+																								ARG: collect__attributes__begin,
+																								arg1: &dCollect{
+																									ARG: collect__child__node,
+																									arg1: &dCollect{
+																										ARG: collect__child__node,
+																										arg1: &dCollect{
+																											ARG: collect__parent__node,
+																											arg1: &dCollect{
+																												ARG:  collect__ancestors__or__self__node,
+																												arg1: &dNode{},
+																												arg2: &dPredicate{
+																													arg1: &dEqual{
+																														ARG: equal__is,
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																														arg2: &dElem{
+																															DATA: []interface{}{"whd"},
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																														},
+																													},
+																												},
+																											},
+																											arg2: &dPredicate{
+																												arg1: &dEqual{
+																													ARG: equal__is,
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__cat,
+																														arg1: &dNode{},
+																													},
+																													arg2: &dElem{
+																														DATA: []interface{}{"whq"},
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__cat,
+																															arg1: &dNode{},
+																														},
+																													},
+																												},
+																											},
+																										},
+																										arg2: &dPredicate{
+																											arg1: &dAnd{
+																												arg1: &dEqual{
+																													ARG: equal__is,
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__rel,
+																														arg1: &dNode{},
+																													},
+																													arg2: &dElem{
+																														DATA: []interface{}{"body"},
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																													},
+																												},
+																												arg2: &dEqual{
+																													ARG: equal__is,
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__cat,
+																														arg1: &dNode{},
+																													},
+																													arg2: &dElem{
+																														DATA: []interface{}{"sv1"},
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__cat,
+																															arg1: &dNode{},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																									arg2: &dPredicate{
+																										arg1: &dEqual{
+																											ARG: equal__is,
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__rel,
+																												arg1: &dNode{},
+																											},
+																											arg2: &dElem{
+																												DATA: []interface{}{"hd"},
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__rel,
+																													arg1: &dNode{},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																							arg2: &dCollect{
+																								ARG: collect__attributes__begin,
+																								arg1: &dCollect{
+																									ARG:  collect__child__node,
+																									arg1: &dNode{},
+																									arg2: &dPredicate{
+																										arg1: &dEqual{
+																											ARG: equal__is,
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__rel,
+																												arg1: &dNode{},
+																											},
+																											arg2: &dElem{
+																												DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__rel,
+																													arg1: &dNode{},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																						arg2: &dSort{
+																							arg1: &dAnd{
+																								arg1: &dCmp{
+																									ARG: cmp__gt,
+																									arg1: &dCollect{
+																										ARG: collect__attributes__begin,
+																										arg1: &dCollect{
+																											ARG: collect__child__node,
+																											arg1: &dCollect{
+																												ARG: collect__child__node,
+																												arg1: &dCollect{
+																													ARG: collect__parent__node,
+																													arg1: &dCollect{
+																														ARG:  collect__ancestors__or__self__node,
+																														arg1: &dNode{},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"whd"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__rel,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																													arg2: &dPredicate{
+																														arg1: &dEqual{
+																															ARG: equal__is,
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__cat,
+																																arg1: &dNode{},
+																															},
+																															arg2: &dElem{
+																																DATA: []interface{}{"whq"},
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__cat,
+																																	arg1: &dNode{},
+																																},
+																															},
+																														},
+																													},
+																												},
+																												arg2: &dPredicate{
+																													arg1: &dAnd{
+																														arg1: &dEqual{
+																															ARG: equal__is,
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																															arg2: &dElem{
+																																DATA: []interface{}{"body"},
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																															},
+																														},
+																														arg2: &dEqual{
+																															ARG: equal__is,
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__cat,
+																																arg1: &dNode{},
+																															},
+																															arg2: &dElem{
+																																DATA: []interface{}{"sv1"},
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__cat,
+																																	arg1: &dNode{},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																											arg2: &dPredicate{
+																												arg1: &dEqual{
+																													ARG: equal__is,
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__rel,
+																														arg1: &dNode{},
+																													},
+																													arg2: &dElem{
+																														DATA: []interface{}{"hd"},
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																									arg2: &dCollect{
+																										ARG:  collect__attributes__begin,
+																										arg1: &dNode{},
+																									},
+																								},
+																								arg2: &dFunction{
+																									ARG: function__not__1__args,
+																									arg1: &dArg{
+																										arg1: &dSort{
+																											arg1: &dCollect{
+																												ARG:  collect__child__node,
+																												arg1: &dNode{},
+																												arg2: &dPredicate{
+																													arg1: &dEqual{
+																														ARG: equal__is,
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																														arg2: &dElem{
+																															DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																				arg2: &dFunction{
+																					ARG: function__not__1__args,
+																					arg1: &dArg{
+																						arg1: &dSort{
+																							arg1: &dCollect{
+																								ARG:  collect__parent__node,
+																								arg1: &dNode{},
+																								arg2: &dPredicate{
+																									arg1: &dSort{
+																										arg1: &dOr{
+																											arg1: &dCmp{
+																												ARG: cmp__gt,
+																												arg1: &dCollect{
+																													ARG: collect__attributes__begin,
+																													arg1: &dCollect{
+																														ARG: collect__child__node,
+																														arg1: &dCollect{
+																															ARG: collect__child__node,
+																															arg1: &dCollect{
+																																ARG: collect__parent__node,
+																																arg1: &dCollect{
+																																	ARG:  collect__ancestors__or__self__node,
+																																	arg1: &dNode{},
+																																	arg2: &dPredicate{
+																																		arg1: &dEqual{
+																																			ARG: equal__is,
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__rel,
+																																				arg1: &dNode{},
+																																			},
+																																			arg2: &dElem{
+																																				DATA: []interface{}{"whd"},
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__rel,
+																																					arg1: &dNode{},
+																																				},
+																																			},
+																																		},
+																																	},
+																																},
+																																arg2: &dPredicate{
+																																	arg1: &dEqual{
+																																		ARG: equal__is,
+																																		arg1: &dCollect{
+																																			ARG:  collect__attributes__cat,
+																																			arg1: &dNode{},
+																																		},
+																																		arg2: &dElem{
+																																			DATA: []interface{}{"whq"},
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__cat,
+																																				arg1: &dNode{},
+																																			},
+																																		},
+																																	},
+																																},
+																															},
+																															arg2: &dPredicate{
+																																arg1: &dAnd{
+																																	arg1: &dEqual{
+																																		ARG: equal__is,
+																																		arg1: &dCollect{
+																																			ARG:  collect__attributes__rel,
+																																			arg1: &dNode{},
+																																		},
+																																		arg2: &dElem{
+																																			DATA: []interface{}{"body"},
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__rel,
+																																				arg1: &dNode{},
+																																			},
+																																		},
+																																	},
+																																	arg2: &dEqual{
+																																		ARG: equal__is,
+																																		arg1: &dCollect{
+																																			ARG:  collect__attributes__cat,
+																																			arg1: &dNode{},
+																																		},
+																																		arg2: &dElem{
+																																			DATA: []interface{}{"sv1"},
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__cat,
+																																				arg1: &dNode{},
+																																			},
+																																		},
+																																	},
+																																},
+																															},
+																														},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"hd"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__rel,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																												arg2: &dCollect{
+																													ARG: collect__attributes__begin,
+																													arg1: &dCollect{
+																														ARG:  collect__child__node,
+																														arg1: &dNode{},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__rel,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																											arg2: &dSort{
+																												arg1: &dAnd{
+																													arg1: &dCmp{
+																														ARG: cmp__gt,
+																														arg1: &dCollect{
+																															ARG: collect__attributes__begin,
+																															arg1: &dCollect{
+																																ARG: collect__child__node,
+																																arg1: &dCollect{
+																																	ARG: collect__child__node,
+																																	arg1: &dCollect{
+																																		ARG: collect__parent__node,
+																																		arg1: &dCollect{
+																																			ARG:  collect__ancestors__or__self__node,
+																																			arg1: &dNode{},
+																																			arg2: &dPredicate{
+																																				arg1: &dEqual{
+																																					ARG: equal__is,
+																																					arg1: &dCollect{
+																																						ARG:  collect__attributes__rel,
+																																						arg1: &dNode{},
+																																					},
+																																					arg2: &dElem{
+																																						DATA: []interface{}{"whd"},
+																																						arg1: &dCollect{
+																																							ARG:  collect__attributes__rel,
+																																							arg1: &dNode{},
+																																						},
+																																					},
+																																				},
+																																			},
+																																		},
+																																		arg2: &dPredicate{
+																																			arg1: &dEqual{
+																																				ARG: equal__is,
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__cat,
+																																					arg1: &dNode{},
+																																				},
+																																				arg2: &dElem{
+																																					DATA: []interface{}{"whq"},
+																																					arg1: &dCollect{
+																																						ARG:  collect__attributes__cat,
+																																						arg1: &dNode{},
+																																					},
+																																				},
+																																			},
+																																		},
+																																	},
+																																	arg2: &dPredicate{
+																																		arg1: &dAnd{
+																																			arg1: &dEqual{
+																																				ARG: equal__is,
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__rel,
+																																					arg1: &dNode{},
+																																				},
+																																				arg2: &dElem{
+																																					DATA: []interface{}{"body"},
+																																					arg1: &dCollect{
+																																						ARG:  collect__attributes__rel,
+																																						arg1: &dNode{},
+																																					},
+																																				},
+																																			},
+																																			arg2: &dEqual{
+																																				ARG: equal__is,
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__cat,
+																																					arg1: &dNode{},
+																																				},
+																																				arg2: &dElem{
+																																					DATA: []interface{}{"sv1"},
+																																					arg1: &dCollect{
+																																						ARG:  collect__attributes__cat,
+																																						arg1: &dNode{},
+																																					},
+																																				},
+																																			},
+																																		},
+																																	},
+																																},
+																																arg2: &dPredicate{
+																																	arg1: &dEqual{
+																																		ARG: equal__is,
+																																		arg1: &dCollect{
+																																			ARG:  collect__attributes__rel,
+																																			arg1: &dNode{},
+																																		},
+																																		arg2: &dElem{
+																																			DATA: []interface{}{"hd"},
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__rel,
+																																				arg1: &dNode{},
+																																			},
+																																		},
+																																	},
+																																},
+																															},
+																														},
+																														arg2: &dCollect{
+																															ARG:  collect__attributes__begin,
+																															arg1: &dNode{},
+																														},
+																													},
+																													arg2: &dFunction{
+																														ARG: function__not__1__args,
+																														arg1: &dArg{
+																															arg1: &dSort{
+																																arg1: &dCollect{
+																																	ARG:  collect__child__node,
+																																	arg1: &dNode{},
+																																	arg2: &dPredicate{
+																																		arg1: &dEqual{
+																																			ARG: equal__is,
+																																			arg1: &dCollect{
+																																				ARG:  collect__attributes__rel,
+																																				arg1: &dNode{},
+																																			},
+																																			arg2: &dElem{
+																																				DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																																				arg1: &dCollect{
+																																					ARG:  collect__attributes__rel,
+																																					arg1: &dNode{},
+																																				},
+																																			},
+																																		},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+																arg2: &dSort{
+																	arg1: &dOr{
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__cat,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dCollect{
+																			ARG:  collect__attributes__pt,
+																			arg1: &dNode{},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							arg2: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"hd"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajajmod": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__cat,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"ap"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__cat,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dCmp{
+							ARG: cmp__gt,
+							arg1: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"mod"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+							arg2: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"hd"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	"ajajc": &xPath{
+		arg1: &dSort{
+			arg1: &dCollect{
+				ARG: collect__child__node,
+				arg1: &dCollect{
+					ARG:  collect__descendant__or__self__type__node,
+					arg1: &dRoot{},
+				},
+				arg2: &dPredicate{
+					arg1: &dAnd{
+						arg1: &dEqual{
+							ARG: equal__is,
+							arg1: &dCollect{
+								ARG:  collect__attributes__cat,
+								arg1: &dNode{},
+							},
+							arg2: &dElem{
+								DATA: []interface{}{"ap"},
+								arg1: &dCollect{
+									ARG:  collect__attributes__cat,
+									arg1: &dNode{},
+								},
+							},
+						},
+						arg2: &dCmp{
+							ARG: cmp__gt,
+							arg1: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dAnd{
+											arg1: &dSort{
+												arg1: &dOr{
+													arg1: &dOr{
+														arg1: &dOr{
+															arg1: &dOr{
+																arg1: &dOr{
+																	arg1: &dEqual{
+																		ARG: equal__is,
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dElem{
+																			DATA: []interface{}{"predc"},
+																			arg1: &dCollect{
+																				ARG:  collect__attributes__rel,
+																				arg1: &dNode{},
+																			},
+																		},
+																	},
+																	arg2: &dEqual{
+																		ARG: equal__is,
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																		arg2: &dElem{
+																			DATA: []interface{}{"obj1"},
+																			arg1: &dCollect{
+																				ARG:  collect__attributes__rel,
+																				arg1: &dNode{},
+																			},
+																		},
+																	},
+																},
+																arg2: &dEqual{
+																	ARG: equal__is,
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__rel,
+																		arg1: &dNode{},
+																	},
+																	arg2: &dElem{
+																		DATA: []interface{}{"obj2"},
+																		arg1: &dCollect{
+																			ARG:  collect__attributes__rel,
+																			arg1: &dNode{},
+																		},
+																	},
+																},
+															},
+															arg2: &dEqual{
+																ARG: equal__is,
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
+																arg2: &dElem{
+																	DATA: []interface{}{"pc"},
+																	arg1: &dCollect{
+																		ARG:  collect__attributes__rel,
+																		arg1: &dNode{},
+																	},
+																},
+															},
+														},
+														arg2: &dEqual{
+															ARG: equal__is,
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+															arg2: &dElem{
+																DATA: []interface{}{"me"},
+																arg1: &dCollect{
+																	ARG:  collect__attributes__rel,
+																	arg1: &dNode{},
+																},
+															},
+														},
+													},
+													arg2: &dEqual{
+														ARG: equal__is,
+														arg1: &dCollect{
+															ARG:  collect__attributes__rel,
+															arg1: &dNode{},
+														},
+														arg2: &dElem{
+															DATA: []interface{}{"vc"},
+															arg1: &dCollect{
+																ARG:  collect__attributes__rel,
+																arg1: &dNode{},
+															},
+														},
+													},
+												},
+											},
+											arg2: &dFunction{
+												ARG: function__not__1__args,
+												arg1: &dArg{
+													arg1: &dSort{
+														arg1: &dSort{
+															arg1: &dAnd{
+																arg1: &dSort{
+																	arg1: &dAnd{
+																		arg1: &dFunction{
+																			ARG: function__not__1__args,
+																			arg1: &dArg{
+																				arg1: &dSort{
+																					arg1: &dOr{
+																						arg1: &dEqual{
+																							ARG: equal__is,
+																							arg1: &dCollect{
+																								ARG:  collect__attributes__cat,
+																								arg1: &dNode{},
+																							},
+																							arg2: &dElem{
+																								DATA: []interface{}{"inf", "ppart"},
+																								arg1: &dCollect{
+																									ARG:  collect__attributes__cat,
+																									arg1: &dNode{},
+																								},
+																							},
+																						},
+																						arg2: &dEqual{
+																							ARG: equal__is,
+																							arg1: &dCollect{
+																								ARG:  collect__attributes__rel,
+																								arg1: &dNode{},
+																							},
+																							arg2: &dElem{
+																								DATA: []interface{}{"hd", "svp"},
+																								arg1: &dCollect{
+																									ARG:  collect__attributes__rel,
+																									arg1: &dNode{},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																		arg2: &dSort{
+																			arg1: &dOr{
+																				arg1: &dCmp{
+																					ARG: cmp__lt,
+																					arg1: &dCollect{
+																						ARG: collect__attributes__begin,
+																						arg1: &dCollect{
+																							ARG: collect__child__node,
+																							arg1: &dCollect{
+																								ARG:  collect__ancestors__node,
+																								arg1: &dNode{},
+																								arg2: &dPredicate{
+																									arg1: &dEqual{
+																										ARG: equal__is,
+																										arg1: &dCollect{
+																											ARG:  collect__attributes__cat,
+																											arg1: &dNode{},
+																										},
+																										arg2: &dElem{
+																											DATA: []interface{}{"inf", "ti", "ssub", "oti", "ppart"},
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__cat,
+																												arg1: &dNode{},
+																											},
+																										},
+																									},
+																								},
+																							},
+																							arg2: &dPredicate{
+																								arg1: &dEqual{
+																									ARG: equal__is,
+																									arg1: &dCollect{
+																										ARG:  collect__attributes__rel,
+																										arg1: &dNode{},
+																									},
+																									arg2: &dElem{
+																										DATA: []interface{}{"hd"},
+																										arg1: &dCollect{
+																											ARG:  collect__attributes__rel,
+																											arg1: &dNode{},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																					arg2: &dCollect{
+																						ARG: collect__attributes__begin,
+																						arg1: &dCollect{
+																							ARG:  collect__child__node,
+																							arg1: &dNode{},
+																							arg2: &dPredicate{
+																								arg1: &dEqual{
+																									ARG: equal__is,
+																									arg1: &dCollect{
+																										ARG:  collect__attributes__rel,
+																										arg1: &dNode{},
+																									},
+																									arg2: &dElem{
+																										DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																										arg1: &dCollect{
+																											ARG:  collect__attributes__rel,
+																											arg1: &dNode{},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																				arg2: &dAnd{
+																					arg1: &dCmp{
+																						ARG: cmp__lt,
+																						arg1: &dCollect{
+																							ARG: collect__attributes__begin,
+																							arg1: &dCollect{
+																								ARG: collect__child__node,
+																								arg1: &dCollect{
+																									ARG:  collect__ancestors__node,
+																									arg1: &dNode{},
+																									arg2: &dPredicate{
+																										arg1: &dEqual{
+																											ARG: equal__is,
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__cat,
+																												arg1: &dNode{},
+																											},
+																											arg2: &dElem{
+																												DATA: []interface{}{"inf", "ti", "ssub", "oti", "ppart"},
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__cat,
+																													arg1: &dNode{},
+																												},
+																											},
+																										},
+																									},
+																								},
+																								arg2: &dPredicate{
+																									arg1: &dEqual{
+																										ARG: equal__is,
+																										arg1: &dCollect{
+																											ARG:  collect__attributes__rel,
+																											arg1: &dNode{},
+																										},
+																										arg2: &dElem{
+																											DATA: []interface{}{"hd"},
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__rel,
+																												arg1: &dNode{},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																						arg2: &dCollect{
+																							ARG:  collect__attributes__begin,
+																							arg1: &dNode{},
+																						},
+																					},
+																					arg2: &dFunction{
+																						ARG: function__not__1__args,
+																						arg1: &dArg{
+																							arg1: &dSort{
+																								arg1: &dCollect{
+																									ARG:  collect__child__node,
+																									arg1: &dNode{},
+																									arg2: &dPredicate{
+																										arg1: &dEqual{
+																											ARG: equal__is,
+																											arg1: &dCollect{
+																												ARG:  collect__attributes__rel,
+																												arg1: &dNode{},
+																											},
+																											arg2: &dElem{
+																												DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__rel,
+																													arg1: &dNode{},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+																arg2: &dFunction{
+																	ARG: function__not__1__args,
+																	arg1: &dArg{
+																		arg1: &dSort{
+																			arg1: &dCollect{
+																				ARG:  collect__parent__node,
+																				arg1: &dNode{},
+																				arg2: &dPredicate{
+																					arg1: &dSort{
+																						arg1: &dAnd{
+																							arg1: &dFunction{
+																								ARG: function__not__1__args,
+																								arg1: &dArg{
+																									arg1: &dSort{
+																										arg1: &dOr{
+																											arg1: &dEqual{
+																												ARG: equal__is,
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__cat,
+																													arg1: &dNode{},
+																												},
+																												arg2: &dElem{
+																													DATA: []interface{}{"inf", "ppart"},
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__cat,
+																														arg1: &dNode{},
+																													},
+																												},
+																											},
+																											arg2: &dEqual{
+																												ARG: equal__is,
+																												arg1: &dCollect{
+																													ARG:  collect__attributes__rel,
+																													arg1: &dNode{},
+																												},
+																												arg2: &dElem{
+																													DATA: []interface{}{"hd", "svp"},
+																													arg1: &dCollect{
+																														ARG:  collect__attributes__rel,
+																														arg1: &dNode{},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																							arg2: &dSort{
+																								arg1: &dOr{
+																									arg1: &dCmp{
+																										ARG: cmp__lt,
+																										arg1: &dCollect{
+																											ARG: collect__attributes__begin,
+																											arg1: &dCollect{
+																												ARG: collect__child__node,
+																												arg1: &dCollect{
+																													ARG:  collect__ancestors__node,
+																													arg1: &dNode{},
+																													arg2: &dPredicate{
+																														arg1: &dEqual{
+																															ARG: equal__is,
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__cat,
+																																arg1: &dNode{},
+																															},
+																															arg2: &dElem{
+																																DATA: []interface{}{"inf", "ti", "ssub", "oti", "ppart"},
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__cat,
+																																	arg1: &dNode{},
+																																},
+																															},
+																														},
+																													},
+																												},
+																												arg2: &dPredicate{
+																													arg1: &dEqual{
+																														ARG: equal__is,
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																														arg2: &dElem{
+																															DATA: []interface{}{"hd"},
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																										arg2: &dCollect{
+																											ARG: collect__attributes__begin,
+																											arg1: &dCollect{
+																												ARG:  collect__child__node,
+																												arg1: &dNode{},
+																												arg2: &dPredicate{
+																													arg1: &dEqual{
+																														ARG: equal__is,
+																														arg1: &dCollect{
+																															ARG:  collect__attributes__rel,
+																															arg1: &dNode{},
+																														},
+																														arg2: &dElem{
+																															DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																									arg2: &dAnd{
+																										arg1: &dCmp{
+																											ARG: cmp__lt,
+																											arg1: &dCollect{
+																												ARG: collect__attributes__begin,
+																												arg1: &dCollect{
+																													ARG: collect__child__node,
+																													arg1: &dCollect{
+																														ARG:  collect__ancestors__node,
+																														arg1: &dNode{},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__cat,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"inf", "ti", "ssub", "oti", "ppart"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__cat,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																													arg2: &dPredicate{
+																														arg1: &dEqual{
+																															ARG: equal__is,
+																															arg1: &dCollect{
+																																ARG:  collect__attributes__rel,
+																																arg1: &dNode{},
+																															},
+																															arg2: &dElem{
+																																DATA: []interface{}{"hd"},
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																											arg2: &dCollect{
+																												ARG:  collect__attributes__begin,
+																												arg1: &dNode{},
+																											},
+																										},
+																										arg2: &dFunction{
+																											ARG: function__not__1__args,
+																											arg1: &dArg{
+																												arg1: &dSort{
+																													arg1: &dCollect{
+																														ARG:  collect__child__node,
+																														arg1: &dNode{},
+																														arg2: &dPredicate{
+																															arg1: &dEqual{
+																																ARG: equal__is,
+																																arg1: &dCollect{
+																																	ARG:  collect__attributes__rel,
+																																	arg1: &dNode{},
+																																},
+																																arg2: &dElem{
+																																	DATA: []interface{}{"hd", "cmp", "mwp", "crd", "rhd", "whd", "nucl", "dp"},
+																																	arg1: &dCollect{
+																																		ARG:  collect__attributes__rel,
+																																		arg1: &dNode{},
+																																	},
+																																},
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							arg2: &dCollect{
+								ARG: collect__attributes__begin,
+								arg1: &dCollect{
+									ARG:  collect__child__node,
+									arg1: &dNode{},
+									arg2: &dPredicate{
+										arg1: &dEqual{
+											ARG: equal__is,
+											arg1: &dCollect{
+												ARG:  collect__attributes__rel,
+												arg1: &dNode{},
+											},
+											arg2: &dElem{
+												DATA: []interface{}{"hd"},
+												arg1: &dCollect{
+													ARG:  collect__attributes__rel,
+													arg1: &dNode{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
 	"vwuit": &xPath{
 		arg1: &dSort{
 			arg1: &dCollect{
