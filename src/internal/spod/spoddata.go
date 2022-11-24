@@ -1301,7 +1301,20 @@ ten slotte de gevallen waarbij het adjectief optreedt met een complement ter rec
 	},
 	{
 		"",
-		`//node[@cat="ap" and node[(@rel="predc" or @rel="obj1" or @rel="obj2" or @rel="pc" or @rel="me" or @rel="vc" ) and not(%PQ_vorfeld%)]/number(@begin) < node[@rel="hd"]/number(@begin)]`,
+		`//node[
+          @cat="ap"
+          and
+          node[
+                  (
+                      @rel="predc" or @rel="obj1" or @rel="obj2" or @rel="pc" or @rel="me" or @rel="vc"
+                  )
+                  and
+                  not(%PQ_vorfeld%)
+          ]/number(@begin)
+          <
+          node[@rel="hd"]/number(@begin)
+]
+`,
 		SPOD_STD,
 		"ajcaj",
 		"interne structuur|, COMPL ADJ",
@@ -1317,7 +1330,19 @@ ten slotte de gevallen waarbij het adjectief optreedt met een complement ter rec
 	},
 	{
 		"",
-		`//node[@cat="ap" and node[(@rel="predc" or @rel="obj1" or @rel="obj2" or @rel="pc" or @rel="me" or @rel="vc") and not(%PQ_nachfeld%)]/number(@begin) > node[@rel="hd"]/number(@begin)]`,
+		`//node[
+          @cat="ap"
+          and
+          node[
+                  (
+                      @rel="predc" or @rel="obj1" or @rel="obj2" or @rel="pc" or @rel="me" or @rel="vc"
+                  )
+                  and
+                  not(%PQ_nachfeld%)
+          ]/number(@begin)
+          >
+          node[@rel="hd"]/number(@begin)
+]`,
 		SPOD_STD,
 		"ajajc",
 		"interne structuur|, ADJ COMPL",
