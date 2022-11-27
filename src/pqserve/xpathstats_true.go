@@ -1,3 +1,4 @@
+//go:build !nodbxml
 // +build !nodbxml
 
 package main
@@ -648,6 +649,9 @@ init({
 				if strings.HasPrefix(match, "<node") {
 					err = xml.Unmarshal([]byte(match), node)
 					sid = node.Id
+					if node.OtherId != "" {
+						sid = node.OtherId
+					}
 				} else if strings.HasPrefix(match, "<ud") {
 					var ud pqnode.UdType
 					err = xml.Unmarshal([]byte(match), &ud)
