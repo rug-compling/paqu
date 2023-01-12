@@ -307,6 +307,8 @@ uitvoer: <select name="out">
 <option value="text">Teksttabel</option>
 <option value="tbl">Gedetailleerde tabel</option>
 <option value="tbllen">Gedetailleerde tabel, inclusief lengtes</option>
+<option value="tbls">Gedetailleerde tabel, inclusief zinnen</option>
+<option value="tbllens">Gedetailleerde tabel, inclusief lengtes en zinnen</option>
 </select>
 <p>
 <input type="submit" value="verzenden">
@@ -336,7 +338,7 @@ func spod_form(q *Context) {
 	outFormat := first(q.r, "out")
 
 	doHtml := outFormat == "html"
-	doTable := outFormat == "tbl" || outFormat == "tbllen"
+	doTable := strings.HasPrefix(outFormat, "tbl")
 
 	if doHtml {
 		writeHead(q, "SPOD -- Resultaat", 0)
@@ -358,7 +360,7 @@ func spod_form(q *Context) {
 
 	if doTable {
 		q.w.Header().Set("Content-Disposition", "attachment; filename=spod-table.tsv")
-		spod_table(q, db, outFormat == "tbllen")
+		spod_table(q, db, strings.HasPrefix(outFormat, "tbllen"), strings.HasSuffix(outFormat, "s"))
 		return
 	}
 

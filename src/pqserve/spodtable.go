@@ -110,7 +110,7 @@ Tot slot, afhankelijk van het corpus volgt alle metadata van de zin
 `)
 }
 
-func spod_table(q *Context, prefix string, length bool) {
+func spod_table(q *Context, prefix string, length bool, sentence bool) {
 
 	var owner string
 	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `owner` FROM `%s_info` WHERE `id` = %q", Cfg.Prefix, prefix))
@@ -238,6 +238,9 @@ func spod_table(q *Context, prefix string, length bool) {
 	if len(metalist) > 0 {
 		fmt.Fprint(q.w, "\tmeta."+strings.Join(metalist, "\tmeta."))
 	}
+	if sentence {
+		fmt.Fprint(q.w, "\tsentence")
+	}
 	fmt.Fprintln(q.w)
 
 	dactfiles := make([]string, 0)
@@ -278,7 +281,7 @@ func spod_table(q *Context, prefix string, length bool) {
 			return
 		}
 		for docs.Next() {
-			if !spod_table_file(q, docs.Name(), docs.Value(), opts, metalist, length) {
+			if !spod_table_file(q, docs.Name(), docs.Value(), opts, metalist, length, sentence) {
 				db.Close()
 				return
 			}
@@ -290,7 +293,7 @@ func spod_table(q *Context, prefix string, length bool) {
 	}
 }
 
-func spod_table_file(q *Context, filename string, contents string, opts map[string]bool, metalist []string, length bool) bool {
+func spod_table_file(q *Context, filename string, contents string, opts map[string]bool, metalist []string, length bool, sentence bool) bool {
 
 	defer fmt.Fprintln(q.w)
 
@@ -442,6 +445,10 @@ SPODS:
 
 	for _, m := range metalist {
 		fmt.Fprintf(q.w, "\t%s", strings.Join(meta[m], "|"))
+	}
+
+	if sentence {
+		fmt.Fprint(q.w, "\t"+alpino.Sentence.Sent)
 	}
 
 	return true
