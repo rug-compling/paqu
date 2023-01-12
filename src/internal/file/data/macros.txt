@@ -54,6 +54,15 @@ PQ_vorfeld = """
           (@cat or @pt)
         ) """
 
+# This also finds vorfeld on an empty index node.
+# This is very slow, so you might want to use the regular PQ_vorfeld, and
+# do a search with expanded index nodes instead.
+PQ_vorfeld_slow = """
+        (  %PQ_vorfeld%
+           or
+           //node[%PQ_vorfeld%]/%PQ_i% = %PQ_i%
+        ) """
+
 PQ_single_name = """
         ( @ntype = 'eigen'
           or
@@ -929,4 +938,39 @@ PQ_voltooid = """
             (  @lemma="hebben" or @lemma="zijn" )
             and
             ../node[@rel="vc" and @cat="ppart"]
+        ) """
+
+## EXPERIMENTEEL
+
+# Deze functies werken niet goed omdat ze geen rekening houden met
+# ancestors via index-nodes.
+
+X_nachfeld_t = """
+        (
+            not(@cat=("inf","ppart") or @rel=("hd","svp"))
+            and
+            (
+                (
+                    ancestor::node[%PQ_vp%]
+                    except
+                    ancestor::node[%PQ_vp%]/ancestor::node[%PQ_vp%]
+                )/node[@rel="hd"]/%PQ_b% < %PQ_begin_of_head%
+                or
+                (
+                    ancestor::node[%PQ_vp%]
+                    except
+                    ancestor::node[%PQ_vp%]/ancestor::node[%PQ_vp%]
+                )/node[@rel="hd"]/%PQ_b% < %PQ_b% and not(node[%PQ_headrel%])
+            )
+        ) """
+
+X_nachfeld = """
+        (
+            %X_nachfeld_t%
+            and
+            not(
+                   ancestor::node[%X_nachfeld_t%]
+                   except
+                   ancestor::node[%PQ_vp%]/ancestor::node[%X_nachfeld_t%]
+            )
         ) """
