@@ -460,6 +460,27 @@ func (d *dEqual) Do(subdoc []interface{}, q *Context) []interface{} {
 	}
 }
 
+type dExcept struct {
+	arg1 doer
+	arg2 doer
+}
+
+func (d *dExcept) Do(subdoc []interface{}, q *Context) []interface{} {
+	result := make([]interface{}, 0)
+	a1 := d.arg1.Do(subdoc, q)
+	a2 := d.arg2.Do(subdoc, q)
+	neg := make(map[interface{}]bool)
+	for _, aa2 := range a2 {
+		neg[aa2] = true
+	}
+	for _, aa1 := range a1 {
+		if !neg[aa1] {
+			result = append(result, aa1)
+		}
+	}
+	return result
+}
+
 type dFilter struct {
 	arg1 doer
 	arg2 doer
@@ -551,6 +572,27 @@ func (d *dFunction) Do(subdoc []interface{}, q *Context) []interface{} {
 	default:
 		panic("Function: Missing case in " + q.Filename)
 	}
+}
+
+type dIntersect struct {
+	arg1 doer
+	arg2 doer
+}
+
+func (d *dIntersect) Do(subdoc []interface{}, q *Context) []interface{} {
+	result := make([]interface{}, 0)
+	a1 := d.arg1.Do(subdoc, q)
+	a2 := d.arg2.Do(subdoc, q)
+	pos := make(map[interface{}]bool)
+	for _, aa2 := range a2 {
+		pos[aa2] = true
+	}
+	for _, aa1 := range a1 {
+		if pos[aa1] {
+			result = append(result, aa1)
+		}
+	}
+	return result
 }
 
 type dNode struct {
@@ -697,6 +739,31 @@ func (d *dSort) Do(subdoc []interface{}, q *Context) []interface{} {
 		}
 	default:
 		panic(fmt.Sprintf("Sort: Missing case for type %T in %s", result[0], q.Filename))
+	}
+	return result
+}
+
+type dUnion struct {
+	arg1 doer
+	arg2 doer
+}
+
+func (d *dUnion) Do(subdoc []interface{}, q *Context) []interface{} {
+	result := make([]interface{}, 0)
+	a1 := d.arg1.Do(subdoc, q)
+	a2 := d.arg2.Do(subdoc, q)
+	seen := make(map[interface{}]bool)
+	for _, aa1 := range a1 {
+		if !seen[aa1] {
+			result = append(result, aa1)
+			seen[aa1] = true
+		}
+	}
+	for _, aa2 := range a2 {
+		if !seen[aa2] {
+			result = append(result, aa2)
+			seen[aa2] = true
+		}
 	}
 	return result
 }
