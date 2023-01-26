@@ -110,14 +110,6 @@ PQ_follows_head_of_vp = """
           )
         ) """
 
-PQ_nachfeld = """
-        ( %PQ_follows_head_of_vp%
-          and
-          not(parent::node[%PQ_follows_head_of_vp%])
-        ) """
-
-PQ_nachfeld_node = """ //node[%PQ_nachfeld%] """
-
 PQ_dep_node_in_verbcluster = """
         ( @rel="vc"
           and
@@ -940,13 +932,10 @@ PQ_voltooid = """
             ../node[@rel="vc" and @cat="ppart"]
         ) """
 
-## EXPERIMENTEEL
-
-# Deze functies werken niet goed omdat ze geen rekening houden met
-# ancestors via index-nodes.
-
-X_nachfeld_t = """
+PQ_nachfeld_t = """
         (
+	    (@cat or @pt)
+	    and
             not(@cat=("inf","ppart") or @rel=("hd","svp"))
             and
             (
@@ -964,13 +953,13 @@ X_nachfeld_t = """
             )
         ) """
 
-X_nachfeld = """
+PQ_nachfeld = """
         (
-            %X_nachfeld_t%
+            %PQ_nachfeld_t%
             and
             not(
-                   ancestor::node[%X_nachfeld_t%]
+                   ancestor::node[%PQ_nachfeld_t%]
                    except
-                   ancestor::node[%PQ_vp%]/ancestor::node[%X_nachfeld_t%]
+                   ancestor::node[%PQ_vp%]/ancestor-or-self::node[%PQ_nachfeld_t%]
             )
         ) """

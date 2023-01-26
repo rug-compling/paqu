@@ -1261,7 +1261,20 @@ ten slotte de gevallen waarbij het adjectief optreedt met een complement ter rec
 	},
 	{
 		"",
-		`//node[(@cat="ap" or @pt="adj") and ((@rel="mod" and not(../@cat="np")) or (@rel="cnj" and ../@rel="mod" and not(../../@cat="np")))]`,
+		`//node[
+          (@cat="ap" or @pt="adj")
+          and (
+                  (@rel="mod" and not(../@cat="np"))
+                  or
+                  (@rel="cnj" and (../@rel="mod" or ../@index=//node[@rel="mod"]/@index) and not(../../@cat="np"))
+                  or
+                  //node[
+                            (@rel="mod" and not(../@cat="np"))
+                            or
+                            (@rel="cnj" and (../@rel="mod" or ../@index=//node[@rel="mod"]/@index) and not(../../@cat="np"))
+                  ]/@index=@index
+          )
+]`,
 		SPOD_STD,
 		"ajbepva",
 		"grammaticale functie|, bijwoordelijke bepaling (bepaling bij werkwoord, adjectief, ...)",
@@ -1277,7 +1290,21 @@ ten slotte de gevallen waarbij het adjectief optreedt met een complement ter rec
 	},
 	{
 		"",
-		`//node[(@cat="ap" or @pt="adj") and ((@rel="predc") or (@rel="cnj" and ../@rel="predc"))]`,
+		`//node[
+          (@cat="ap" or @pt="adj")
+          and
+          (
+              @rel="predc"
+              or
+              (@rel="cnj" and (../@rel="predc" or ../@index=//node[@rel="predc"]/@index))
+              or
+              //node[
+                        @rel="predc"
+                        or
+                        (@rel="cnj" and (../@rel="predc" or ../@index=//node[@rel="predc"]/@index))
+              ]/@index=@index
+          )
+]`,
 		SPOD_STD,
 		"ajpredc",
 		"grammaticale functie|, predicatief complement",

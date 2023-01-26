@@ -804,7 +804,7 @@ func (d *xPath) Do(q *Context) (result []interface{}, err error) {
 			err = fmt.Errorf("%v", r)
 			fmt.Fprintf(os.Stderr, "\n\n>>> %s -- %v\n\n", q.Sentid, err)
 			debug.PrintStack()
-			fmt.Fprintln(os.Stderr, "\n<<<\n\n")
+			fmt.Fprint(os.Stderr, "\n<<<\n\n\n")
 		}
 	}()
 
