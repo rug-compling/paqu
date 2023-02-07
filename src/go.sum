@@ -18,12 +18,13 @@ github.com/pebbe/compactcorpus v1.0.0 h1:z76XdaHOGrZT4Pvsy3gQSbKB+JNZ0JO11G0DFlC
 github.com/pebbe/compactcorpus v1.0.0/go.mod h1:EvuE+7ufpjWuFrtyRgGUrY2t3BN+kgII666i8NIUVi0=
 github.com/pebbe/dbxml v1.3.0 h1:wXbSUtTZ32uXOE7BAHuTxpd2UWZBdERfhzvP7l6+PoI=
 github.com/pebbe/dbxml v1.3.0/go.mod h1:Hl8vBiwip2cZ3BQHlQ0gBYLuNVaNY++qqYzCyM4U7OA=
-github.com/pebbe/util v0.0.0-20140716220158-e0e04dfe647c h1:v8sa96tiKlyli7NB08SpQAFLsvMhrYupxhpdBrCYH/E=
-github.com/pebbe/util v0.0.0-20140716220158-e0e04dfe647c/go.mod h1:X/ocweApVYXiDQEEfsunYRI4UXw60Ea8u7fYf+aAaEU=
+github.com/pebbe/util v0.9.0 h1:PMZd+CpWb8GbWEmFGlL3qd6XPuywl6xFIbrXWi870OA=
+github.com/pebbe/util v0.9.0/go.mod h1:ynWl/SFX4+Seb9fpjVlYevr1f4TP7FrCmyZHiBCg69Q=
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac h1:kYPjbEN6YPYWWHI6ky1J813KzIq/8+Wg4TO4xU7A/KU=
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac/go.mod h1:xvqspoSXJTIpemEonrMDFq6XzwHYYgToXWj5eRX1OtY=
-github.com/rug-compling/alpinods v1.12.4 h1:SkNFEcNhS8oD7QwaCdMOEfkUGtbW16ghdDFr+f0xX+k=
 github.com/rug-compling/alpinods v1.12.4/go.mod h1:R3BBX8RIw9InVqHZ+1W+MsX8WX8uBkoVNNGE38mqF1Q=
+github.com/rug-compling/alpinods v1.13.1 h1:Y9bX1AR70qH1oIMZEnI2oBwYWgjzMNWp30TTobN4v7w=
+github.com/rug-compling/alpinods v1.13.1/go.mod h1:R3BBX8RIw9InVqHZ+1W+MsX8WX8uBkoVNNGE38mqF1Q=
 github.com/rug-compling/alud/v2 v2.8.1 h1:cG4lFX8iQkGSE49ZlSnBjcxUNpaEtmvaUeg59UzVpAE=
 github.com/rug-compling/alud/v2 v2.8.1/go.mod h1:M+vSatnGuun2IZWgfCSHO0lZre4aIN3w/kwVhPow5QU=
 github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=

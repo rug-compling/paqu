@@ -7,6 +7,8 @@ comparative
 conjtype
 def
 dial
+dropped_agr
+dropped_prs
 dscmanual
 dscsense
 end
@@ -35,6 +37,9 @@ id
 iets
 index
 infl
+is_nachfeld
+is_np
+is_vorfeld
 lcat
 lemma
 lwtype
@@ -74,6 +79,7 @@ spectype
 status
 stype
 tense
+v_per
 vform
 vwtype
 vztype
