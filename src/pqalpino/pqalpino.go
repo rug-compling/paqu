@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/pebbe/util"
+	"github.com/rug-compling/alpinods"
 	"github.com/rug-compling/alud/v2"
 
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
@@ -60,12 +62,15 @@ var (
 	opt_T = flag.Bool("T", false, "true: zinnen zijn getokeniseerd")
 	opt_u = flag.String("u", "", "output file for UD errors (impliceert -U)")
 	opt_U = flag.Bool("U", false, "true: derive Universal Dependencies")
+	opt_X = flag.Bool("X", false, "true: derive extra attributes, like is_np, is_vorfeld...")
 
 	x            = util.CheckErr
 	reParser     = regexp.MustCompile(`<parser.*?>`)
 	alpino_build string
 	filename     string
 	lastdir      string
+
+	idxnodes map[int]*alpinods.Node
 )
 
 func usage() {
@@ -94,6 +99,7 @@ Overige opties:
   -t int    : Time-out per regel (default: 900)
   -U        : Derive Universal Dependencies (UD) (default: nee)
   -u string : Output file for UD errors (impliceert -U) (default: geen)
+  -X        : Maak extra attributen: is_np, is_vorfeld, is_nachfeld (default: nee)
 
 Opties alleen van toepassing bij gebruik van Alpino-server:
 
@@ -269,6 +275,9 @@ Q#%s|skipped|??|????
 		b, err := ioutil.ReadFile(filename)
 		x(err)
 		xml := setBuild(string(b))
+		if *opt_X {
+			xml = doExtra(xml)
+		}
 		if *opt_U || *opt_u != "" {
 			s, err := alud.UdAlpino([]byte(xml), filename, "")
 			if s != "" {
@@ -432,6 +441,9 @@ func doServer(info *AlpinoInfo) {
 					line.Label = fmt.Sprint(line.Line_number)
 				}
 				filename := filepath.Join(*opt_d, line.Label+".xml")
+				if *opt_X {
+					line.Alpino_ds = doExtra(line.Alpino_ds)
+				}
 				if *opt_U || *opt_u != "" {
 					s, err := alud.UdAlpino([]byte(line.Alpino_ds), filename, "")
 					if s != "" {
@@ -520,3 +532,468 @@ func setBuild(xml string) string {
 		return s
 	})
 }
+
+func doExtra(data string) string {
+	var alpino alpinods.AlpinoDS
+	x(xml.Unmarshal([]byte(data), &alpino))
+
+	alpino.Version = alpinods.DtdVersion
+
+	idxnodes = make(map[int]*alpinods.Node)
+	prepare(alpino.Node)
+	doNp(alpino.Node)
+	doVorfeld(alpino.Node)
+	doNachfeld(alpino.Node)
+	return alpino.String()
+}
+
+func prepare(node *alpinods.Node) {
+	node.IsNp = ""
+	node.IsNachfeld = ""
+	node.IsVorfeld = ""
+	if node.Index != 0 && (node.Cat != "" || node.Pt != "") {
+		idxnodes[node.Index] = node
+	}
+	if node.Node != nil {
+		for _, n := range node.Node {
+			prepare(n)
+		}
+	}
+}
+
+func idx(node *alpinods.Node) *alpinods.Node {
+	if n, ok := idxnodes[node.Index]; ok {
+		return n
+	}
+	return node
+}
+
+// is_np
+
+var (
+	rels map[int][]string
+)
+
+func doNp(node *alpinods.Node) {
+	rels = make(map[int][]string)
+	prepareNp1(node)
+	prepareNp2(node)
+}
+
+func prepareNp1(node *alpinods.Node) {
+	if rels[node.ID] == nil {
+		rels[node.ID] = make([]string, 0)
+	}
+	rels[node.ID] = append(rels[node.ID], node.Rel)
+	if n := idx(node); n != node {
+		if rels[n.ID] == nil {
+			rels[n.ID] = make([]string, 0)
+		}
+		rels[n.ID] = append(rels[n.ID], node.Rel)
+	}
+	if node.Node != nil {
+		for _, n := range node.Node {
+			prepareNp1(n)
+		}
+	}
+}
+
+func prepareNp2(node *alpinods.Node) {
+	if isNP(node) {
+		node.IsNp = "true"
+	}
+	if node.Node != nil {
+		for _, n := range node.Node {
+			doNp(n)
+		}
+	}
+}
+
+func isNP(node *alpinods.Node) bool {
+
+	if node.Cat == "" && node.Pt == "" {
+		return false
+	}
+
+	if node.Cat == "np" {
+		return true
+	}
+
+	if node.Lcat == "np" && otherString(rels[node.ID], "hd", "mwp") {
+		return true
+	}
+
+	if node.Pt == "n" && otherString(rels[node.ID], "hd") {
+		return true
+	}
+
+	if node.Pt == "vnw" && node.Pdtype == "pron" && otherString(rels[node.ID], "hd") {
+		return true
+	}
+
+	if node.Cat == "mwu" && hasString(rels[node.ID], "su", "obj1", "obj2", "app") {
+		return true
+	}
+
+	if node.Node != nil {
+		for _, n := range node.Node {
+			if n.Rel != "cnj" {
+				continue
+			}
+			n = idx(n)
+			if isNP(n) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// is er een string in ss die gelijk is aan een string in s ?
+func hasString(ss []string, s ...string) bool {
+	for _, s1 := range ss {
+		for _, s2 := range s {
+			if s1 == s2 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// is er een string in ss die ongelijk is aan alle strings in s ?
+func otherString(ss []string, s ...string) bool {
+LOOP:
+	for _, s1 := range ss {
+		for _, s2 := range s {
+			if s1 == s2 {
+				continue LOOP
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// is_vorfeld
+
+var (
+	vorfeld     map[int]map[int]bool
+	vorfeldSkip map[int]map[int]bool
+)
+
+func doVorfeld(node *alpinods.Node) {
+	vorfeld = make(map[int]map[int]bool)
+	vorfeldSkip = make(map[int]map[int]bool)
+	prepareVorfeld1(node)
+	prepareVorfeld2(node)
+	prepareVorfeld3(node)
+}
+
+func prepareVorfeld1(node *alpinods.Node) {
+	vorfeld[node.ID] = make(map[int]bool)
+	vorfeldSkip[node.ID] = make(map[int]bool)
+	if node.Node != nil {
+		for _, n := range node.Node {
+			prepareVorfeld1(n)
+		}
+	}
+}
+
+func prepareVorfeld2(node *alpinods.Node) {
+	if node.Cat == "smain" {
+		smainVorfeld(node)
+	} else if node.Cat == "whq" {
+		whqVorfeld(node)
+	}
+	if node.Node != nil {
+		for _, n := range node.Node {
+			prepareVorfeld2(n)
+		}
+	}
+}
+
+func prepareVorfeld3(node *alpinods.Node) {
+	if node.Cat != "" || node.Pt != "" {
+		for id := range vorfeld[node.ID] {
+			if !vorfeldSkip[node.ID][id] {
+				node.IsVorfeld = "true"
+				break
+			}
+		}
+	}
+	if node.Node != nil {
+		for _, n := range node.Node {
+			prepareVorfeld3(n)
+		}
+	}
+}
+
+func smainVorfeld(node *alpinods.Node) {
+	if node.Node != nil {
+		for _, n := range node.Node {
+			if n.Rel == "hd" {
+				// NIET alleen primary links
+				n = idx(n)
+				if n.Word != "" {
+					for _, topic := range findTopic(node, n.Begin, false) {
+						if checkTopic(topic, node, n.Begin) {
+							vorfeld[topic.ID][node.ID] = true
+						} else {
+							vorfeldSkip[topic.ID][node.ID] = true
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func whqVorfeld(node *alpinods.Node) {
+	if node.Node != nil {
+		for _, n := range node.Node {
+			// NIET alleen primary links
+			rel := n.Rel
+			n = idx(n)
+			if rel == "body" && n.Cat == "sv1" {
+				for _, n2 := range n.Node {
+					if n2.Rel == "hd" {
+						// NIET alleen primary links
+						n2 = idx(n2)
+						if n2.Word != "" {
+							for _, topic := range findTopic(node, n2.Begin, true) {
+								if checkTopic(topic, node, n2.Begin) {
+									vorfeld[topic.ID][node.ID] = true
+								} else {
+									vorfeldSkip[topic.ID][node.ID] = true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func findTopic(node *alpinods.Node, begin int, needWhd bool) []*alpinods.Node {
+	topics := make([]*alpinods.Node, 0)
+
+	// hier: inclusief topnode
+	//if isTopic(node, begin) {
+	//      topics = append(topics, node)
+	//}
+
+	if node.Node != nil {
+		for _, n := range node.Node {
+
+			if needWhd && n.Rel != "whd" {
+				continue
+			}
+
+			// hier: exclusief topnode
+			if isTopic(n, begin) {
+				topics = append(topics, n)
+			}
+
+			// ALLEEN primary links
+			for _, topic := range findTopic(n, begin, false) {
+				topics = append(topics, topic)
+			}
+		}
+	}
+	return topics
+}
+
+func isTopic(node *alpinods.Node, begin int) bool {
+	if node.Begin < begin && node.End <= begin {
+		return true
+	}
+	if node.Lemma != "" || node.Cat == "mwu" {
+		if node.Begin < begin {
+			return true
+		}
+		return false
+	}
+
+	if node.Node != nil {
+		for _, n := range node.Node {
+			if n.Rel == "hd" || n.Rel == "cmp" || n.Rel == "crd" {
+				// NIET alleen primary links
+				n = idx(n)
+				if (n.Lemma != "" || n.Cat == "mwu") && n.Begin < begin {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func checkTopic(topic, node *alpinods.Node, begin int) bool {
+	// alle nodes tussen node (exclusief) en topic (exclusief)
+	nodes := make(map[*alpinods.Node]bool)
+	nodePath(node, topic, nodes)
+
+	for n := range nodes {
+		if isTopic(n, begin) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func nodePath(top, bottom *alpinods.Node, nodes map[*alpinods.Node]bool) bool {
+	retval := false
+	if top.Node != nil {
+		for _, n := range top.Node {
+			// NIET alleen primaire links (lijkt niet logisch, maar werkt toch beter)
+			n = idx(n)
+			if n == bottom {
+				retval = true
+			} else if nodePath(n, bottom, nodes) {
+				nodes[n] = true
+				retval = true
+			}
+		}
+	}
+	return retval
+}
+
+// is_nachfeld
+
+var (
+	vpCat = map[string]bool{
+		"inf":   true,
+		"ti":    true,
+		"ssub":  true,
+		"oti":   true,
+		"ppart": true,
+	}
+	rHead = map[string]bool{
+		"hd":   true,
+		"cmp":  true,
+		"mwp":  true,
+		"crd":  true,
+		"rhd":  true,
+		"whd":  true,
+		"nucl": true,
+		"dp":   true,
+	}
+)
+
+func doNachfeld(node *alpinods.Node) {
+	findNachfeld(node)
+	if node.Node != nil {
+		for _, n := range node.Node {
+			doNachfeld(n)
+		}
+	}
+}
+
+func findNachfeld(node *alpinods.Node) {
+	if !vpCat[node.Cat] {
+		return
+	}
+
+	if node.Node == nil || len(node.Node) == 0 {
+		return
+	}
+
+	// zoek begin van head
+	headBegin := -1
+	for _, n := range node.Node {
+		n = idx(n)
+		if n.Rel == "hd" {
+			headBegin = n.Begin
+			break
+		}
+	}
+	if headBegin < 0 {
+		return
+	}
+	// zoek nachfeld
+	for _, n := range node.Node {
+		n = idx(n)
+		if n.Rel != "hd" {
+			setNachfeld(n, headBegin, node)
+		}
+	}
+}
+
+func setNachfeld(node *alpinods.Node, begin int, vp *alpinods.Node) {
+	if node.Rel != "hd" && node.Rel != "svp" && node.Cat != "inf" && node.Cat != "ppart" {
+
+		var skip func(*alpinods.Node, int) bool
+		skip = func(current *alpinods.Node, state int) bool {
+			current = idx(current)
+			if current == node {
+				return state == 2
+			}
+			switch state {
+			case 0:
+				state = 1
+			case 1:
+				if vpCat[current.Cat] {
+					state = 2
+				}
+			}
+			if current.Node != nil {
+				for _, n := range current.Node {
+					if skip(n, state) {
+						return true
+					}
+				}
+			}
+			return false
+		}
+
+		n2 := make([]*alpinods.Node, 0)
+		if node.Node != nil {
+			for _, nn2 := range node.Node {
+				nn2 = idx(nn2)
+				if rHead[nn2.Rel] {
+					n2 = append(n2, nn2)
+				}
+			}
+		}
+		if len(n2) == 0 {
+			if begin < node.Begin {
+				if !skip(vp, 0) {
+					node.IsNachfeld = "true"
+				}
+				return
+			}
+		} else {
+			ok := true
+			for _, nn2 := range n2 {
+				if begin >= nn2.Begin {
+					ok = false
+					break
+				}
+			}
+			if ok {
+				if !skip(vp, 0) {
+					node.IsNachfeld = "true"
+				}
+				return
+			}
+		}
+	}
+	if vpCat[node.Cat] {
+		return
+	}
+	if node.Node == nil {
+		return
+	}
+	for _, n := range node.Node {
+		n = idx(n)
+		setNachfeld(n, begin, vp)
+	}
+}
+
+// END is_np, is_vorfeld, is_nachfeld
+//
+////////////////

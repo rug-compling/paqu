@@ -695,7 +695,7 @@ func dowork(task *Process) (user string, title string, err error) {
 				ud2 = "; echo " + alud.VersionID() + " > " + conllu + ".version"
 			}
 			cmd := shell(
-				`pqalpino %s -e half -l -T -q -n %d -d %s %s %s %s.lines%s >> %s 2>> %s%s`,
+				`pqalpino %s -X -e half -l -T -q -n %d -d %s %s %s %s.lines%s >> %s 2>> %s%s`,
 				ud1, Cfg.Maxtokens, xml, server, timeout, data, ext, stdout, stderr, ud2)
 			err = run(cmd, task.chKill, nil)
 			if err != nil {
