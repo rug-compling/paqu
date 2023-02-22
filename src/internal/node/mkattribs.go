@@ -1,21 +1,25 @@
+//go:build ignore
 // +build ignore
 
 package main
 
 import (
+	"github.com/rug-compling/alpinods"
+
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
+	"sort"
 	"strings"
 )
 
 func main() {
-	data, err := ioutil.ReadFile(os.Args[1])
-	if err != nil {
-		log.Fatal(err)
+	attribs := []string{
+		"other_id",
+		"word_is_",
 	}
-	attribs := strings.Fields(string(data))
+	for _, a := range alpinods.Attribs() {
+		attribs = append(attribs, a.Name)
+	}
+	sort.Strings(attribs)
 
 	fmt.Print(`//
 // THIS IS A GENERATED FILE. DO NOT EDIT.

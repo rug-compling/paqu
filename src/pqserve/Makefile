@@ -27,7 +27,7 @@ all: ../../bin/pqserve
 ../internal/file/file.go: ../internal/file/data/*
 	make -C ../internal/file/data
 
-../internal/node/attribs.go: ../internal/node/attribs.txt ../internal/node/mkattribs.go
+../internal/node/attribs.go: ../go.mod ../internal/node/mkattribs.go
 	make -C ../internal/node
 
 ../internal/spod/spod2xpath.go: ../internal/spod/spoddata.go ../internal/file/data/macros.txt ../internal/spod/spodmake/spodmake.go
