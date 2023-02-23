@@ -63,8 +63,10 @@ $(document).mouseup(
 <div id="title"></div>
 <div id="content"></div>
 </div>
+Extra's: M = metadata ; U = UD ; I = is_np, is_vorfeld, is_nachfeld
+<p>
 <table class="corpusinfo">
-<tr><th><th class="left">Titel<th class="right">Regels<th class="right">Datum<th class="left">Metadata<th class="left">UD<th class="left">Eigenaar</tr>
+<tr><th><th class="left">Titel<th class="right">Regels<th class="right">Datum<th class="left">Extra's<th class="left">Eigenaar</tr>
 `)
 
 	t := ""
@@ -99,16 +101,18 @@ $(document).mouseup(
 		} else {
 			fmt.Fprintf(q.w, "<tr><td><a href=\"javascript:void(0)\" onclick=\"javascript:info('%s')\">[?]</a>", db)
 		}
-		metadata := "nee"
+		f := ""
 		if q.hasmeta[db] {
-			metadata = "ja"
+			f = "M "
 		}
-		ud := "nee"
 		if q.hasud[db] {
-			ud = "ja"
+			f += "U "
 		}
-		fmt.Fprintf(q.w, "<td>%s<td class=\"right\">%s<td class=\"right\">%s<td>%s<td>%s<td>%s</tr>\n",
-			html.EscapeString(a[1]), iformat(q.lines[db]), datum(q.dates[db]), metadata, ud, html.EscapeString(displayEmail(q.owners[db])))
+		if q.hasis[db] {
+			f += "I "
+		}
+		fmt.Fprintf(q.w, "<td>%s<td class=\"right\">%s<td class=\"right\">%s<td>%s<td>%s</tr>\n",
+			html.EscapeString(a[1]), iformat(q.lines[db]), datum(q.dates[db]), f, html.EscapeString(displayEmail(q.owners[db])))
 	}
 
 	fmt.Fprint(q.w, `

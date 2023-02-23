@@ -31,6 +31,7 @@ type Context struct {
 	protected    map[string]bool
 	hasmeta      map[string]bool
 	hasud        map[string]bool
+	hasis        map[string]bool
 	desc         map[string]string
 	lines        map[string]int
 	words        map[string]int
@@ -91,6 +92,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				protected:    make(map[string]bool),
 				hasmeta:      make(map[string]bool),
 				hasud:        make(map[string]bool),
+				hasis:        make(map[string]bool),
 				desc:         make(map[string]string),
 				lines:        make(map[string]int),
 				words:        make(map[string]int),
@@ -167,7 +169,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				where = fmt.Sprintf(" OR `c`.`user` = %q", q.user)
 			}
 			rows, err := sqlDB.Query(fmt.Sprintf(
-				"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`,`i`.`hasud`, `i`.`info`, `i`.`infop`, `i`.`created` "+
+				"SELECT `i`.`id`, `i`.`description`, `i`.`nline`, `i`.`nword`, `i`.`owner`, `i`.`shared`, `i`.`params`,  "+s+", `i`.`protected`, `i`.`hasmeta`,`i`.`hasud`, `i`.`hasis`, `i`.`info`, `i`.`infop`, `i`.`created` "+
 					"FROM `%s_info` `i`, `%s_corpora` `c` "+
 					"WHERE `c`.`enabled` = 1 AND "+
 					"`i`.`status` = \"FINISHED\" AND `i`.`id` = `c`.`prefix` AND ( `c`.`user` = \"all\"%s ) "+
@@ -181,10 +183,10 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				return
 			}
 			var id, desc, owner, shared, params, info, infop, group string
-			var zinnen, woorden, protected, hasmeta, hasud int
+			var zinnen, woorden, protected, hasmeta, hasud, hasis int
 			var date time.Time
 			for rows.Next() {
-				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta, &hasud, &info, &infop, &date)
+				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta, &hasud, &hasis, &info, &infop, &date)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					logerr(err)
@@ -235,6 +237,9 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				}
 				if hasud > 0 {
 					q.hasud[id] = true
+				}
+				if hasis > 0 {
+					q.hasis[id] = true
 				}
 				if q.auth && owner == q.user {
 					q.myprefixes[id] = true
