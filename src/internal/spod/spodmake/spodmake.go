@@ -119,7 +119,7 @@ var Spod2xpath = map[string]*xPath{
 		se = strings.Replace(se, "XPath error : Undefined variable\n", "", 1)
 
 		if se != "" {
-			x(fmt.Errorf("%s\n\n%s\n", se, s2))
+			x(fmt.Errorf("[%s] %s\n\n%s\n", spod.Lbl, se, s2))
 		}
 
 		fmt.Printf("%q: %s,\n", spod.Lbl, parse(so))

@@ -88,6 +88,9 @@ const (
 	collect__attributes__graad
 	collect__attributes__his
 	collect__attributes__index
+	collect__attributes__is_5fnachfeld
+	collect__attributes__is_5fnp
+	collect__attributes__is_5fvorfeld
 	collect__attributes__lcat
 	collect__attributes__lemma
 	collect__attributes__naamval
@@ -100,10 +103,12 @@ const (
 	collect__attributes__spectype
 	collect__attributes__stype
 	collect__attributes__tense
+	collect__attributes__version
 	collect__attributes__vwtype
 	collect__attributes__word
 	collect__attributes__wvorm
 	collect__child__node
+	collect__child__alpino_5fds
 	collect__descendant__node
 	collect__descendant__or__self__node
 	collect__descendant__or__self__type__node
@@ -257,6 +262,18 @@ func (d *dCollect) Do(subdoc []interface{}, q *Context) []interface{} {
 			if i := r.(*NodeType).Index; i > 0 {
 				result1 = append(result1, i)
 			}
+		case collect__attributes__is_5fnachfeld:
+		    if i := r.(*NodeType).IsNachfeld; i != "" {
+				result1 = append(result1, i)
+			}
+		case collect__attributes__is_5fnp:
+		    if i := r.(*NodeType).IsNp; i != "" {
+				result1 = append(result1, i)
+			}
+		case collect__attributes__is_5fvorfeld:
+		    if i := r.(*NodeType).IsVorfeld; i != "" {
+				result1 = append(result1, i)
+			}
 		case collect__attributes__lcat:
 			if i := r.(*NodeType).Lcat; i != "" {
 				result1 = append(result1, i)
@@ -301,6 +318,10 @@ func (d *dCollect) Do(subdoc []interface{}, q *Context) []interface{} {
 			if i := r.(*NodeType).Stype; i != "" {
 				result1 = append(result1, i)
 			}
+		case collect__attributes__version:
+		    if i := r.(*Alpino_ds).Version; i != "" {
+				result1 = append(result1, i)
+			}
 		case collect__attributes__tense:
 			if i := r.(*NodeType).Stype; i != "" {
 				result1 = append(result1, i)
@@ -317,6 +338,8 @@ func (d *dCollect) Do(subdoc []interface{}, q *Context) []interface{} {
 			if i := r.(*NodeType).Wvorm; i != "" {
 				result1 = append(result1, i)
 			}
+		case collect__child__alpino_5fds:
+			lists = append(lists, []interface{}{q.Alpino})
 		case collect__child__node:
 			lists = append(lists, r.(*NodeType).AxChildren)
 		case collect__descendant__node:

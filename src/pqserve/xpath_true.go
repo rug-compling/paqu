@@ -242,7 +242,7 @@ PARTLOOP:
 				if udTags[s[1:]] {
 					continue
 				}
-				if s == "@type" || s == "@name" || s == "@value" || s == "@sentid" || s == "@cats" || s == "@skips" {
+				if s == "@type" || s == "@name" || s == "@value" || s == "@sentid" || s == "@cats" || s == "@skips" || s == "@version" {
 					continue
 				}
 				lvl = 1

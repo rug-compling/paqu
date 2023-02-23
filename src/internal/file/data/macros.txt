@@ -40,18 +40,26 @@ PQ_precedes_head_of_whq = """
         ) """
 
 PQ_vorfeld = """
-        ( ( (  %PQ_precedes_head_of_smain%
+        (
+            (  /alpino_ds[@version = ("1.16", "1.17")] and @is_vorfeld )
+               or
+               ( /alpino_ds[not(@version = ("1.16", "1.17"))]
                and
-               not(parent::node[%PQ_precedes_head_of_smain%])
+               (
+                   ( (  %PQ_precedes_head_of_smain%
+                        and
+                        not(parent::node[%PQ_precedes_head_of_smain%])
+                     )
+                     or
+                     (  %PQ_precedes_head_of_whq%
+                        and
+                        not(parent::node[%PQ_precedes_head_of_whq%])
+                     )
+                   )
+                   and
+                   (@cat or @pt)
+               )
             )
-            or
-            (  %PQ_precedes_head_of_whq%
-               and
-               not(parent::node[%PQ_precedes_head_of_whq%])
-            )
-          )
-          and
-          (@cat or @pt)
         ) """
 
 # This also finds vorfeld on an empty index node.
@@ -680,11 +688,22 @@ PQ_basenp = """
         ) """
 
 PQ_np = """
-        ( %PQ_basenp%
-          or
-          ( @cat="conj"
-            and node[%PQ_basenp%]
-          )
+        (
+            (
+                /alpino_ds[@version=("1.16","1.17")]
+                and
+                @is_np
+            )
+            or
+            (
+                /alpino_ds[not(@version=("1.16","1.17"))]
+                and
+                (
+                    %PQ_basenp%
+                    or
+                    ( @cat="conj" and node[%PQ_basenp%] )
+                )
+            )
         ) """
 
 PQ_npnode= """ //node[%PQ_np%] """
@@ -934,8 +953,8 @@ PQ_voltooid = """
 
 PQ_nachfeld_t = """
         (
-	    (@cat or @pt)
-	    and
+            (@cat or @pt)
+            and
             not(@cat=("inf","ppart") or @rel=("hd","svp"))
             and
             (
@@ -955,11 +974,18 @@ PQ_nachfeld_t = """
 
 PQ_nachfeld = """
         (
-            %PQ_nachfeld_t%
-            and
-            not(
-                   ancestor::node[%PQ_nachfeld_t%]
-                   except
-                   ancestor::node[%PQ_vp%]/ancestor-or-self::node[%PQ_nachfeld_t%]
+            (  /alpino_ds[@version = ("1.16", "1.17")] and @is_nachfeld )
+               or
+               ( /alpino_ds[not(@version = ("1.16", "1.17"))]
+               and
+               (
+                   %PQ_nachfeld_t%
+                   and
+                   not(
+                          ancestor::node[%PQ_nachfeld_t%]
+                          except
+                          ancestor::node[%PQ_vp%]/ancestor-or-self::node[%PQ_nachfeld_t%]
+                   )
+               )
             )
         ) """

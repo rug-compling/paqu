@@ -53,20 +53,23 @@ type MetaT struct {
 }
 
 type Node struct {
-	OtherId  string  `xml:"other_id,attr"`
-	Id       string  `xml:"id,attr"`
-	Word     string  `xml:"word,attr"`
-	Lemma    string  `xml:"lemma,attr"`
-	Root     string  `xml:"root,attr"`
-	Pos      string  `xml:"pos,attr"`
-	Postag   string  `xml:"pt,attr"` // pt i.p.v. postag
-	Rel      string  `xml:"rel,attr"`
-	Cat      string  `xml:"cat,attr"`
-	Begin    int     `xml:"begin,attr"`
-	End      int     `xml:"end,attr"`
-	Index    int     `xml:"index,attr"`
-	NodeList []*Node `xml:"node"`
-	used     bool
+	OtherId    string  `xml:"other_id,attr"`
+	Id         string  `xml:"id,attr"`
+	Word       string  `xml:"word,attr"`
+	Lemma      string  `xml:"lemma,attr"`
+	Root       string  `xml:"root,attr"`
+	Pos        string  `xml:"pos,attr"`
+	Postag     string  `xml:"pt,attr"` // pt i.p.v. postag
+	Rel        string  `xml:"rel,attr"`
+	Cat        string  `xml:"cat,attr"`
+	Begin      int     `xml:"begin,attr"`
+	End        int     `xml:"end,attr"`
+	Index      int     `xml:"index,attr"`
+	IsNp       bool    `xml:"is_np,attr"`
+	IsVorfeld  bool    `xml:"is_vorfeld,attr"`
+	IsNachfeld bool    `xml:"is_nachfeld,attr"`
+	NodeList   []*Node `xml:"node"`
+	used       bool
 }
 
 // Een node met het pad naar de node
@@ -128,6 +131,7 @@ var (
 	info       string
 	infop      string
 	hasUD      int
+	hasIS      int
 
 	topfile   = -1
 	toparch   = -1
@@ -1047,11 +1051,11 @@ Opties:
 	}
 
 	if db_updatestatus {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d WHERE `id` = %q",
-			Cfg.Prefix, lines, hasmeta, hasUD, prefix))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `status` = \"FINISHED\", `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d, `hasis` = %d  WHERE `id` = %q",
+			Cfg.Prefix, lines, hasmeta, hasUD, hasIS, prefix))
 	} else {
-		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d WHERE `id` = %q",
-			Cfg.Prefix, lines, hasmeta, hasUD, prefix))
+		_, err = db.Exec(fmt.Sprintf("UPDATE `%s_info` SET `nline` = %d, `active` = NOW(), `hasmeta` = %d, `hasud` = %d, `hasis` = %d  WHERE `id` = %q",
+			Cfg.Prefix, lines, hasmeta, hasUD, hasIS, prefix))
 	}
 	util.CheckErr(err)
 
@@ -1301,7 +1305,15 @@ func prepare(node *Node) {
 }
 
 // Zoek alle dependency relations, en sla die op in de tabel 'deprels'
+// Kijk gelijk of attributes zoals is_np aanwezig zijn
 func traverse(node *Node) {
+
+	if hasIS == 0 {
+		if node.IsNp || node.IsVorfeld || node.IsNachfeld {
+			hasIS = 1
+		}
+	}
+
 	if len(node.NodeList) == 0 {
 		return
 	}

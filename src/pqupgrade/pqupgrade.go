@@ -330,13 +330,28 @@ func main() {
 
 	////////////////////////////////////////////////////////////////
 
-	// upgrade naar versie 5
+	// veld `hasis` toevoegen
 
-	if version < 5 {
+	if version < 6 {
+		rows, err = db.Query("SELECT `hasis` FROM `" + Cfg.Prefix + "_info` LIMIT 0, 1")
+		if err == nil {
+			rows.Close()
+		} else {
+			_, err := db.Exec("ALTER TABLE `" + Cfg.Prefix + "_info` ADD `hasis` BOOLEAN NOT NULL DEFAULT 0 AFTER `hasud`")
+			x(err)
+			changed = true
+		}
+	}
 
-		fmt.Printf("Upgrade from version %d to 5\n", version)
+	////////////////////////////////////////////////////////////////
 
-		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 5 WHERE `id` = 1", Cfg.Prefix))
+	// upgrade naar versie 6
+
+	if version < 6 {
+
+		fmt.Printf("Upgrade from version %d to 6\n", version)
+
+		result, err := db.Exec(fmt.Sprintf("UPDATE `%s_version` SET `version` = 6 WHERE `id` = 1", Cfg.Prefix))
 		x(err)
 		n, err := result.RowsAffected()
 		x(err)
@@ -344,7 +359,7 @@ func main() {
 			x(fmt.Errorf("Version update failed"))
 		}
 
-		version = 5
+		version = 6
 		changed = true
 	}
 
