@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	VERSION = 5
+	VERSION = 6
 )
 
 type Config struct {
@@ -88,6 +88,7 @@ Syntax: %s [-w]
 		protected   boolean      NOT NULL DEFAULT 0,
 		hasmeta     boolean      NOT NULL DEFAULT 0,
 		hasud       boolean      NOT NULL DEFAULT 0,
+		hasis       boolean      NOT NULL DEFAULT 0,
 		info        text         NOT NULL DEFAULT "",
 		infop       text         NOT NULL DEFAULT "",
 		UNIQUE INDEX (id),
