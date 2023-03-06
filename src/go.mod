@@ -16,6 +16,6 @@ require (
 	github.com/rug-compling/alpinods v1.16.2
 	github.com/rug-compling/alud/v2 v2.8.9
 	github.com/russross/blackfriday/v2 v2.1.0
-	golang.org/x/image v0.0.0-20210216034530-4410531fe030
+	golang.org/x/image v0.5.0
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
