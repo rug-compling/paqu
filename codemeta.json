@@ -18,7 +18,8 @@
         "Go"
     ],
     "operatingSystem": [
-        "Linux"
+        "Linux",
+	"Docker"
     ],
     "softwareRequirements": [
         "MySQL or MariaDB",
