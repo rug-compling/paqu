@@ -1,0 +1,40 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/BSD-2-Clause",
+    "codeRepository": "git+https://github.com/rug-compling/paqu.git",
+    "dateCreated": "2014-05-21",
+    "downloadUrl": "https://github.com/rug-compling/paqu/archive/refs/heads/master.zip",
+    "issueTracker": "https://github.com/rug-compling/paqu/issues",
+    "name": "PaQu",
+    "identifier": "https://github.com/rug-compling/paqu",
+    "description": "PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.",
+    "applicationCategory": "Linguistics",
+    "developmentStatus": "active",
+    "keywords": [
+        "Alpino"
+    ],
+    "programmingLanguage": [
+        "Go"
+    ],
+    "operatingSystem": [
+        "Linux"
+    ],
+    "softwareRequirements": [
+        "MySQL or MariaDB",
+        "DbXML: Oracle Berkeley DB XML"
+    ],
+    "contributor": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/my-orcid?orcid=0000-0001-8364-3201",
+            "givenName": "Peter",
+            "familyName": "Kleiweg",
+            "email": "p.c.j.kleiweg@rug.nl",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen"
+            }
+        }
+    ]
+}

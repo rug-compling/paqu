@@ -14,6 +14,7 @@ func corpusinfo(q *Context) {
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript"><!--
 var infop = {
+  __extra: "M: Corpus met metadata<p>U: Corpus met Universal Dependencies<p>I: Corpus met attributen <code>is_np</code>, <code>is_vorfeld</code>, <code>is_nachfeld</code>",
 `)
 
 	p := ""
@@ -35,6 +36,7 @@ var infop = {
 	fmt.Fprintf(q.w, `
 };
 var titles = {
+__extra: "Extra's",
 %s
 };`, strings.Join(ids, ",\n"))
 
@@ -63,10 +65,8 @@ $(document).mouseup(
 <div id="title"></div>
 <div id="content"></div>
 </div>
-Extra's: M = metadata ; U = UD ; I = is_np, is_vorfeld, is_nachfeld
-<p>
 <table class="corpusinfo">
-<tr><th><th class="left">Titel<th class="right">Regels<th class="right">Datum<th class="left">Extra's<th class="left">Eigenaar</tr>
+<tr><th><th class="left">Titel<th class="right">Regels<th class="right">Datum<th class="left">Extra's&nbsp;<a href="javascript:void(0)" onclick="javascript:info('__extra')">[?]</a><th class="left">Eigenaar</tr>
 `)
 
 	t := ""
