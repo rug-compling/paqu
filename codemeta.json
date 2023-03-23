@@ -6,21 +6,8 @@
     "https://w3id.org/software-types",
     "https://raw.githubusercontent.com/jantman/repostatus.org/master/badges/latest/ontology.jsonld",
     {
-      "author": {
-        "@container": "@list",
-        "@id": "schema:author"
-      },
-      "contributor": {
-        "@container": "@list",
-        "@id": "schema:contributor"
-      },
-      "referencePublication": {
-        "@id": "codemeta:referencePublication",
-        "@type": "@id"
-      },
       "softwareRequirements": {
-        "@id": "schema:softwareRequirements",
-        "@type": "@id"
+        "@container": "@list"
       }
     }
   ],
@@ -50,32 +37,30 @@
   "keywords": ["Alpino"],
   "programmingLanguage": ["Go"],
   "operatingSystem": ["Linux", "Docker"],
-  "softwareRequirements": ["MySQL or MariaDB", "DbXML: Oracle Berkeley DB XML"],
-  "softwareHelp": [
-    {
-      "@type": "WebSite",
-      "name": "PaQu -- Info",
-      "url": "https://paqu.let.rug.nl:8068/info.html"
-    }
+  "softwareRequirements": [
+    "Alpino: tokenizer and parser",
+    "MySQL or MariaDB",
+    "DbXML: Oracle Berkeley DB XML"
   ],
-  "author": [
-    {
-      "@type": "Person",
-      "@id": "https://orcid.org/0000-0001-8364-3201",
-      "givenName": "Peter",
-      "familyName": "Kleiweg",
-      "email": "p.c.j.kleiweg@rug.nl",
-      "affiliation": {
-        "@type": "Organization",
-        "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen"
-      }
+  "softwareHelp": {
+    "@type": "WebSite",
+    "name": "PaQu -- Info",
+    "url": "https://paqu.let.rug.nl:8068/info.html"
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://orcid.org/0000-0001-8364-3201",
+    "givenName": "Peter",
+    "familyName": "Kleiweg",
+    "email": "p.c.j.kleiweg@rug.nl",
+    "affiliation": {
+      "@type": "Organization",
+      "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen"
     }
-  ],
-  "maintainer": [
-    {
-      "@id": "https://orcid.org/0000-0001-8364-3201"
-    }
-  ],
+  },
+  "maintainer": {
+    "@id": "https://orcid.org/0000-0001-8364-3201"
+  },
   "referencePublication": {
     "@type": "ScholarlyArticle",
     "sameAs": "https://research.rug.nl/en/publications/the-parse-and-query-paqu-application",
@@ -96,18 +81,16 @@
     },
     "url": "https://doi.org/10.5334/bbi.23"
   },
-  "targetProduct": [
-    {
-      "@type": "WebApplication",
-      "name": "PaQu",
-      "url": "https://paqu.let.rug.nl:8068/",
-      "provider": {
-        "@type": "Organization",
-        "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen",
-        "url": "https://www.rug.nl/research/clcg/research/cl/"
-      }
+  "targetProduct": {
+    "@type": "WebApplication",
+    "name": "PaQu",
+    "url": "https://paqu.let.rug.nl:8068/",
+    "provider": {
+      "@type": "Organization",
+      "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen",
+      "url": "https://www.rug.nl/research/clcg/research/cl/"
     }
-  ],
+  },
   "funding": [
     {
       "@type": "Grant",
