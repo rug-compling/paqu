@@ -17,7 +17,7 @@
   "name": "PaQu",
   "description": "PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.",
   "codeRepository": "git+https://github.com/rug-compling/paqu.git",
-  "url": "https://paqu.let.rug.nl:8068/",
+  "url": "https://www.let.rug.nl/alfa/paqu/",
   "issueTracker": "https://github.com/rug-compling/paqu/issues",
   "license": "https://spdx.org/licenses/BSD-2-Clause",
   "developmentStatus": "https://www.repostatus.org/#active",
@@ -45,7 +45,7 @@
   "softwareHelp": {
     "@type": "WebSite",
     "name": "PaQu -- Info",
-    "url": "https://paqu.let.rug.nl:8068/info.html"
+    "url": "https://www.let.rug.nl/alfa/paqu/info.html"
   },
   "author": {
     "@type": "Person",
@@ -84,7 +84,7 @@
   "targetProduct": {
     "@type": "WebApplication",
     "name": "PaQu",
-    "url": "https://paqu.let.rug.nl:8068/",
+    "url": "https://www.let.rug.nl/alfa/paqu/",
     "provider": {
       "@type": "Organization",
       "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen",
