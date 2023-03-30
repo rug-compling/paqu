@@ -8,6 +8,9 @@
     {
       "softwareRequirements": {
         "@container": "@list"
+      },
+      "releaseNotes": {
+        "@type": ""
       }
     }
   ],
@@ -20,11 +23,15 @@
   "url": "https://www.let.rug.nl/alfa/paqu/",
   "issueTracker": "https://github.com/rug-compling/paqu/issues",
   "license": "https://spdx.org/licenses/BSD-2-Clause",
-  "developmentStatus": "https://www.repostatus.org/#active",
+  "developmentStatus": [
+    "https://www.repostatus.org/#active",
+    "https://w3id.org/research-technology-readiness-levels#Stage4Complete"
+  ],
   "applicationCategory": [
     "https://w3id.org/nwo-research-fields#SoftwareForHumanities",
     "https://w3id.org/nwo-research-fields#Linguistics",
-    "https://w3id.org/nwo-research-fields#ComputationalLinguisticsAndPhilology"
+    "https://w3id.org/nwo-research-fields#ComputationalLinguisticsAndPhilology",
+    "https://vocabs.dariah.eu/tadirah/structuralAnalysis"
   ],
   "producer": {
     "@type": "Organization",
@@ -32,7 +39,9 @@
     "url": "https://www.rug.nl/research/clcg/research/cl/"
   },
   "dateCreated": "2014-05-21",
-  "dateModified": "2023-02-23",
+  "dateModified": "2023-03-30",
+  "version": "1.0.1",
+  "releaseNotes": "long overdue initial release",
   "downloadUrl": "https://github.com/rug-compling/paqu/archive/refs/heads/master.zip",
   "keywords": ["Alpino"],
   "programmingLanguage": ["Go"],
@@ -104,6 +113,8 @@
     },
     {
       "@type": "Grant",
+      "name": "Projectnummer CC-WP3-15-005",
+      "url": "https://www.clariah.nl/wp3-linguistics",
       "funder": {
         "@type": "Organization",
         "name": "Clariah",
