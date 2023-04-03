@@ -42,6 +42,7 @@
   "dateModified": "2023-03-30",
   "version": "1.0.1",
   "releaseNotes": "long overdue initial release",
+  "readme": "https://github.com/rug-compling/paqu/blob/master/README.md",
   "downloadUrl": "https://github.com/rug-compling/paqu/archive/refs/heads/master.zip",
   "keywords": ["Alpino"],
   "programmingLanguage": ["Go"],
@@ -61,7 +62,7 @@
     "@id": "https://orcid.org/0000-0001-8364-3201",
     "givenName": "Peter",
     "familyName": "Kleiweg",
-    "email": "p.c.j.kleiweg@rug.nl",
+    "email": "mailto:p.c.j.kleiweg@rug.nl",
     "affiliation": {
       "@type": "Organization",
       "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen"
