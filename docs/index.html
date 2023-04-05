@@ -1,188 +1,29 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base href="https://bisse.nl/"/>
-    <title>peter kleiweg</title>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="icon" href="favicon.ico" type="image/ico"/>
-    <link rel="alternate" href="blog/index.xml" type="application/rss+xml" title="de laatste huismus"/>
-    <link rel="alternate" href="index.ttl" type="text/turtle"/>
-    <link rel="alternate" href="index.rdf" type="application/rdf+xml"/> 
-    <link rel="alternate" href="vcard.vcf" type="text/x-vcard"/>
-    <link rel="stylesheet" href="/md.css" type="text/css"/>
-    <link rel="stylesheet" href="normalize.css"/>
-    <link rel="stylesheet" href="style.css"/>
 
-    <script defer src="bin/maanfase.sh"></script>
-   
-    <link rel="authorization_endpoint" href="https://bisse.nl/auth/" />
+<head>
+  <base href="https://rug-compling.github.io/paqu/" />
+  <title>PaQu Documentation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="alternate" href="index.ttl" type="text/turtle" />
+  <link rel="alternate" href="index.rdf" type="application/rdf+xml" />
+  <link rel="alternate" href="https://github.com/rug-compling/paqu/blob/master/codemeta.jsonl"
+    type="application/ld+json" />
+  <style type="text/css">
+    <!--
+    -->
+  </style>
+</head>
 
-    <link rel="me" href="mailto:info@bisse.nl">
-    <link rel="me" href="https://github.com/pebbe/">
-    <link rel="me" href="https://www.let.rug.nl/~kleiweg/">
-    <link rel="me" href="https://www.rug.nl/staff/p.c.j.kleiweg/">
-    <link rel="me" href="https://orcid.org/0000-0001-8364-3201">
-    <link rel="me" href="https://mastodon.social/@pebbe">
-    <link rel="me" href="acct:pebbe@mastodon.social">
+<body>
 
-    <link rel="pgpkey" href="/key.txt">
+    <h1>PaQu Documentation</h1>
 
-    <link rel="openid.delegate" href="https://bisse.nl/" />
-    <link rel="openid.server" href="https://openid.indieauth.com/openid" />
+    <h2>Computer programming source code</h2>
 
-    <style type="text/css">
-      <!--
-        body {
-          background-color: #b49c84;
-          background-image: url(bgindex.jpg);
-        }
+  Download metadata as <a href="index.ttl">turtle>, <a href="index.rdf">rdf</a>, <a
+      href="https://github.com/rug-compling/paqu/blob/master/codemeta.jsonl">json-ld</a>.
+</body>
 
-        /* menu */
-
-        #menu {
-          opacity: .9;
-          color: white; /* #F0F4C3; */
-          background-color: #744f37; /*  #8D6E63; */
-          z-index: 4;
-          position: fixed;
-          top: 8em;
-          left: 20%;
-          right: auto;
-          box-shadow: 0 12px 32px 0 rgba(0,0,0,1);
-          border: 1px solid black;
-        }
-        #contents {
-          display: none;
-          margin: 0px auto;
-          padding: 0px 1em .5em 1em;
-          max-width: 30em;
-          line-height: 200%;
-        }
-        #menu:hover #contents {
-          display: block;
-        }
-        #menuitems {
-	  padding: .5em 0px;
-          margin-top: 0px;
-          border-top: 1px solid black;
-          border-bottom: 1px solid black;
-          text-align: justify;
-        }
-        #dots {
-	  padding: .5em 2em;
-          
-	}
-        #menu a {
-           padding: 0px 1em;
-           color: white; /* #F0F4C3; */
-           text-decoration: none;
-           white-space: nowrap;
-        }
-        #menu a:hover {
-          text-decoration: underline;
-        }
-
-	/* webbunny */
-	
-        #wb {
-          max-height: 213px;
-          position: fixed;
-          z-index: 2;
-          bottom: 20%;
-          right: 96px;
-	  background-color: rgba(237, 237, 237, 1);
-          text-decoration: none;
-        }
-	#wb {
-          -webkit-box-shadow: 10px 16px 32px -6px rgba(0, 0, 0, 1);
-          -moz-box-shadow: 10px 16px 32px -6px rgba(0, 0, 0, 1);
-          box-shadow: 10px 16px 32px -6px rgba(0, 0, 0, 1);
-        }
-        #wb:hover {
-	    background-color: red;
-        }
-	#wb:hover > img {
-          opacity: 0.8;
-        }
-	#wb img {
-          max-width: 100%;
-        }
-	
-	.hidden {
-          display: none;
-        }
-
-        @media screen and (max-height: 480px) {
-          #wb {
-            max-width: 90%;
-            right: 1%;
-	    bottom: 2%;
-            top: auto;
-	  }
-          #menu {
-	    left: 1%;
-            top: 2%;
-            max-width: 90%;
-	  }
-        }
-        @media screen and (max-width: 872px) {
-          #wb {
-            max-width: 96%;
-            right: 2%;
-	  }
-          #menu {
-	    left: 5%;
-            max-width: 90%;
-          }
-        }
-      -->
-    </style>
-  </head>
-  <body>
-    <div class="hidden">
-      <div resource="." typeof="foaf:PersonalProfileDocument">
-        <a property="foaf:maker" href="#me"></a>
-        <a property="foaf:primaryTopic" href="#me"></a>
-      </div>
-      <div class="h-card" resource="#me" typeof="foaf:Person">
-        <span class="p-name" property="foaf:name">Peter Kleiweg</span>
-        <a class="u-url" property="foaf:homepage" href="https://bisse.nl/">website</a>
-        <img class="u-photo" property="foaf:img" src="foto.jpg">
-        <div property="schema:homeLocation" typeof="schema:Place">
-          <div property="schema:address" typeof="schema:PostalAddress">
-            <span class="p-locality" property="schema:addressLocality">Groningen</span>
-            <span class="p-country-name" property="schema:addressCountry">Nederland</span>
-          </div>
-          <div class="h-geo" property="schema:geo" typeof="schema:GeoCoordinates">
-           <span class="p-latitude" property="schema:latitude">53.2187</span>,
-           <span class="p-longitude" property="schema:longitude">6.567</span>
-          </div>
-          <a property="schema:sameAs" href="https://sws.geonames.org/2755251/"></a>
-          <a property="schema:sameAs" href="http://www.wikidata.org/entity/Q749"></a>
-        </div>
-        <a class="u-email" property="schema:email" href="mailto:kleiweg@ziggo.nl">kleiweg@ziggo.nl</a>
-        <div class="p-note">er is geen weg terug</div>
-        <a property="schema:sameAs" href="https://orcid.org/0000-0001-8364-3201"></a>
-      </div>
-    </div>
-    <div id="menu">
-      <div id="dots">&middot;&middot;&middot;</div>
-      <div id="contents" class="center">
-        <div id="menuitems">
-          <a href="blog/">blog</a>
-          <a href="leeslog/">leeslog</a>
-          <a href="makerijen/">maaksels</a>
-          <a href="https://www.flickr.com/photos/pebbe/">foto's</a>
-          <a href="blog/categories/elektro/">hobby</a>
-          <a href="ij.html">de&nbsp;letter&nbsp;ij</a>
-          <a href="topo.html">topografie</a>
-          <a href="spul/">meer&nbsp;spul</a>
-          <a href="spul/waar.md">elders</a>
-        </div>
-        <em id="maanfase">&middot;&middot;&middot;</em>
-      </div>
-    </div>
-    <a id="wb" href="https://extinctionrebellion.nl/"><img src="img/webbunny1.png"></a>
-  </body>
 </html>
