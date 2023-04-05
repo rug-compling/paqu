@@ -26,6 +26,7 @@
     <schema:producer rdf:nodeID="cl"/>
     <schema:programmingLanguage>Go</schema:programmingLanguage>
     <schema:releaseNotes rdf:resource="https://github.com/rug-compling/paqu/blob/master/Changes.txt"/>
+    <schema:sameAs rdf:resource="https://tools.clariah.nl/paqu"/>
     <schema:softwareHelp>
       <schema:WebSite>
         <schema:name>PaQu -- Info</schema:name>

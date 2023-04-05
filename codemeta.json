@@ -10,6 +10,7 @@
   "@type": "SoftwareSourceCode",
   "name": "PaQu",
   "description": "PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.",
+  "sameAs": "https://tools.clariah.nl/paqu",
   "codeRepository": "https://github.com/rug-compling/paqu.git",
   "issueTracker": "https://github.com/rug-compling/paqu/issues",
   "license": "https://spdx.org/licenses/BSD-2-Clause",

@@ -21,6 +21,7 @@
     schema:producer _:cl ;
     schema:programmingLanguage "Go" ;
     schema:releaseNotes <https://github.com/rug-compling/paqu/blob/master/Changes.txt> ;
+    schema:sameAs <https://tools.clariah.nl/paqu> ;
     schema:softwareHelp [ a schema:WebSite ;
             schema:name "PaQu -- Info" ;
             schema:url <https://www.let.rug.nl/alfa/paqu/info.html> ] ;
