@@ -18,18 +18,12 @@
     <schema:dateModified rdf:datatype="http://schema.org/Date">2023-03-30</schema:dateModified>
     <schema:description>PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.</schema:description>
     <schema:downloadUrl rdf:resource="https://github.com/rug-compling/paqu/archive/refs/heads/master.zip"/>
-    <schema:identifier rdf:resource="https://github.com/rug-compling/paqu"/>
     <schema:keywords>Alpino</schema:keywords>
     <schema:license rdf:resource="https://spdx.org/licenses/BSD-2-Clause"/>
     <schema:name>PaQu</schema:name>
     <schema:operatingSystem>Docker</schema:operatingSystem>
     <schema:operatingSystem>Linux</schema:operatingSystem>
-    <schema:producer>
-      <schema:Organization>
-        <schema:name>Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen</schema:name>
-        <schema:url rdf:resource="https://www.rug.nl/research/clcg/research/cl/"/>
-      </schema:Organization>
-    </schema:producer>
+    <schema:producer rdf:nodeID="cl"/>
     <schema:programmingLanguage>Go</schema:programmingLanguage>
     <schema:releaseNotes rdf:resource="https://github.com/rug-compling/paqu/blob/master/Changes.txt"/>
     <schema:softwareHelp>
@@ -53,24 +47,24 @@
       <schema:Grant>
         <schema:funder>
           <schema:Organization>
-            <schema:name>Clariah</schema:name>
-            <schema:url rdf:resource="https://www.clariah.nl/"/>
-          </schema:Organization>
-        </schema:funder>
-        <schema:name>Projectnummer CC-WP3-15-005</schema:name>
-        <schema:url rdf:resource="https://www.clariah.nl/wp3-linguistics"/>
-      </schema:Grant>
-    </codemeta:funding>
-    <codemeta:funding>
-      <schema:Grant>
-        <schema:funder>
-          <schema:Organization>
             <schema:name>CLARIN-NL</schema:name>
             <schema:url rdf:resource="http://www.clarin.nl/"/>
           </schema:Organization>
         </schema:funder>
         <schema:name>PaQu - Parse and Query</schema:name>
         <schema:url rdf:resource="https://portal.clarin.nl/node/4182"/>
+      </schema:Grant>
+    </codemeta:funding>
+    <codemeta:funding>
+      <schema:Grant>
+        <schema:funder>
+          <schema:Organization>
+            <schema:name>Clariah</schema:name>
+            <schema:url rdf:resource="https://www.clariah.nl/"/>
+          </schema:Organization>
+        </schema:funder>
+        <schema:name>Projectnummer CC-WP3-15-005</schema:name>
+        <schema:url rdf:resource="https://www.clariah.nl/wp3-linguistics"/>
       </schema:Grant>
     </codemeta:funding>
     <codemeta:issueTracker rdf:resource="https://github.com/rug-compling/paqu/issues"/>

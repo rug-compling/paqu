@@ -8,7 +8,6 @@
   ],
   "@id": "https://rug-compling.github.io/paqu/",
   "@type": "SoftwareSourceCode",
-  "identifier": "https://github.com/rug-compling/paqu",
   "name": "PaQu",
   "description": "PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.",
   "codeRepository": "https://github.com/rug-compling/paqu.git",
@@ -25,6 +24,7 @@
     "https://vocabs.dariah.eu/tadirah/structuralAnalysis"
   ],
   "producer": {
+    "@id": "_:cl",
     "@type": "Organization",
     "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen",
     "url": "https://www.rug.nl/research/clcg/research/cl/"
@@ -52,10 +52,7 @@
     "familyName": "Kleiweg",
     "email": "mailto:p.c.j.kleiweg@rug.nl",
     "affiliation": {
-      "@id": "_:cl",
-      "@type": "Organization",
-      "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen",
-      "url": "https://www.rug.nl/research/clcg/research/cl/"
+      "@id": "_:cl"
     }
   },
   "maintainer": {
