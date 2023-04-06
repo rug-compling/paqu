@@ -61,6 +61,7 @@
           "@id": "_:grnNL",
           "@type": "PostalAddress",
           "addressLocality": "Groningen",
+          "addressRegion": "Groningen",
           "addressCountry": "NL"
         },
         "sameAs": [

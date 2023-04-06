@@ -120,6 +120,7 @@
               <schema:PostalAddress>
                 <schema:addressCountry>NL</schema:addressCountry>
                 <schema:addressLocality>Groningen</schema:addressLocality>
+                <schema:addressRegion>Groningen</schema:addressRegion>
               </schema:PostalAddress>
             </schema:address>
             <schema:name>Groningen</schema:name>

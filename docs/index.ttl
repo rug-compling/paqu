@@ -62,7 +62,8 @@
 
 _:grnNL a schema:PostalAddress ;
     schema:addressCountry "NL" ;
-    schema:addressLocality "Groningen" .
+    schema:addressLocality "Groningen" ;
+    schema:addressRegion "Groningen" .
 
 _:groningen a schema:Place ;
     schema:address _:grnNL ;
