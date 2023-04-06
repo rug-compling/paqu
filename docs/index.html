@@ -3,7 +3,7 @@
 
 <head>
   <base href="https://rug-compling.github.io/paqu/" />
-  <title>PaQu Documentation</title>
+  <title>PaQu &mdash; Documentatie</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="alternate" href="index.ttl" type="text/turtle" />
@@ -11,17 +11,123 @@
   <link rel="alternate" href="index.jsonld" type="application/ld+json" />
   <style type="text/css">
     <!--
+    * {
+      box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+    }
+
+    body {
+      border: 0px;
+      margin: 0px;
+      padding: 0px;
+      color: black;
+      background-color: #78909C;
+      line-height: 160%;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: purple;
+      letter-spacing: .1em;
+      margin-top: 2em;
+    }
+
+    h1 {
+      font-size: xx-large;
+      font-weight: 200;
+      border-bottom: 1px solid purple;
+    }
+
+    h2 {
+      font-size: x-large;
+      font-weight: 300;
+    }
+
+    h3 {
+      font-size: large;
+      font-weight: 400;
+    }
+
+    h4 {
+      font-size: medium;
+      font-weight: 500;
+    }
+
+    h5 {
+      font-size: small;
+      font-weight: 600;
+    }
+
+    h6 {
+      font-size: x-small;
+      font-weight: 700;
+    }
+
+    #container {
+      width: 960px;
+      margin: 2em auto;
+      padding: 1em;
+      border: 1px solid black;
+      background-color: #f5fffa;
+      -webkit-box-shadow: 10px 16px 18px -6px rgba(0, 0, 0, 0.5);
+      -moz-box-shadow: 10px 16px 18px -6px rgba(0, 0, 0, 0.5);
+      box-shadow: 10px 16px 18px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    @media screen and (max-width: 980px) {
+      body {
+        background-color: white;
+      }
+
+      #container {
+        max-width: 100%;
+        margin: 0px;
+        border: 0px;
+      }
+    }
     -->
   </style>
 </head>
 
 <body>
-  <h1>PaQu Documentation</h1>
+  <div id="container">
+    <h1>PaQu &mdash; Documentatie</h1>
+    <p>
+      Download metadata als <a href="index.ttl">turtle</a>,
+      <a href="index.rdf">rdf</a>, <a href="index.jsonld">json-ld</a>.
+    </p>
 
-  <h2>Computer programming source code</h2>
+    <p>
+      Ga naar <a href="https://www.let.rug.nl/alfa/paqu/">web-applicatie</a>
+    </p>
 
-  Download metadata as <a href="index.ttl">turtle</a>,
-  <a href="index.rdf">rdf</a>, <a href="index.jsonld">json-ld</a>.
+    <h2>Beschijving</h2>
+
+    <p>
+      Met PaQu (Parse &amp; Query) kun je zoeken in syntactisch geannoteerde
+      Nederlandstalige corpora.
+    </p>
+
+    <p>
+      PaQu ondersteunt twee manieren van zoeken. Met de eerste, eenvoudige,
+      manier kun je naar woordparen zoeken, met daarbij eventueel hun
+      syntactische relatie. De tweede, ingewikkeldere, manier gebruikt de
+      zoektaal XPath.
+    </p>
+
+    <p>
+      In PaQu is een aantal syntactisch geannoteerde corpora standaard
+      beschikbaar. Maar het is ook mogelijk om je eigen teksten aan te bieden.
+      Deze teksten worden dan door de automatische ontleder geanalyseerd, en
+      opgeslagen. Vervolgens kun je dan op dezelfde manier in je eigen teksten
+      zoeken.
+    </p>
+  </div>
 </body>
 
 </html>

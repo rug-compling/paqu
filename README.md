@@ -2,12 +2,17 @@
 
 Parse & Query
 
-----------------------------------------------------------------
+Metadata: https://rug-compling.github.io/paqu/
 
-## Docker ##
+#### Docker ##
 
 Je kunt PaQu nu ook in Docker draaien. Zie:
 https://github.com/rug-compling/paqu-docker
+
+#### Vergelijkbare toepassingen
+
+ * [AlpinoGraph](https://urd2.let.rug.nl/~kleiweg/alpinograph/)
+ * [GrETEL](https://gretel.hum.uu.nl/)
 
 ----------------------------------------------------------------
 

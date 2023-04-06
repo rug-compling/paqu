@@ -4,12 +4,22 @@
     "https://doi.org/10.5063/schema/codemeta-2.0",
     "https://w3id.org/software-iodata",
     "https://w3id.org/software-types",
-    "https://raw.githubusercontent.com/jantman/repostatus.org/master/badges/latest/ontology.jsonld"
+    "https://raw.githubusercontent.com/jantman/repostatus.org/master/badges/latest/ontology.jsonld",
+    {
+      "relation": {
+        "@id": "http://purl.org/dc/terms/relation",
+        "@type": "@id"
+      }
+    }
   ],
   "@id": "https://rug-compling.github.io/paqu/",
   "@type": "SoftwareSourceCode",
+  "relation": [
+    "https://rug-compling.github.io/alpinograph/",
+    "https://tools.clariah.nl/gretel"
+  ],
   "name": "PaQu",
-  "description": "PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.",
+  "description": "Met PaQu (Parse & Query) kun je zoeken in syntactisch geannoteerde Nederlandstalige corpora.\n\nPaQu ondersteunt twee manieren van zoeken. Met de eerste, eenvoudige, manier kun je naar woordparen zoeken, met daarbij eventueel hun syntactische relatie. De tweede, ingewikkeldere, manier gebruikt de zoektaal XPath.\n\nIn PaQu is een aantal syntactisch geannoteerde corpora standaard beschikbaar. Maar het is ook mogelijk om je eigen teksten aan te bieden. Deze teksten worden dan door de automatische ontleder geanalyseerd, en opgeslagen. Vervolgens kun je dan op dezelfde manier in je eigen teksten zoeken.",
   "sameAs": "https://tools.clariah.nl/paqu",
   "codeRepository": "https://github.com/rug-compling/paqu.git",
   "issueTracker": "https://github.com/rug-compling/paqu/issues",
@@ -77,7 +87,13 @@
   "releaseNotes": "https://github.com/rug-compling/paqu/blob/master/Changes.txt",
   "readme": "https://github.com/rug-compling/paqu/blob/master/README.md",
   "downloadUrl": "https://github.com/rug-compling/paqu/archive/refs/heads/master.zip",
-  "keywords": "Alpino",
+  "keywords": [
+    "Alpino",
+    "Dependency parsing",
+    "SPOD: Syntactic profiler of Dutch",
+    "XPath",
+    "UD: Universal Dependencies"
+  ],
   "programmingLanguage": "Go",
   "operatingSystem": ["Linux", "Docker"],
   "softwareRequirements": "https://github.com/rug-compling/paqu#benodigde-software",
