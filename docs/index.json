@@ -1,0 +1,153 @@
+{
+  "@context": [
+    "https://schema.org",
+    "https://doi.org/10.5063/schema/codemeta-2.0",
+    "https://w3id.org/software-iodata",
+    "https://w3id.org/software-types",
+    "https://raw.githubusercontent.com/jantman/repostatus.org/master/badges/latest/ontology.jsonld"
+  ],
+  "@id": "https://rug-compling.github.io/paqu/",
+  "@type": "SoftwareSourceCode",
+  "name": "PaQu",
+  "description": "PaQu is een webserver waarin gebruikers Nederlandstalige tekstdocumenten kunnen laten analyseren, en vervolgens onderzoeken op woordrelaties.",
+  "sameAs": "https://tools.clariah.nl/paqu",
+  "codeRepository": "https://github.com/rug-compling/paqu.git",
+  "issueTracker": "https://github.com/rug-compling/paqu/issues",
+  "license": "https://spdx.org/licenses/BSD-2-Clause",
+  "developmentStatus": [
+    "https://www.repostatus.org/#active",
+    "https://w3id.org/research-technology-readiness-levels#Stage4Complete"
+  ],
+  "applicationCategory": [
+    "https://w3id.org/nwo-research-fields#SoftwareForHumanities",
+    "https://w3id.org/nwo-research-fields#Linguistics",
+    "https://w3id.org/nwo-research-fields#ComputationalLinguisticsAndPhilology",
+    "https://vocabs.dariah.eu/tadirah/structuralAnalysis"
+  ],
+  "producer": {
+    "@id": "_:cl",
+    "@type": "Organization",
+    "name": [
+      {
+        "@value": "Computationele Taalkunde, Faculteit der Letteren, Rijksuniversiteit Groningen",
+        "@language": "nl"
+      },
+      {
+        "@value": "Computational Linguistics, Faculty of Arts, Groningen University",
+        "@language": "en"
+      }
+    ],
+    "url": "https://www.rug.nl/research/clcg/research/cl/",
+    "parentOrganization": {
+      "@id": "_:rug",
+      "@type": "Organization",
+      "name": [
+        {
+          "@value": "Rijksuniversiteit Groningen",
+          "@language": "nl"
+        },
+        {
+          "@value": "Groningen University",
+          "@language": "en"
+        }
+      ],
+      "url": "https://www.rug.nl/",
+      "sameAs": "http://www.wikidata.org/entity/Q850730",
+      "location": {
+        "@id": "_:groningen",
+        "@type": "Place",
+        "name": "Groningen",
+        "address": {
+          "@id": "_:grnNL",
+          "@type": "PostalAddress",
+          "addressLocality": "Groningen",
+          "addressRegion": "Groningen",
+          "addressCountry": "NL"
+        },
+        "sameAs": [
+          "http://www.wikidata.org/entity/Q749",
+          "https://sws.geonames.org/2755251/"
+        ]
+      }
+    }
+  },
+  "dateCreated": "2014-05-21",
+  "dateModified": "2023-03-30",
+  "version": "1.0.1",
+  "releaseNotes": "https://github.com/rug-compling/paqu/blob/master/Changes.txt",
+  "readme": "https://github.com/rug-compling/paqu/blob/master/README.md",
+  "downloadUrl": "https://github.com/rug-compling/paqu/archive/refs/heads/master.zip",
+  "keywords": "Alpino",
+  "programmingLanguage": "Go",
+  "operatingSystem": ["Linux", "Docker"],
+  "softwareRequirements": "https://github.com/rug-compling/paqu#benodigde-software",
+  "softwareHelp": {
+    "@type": "WebSite",
+    "name": "PaQu -- Info",
+    "url": "https://www.let.rug.nl/alfa/paqu/info.html"
+  },
+  "author": {
+    "@id": "_:pkleiweg",
+    "@type": "Person",
+    "sameAs": "https://orcid.org/0000-0001-8364-3201",
+    "givenName": "Peter",
+    "familyName": "Kleiweg",
+    "email": "mailto:p.c.j.kleiweg@rug.nl",
+    "affiliation": {
+      "@id": "_:cl"
+    }
+  },
+  "maintainer": {
+    "@id": "_:pkleiweg"
+  },
+  "referencePublication": {
+    "@type": "ScholarlyArticle",
+    "sameAs": "https://research.rug.nl/en/publications/the-parse-and-query-paqu-application",
+    "name": "The Parse and Query (PaQu) Application",
+    "author": [
+      "Jan Odijk",
+      "Gertjan van Noord",
+      "Peter Kleiweg",
+      "Erik Tjong Kim Sang"
+    ],
+    "pageStart": "281",
+    "pageEnd": "297",
+    "isPartOf": {
+      "@type": "PublicationIssue",
+      "datePublished": "2017",
+      "name": "CLARIN in the low countries",
+      "location": "London, UK"
+    },
+    "url": "https://doi.org/10.5334/bbi.23"
+  },
+  "targetProduct": {
+    "@type": "WebApplication",
+    "name": "PaQu",
+    "url": "https://www.let.rug.nl/alfa/paqu/",
+    "provider": {
+      "@id": "_:cl"
+    }
+  },
+  "funding": [
+    {
+      "@type": "Grant",
+      "name": "PaQu - Parse and Query",
+      "url": "https://portal.clarin.nl/node/4182",
+      "funder": {
+        "@type": "Organization",
+        "name": "CLARIN-NL",
+        "url": "http://www.clarin.nl/"
+      }
+    },
+    {
+      "@type": "Grant",
+      "name": "Projectnummer CC-WP3-15-005",
+      "url": "https://www.clariah.nl/wp3-linguistics",
+      "funder": {
+        "@type": "Organization",
+        "name": "Clariah",
+        "url": "https://www.clariah.nl/"
+      }
+    }
+  ]
+}
