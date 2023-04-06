@@ -35,16 +35,16 @@
         <https://www.repostatus.org/#active> ;
     codemeta:funding [ a schema:Grant ;
             schema:funder [ a schema:Organization ;
-                    schema:name "Clariah" ;
-                    schema:url <https://www.clariah.nl/> ] ;
-            schema:name "Projectnummer CC-WP3-15-005" ;
-            schema:url <https://www.clariah.nl/wp3-linguistics> ],
-        [ a schema:Grant ;
-            schema:funder [ a schema:Organization ;
                     schema:name "CLARIN-NL" ;
                     schema:url <http://www.clarin.nl/> ] ;
             schema:name "PaQu - Parse and Query" ;
-            schema:url <https://portal.clarin.nl/node/4182> ] ;
+            schema:url <https://portal.clarin.nl/node/4182> ],
+        [ a schema:Grant ;
+            schema:funder [ a schema:Organization ;
+                    schema:name "Clariah" ;
+                    schema:url <https://www.clariah.nl/> ] ;
+            schema:name "Projectnummer CC-WP3-15-005" ;
+            schema:url <https://www.clariah.nl/wp3-linguistics> ] ;
     codemeta:issueTracker <https://github.com/rug-compling/paqu/issues> ;
     codemeta:maintainer _:pkleiweg ;
     codemeta:readme <https://github.com/rug-compling/paqu/blob/master/README.md> ;

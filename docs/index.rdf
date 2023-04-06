@@ -48,24 +48,24 @@
       <schema:Grant>
         <schema:funder>
           <schema:Organization>
-            <schema:name>Clariah</schema:name>
-            <schema:url rdf:resource="https://www.clariah.nl/"/>
-          </schema:Organization>
-        </schema:funder>
-        <schema:name>Projectnummer CC-WP3-15-005</schema:name>
-        <schema:url rdf:resource="https://www.clariah.nl/wp3-linguistics"/>
-      </schema:Grant>
-    </codemeta:funding>
-    <codemeta:funding>
-      <schema:Grant>
-        <schema:funder>
-          <schema:Organization>
             <schema:name>CLARIN-NL</schema:name>
             <schema:url rdf:resource="http://www.clarin.nl/"/>
           </schema:Organization>
         </schema:funder>
         <schema:name>PaQu - Parse and Query</schema:name>
         <schema:url rdf:resource="https://portal.clarin.nl/node/4182"/>
+      </schema:Grant>
+    </codemeta:funding>
+    <codemeta:funding>
+      <schema:Grant>
+        <schema:funder>
+          <schema:Organization>
+            <schema:name>Clariah</schema:name>
+            <schema:url rdf:resource="https://www.clariah.nl/"/>
+          </schema:Organization>
+        </schema:funder>
+        <schema:name>Projectnummer CC-WP3-15-005</schema:name>
+        <schema:url rdf:resource="https://www.clariah.nl/wp3-linguistics"/>
       </schema:Grant>
     </codemeta:funding>
     <codemeta:issueTracker rdf:resource="https://github.com/rug-compling/paqu/issues"/>
