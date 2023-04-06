@@ -111,7 +111,7 @@
   </schema:SoftwareSourceCode>
   <schema:Organization rdf:nodeID="cl">
     <schema:name xml:lang="en">Computational Linguistics, Faculty of Arts, Groningen University</schema:name>
-    <schema:name xml:lang="nl">Computationele Linguïstiek, Faculteit der Letteren, Rijksuniversiteit Groningen</schema:name>
+    <schema:name xml:lang="nl">Computationele Taalkunde, Faculteit der Letteren, Rijksuniversiteit Groningen</schema:name>
     <schema:parentOrganization>
       <schema:Organization>
         <schema:location>

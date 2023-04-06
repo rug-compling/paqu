@@ -86,7 +86,7 @@ _:pkleiweg a schema:Person ;
 
 _:cl a schema:Organization ;
     schema:name "Computational Linguistics, Faculty of Arts, Groningen University"@en,
-        "Computationele Linguïstiek, Faculteit der Letteren, Rijksuniversiteit Groningen"@nl ;
+        "Computationele Taalkunde, Faculteit der Letteren, Rijksuniversiteit Groningen"@nl ;
     schema:parentOrganization _:rug ;
     schema:url <https://www.rug.nl/research/clcg/research/cl/> .
 
