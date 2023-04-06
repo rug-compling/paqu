@@ -27,8 +27,48 @@
   "producer": {
     "@id": "_:cl",
     "@type": "Organization",
-    "name": "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen",
-    "url": "https://www.rug.nl/research/clcg/research/cl/"
+    "name": [
+      {
+        "@value": "Computationele Linguïstiek, Faculteit der Letteren, Rijksuniversiteit Groningen",
+        "@language": "nl"
+      },
+      {
+        "@value": "Computational Linguistics, Faculty of Arts, Groningen University",
+        "@language": "en"
+      }
+    ],
+    "url": "https://www.rug.nl/research/clcg/research/cl/",
+    "parentOrganization": {
+      "@id": "_:rug",
+      "@type": "Organization",
+      "name": [
+        {
+          "@value": "Rijksuniversiteit Groningen",
+          "@language": "nl"
+        },
+        {
+          "@value": "Groningen University",
+          "@language": "en"
+        }
+      ],
+      "url": "https://www.rug.nl/",
+      "sameAs": "http://www.wikidata.org/entity/Q850730",
+      "location": {
+        "@id": "_:groningen",
+        "@type": "Place",
+        "name": "Groningen",
+        "address": {
+          "@id": "_:grnNL",
+          "@type": "PostalAddress",
+          "addressLocality": "Groningen",
+          "addressCountry": "NL"
+        },
+        "sameAs": [
+          "http://www.wikidata.org/entity/Q749",
+          "https://sws.geonames.org/2755251/"
+        ]
+      }
+    }
   },
   "dateCreated": "2014-05-21",
   "dateModified": "2023-03-30",

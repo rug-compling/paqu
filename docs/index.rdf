@@ -48,24 +48,24 @@
       <schema:Grant>
         <schema:funder>
           <schema:Organization>
-            <schema:name>CLARIN-NL</schema:name>
-            <schema:url rdf:resource="http://www.clarin.nl/"/>
-          </schema:Organization>
-        </schema:funder>
-        <schema:name>PaQu - Parse and Query</schema:name>
-        <schema:url rdf:resource="https://portal.clarin.nl/node/4182"/>
-      </schema:Grant>
-    </codemeta:funding>
-    <codemeta:funding>
-      <schema:Grant>
-        <schema:funder>
-          <schema:Organization>
             <schema:name>Clariah</schema:name>
             <schema:url rdf:resource="https://www.clariah.nl/"/>
           </schema:Organization>
         </schema:funder>
         <schema:name>Projectnummer CC-WP3-15-005</schema:name>
         <schema:url rdf:resource="https://www.clariah.nl/wp3-linguistics"/>
+      </schema:Grant>
+    </codemeta:funding>
+    <codemeta:funding>
+      <schema:Grant>
+        <schema:funder>
+          <schema:Organization>
+            <schema:name>CLARIN-NL</schema:name>
+            <schema:url rdf:resource="http://www.clarin.nl/"/>
+          </schema:Organization>
+        </schema:funder>
+        <schema:name>PaQu - Parse and Query</schema:name>
+        <schema:url rdf:resource="https://portal.clarin.nl/node/4182"/>
       </schema:Grant>
     </codemeta:funding>
     <codemeta:issueTracker rdf:resource="https://github.com/rug-compling/paqu/issues"/>
@@ -110,7 +110,29 @@
     </codemeta:referencePublication>
   </schema:SoftwareSourceCode>
   <schema:Organization rdf:nodeID="cl">
-    <schema:name>Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen</schema:name>
+    <schema:name xml:lang="en">Computational Linguistics, Faculty of Arts, Groningen University</schema:name>
+    <schema:name xml:lang="nl">Computationele Linguïstiek, Faculteit der Letteren, Rijksuniversiteit Groningen</schema:name>
+    <schema:parentOrganization>
+      <schema:Organization>
+        <schema:location>
+          <schema:Place>
+            <schema:address>
+              <schema:PostalAddress>
+                <schema:addressCountry>NL</schema:addressCountry>
+                <schema:addressLocality>Groningen</schema:addressLocality>
+              </schema:PostalAddress>
+            </schema:address>
+            <schema:name>Groningen</schema:name>
+            <schema:sameAs rdf:resource="http://www.wikidata.org/entity/Q749"/>
+            <schema:sameAs rdf:resource="https://sws.geonames.org/2755251/"/>
+          </schema:Place>
+        </schema:location>
+        <schema:name xml:lang="en">Groningen University</schema:name>
+        <schema:name xml:lang="nl">Rijksuniversiteit Groningen</schema:name>
+        <schema:sameAs rdf:resource="http://www.wikidata.org/entity/Q850730"/>
+        <schema:url rdf:resource="https://www.rug.nl/"/>
+      </schema:Organization>
+    </schema:parentOrganization>
     <schema:url rdf:resource="https://www.rug.nl/research/clcg/research/cl/"/>
   </schema:Organization>
   <schema:Person rdf:nodeID="pkleiweg">

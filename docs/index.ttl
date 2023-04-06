@@ -35,16 +35,16 @@
         <https://www.repostatus.org/#active> ;
     codemeta:funding [ a schema:Grant ;
             schema:funder [ a schema:Organization ;
-                    schema:name "CLARIN-NL" ;
-                    schema:url <http://www.clarin.nl/> ] ;
-            schema:name "PaQu - Parse and Query" ;
-            schema:url <https://portal.clarin.nl/node/4182> ],
-        [ a schema:Grant ;
-            schema:funder [ a schema:Organization ;
                     schema:name "Clariah" ;
                     schema:url <https://www.clariah.nl/> ] ;
             schema:name "Projectnummer CC-WP3-15-005" ;
-            schema:url <https://www.clariah.nl/wp3-linguistics> ] ;
+            schema:url <https://www.clariah.nl/wp3-linguistics> ],
+        [ a schema:Grant ;
+            schema:funder [ a schema:Organization ;
+                    schema:name "CLARIN-NL" ;
+                    schema:url <http://www.clarin.nl/> ] ;
+            schema:name "PaQu - Parse and Query" ;
+            schema:url <https://portal.clarin.nl/node/4182> ] ;
     codemeta:issueTracker <https://github.com/rug-compling/paqu/issues> ;
     codemeta:maintainer _:pkleiweg ;
     codemeta:readme <https://github.com/rug-compling/paqu/blob/master/README.md> ;
@@ -60,6 +60,23 @@
             schema:sameAs <https://research.rug.nl/en/publications/the-parse-and-query-paqu-application> ;
             schema:url <https://doi.org/10.5334/bbi.23> ] .
 
+_:grnNL a schema:PostalAddress ;
+    schema:addressCountry "NL" ;
+    schema:addressLocality "Groningen" .
+
+_:groningen a schema:Place ;
+    schema:address _:grnNL ;
+    schema:name "Groningen" ;
+    schema:sameAs <http://www.wikidata.org/entity/Q749>,
+        <https://sws.geonames.org/2755251/> .
+
+_:rug a schema:Organization ;
+    schema:location _:groningen ;
+    schema:name "Groningen University"@en,
+        "Rijksuniversiteit Groningen"@nl ;
+    schema:sameAs <http://www.wikidata.org/entity/Q850730> ;
+    schema:url <https://www.rug.nl/> .
+
 _:pkleiweg a schema:Person ;
     schema:affiliation _:cl ;
     schema:email "mailto:p.c.j.kleiweg@rug.nl" ;
@@ -68,7 +85,9 @@ _:pkleiweg a schema:Person ;
     schema:sameAs <https://orcid.org/0000-0001-8364-3201> .
 
 _:cl a schema:Organization ;
-    schema:name "Taaltechnologie, Faculteit der Letteren, Rijksuniversiteit Groningen" ;
+    schema:name "Computational Linguistics, Faculty of Arts, Groningen University"@en,
+        "Computationele Linguïstiek, Faculteit der Letteren, Rijksuniversiteit Groningen"@nl ;
+    schema:parentOrganization _:rug ;
     schema:url <https://www.rug.nl/research/clcg/research/cl/> .
 
 
