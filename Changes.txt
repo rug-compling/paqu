@@ -1,4 +1,8 @@
-Head
+Version 1.0.2
+2023-04-08
+
+ * update codemeta.json
+ * webpage https://rug-compling.github.io/paqu/ with rdf data
 
 
 Version 1.0.1

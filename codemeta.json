@@ -20,6 +20,9 @@
   ],
   "name": "PaQu",
   "description": "Met PaQu (Parse & Query) kun je zoeken in syntactisch geannoteerde Nederlandstalige corpora.\n\nPaQu ondersteunt twee manieren van zoeken. Met de eerste, eenvoudige, manier kun je naar woordparen zoeken, met daarbij eventueel hun syntactische relatie. De tweede, ingewikkeldere, manier gebruikt de zoektaal XPath.\n\nIn PaQu is een aantal syntactisch geannoteerde corpora standaard beschikbaar. Maar het is ook mogelijk om je eigen teksten aan te bieden. Deze teksten worden dan door de automatische ontleder geanalyseerd, en opgeslagen. Vervolgens kun je dan op dezelfde manier in je eigen teksten zoeken.",
+  "dateCreated": "2014-05-21",
+  "dateModified": "2023-04-08",
+  "version": "1.0.2",
   "sameAs": "https://tools.clariah.nl/paqu",
   "codeRepository": "https://github.com/rug-compling/paqu.git",
   "issueTracker": "https://github.com/rug-compling/paqu/issues",
@@ -31,7 +34,7 @@
   "applicationCategory": [
     "https://w3id.org/nwo-research-fields#SoftwareForHumanities",
     "https://w3id.org/nwo-research-fields#Linguistics",
-    "https://w3id.org/nwo-research-fields#ComputationalLinguisticsAndPhilology",
+    "https://w3id.org/nwo-research-fields#ComputationalLinguisticsandPhilology",
     "https://vocabs.dariah.eu/tadirah/structuralAnalysis"
   ],
   "producer": {
@@ -81,9 +84,6 @@
       }
     }
   },
-  "dateCreated": "2014-05-21",
-  "dateModified": "2023-03-30",
-  "version": "1.0.1",
   "releaseNotes": "https://github.com/rug-compling/paqu/blob/master/Changes.txt",
   "readme": "https://github.com/rug-compling/paqu/blob/master/README.md",
   "downloadUrl": "https://github.com/rug-compling/paqu/archive/refs/heads/master.zip",
