@@ -1657,8 +1657,8 @@ tijd met tegenwoordige tijd (3) en verleden tijd met verleden tijd (4).
 		"",
 	},
 	{
-		`Inbedding//Bij deze queries wordt gekeken naar de complexiteit van de zinnen in
-termen van de inbedding van finitie bijzinnen. Een hoofdzin zonder
+		`Inbedding in finiete zinnen//Bij deze queries wordt gekeken naar de complexiteit van de zinnen in
+termen van de inbedding van finiete bijzinnen. Een hoofdzin zonder
 finiete bijzin geldt dan als "geen inbedding". Een hoofdzin met een
 finiete bijzin geldt als "minstens 1 finiete zinsinbedding. Indien de
 finiete bijzin zelf ook een finiete bijzin bevat is er sprake van minstens
@@ -1666,7 +1666,7 @@ finiete bijzin zelf ook een finiete bijzin bevat is er sprake van minstens
 		`//node[%PQ_finiete_inbedding0%]`,
 		SPOD_STD,
 		"inb0",
-		"geen inbedding",
+		"finiete zinnen zonder inbedding",
 		"",
 	},
 	{
