@@ -77,7 +77,11 @@ speech tagging en lemmatisering van het D-Coi corpus</a>, 2005.
 Vanwege historische redenen wordt hier ook het attribuut <b>pos</b>
 opgenomen, maar dit attribuut wordt niet langer onderhouden, is ook
 niet gedocumenteerd en wordt ook niet gecorrigeerd in de handmatig
-geannoteerde corpora.`,
+geannoteerde corpora.
+<p>
+Ook geven we hier een overzicht van de categorie van de uiting (de &quot;zin&quot;)
+als geheel. Dat zijn immers niet altijd zinnen, maar soms ook
+naamwoordgroepen of nog andere categorieën.`,
 		`//node [@pos]`, // spatie i.v.m. mogelijk duplicaat
 		SPOD_STD,
 		"pos",
@@ -98,6 +102,14 @@ geannoteerde corpora.`,
 		SPOD_STD,
 		"pt",
 		"pt",
+		"attr",
+	},
+	{
+		``,
+		`/alpino_ds/node/node [@cat]`, // spatie i.v.m. mogelijk duplicaat
+		SPOD_STD,
+		"topcat",
+		"categorie van de gehele uiting",
 		"attr",
 	},
 	{

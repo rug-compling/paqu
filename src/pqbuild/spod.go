@@ -1,12 +1,6 @@
 package main
 
 import (
-	"github.com/rug-compling/paqu/internal/dir"
-	pqspod "github.com/rug-compling/paqu/internal/spod"
-
-	"github.com/pebbe/util"
-	"github.com/rug-compling/alpinods"
-
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -15,6 +9,12 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/rug-compling/paqu/internal/dir"
+	pqspod "github.com/rug-compling/paqu/internal/spod"
+
+	"github.com/pebbe/util"
+	"github.com/rug-compling/alpinods"
 )
 
 var (
@@ -36,6 +36,7 @@ var (
 	posCount    = make(map[string]int)
 	postagCount = make(map[string]int)
 	ptCount     = make(map[string]int)
+	topcatCount = make(map[string]int)
 	types       = make(map[string]bool)
 
 	sentenceCount = 0
@@ -76,6 +77,11 @@ func do_spod(data []byte) {
 
 	var walk func(*pqspod.NodeType)
 	walk = func(node *pqspod.NodeType) {
+		if node.Parent != nil && node.Parent.ID == 0 {
+			if p := node.Cat; p != "" {
+				topcatCount[p] = topcatCount[p] + 1
+			}
+		}
 		if p := node.Pos; p != "" {
 			posCount[p] = posCount[p] + 1
 		}
@@ -91,6 +97,9 @@ func do_spod(data []byte) {
 			node.Node = make([]*pqspod.NodeType, 0)
 		} else {
 			for _, n := range node.Node {
+				if node.ID == 0 {
+					n.Parent = node
+				}
 				walk(n)
 			}
 		}
@@ -211,7 +220,6 @@ func do_spod(data []byte) {
 
 	}
 	first = false
-
 }
 
 func inspect(q *pqspod.Context) {
@@ -228,7 +236,6 @@ func inspect(q *pqspod.Context) {
 
 	var walk func(*pqspod.NodeType)
 	walk = func(node *pqspod.NodeType) {
-
 		if node.Pos == "verb" {
 			has_pos_verb = true
 		}
@@ -332,11 +339,9 @@ func inspect(q *pqspod.Context) {
 	q.Varindexnodes = varindexnodes
 	q.Ptnodes = Ptnodes
 	q.Varptnodes = varptnodes
-
 }
 
 func spod_save() {
-
 	dir := filepath.Join(dir.Data, "data", prefix, "spod")
 
 	x(os.MkdirAll(dir, 0o777))
@@ -387,6 +392,8 @@ func spod_save() {
 				count = postagCount
 			case "pt":
 				count = ptCount
+			case "topcat":
+				count = topcatCount
 			}
 
 			keys := make([]string, 0)
@@ -457,5 +464,4 @@ func spod_save() {
 		fmt.Fprintln(fp)
 		fp.Close()
 	}
-
 }

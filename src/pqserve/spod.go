@@ -1,12 +1,6 @@
 package main
 
 import (
-	"github.com/rug-compling/paqu/internal/dir"
-	pqnode "github.com/rug-compling/paqu/internal/node"
-	pqspod "github.com/rug-compling/paqu/internal/spod"
-
-	"github.com/pebbe/dbxml"
-
 	"bufio"
 	"bytes"
 	"compress/gzip"
@@ -24,6 +18,12 @@ import (
 	"strings"
 	"sync"
 	"unicode/utf8"
+
+	"github.com/rug-compling/paqu/internal/dir"
+	pqnode "github.com/rug-compling/paqu/internal/node"
+	pqspod "github.com/rug-compling/paqu/internal/spod"
+
+	"github.com/pebbe/dbxml"
 )
 
 type spodQueueItem struct {
@@ -57,7 +57,6 @@ func spod_init() {
 }
 
 func spod_main(q *Context) {
-
 	writeHead(q, "Syntactic profiler of Dutch", 5)
 
 	fmt.Fprintln(q.w, "Syntactic profiler of Dutch<p>")
@@ -328,11 +327,9 @@ for (var n = 1; n < 7; n++) {
 `)
 
 	fmt.Fprintln(q.w, "</body></html>")
-
 }
 
 func spod_form(q *Context) {
-
 	seen := ""
 
 	outFormat := first(q.r, "out")
@@ -542,7 +539,11 @@ function vb(i) {
     window.open("xpath?db=`+db+`&xpath=" + xpaths[i][0] + "&mt=" + xpaths[i][1]);
 }
 function vb2(i, a, v) {
-    window.open("xpath?db=`+db+`&xpath=%2f%2fnode%5b%40" + a + "%3d%22" + v + "%22%5d&mt=" + xpaths[i][1]);
+	if (a == 'topcat') {
+        window.open("xpath?db=`+db+`&xpath=%2falpino_ds%2fnode%2fnode%5b%40cat%3d%22" + v + "%22%5d&mt=" + xpaths[i][1]);
+	} else {
+        window.open("xpath?db=`+db+`&xpath=%2f%2fnode%5b%40" + a + "%3d%22" + v + "%22%5d&mt=" + xpaths[i][1]);
+	}
 }
 
 var modal = document.getElementById('myModal');
@@ -1045,11 +1046,15 @@ func spod_work(q *Context, key string, filename string, db string, owner string,
 			url.QueryEscape(pqspod.Spods[item].Xpath),
 			pqspod.Spods[item].Method)
 	} else if attr {
+		lbl := pqspod.Spods[item].Lbl
+		if lbl == "topcat" {
+			lbl = "cat"
+		}
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=%s&d=1",
 			db,
 			url.QueryEscape(pqspod.Spods[item].Xpath),
 			pqspod.Spods[item].Method,
-			pqspod.Spods[item].Lbl)
+			lbl)
 	} else {
 		u = fmt.Sprintf("http://localhost/?db=%s&xpath=%s&mt=%s&attr1=word_is_&d=1",
 			db,
@@ -1342,7 +1347,6 @@ func spod_stats_work(q *Context, dbname string, owner string, outname string) {
 }
 
 func spod_list(q *Context) {
-
 	contentType(q, "text/plain; charset=utf-8")
 	nocache(q)
 
@@ -1386,7 +1390,6 @@ func spodEscape(s string) string {
 }
 
 func spod_schedule(owner string) {
-
 	ch := make(chan bool)
 	item := spodQueueItem{
 		ch:    ch,
