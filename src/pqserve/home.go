@@ -13,7 +13,6 @@ import (
 
 // TAB: begin
 func home(q *Context) {
-
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
 		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
@@ -1075,7 +1074,7 @@ func html_form(q *Context, prefix string, maxzin int) (has_query bool) {
            </select>
        <tr>
          <td colspan="3"><span class="ie">Metadata:<br></span>
-           <textarea rows="3" cols="40" name="meta" placeholder="metadata" id="metaarea">`+first(q.r, "meta")+`</textarea><br>
+           <textarea rows="3" cols="40" name="meta" placeholder="metadata" id="metaarea">`+html.EscapeString(first(q.r, "meta"))+`</textarea><br>
            <small><a href="javascript:void(0)" onclick="javascript:queryhelp()">voorbeelden</a></small>
        <tr>
          <td colspan="3">aantal: <select name="sn">
