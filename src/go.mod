@@ -13,7 +13,7 @@ require (
 	github.com/pebbe/dbxml v1.3.0
 	github.com/pebbe/util v0.9.0
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac
-	github.com/rug-compling/alpinods v1.16.2
+	github.com/rug-compling/alpinods v1.16.3
 	github.com/rug-compling/alud/v2 v2.13.0
 	github.com/russross/blackfriday/v2 v2.1.0
 	golang.org/x/image v0.0.0-20210216034530-4410531fe030
