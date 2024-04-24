@@ -1,3 +1,14 @@
+Version 1.0.5
+2024-04-24
+
+ * upgrade naar alud v2.14.0
+ * upgrade naar alpinods v1.16.4
+ * SPOD:
+     * Inbedding -> Inbedding in finiete zinnen
+     * count of cat below top
+ * fix voor XSS kwetsbaarheid
+
+
 Version 1.0.4
 2023-04-10
 
