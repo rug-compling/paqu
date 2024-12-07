@@ -3,11 +3,6 @@ package main
 //. Imports
 
 import (
-	"github.com/rug-compling/paqu/internal/dir"
-
-	"github.com/go-sql-driver/mysql"
-	"github.com/pebbe/util"
-
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
@@ -29,6 +24,11 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/rug-compling/paqu/internal/dir"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/pebbe/util"
 )
 
 type AlpinoInfo struct {
@@ -52,7 +52,6 @@ var (
 //. Main
 
 func main() {
-
 	flag.Parse()
 	if *opt_v {
 		verbose = true
@@ -326,6 +325,7 @@ func main() {
 		errserve = server.Serve(&SplitListener{Listener: ln})
 	}
 	logerr(errserve)
+	time.Sleep(2 * time.Second)
 
 	close(chGlobalExit)
 	wg.Wait()
