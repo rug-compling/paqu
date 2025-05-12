@@ -3,12 +3,6 @@ package main
 //. Imports
 
 import (
-	"github.com/rug-compling/paqu/internal/dir"
-
-	"github.com/BurntSushi/toml"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/pebbe/util"
-
 	"bytes"
 	"database/sql"
 	"encoding/hex"
@@ -17,6 +11,12 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/rug-compling/paqu/internal/dir"
+
+	"github.com/BurntSushi/toml"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/pebbe/util"
 )
 
 //. Types
@@ -29,17 +29,26 @@ type Config struct {
 	Path string
 }
 
-var (
-	Cfg Config
-)
+var Cfg Config
 
 //. Main
 
 func main() {
+	if len(os.Args) != 2 || (os.Args[1] != "-c" && os.Args[1] != "-C") {
+		fmt.Printf(`
+nSyntax: %s -c
 
-	if len(os.Args) != 2 || os.Args[1] != "-c" {
-		fmt.Printf("\nSyntax: %s -c\n\nDit verwijdert alle gebruikers zonder corpora die twee maanden niet actief zijn geweest\n\n", os.Args[0])
+Dit verwijdert gebruikers zonder corpora die twee maanden niet actief zijn geweest
+
+Gebruik -C i.p.v. -c voor het verwijderen van alle gebruikers zonder corpora
+
+`, os.Args[0])
 		return
+	}
+
+	addMonth := -2
+	if os.Args[1] != "-C" {
+		addMonth = 0
 	}
 
 	_, err := TomlDecodeFile(filepath.Join(dir.Config, "setup.toml"), &Cfg)
@@ -69,7 +78,7 @@ func main() {
 		fmt.Sprintf(
 			"SELECT `mail` FROM `%s_users` WHERE `active` < %q",
 			Cfg.Prefix,
-			datetime(time.Now().AddDate(0, -2, 0))))
+			datetime(time.Now().AddDate(0, addMonth, 0))))
 	util.CheckErr(err)
 	for rows.Next() {
 		var mail string
