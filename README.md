@@ -5,7 +5,7 @@
 
 Parse & Query
 
-Metadata: https://rug-compling.github.io/paqu/
+Metadata: https://www.let.rug.nl/alfa/rdf/paqu
 
 #### Docker ##
 
