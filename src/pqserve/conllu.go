@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/rug-compling/alud/v2"
-	pqnode "github.com/rug-compling/paqu/internal/node"
-
 	"bytes"
 	"fmt"
 	"html"
 	"sort"
 	"strings"
+
+	"github.com/rug-compling/alud/v2"
+	pqnode "github.com/rug-compling/paqu/internal/node"
 )
 
 const (
@@ -78,11 +78,6 @@ type Multi struct {
 }
 
 var (
-	dependencies []*Dependency
-	anchors      [][]Anchor
-	ud1s         = make(map[string]bool)
-	ud2s         = make(map[string]bool)
-
 	UdTags = []string{
 		"id",
 		"form",
@@ -184,7 +179,6 @@ func getDepAttr(attr string, n *pqnode.DepType) string {
 }
 
 func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext, data []byte) {
-
 	fp := q.w
 	if alpino.Conllu == nil || alpino.Conllu.Status == "" {
 		conllu, err := alud.Ud(data, "", "", alud.OPT_NO_COMMENTS|alud.OPT_NO_DETOKENIZE)
@@ -233,7 +227,7 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 		}
 	}
 
-	dependencies = make([]*Dependency, 0)
+	dependencies := make([]*Dependency, 0)
 
 	hasEnhanced := false
 	svgID := fmt.Sprintf("svg%d", id)
@@ -298,7 +292,8 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 				headpos: headpos,
 				rel:     [2]string{item.rel, ""},
 				dist:    abs(end - headpos),
-				marked:  [2]bool{ctx.ud1[ms], false}})
+				marked:  [2]bool{ctx.ud1[ms], false},
+			})
 			// }
 		}
 
@@ -321,7 +316,8 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 					headpos: headpos,
 					rel:     [2]string{"", a[1]},
 					dist:    abs(end - headpos),
-					marked:  [2]bool{false, ctx.ud2[ms]}})
+					marked:  [2]bool{false, ctx.ud2[ms]},
+				})
 				hasEnhanced = true
 			}
 		}
@@ -376,7 +372,7 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 
 	// hoogtes van de edges en aangrijppunten van de edges
 
-	anchors = make([][]Anchor, len(items))
+	anchors := make([][]Anchor, len(items))
 	for i := range items {
 		anchors[i] = make([]Anchor, 0)
 	}
@@ -441,8 +437,8 @@ func conllu2svg(q *Context, id int, alpino *Alpino_ds_complete, ctx *TreeContext
 
 	for n := range anchors {
 		sort.Slice(anchors[n], func(i, j int) bool {
-			var a1 = anchors[n][i]
-			var a2 = anchors[n][j]
+			a1 := anchors[n][i]
+			a2 := anchors[n][j]
 			if a1.dist == 0 {
 				return a2.dist > 0
 			}
@@ -617,9 +613,9 @@ function unmrk(id, i, j) {
 				i2 = i1
 			}
 			d1 := float64(items[i1].x2-items[i1].x1) - 20
-			x1 := items[i1].x1 + 10 + int(d1*anchor(i1, i2, dep.lvl))
+			x1 := items[i1].x1 + 10 + int(d1*anchor(i1, i2, dep.lvl, anchors))
 			d2 := float64(items[i2].x2-items[i2].x1) - 20
-			x2 := items[i2].x1 + 10 + int(d2*anchor(i2, i1, dep.lvl))
+			x2 := items[i2].x1 + 10 + int(d2*anchor(i2, i1, dep.lvl, anchors))
 			y1 := MARGIN + EDGE_FONT_SIZE + EDGE_FONT_OFFSET + LVL_HEIGHT*(maxlvl+1)
 			y2 := MARGIN + EDGE_FONT_SIZE + EDGE_FONT_OFFSET + LVL_HEIGHT*(maxlvl-dep.lvl)
 			linestyle := ""
@@ -719,7 +715,7 @@ function unmrk(id, i, j) {
 		color := ""
 		if item.enhanced {
 			enh = "enhanced "
-			//color = `fill="#FF8080" `
+			// color = `fill="#FF8080" `
 			color = `stroke-dasharray="10,10" `
 		}
 		if yellows[item.here] {
@@ -734,7 +730,7 @@ function unmrk(id, i, j) {
 		fmt.Fprintf(fp, "<rect class=\"%sq%d %s\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" rx=\"5\" ry=\"5\" %s/>\n",
 			enh,
 			i+1,
-			classlbl(item),
+			classlbl(item, dependencies),
 			item.x1,
 			offset,
 			item.x2-item.x1,
@@ -860,7 +856,7 @@ tts['%s'] = [
 	}
 }
 
-func anchor(i1, i2, lvl int) float64 {
+func anchor(i1, i2, lvl int, anchors [][]Anchor) float64 {
 	a := anchors[i1]
 	if len(a) == 1 {
 		if i1 < i2 {
@@ -878,7 +874,7 @@ func anchor(i1, i2, lvl int) float64 {
 	return (float64(n) + .5) / float64(len(a))
 }
 
-func classlbl(item *Item) string {
+func classlbl(item *Item, dependencies []*Dependency) string {
 	n := item.end
 	uses0 := make(map[int]bool)
 	uses1 := make(map[int]bool)
@@ -914,7 +910,6 @@ func tooltip(item *Item) string {
 }
 
 func textwidth(text string, fontsize float64, bold bool) (width, height, lift int) {
-
 	var sizes []uint8
 	var asc, desc int
 	if bold {
