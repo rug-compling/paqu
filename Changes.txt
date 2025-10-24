@@ -1,3 +1,12 @@
+Version 1.0.6
+2025-10-24
+
+ * bugfix pqserve/conllu.go : global vars -> local vars
+ * README.md: broken link
+ * pqclean: optie -C
+ * pqserve: pauze voor exit als server faalt, ivm logger
+
+
 Version 1.0.5
 2024-04-24
 
