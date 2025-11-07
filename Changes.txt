@@ -1,3 +1,9 @@
+Version 1.0.7
+2025-11-07
+
+ * upgrade naar alpinods v1.17.0 en alud v2.17.0
+
+
 Version 1.0.6
 2025-10-24
 
