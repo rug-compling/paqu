@@ -139,10 +139,14 @@ func getUdAttr(attr string, n *pqnode.UdType) string {
 		return n.Definite
 	case "Degree":
 		return n.Degree
+	case "ExtPos":
+		return n.ExtPos
 	case "Foreign":
 		return n.Foreign
 	case "Gender":
 		return n.Gender
+	case "Mood":
+		return n.Mood
 	case "Number":
 		return n.Number
 	case "Person":
