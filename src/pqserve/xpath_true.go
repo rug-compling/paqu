@@ -1,3 +1,4 @@
+//go:build !nodbxml
 // +build !nodbxml
 
 package main
@@ -37,9 +38,11 @@ var (
 		"Case":            true,
 		"Definite":        true,
 		"Degree":          true,
+		"ExtPos":          true,
 		"Foreign":         true,
 		"Gender":          true,
 		"Number":          true,
+		"Mood":            true,
 		"Person":          true,
 		"PronType":        true,
 		"Reflex":          true,

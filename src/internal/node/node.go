@@ -25,8 +25,10 @@ type FeatsType struct {
 	Case     string `xml:"Case,attr,omitempty"`
 	Definite string `xml:"Definite,attr,omitempty"`
 	Degree   string `xml:"Degree,attr,omitempty"`
+	ExtMod   string `xml:"ExtMod,attr,omitempty"`
 	Foreign  string `xml:"Foreign,attr,omitempty"`
 	Gender   string `xml:"Gender,attr,omitempty"`
+	Mood     string `xml:"Mood,attr,omitempty"`
 	Number   string `xml:"Number,attr,omitempty"`
 	Person   string `xml:"Person,attr,omitempty"`
 	PronType string `xml:"PronType,attr,omitempty"`
