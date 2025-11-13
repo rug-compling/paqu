@@ -9,6 +9,9 @@
 ## any macro definition that starts with //node should not
 ## have outer () brackets
 
+## DEP:ALPINODS:1.18
+PQ_ver_116 = """ ("1.16","1.17","1.18") """
+
 PQ_b = """ number(@begin) """
 PQ_e = """ number(@end) """
 PQ_i = """ number(@index) """
@@ -41,9 +44,9 @@ PQ_precedes_head_of_whq = """
 
 PQ_vorfeld = """
         (
-            (  /alpino_ds[@version = ("1.16", "1.17", "1.18")] and @is_vorfeld )
+            (  /alpino_ds[@version = %PQ_ver_116%] and @is_vorfeld )
                or
-               ( /alpino_ds[not(@version = ("1.16", "1.17", "1.18"))]
+               ( /alpino_ds[not(@version = %PQ_ver_116%)]
                and
                (
                    ( (  %PQ_precedes_head_of_smain%
@@ -690,13 +693,13 @@ PQ_basenp = """
 PQ_np = """
         (
             (
-                /alpino_ds[@version=("1.16","1.17","1.18")]
+                /alpino_ds[@version=%PQ_ver_116%]
                 and
                 @is_np
             )
             or
             (
-                /alpino_ds[not(@version=("1.16","1.17","1.18"))]
+                /alpino_ds[not(@version=%PQ_ver_116%)]
                 and
                 (
                     %PQ_basenp%
@@ -974,9 +977,9 @@ PQ_nachfeld_t = """
 
 PQ_nachfeld = """
         (
-            (  /alpino_ds[@version = ("1.16", "1.17","1.18")] and @is_nachfeld )
+            (  /alpino_ds[@version = %PQ_ver_116%] and @is_nachfeld )
                or
-               ( /alpino_ds[not(@version = ("1.16", "1.17","1.18"))]
+               ( /alpino_ds[not(@version = %PQ_ver_116%)]
                and
                (
                    %PQ_nachfeld_t%

@@ -87,6 +87,7 @@ var (
 		"deprel",
 		"deprel_main",
 		"deprel_aux",
+		// DEP:ALPINODS:1.18
 		"Abbr",
 		"Case",
 		"Definite",
@@ -131,6 +132,7 @@ func getUdAttr(attr string, n *pqnode.UdType) string {
 		return n.DeprelMain
 	case "deprel_aux":
 		return n.DeprelAux
+	// DEP:ALPINODS:1.18
 	case "Abbr":
 		return n.Abbr
 	case "Case":

@@ -33,7 +33,8 @@ var (
 	reXpath   = regexp.MustCompile(
 		`'[^']*'|"[^"]*"|@[_:a-zA-ZÀ-ÖØ-öø-ÿ][-._:a-zA-ZÀ-ÖØ-öø-ÿ0-9]*|\$[a-z][-_a-zA-Z0-9]*|[a-zA-Z][-_a-zA-Z]*:*(\s*\()?`)
 	keyTags = make(map[string]bool)
-	udTags  = map[string]bool{
+	// DEP:ALPINODS:1.18
+	udTags = map[string]bool{
 		"Abbr":            true,
 		"Case":            true,
 		"Definite":        true,
@@ -123,6 +124,7 @@ var (
 		"dep":                  true,
 		"ud":                   true,
 
+		// DEP:ALPINODS:1.18
 		"acl":        true,
 		"advcl":      true,
 		"advmod":     true,

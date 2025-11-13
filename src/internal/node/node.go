@@ -20,6 +20,7 @@ type UdType struct {
 	Dep        []DepType `xml:"dep,omitempty"`
 }
 
+// DEP:ALPINODS:1.18
 type FeatsType struct {
 	Abbr     string `xml:"Abbr,attr,omitempty"`
 	Case     string `xml:"Case,attr,omitempty"`

@@ -2652,7 +2652,7 @@ var Spod2xpath = map[string]*xPath{
 																						arg1: &dNode{},
 																					},
 																					arg2: &dElem{
-																						DATA: []interface{}{"1.16", "1.17"},
+																						DATA: []interface{}{"1.16", "1.17", "1.18"},
 																						arg1: &dCollect{
 																							ARG:  collect__attributes__version,
 																							arg1: &dNode{},
@@ -2684,7 +2684,7 @@ var Spod2xpath = map[string]*xPath{
 																									arg1: &dNode{},
 																								},
 																								arg2: &dElem{
-																									DATA: []interface{}{"1.16", "1.17"},
+																									DATA: []interface{}{"1.16", "1.17", "1.18"},
 																									arg1: &dCollect{
 																										ARG:  collect__attributes__version,
 																										arg1: &dNode{},
@@ -3778,7 +3778,7 @@ var Spod2xpath = map[string]*xPath{
 																					arg1: &dNode{},
 																				},
 																				arg2: &dElem{
-																					DATA: []interface{}{"1.16", "1.17"},
+																					DATA: []interface{}{"1.16", "1.17", "1.18"},
 																					arg1: &dCollect{
 																						ARG:  collect__attributes__version,
 																						arg1: &dNode{},
@@ -3810,7 +3810,7 @@ var Spod2xpath = map[string]*xPath{
 																								arg1: &dNode{},
 																							},
 																							arg2: &dElem{
-																								DATA: []interface{}{"1.16", "1.17"},
+																								DATA: []interface{}{"1.16", "1.17", "1.18"},
 																								arg1: &dCollect{
 																									ARG:  collect__attributes__version,
 																									arg1: &dNode{},
@@ -4841,7 +4841,7 @@ var Spod2xpath = map[string]*xPath{
 																					arg1: &dNode{},
 																				},
 																				arg2: &dElem{
-																					DATA: []interface{}{"1.16", "1.17"},
+																					DATA: []interface{}{"1.16", "1.17", "1.18"},
 																					arg1: &dCollect{
 																						ARG:  collect__attributes__version,
 																						arg1: &dNode{},
@@ -4873,7 +4873,7 @@ var Spod2xpath = map[string]*xPath{
 																								arg1: &dNode{},
 																							},
 																							arg2: &dElem{
-																								DATA: []interface{}{"1.16", "1.17"},
+																								DATA: []interface{}{"1.16", "1.17", "1.18"},
 																								arg1: &dCollect{
 																									ARG:  collect__attributes__version,
 																									arg1: &dNode{},
@@ -7378,7 +7378,7 @@ var Spod2xpath = map[string]*xPath{
 																		arg1: &dNode{},
 																	},
 																	arg2: &dElem{
-																		DATA: []interface{}{"1.16", "1.17"},
+																		DATA: []interface{}{"1.16", "1.17", "1.18"},
 																		arg1: &dCollect{
 																			ARG:  collect__attributes__version,
 																			arg1: &dNode{},
@@ -7410,7 +7410,7 @@ var Spod2xpath = map[string]*xPath{
 																					arg1: &dNode{},
 																				},
 																				arg2: &dElem{
-																					DATA: []interface{}{"1.16", "1.17"},
+																					DATA: []interface{}{"1.16", "1.17", "1.18"},
 																					arg1: &dCollect{
 																						ARG:  collect__attributes__version,
 																						arg1: &dNode{},
@@ -7924,7 +7924,7 @@ var Spod2xpath = map[string]*xPath{
 																							arg1: &dNode{},
 																						},
 																						arg2: &dElem{
-																							DATA: []interface{}{"1.16", "1.17"},
+																							DATA: []interface{}{"1.16", "1.17", "1.18"},
 																							arg1: &dCollect{
 																								ARG:  collect__attributes__version,
 																								arg1: &dNode{},
@@ -7956,7 +7956,7 @@ var Spod2xpath = map[string]*xPath{
 																										arg1: &dNode{},
 																									},
 																									arg2: &dElem{
-																										DATA: []interface{}{"1.16", "1.17"},
+																										DATA: []interface{}{"1.16", "1.17", "1.18"},
 																										arg1: &dCollect{
 																											ARG:  collect__attributes__version,
 																											arg1: &dNode{},
@@ -8964,7 +8964,7 @@ var Spod2xpath = map[string]*xPath{
 													arg1: &dNode{},
 												},
 												arg2: &dElem{
-													DATA: []interface{}{"1.16", "1.17"},
+													DATA: []interface{}{"1.16", "1.17", "1.18"},
 													arg1: &dCollect{
 														ARG:  collect__attributes__version,
 														arg1: &dNode{},
@@ -8996,7 +8996,7 @@ var Spod2xpath = map[string]*xPath{
 																arg1: &dNode{},
 															},
 															arg2: &dElem{
-																DATA: []interface{}{"1.16", "1.17"},
+																DATA: []interface{}{"1.16", "1.17", "1.18"},
 																arg1: &dCollect{
 																	ARG:  collect__attributes__version,
 																	arg1: &dNode{},
@@ -11636,7 +11636,7 @@ var Spod2xpath = map[string]*xPath{
 																						arg1: &dNode{},
 																					},
 																					arg2: &dElem{
-																						DATA: []interface{}{"1.16", "1.17"},
+																						DATA: []interface{}{"1.16", "1.17", "1.18"},
 																						arg1: &dCollect{
 																							ARG:  collect__attributes__version,
 																							arg1: &dNode{},
@@ -11668,7 +11668,7 @@ var Spod2xpath = map[string]*xPath{
 																									arg1: &dNode{},
 																								},
 																								arg2: &dElem{
-																									DATA: []interface{}{"1.16", "1.17"},
+																									DATA: []interface{}{"1.16", "1.17", "1.18"},
 																									arg1: &dCollect{
 																										ARG:  collect__attributes__version,
 																										arg1: &dNode{},
@@ -12824,7 +12824,7 @@ var Spod2xpath = map[string]*xPath{
 																						arg1: &dNode{},
 																					},
 																					arg2: &dElem{
-																						DATA: []interface{}{"1.16", "1.17"},
+																						DATA: []interface{}{"1.16", "1.17", "1.18"},
 																						arg1: &dCollect{
 																							ARG:  collect__attributes__version,
 																							arg1: &dNode{},
@@ -12856,7 +12856,7 @@ var Spod2xpath = map[string]*xPath{
 																									arg1: &dNode{},
 																								},
 																								arg2: &dElem{
-																									DATA: []interface{}{"1.16", "1.17"},
+																									DATA: []interface{}{"1.16", "1.17", "1.18"},
 																									arg1: &dCollect{
 																										ARG:  collect__attributes__version,
 																										arg1: &dNode{},
@@ -18811,7 +18811,7 @@ var Spod2xpath = map[string]*xPath{
 															arg1: &dNode{},
 														},
 														arg2: &dElem{
-															DATA: []interface{}{"1.16", "1.17"},
+															DATA: []interface{}{"1.16", "1.17", "1.18"},
 															arg1: &dCollect{
 																ARG:  collect__attributes__version,
 																arg1: &dNode{},
@@ -18843,7 +18843,7 @@ var Spod2xpath = map[string]*xPath{
 																		arg1: &dNode{},
 																	},
 																	arg2: &dElem{
-																		DATA: []interface{}{"1.16", "1.17"},
+																		DATA: []interface{}{"1.16", "1.17", "1.18"},
 																		arg1: &dCollect{
 																			ARG:  collect__attributes__version,
 																			arg1: &dNode{},
@@ -19767,7 +19767,7 @@ var Spod2xpath = map[string]*xPath{
 														arg1: &dNode{},
 													},
 													arg2: &dElem{
-														DATA: []interface{}{"1.16", "1.17"},
+														DATA: []interface{}{"1.16", "1.17", "1.18"},
 														arg1: &dCollect{
 															ARG:  collect__attributes__version,
 															arg1: &dNode{},
@@ -19799,7 +19799,7 @@ var Spod2xpath = map[string]*xPath{
 																	arg1: &dNode{},
 																},
 																arg2: &dElem{
-																	DATA: []interface{}{"1.16", "1.17"},
+																	DATA: []interface{}{"1.16", "1.17", "1.18"},
 																	arg1: &dCollect{
 																		ARG:  collect__attributes__version,
 																		arg1: &dNode{},
@@ -20298,7 +20298,7 @@ var Spod2xpath = map[string]*xPath{
 															arg1: &dNode{},
 														},
 														arg2: &dElem{
-															DATA: []interface{}{"1.16", "1.17"},
+															DATA: []interface{}{"1.16", "1.17", "1.18"},
 															arg1: &dCollect{
 																ARG:  collect__attributes__version,
 																arg1: &dNode{},
@@ -20330,7 +20330,7 @@ var Spod2xpath = map[string]*xPath{
 																		arg1: &dNode{},
 																	},
 																	arg2: &dElem{
-																		DATA: []interface{}{"1.16", "1.17"},
+																		DATA: []interface{}{"1.16", "1.17", "1.18"},
 																		arg1: &dCollect{
 																			ARG:  collect__attributes__version,
 																			arg1: &dNode{},
@@ -21261,7 +21261,7 @@ var Spod2xpath = map[string]*xPath{
 														arg1: &dNode{},
 													},
 													arg2: &dElem{
-														DATA: []interface{}{"1.16", "1.17"},
+														DATA: []interface{}{"1.16", "1.17", "1.18"},
 														arg1: &dCollect{
 															ARG:  collect__attributes__version,
 															arg1: &dNode{},
@@ -21293,7 +21293,7 @@ var Spod2xpath = map[string]*xPath{
 																	arg1: &dNode{},
 																},
 																arg2: &dElem{
-																	DATA: []interface{}{"1.16", "1.17"},
+																	DATA: []interface{}{"1.16", "1.17", "1.18"},
 																	arg1: &dCollect{
 																		ARG:  collect__attributes__version,
 																		arg1: &dNode{},
@@ -21830,7 +21830,7 @@ var Spod2xpath = map[string]*xPath{
 																				arg1: &dNode{},
 																			},
 																			arg2: &dElem{
-																				DATA: []interface{}{"1.16", "1.17"},
+																				DATA: []interface{}{"1.16", "1.17", "1.18"},
 																				arg1: &dCollect{
 																					ARG:  collect__attributes__version,
 																					arg1: &dNode{},
@@ -21862,7 +21862,7 @@ var Spod2xpath = map[string]*xPath{
 																							arg1: &dNode{},
 																						},
 																						arg2: &dElem{
-																							DATA: []interface{}{"1.16", "1.17"},
+																							DATA: []interface{}{"1.16", "1.17", "1.18"},
 																							arg1: &dCollect{
 																								ARG:  collect__attributes__version,
 																								arg1: &dNode{},
@@ -22809,7 +22809,7 @@ var Spod2xpath = map[string]*xPath{
 																									arg1: &dNode{},
 																								},
 																								arg2: &dElem{
-																									DATA: []interface{}{"1.16", "1.17"},
+																									DATA: []interface{}{"1.16", "1.17", "1.18"},
 																									arg1: &dCollect{
 																										ARG:  collect__attributes__version,
 																										arg1: &dNode{},
@@ -22841,7 +22841,7 @@ var Spod2xpath = map[string]*xPath{
 																												arg1: &dNode{},
 																											},
 																											arg2: &dElem{
-																												DATA: []interface{}{"1.16", "1.17"},
+																												DATA: []interface{}{"1.16", "1.17", "1.18"},
 																												arg1: &dCollect{
 																													ARG:  collect__attributes__version,
 																													arg1: &dNode{},
