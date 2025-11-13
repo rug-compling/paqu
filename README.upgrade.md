@@ -1,9 +1,12 @@
 wat:
 
-- afhankelijkheden van `alpinods`, zie:
-    - `rg DEP:ALPINODS`
-- `src/go.mod`
-- `src/go.sum`
+- afhankelijkheden van `alpinods`:
+    - zie `rg DEP:ALPINODS`
+    - `src/go.mod`
+    - `src/go.sum`
+- afhankelijkheden van `alud`:
+    - `src/go.mod`
+    - `src/go.sum`
 - `Changes.txt`
 - `codemeta.json`
 
