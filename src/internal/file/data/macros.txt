@@ -41,9 +41,9 @@ PQ_precedes_head_of_whq = """
 
 PQ_vorfeld = """
         (
-            (  /alpino_ds[@version = ("1.16", "1.17")] and @is_vorfeld )
+            (  /alpino_ds[@version = ("1.16", "1.17", "1.18")] and @is_vorfeld )
                or
-               ( /alpino_ds[not(@version = ("1.16", "1.17"))]
+               ( /alpino_ds[not(@version = ("1.16", "1.17", "1.18"))]
                and
                (
                    ( (  %PQ_precedes_head_of_smain%
@@ -690,13 +690,13 @@ PQ_basenp = """
 PQ_np = """
         (
             (
-                /alpino_ds[@version=("1.16","1.17")]
+                /alpino_ds[@version=("1.16","1.17","1.18")]
                 and
                 @is_np
             )
             or
             (
-                /alpino_ds[not(@version=("1.16","1.17"))]
+                /alpino_ds[not(@version=("1.16","1.17","1.18"))]
                 and
                 (
                     %PQ_basenp%
@@ -974,9 +974,9 @@ PQ_nachfeld_t = """
 
 PQ_nachfeld = """
         (
-            (  /alpino_ds[@version = ("1.16", "1.17")] and @is_nachfeld )
+            (  /alpino_ds[@version = ("1.16", "1.17","1.18")] and @is_nachfeld )
                or
-               ( /alpino_ds[not(@version = ("1.16", "1.17"))]
+               ( /alpino_ds[not(@version = ("1.16", "1.17","1.18"))]
                and
                (
                    %PQ_nachfeld_t%
