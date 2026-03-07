@@ -295,9 +295,9 @@ func sqlmeta(q *Context, prefix string, text string) (query string, njoins int, 
 			} else {
 				t := strings.ToLower(token)
 				if t == "&" || t == "en" || t == "and" {
-					sqlbuf.WriteString("\nAND ")
+					sqlbuf.WriteString(" AND ")
 				} else if t == "|" || t == "of" || t == "or" {
-					sqlbuf.WriteString("\nOR ")
+					sqlbuf.WriteString(" OR ")
 					current[lvl] = start[lvl]
 				} else {
 					return "", 0, fmt.Errorf("Ongeldige operator %q (verwacht: AND, OR)", token), nil

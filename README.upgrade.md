@@ -10,6 +10,7 @@ wat:
 - `Changes.txt`
 - `codemeta.json`
 
+
 waar:
 
 - thuis
@@ -17,7 +18,8 @@ waar:
 - PaQu in Docker
 - https://www.let.rug.nl/kleiweg/paqu/
 
-elders:
+
+afhankelijk van PaQu:
 
 - AlpinoGraph na update van SPOD
 - AlpinoGraph in Docker (idem)
