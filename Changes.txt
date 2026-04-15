@@ -1,3 +1,8 @@
+Version 1.0.10
+2026-04-15
+
+ * upgrade: compactcorpus v1.0.1 -> v1.0.3
+
 Version 1.0.9
 2026-03-07
 

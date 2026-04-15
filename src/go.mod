@@ -9,7 +9,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/microcosm-cc/bluemonday v1.0.22
-	github.com/pebbe/compactcorpus v1.0.1
+	github.com/pebbe/compactcorpus v1.0.3
 	github.com/pebbe/dbxml v1.3.0
 	github.com/pebbe/util v0.9.0
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac
