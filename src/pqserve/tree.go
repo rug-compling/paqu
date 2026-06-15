@@ -487,7 +487,7 @@ func tree(q *Context) {
 
 		}
 		if strings.HasPrefix(line, "<text ") && a != "" {
-			line = "<text onmouseover=\"tooltip.show('" + html.EscapeString(a) + "')\" onmouseout=\"tooltip.hide()\"" + line[5:]
+			line = "<text onmouseover=\"tooltip.show('" + html.EscapeString(slescape(a)) + "')\" onmouseout=\"tooltip.hide()\"" + line[5:]
 		}
 		if strings.HasPrefix(line, "</a>") {
 			line = ""
@@ -765,4 +765,8 @@ func unexpand(node *pqnode.Node) {
 			unexpand(n)
 		}
 	}
+}
+
+func slescape(s string) string {
+	return strings.ReplaceAll(s, "\\", "&#92;")
 }
