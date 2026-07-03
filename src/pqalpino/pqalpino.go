@@ -55,6 +55,7 @@ var (
 	opt_l = flag.Bool("l", false, "true: één zin per regel; false: doorlopende tekst")
 	opt_L = flag.String("L", "doc", "prefix voor labels")
 	opt_n = flag.Int("n", 0, "maximum aantal tokens per regel")
+	opt_N = flag.Bool("N", false, "meerdere zinnen per regel")
 	opt_p = flag.String("p", "", "alternatieve parser")
 	opt_q = flag.Bool("q", false, "true: quiet")
 	opt_s = flag.String("s", "", "URL van Alpino-server")
@@ -103,6 +104,7 @@ Opties alleen van toepassing bij gebruik van Alpino-server:
 
   -l        : Eén zin per regel (default: doorlopende tekst)
   -L string : Prefix voor labels (default: doc)
+  -N        : Meerdere zinnen per regel
   -q        : Stil
   -T        : Zinnen zijn getokeniseerd (default: niet getokeniseerd)
 
@@ -333,10 +335,14 @@ func doServer(info *AlpinoInfo) {
 			dataType = "lines"
 		}
 	} else {
+		dataType = "text"
+		if *opt_N {
+			dataType = "textlines"
+		}
 		if *opt_L == "" {
-			dataType = "text doc"
+			dataType += " doc"
 		} else {
-			dataType = "text " + *opt_L
+			dataType += " " + *opt_L
 		}
 	}
 	fmt.Fprintf(
