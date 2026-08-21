@@ -6,12 +6,17 @@ package main
 #cgo LDFLAGS: -lgvc -lcgraph
 #include <graphviz/gvc.h>
 #include <graphviz/cgraph.h>
+#include <graphviz/graphviz_version.h>
 #include <stdlib.h>
 
 char *makeGraph(char *data) {
 	Agraph_t *G;
 	char *s;
+#if GVPLUGIN_VERSION == 8
+	size_t n;
+#else
 	unsigned int n;
+#endif
 	GVC_t *gvc;
 
 	s = NULL;
