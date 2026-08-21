@@ -7,6 +7,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 var (
@@ -158,10 +160,10 @@ func (a *arch) Name() string {
 	}
 
 	if a.isZip {
-		return a.zr.File[a.zi-1].Name
+		return savePath(a.zr.File[a.zi-1].Name)
 	}
 
-	return a.theader.Name
+	return savePath(a.theader.Name)
 }
 
 func (a *arch) Close() {
@@ -181,4 +183,19 @@ func (a *arch) IsZip() bool {
 
 func (a *arch) IsTar() bool {
 	return a.isTar
+}
+
+func savePath(p string) string {
+	p = strings.ReplaceAll(p, `\`, "/")
+	p = filepath.Clean(p)
+	for {
+		if strings.HasPrefix(p, "/") {
+			p = p[1:]
+		} else if strings.HasPrefix(p, "..") {
+			p = p[2:]
+		} else {
+			break
+		}
+	}
+	return p
 }

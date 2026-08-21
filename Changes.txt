@@ -1,3 +1,9 @@
+Version 1.0.13
+2026-08-21
+
+ * pqserve: make sure paths in incomming archives are safe
+
+
 Version 1.0.12
 2026-07-03
 
