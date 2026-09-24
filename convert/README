@@ -1,3 +1,10 @@
+paqu.db aanmaken:
+
+    sqlite3 paqu.db < init.sql
+    duckdb -f mkSqlite.sql
+
+
+
 pq_corpora
   - user prefix
   - prefix

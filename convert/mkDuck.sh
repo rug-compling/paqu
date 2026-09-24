@@ -20,6 +20,12 @@ CREATE TABLE file   AS SELECT * FROM db1.${P}_c_${db}_file;
 CREATE UNIQUE INDEX file_id ON file(id);
 
 CREATE TABLE deprel AS SELECT * FROM db1.${P}_c_${db}_deprel;
+ALTER TABLE deprel ALTER word   TYPE VARCHAR COLLATE NOCASE.NOACCENT;
+ALTER TABLE deprel ALTER lemma  TYPE VARCHAR COLLATE NOCASE.NOACCENT;
+ALTER TABLE deprel ALTER root   TYPE VARCHAR COLLATE NOCASE.NOACCENT;
+ALTER TABLE deprel ALTER hword  TYPE VARCHAR COLLATE NOCASE.NOACCENT;
+ALTER TABLE deprel ALTER hlemma TYPE VARCHAR COLLATE NOCASE.NOACCENT;
+ALTER TABLE deprel ALTER hroot  TYPE VARCHAR COLLATE NOCASE.NOACCENT;
 CREATE UNIQUE INDEX deprel_idd ON deprel(idd);
 CREATE INDEX deprel_word    ON deprel(word);
 CREATE INDEX deprel_lemma   ON deprel(lemma);
@@ -60,6 +66,7 @@ CREATE INDEX sent_arch ON sent(arch);
 CREATE INDEX sent_lbl  ON sent(lbl);
 
 CREATE TABLE word   AS SELECT * FROM db1.${P}_c_${db}_word;
+ALTER TABLE word ALTER word TYPE VARCHAR COLLATE NOCASE.NOACCENT;
 CREATE UNIQUE INDEX word_word ON word(word);
     " | duckdb -echo $D/$db/data.duckdb
     # read -p continue... X
