@@ -1,0 +1,64 @@
+pq_corpora
+  - user prefix
+  - prefix
+  - user
+  - enabled
+pq_ignore
+  - user prefix
+pq_info
+  - id
+  - description
+  - owner
+  - status
+  - created
+  - active
+pq_macros
+  - user
+pq_users
+  - mail
+  - active
+pq_version
+  - id
+
+
+arch
+  - id
+deprel
+  - idd
+  - word
+  - lemma
+  - root
+  - postag
+  - rel
+  - hword
+  - hlemma
+  - hroot
+  - hpostag
+  - file
+  - arch
+file
+  - id
+meta
+  - id
+  - file
+  - arch
+  - tval
+  - ival
+  - fval
+  - dval
+  - idx
+midx
+  - id
+  - name
+minf
+  - id
+mval
+  - id
+  - idx
+sent
+  - file
+  - arch
+  - lbl
+word
+  - word
+
