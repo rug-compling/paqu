@@ -1,9 +1,9 @@
 paqu.db aanmaken:
 
-    sqlite3 paqu.db < init.sql
-    duckdb -f mkSqlite.sql
+    sqlite3 paqu.db < mkSqlite1.sql
+    duckdb -f mkSqlite2.sql
 
-
+SELECT database_name,table_name,sql FROM duckdb_tables();
 
 pq_corpora
   - user prefix

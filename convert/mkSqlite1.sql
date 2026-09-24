@@ -1,3 +1,5 @@
+-- usage: sqlite3 paqu.db < mkSqlite1.sql
+
 CREATE TABLE corpora (
   user    TEXT NOT NULL,
   prefix  TEXT NOT NULL,

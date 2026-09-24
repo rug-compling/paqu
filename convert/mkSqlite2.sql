@@ -1,3 +1,5 @@
+-- usage: duckdb -f mkSqlite2.sql
+
 INSTALL mysql;
 INSTALL sqlite;
 
