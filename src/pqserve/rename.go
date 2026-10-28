@@ -55,7 +55,7 @@ func rename2(q *Context) {
 	if d2 != "" {
 		_, err := sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `description` = %q WHERE `id` = %q", Cfg.Prefix, d2, id))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -66,13 +66,13 @@ func rename2(q *Context) {
 	infop := strings.TrimSpace(string(bluemonday.UGCPolicy().SanitizeBytes(unsafe)))
 	_, err := sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `info` = %q WHERE `id` = %q", Cfg.Prefix, info, id))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
 	_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `infop` = %q WHERE `id` = %q", Cfg.Prefix, infop, id))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}

@@ -145,12 +145,12 @@ func statstel(q *Context) {
 
 	query, joins, usererr, syserr := makeQuery(q, prefix, "", chClose)
 	if syserr != nil {
-		http.Error(q.w, syserr.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Query error", http.StatusInternalServerError)
 		logerr(syserr)
 		return
 	}
 	if usererr != nil {
-		http.Error(q.w, usererr.Error(), http.StatusPreconditionFailed)
+		http.Error(q.w, "Query error", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -230,12 +230,12 @@ func stats(q *Context) {
 
 	query, joins, usererr, syserr := makeQuery(q, prefix, "", chClose)
 	if syserr != nil {
-		http.Error(q.w, syserr.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Query error", http.StatusInternalServerError)
 		logerr(syserr)
 		return
 	}
 	if usererr != nil {
-		http.Error(q.w, usererr.Error(), http.StatusPreconditionFailed)
+		http.Error(q.w, "Query error", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -431,12 +431,12 @@ func statsrel(q *Context) {
 
 	query, joins, usererr, syserr := makeQuery(q, prefix, "a", chClose)
 	if syserr != nil {
-		http.Error(q.w, syserr.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Query error", http.StatusInternalServerError)
 		logerr(syserr)
 		return
 	}
 	if usererr != nil {
-		http.Error(q.w, usererr.Error(), http.StatusPreconditionFailed)
+		http.Error(q.w, "Query error", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -470,7 +470,7 @@ func statsrel(q *Context) {
 		if download {
 			interneFoutRegel(q, err, !download)
 		} else {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Internal error", http.StatusInternalServerError)
 		}
 		logerr(err)
 		return
@@ -525,7 +525,7 @@ func statsrel(q *Context) {
 			if download {
 				interneFoutRegel(q, err, !download)
 			} else {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "Internal error", http.StatusInternalServerError)
 			}
 			logerr(err)
 			return
@@ -729,5 +729,6 @@ func interneFoutRegel(q *Context, err error, is_html bool) {
 	if is_html {
 		s = html.EscapeString(s)
 	}
-	fmt.Fprintln(q.w, "Interne fout:", s)
+	_ = s
+	fmt.Fprintln(q.w, "Interne fout")
 }

@@ -25,7 +25,7 @@ func remove(q *Context) {
 		"SELECT `description` FROM `%s_info` WHERE `id` = %q AND `owner` = %q",
 		Cfg.Prefix, id, q.user))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -38,7 +38,7 @@ func remove(q *Context) {
 			rows.Close()
 			my = true
 		} else {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}

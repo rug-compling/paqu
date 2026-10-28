@@ -43,7 +43,7 @@ func share(q *Context) {
 	rows, err := sqlDB.Query(fmt.Sprintf(
 		"SELECT `user` FROM `%s_corpora` WHERE `prefix` = %q AND `user` != \"all\" AND `user` != %q ORDER BY `user`", Cfg.Prefix, id, q.user))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -51,7 +51,7 @@ func share(q *Context) {
 		var mail string
 		err := rows.Scan(&mail)
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -133,7 +133,7 @@ func share2(q *Context) {
 
 	_, err := sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_corpora` WHERE `prefix` = %q", Cfg.Prefix, id))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -144,7 +144,7 @@ func share2(q *Context) {
 	}
 	_, err = sqlDB.Exec(fmt.Sprintf("INSERT INTO `%s_corpora` (`user`, `prefix`) VALUES (%q, %q)", Cfg.Prefix, u, id))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -168,7 +168,7 @@ func share2(q *Context) {
 		seen[user] = true
 		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `mail` FROM `%s_users` WHERE `mail` = %q", Cfg.Prefix, user))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -179,7 +179,7 @@ func share2(q *Context) {
 		}
 		_, err = sqlDB.Exec(fmt.Sprintf("INSERT INTO `%s_corpora` (`user`, `prefix`, `enabled`) VALUES (%q, %q, %d)", Cfg.Prefix, user, id, e))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -191,7 +191,7 @@ func share2(q *Context) {
 
 	_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_info` SET `shared` = %q WHERE `id` = %q", Cfg.Prefix, sh, id))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}

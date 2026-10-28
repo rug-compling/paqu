@@ -18,7 +18,7 @@ func metadata(q *Context) {
 
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
-		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
+		http.Error(q.w, "Invalid corpus", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -104,7 +104,7 @@ func metadl(q *Context) {
 
 	prefix := first(q.r, "db")
 	if !q.hasmeta[prefix] {
-		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
+		http.Error(q.w, "Invalid corpus", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -218,7 +218,7 @@ func meta2(q *Context) {
 
 	prefix := first(q.r, "db")
 	if !q.hasmeta[prefix] {
-		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
+		http.Error(q.w, "Invalid corpus", http.StatusPreconditionFailed)
 		return
 	}
 

@@ -116,7 +116,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				rows, err := sqlDB.Query(fmt.Sprintf(
 					"SELECT `quotum` FROM `%s_users` WHERE `mail` = %q AND `sec` = %q", Cfg.Prefix, q.user, q.sec))
 				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+					http.Error(w, "Database error", http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
@@ -126,14 +126,14 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 					err := rows.Scan(&q.quotum)
 					rows.Close()
 					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
+						http.Error(w, "Database error", http.StatusInternalServerError)
 						logerr(err)
 						return
 					}
 					q.auth = true
 					_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_users` SET `active` = NOW() WHERE `mail` = %q", Cfg.Prefix, q.user))
 					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
+						http.Error(w, "Database error", http.StatusInternalServerError)
 						logerr(err)
 						return
 					}
@@ -146,7 +146,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 			if q.auth {
 				rows, err := sqlDB.Query(fmt.Sprintf("SELECT `prefix` FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
 				if err != nil {
-					http.Error(q.w, err.Error(), http.StatusInternalServerError)
+					http.Error(q.w, "Database error", http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
@@ -154,7 +154,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 					var s string
 					err := rows.Scan(&s)
 					if err != nil {
-						http.Error(q.w, err.Error(), http.StatusInternalServerError)
+						http.Error(q.w, "Database error", http.StatusInternalServerError)
 						logerr(err)
 						return
 					}
@@ -178,7 +178,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 				Cfg.Prefix,
 				where))
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, "Database error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
@@ -188,7 +188,7 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 			for rows.Next() {
 				err := rows.Scan(&id, &desc, &zinnen, &woorden, &owner, &shared, &params, &group, &protected, &hasmeta, &hasud, &hasis, &info, &infop, &date)
 				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+					http.Error(w, "Database error", http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
@@ -257,21 +257,21 @@ func handleFunc(url string, handler func(*Context), options *HandlerOptions) {
 			case "GET":
 				err = r.ParseForm()
 				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+					http.Error(w, "Form error", http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
 			case "POST":
 				reader, err := r.MultipartReader()
 				if err != nil && options.NeedForm {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+					http.Error(w, "Form error", http.StatusInternalServerError)
 					logerr(err)
 					return
 				}
 				if err == nil {
 					q.form, err = reader.ReadForm(10 * 1024 * 1024)
 					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
+						http.Error(w, "Form error", http.StatusInternalServerError)
 						logerr(err)
 						return
 					}

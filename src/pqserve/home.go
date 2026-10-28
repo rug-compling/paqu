@@ -15,7 +15,7 @@ import (
 func home(q *Context) {
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
-		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
+		http.Error(q.w, "Invalid corpus", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -1293,7 +1293,7 @@ func homedl(q *Context) {
 		return
 	}
 	if !q.prefixes[prefix] {
-		http.Error(q.w, "Ongeldig corpus: "+prefix, http.StatusPreconditionFailed)
+		http.Error(q.w, "Ongeldig corpus", http.StatusPreconditionFailed)
 		return
 	}
 

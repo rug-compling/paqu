@@ -1,3 +1,8 @@
+Version 1.0.14
+2026-10-28
+
+ * pqserve: several security fixes
+
 Version 1.0.13
 2026-08-21
 

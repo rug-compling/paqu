@@ -106,7 +106,7 @@ func hErr(q *Context, err error) bool {
 	}
 	chLog <- s1
 
-	http.Error(q.w, s, http.StatusInternalServerError)
+	http.Error(q.w, "System error", http.StatusInternalServerError)
 
 	return true
 }
@@ -117,7 +117,7 @@ func uhErr(q *Context, err error) bool {
 		return false
 	}
 
-	http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
+	http.Error(q.w, "User error", http.StatusPreconditionFailed)
 
 	return true
 }

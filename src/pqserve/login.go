@@ -21,7 +21,7 @@ func login(q *Context) {
 
 	rows, err := sqlDB.Query(fmt.Sprintf("SELECT `mail`,`sec` FROM `%s_users` WHERE `pw` = %q", Cfg.Prefix, pw))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -31,13 +31,13 @@ func login(q *Context) {
 		err := rows.Scan(&mail, &sec)
 		rows.Close()
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
 		_, err = sqlDB.Exec(fmt.Sprintf("UPDATE `%s_users` SET `pw` = '' WHERE `mail` = %q", Cfg.Prefix, mail))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -75,7 +75,7 @@ func login1(q *Context) {
 
 	rows, err := sqlDB.Query(fmt.Sprintf("SELECT * from `%s_users` WHERE `mail` = %q", Cfg.Prefix, mail))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -88,7 +88,7 @@ func login1(q *Context) {
 			Cfg.Prefix, mail, sec, auth, Cfg.Maxwrd))
 	}
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -100,7 +100,7 @@ func login1(q *Context) {
 			"Ga naar deze URL om in te loggen: %s?pw=%s",
 			urlJoin(Cfg.Url, "login"), urlencode(auth)))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Sendmail error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}

@@ -48,14 +48,14 @@ func browse(q *Context) {
 	datadir := filepath.Join(dir.Data, "data", id)
 	fp, err := os.Open(filepath.Join(datadir, "summary.txt.gz"))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "File error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
 	defer fp.Close()
 	gz, err := gzip.NewReader(fp)
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "File error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}

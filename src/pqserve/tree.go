@@ -6,17 +6,12 @@ package main
 #cgo LDFLAGS: -lgvc -lcgraph
 #include <graphviz/gvc.h>
 #include <graphviz/cgraph.h>
-#include <graphviz/graphviz_version.h>
 #include <stdlib.h>
 
 char *makeGraph(char *data) {
 	Agraph_t *G;
 	char *s;
-#if GVPLUGIN_VERSION == 8
-	size_t n;
-#else
 	unsigned int n;
-#endif
 	GVC_t *gvc;
 
 	s = NULL;
@@ -98,9 +93,12 @@ func tree(q *Context) {
 		return
 	}
 
-	has_names := false
-	if first(q.r, "names") == "true" {
-		has_names = true
+	filename := first(q.r, "filename")
+	if filename != "" {
+		if first(q.r, "arch") == "" {
+			http.Error(q.w, "Archiefnummer ontbreekt", http.StatusPreconditionFailed)
+			return
+		}
 	}
 
 	if n := first(q.r, "marknodes"); n != "" {
@@ -111,37 +109,67 @@ func tree(q *Context) {
 
 	file := 0
 	arch := 0
-	if !has_names {
+	if filename == "" {
 		var err error
 		file, err = strconv.Atoi(first(q.r, "file"))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
+			http.Error(q.w, "Invalid argument", http.StatusPreconditionFailed)
 			return
 		}
-		arch, err = strconv.Atoi(first(q.r, "arch"))
+	}
+	arch, err := strconv.Atoi(first(q.r, "arch"))
+	if err != nil {
+		arch = -1
+	}
+
+	archive := ""
+	if arch >= 0 {
+		row := sqlDB.QueryRow(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
+		err := row.Scan(&archive)
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusPreconditionFailed)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
+			logerr(err)
+			return
+		}
+	} else {
+		if filename != "" {
+			archive = "$$/data/" + prefix + "/data.dact"
+			if first(q.r, "x") == "true" {
+				archive += "x"
+			}
+		}
+	}
+
+	if filename == "" {
+		row := sqlDB.QueryRow(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
+		err := row.Scan(&filename)
+		if err != nil {
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
+			logerr(err)
 			return
 		}
 	}
 
 	label := ""
-	if has_names {
-		label = first(q.r, "file")
+	if filename != "" {
+		label = filename
+		if strings.HasPrefix(label, "$$/") {
+			label = label[3:]
+		}
 		if first(q.r, "global") == "true" {
-			label = filepath.Base(first(q.r, "arch")) + "::" + label
+			label = filepath.Base(archive) + "::" + label
 		}
 	} else {
 		rows, err := sqlDB.Query(fmt.Sprintf("SELECT `lbl` FROM `%s_c_%s_sent` WHERE `file` = %d AND `arch` = %d", Cfg.Prefix, prefix, file, arch))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
 		if rows.Next() {
 			err := rows.Scan(&label)
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "Database error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
@@ -149,49 +177,6 @@ func tree(q *Context) {
 		}
 	}
 
-	archive := ""
-	if has_names {
-		archive = first(q.r, "arch")
-	} else {
-		if arch >= 0 {
-			rows, err := sqlDB.Query(fmt.Sprintf("SELECT arch FROM %s_c_%s_arch WHERE id = %d", Cfg.Prefix, prefix, arch))
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			if rows.Next() {
-				err := rows.Scan(&archive)
-				if err != nil {
-					http.Error(q.w, err.Error(), http.StatusInternalServerError)
-					logerr(err)
-					return
-				}
-				rows.Close()
-			}
-		}
-	}
-
-	filename := ""
-	if has_names {
-		filename = first(q.r, "file")
-	} else {
-		rows, err := sqlDB.Query(fmt.Sprintf("SELECT file FROM %s_c_%s_file WHERE id = %d", Cfg.Prefix, prefix, file))
-		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
-			logerr(err)
-			return
-		}
-		if rows.Next() {
-			err := rows.Scan(&filename)
-			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
-				logerr(err)
-				return
-			}
-			rows.Close()
-		}
-	}
 	if strings.HasPrefix(filename, "$$") {
 		filename = dir.Data + "/data/" + prefix + "/xml" + filename[2:]
 	}
@@ -205,21 +190,21 @@ func tree(q *Context) {
 			var err error
 			data, err = get_dact(archive, filename)
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "Archive error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
 		} else {
 			reader, err := compactcorpus.RaOpen(archive)
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "Archive error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
 			data, err = reader.Get(filename)
 			reader.Close()
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "Archive error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
@@ -230,14 +215,14 @@ func tree(q *Context) {
 		if err != nil {
 			fp, err := os.Open(filename + ".gz")
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "File error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
 			r, err := gzip.NewReader(fp)
 			if err != nil {
 				fp.Close()
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "File error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
@@ -245,7 +230,7 @@ func tree(q *Context) {
 			r.Close()
 			fp.Close()
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "File error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
@@ -298,9 +283,9 @@ func tree(q *Context) {
 	}
 
 	alpino := Alpino_ds_complete{}
-	err := xml.Unmarshal(data, &alpino)
+	err = xml.Unmarshal(data, &alpino)
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Data error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}

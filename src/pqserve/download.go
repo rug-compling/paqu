@@ -28,7 +28,7 @@ func download(q *Context) {
 				id,
 				q.user))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -36,7 +36,7 @@ func download(q *Context) {
 			err := rows.Scan(&params)
 			rows.Close()
 			if err != nil {
-				http.Error(q.w, err.Error(), http.StatusInternalServerError)
+				http.Error(q.w, "Database error", http.StatusInternalServerError)
 				logerr(err)
 				return
 			}
@@ -67,21 +67,21 @@ func download(q *Context) {
 	case "dact":
 	case "xml":
 	default:
-		http.Error(q.w, "Ongeldige selectie: "+dl, http.StatusUnauthorized)
+		http.Error(q.w, "Ongeldige selectie", http.StatusUnauthorized)
 		return
 	}
 
 	if filename != "" {
 		fp, err := os.Open(filepath.Join(datadir, filename+".gz"))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "File error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
 		r, err := gzip.NewReader(fp)
 		if err != nil {
 			fp.Close()
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "File error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -96,7 +96,7 @@ func download(q *Context) {
 	if dl == "dact" {
 		fp, err := os.Open(filepath.Join(datadir, "data.dact"))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "File error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -111,14 +111,14 @@ func download(q *Context) {
 	if dl == "zinnen" {
 		fp, err := os.Open(filepath.Join(datadir, "data.lines.gz"))
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "File error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
 		r, err := gzip.NewReader(fp)
 		if err != nil {
 			fp.Close()
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "File error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -144,7 +144,7 @@ func download(q *Context) {
 	datadir = filepath.Join(datadir, "xml")
 	files, err := filenames2(datadir, false)
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Internal error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}

@@ -27,6 +27,11 @@ import (
 	"time"
 )
 
+type dactfileType struct {
+	id   int
+	arch string
+}
+
 var (
 	pqbugtest string
 	pqxok     string
@@ -276,6 +281,10 @@ func xpathdl(q *Context) {
 
 	query := firstf(q.form, "xpath")
 	prefix := firstf(q.form, "db")
+	if !q.prefixes[prefix] {
+		http.Error(q.w, "Invalid corpus", http.StatusPreconditionFailed)
+		return
+	}
 	methode := firstf(q.form, "mt")
 	step, err := strconv.Atoi(firstf(q.form, "step"))
 	if err != nil || step < 1 {
@@ -302,7 +311,7 @@ func xpath(q *Context) {
 
 	prefix := getprefix(q)
 	if !q.prefixes[prefix] {
-		http.Error(q.w, "Invalid corpus: "+prefix, http.StatusPreconditionFailed)
+		http.Error(q.w, "Invalid corpus", http.StatusPreconditionFailed)
 		return
 	}
 
@@ -1624,7 +1633,7 @@ init();
 	return
 }
 
-func xpath_result(q *Context, curno int, dactfile, filename, xmlall string, xmlparts []string, prefix string, global bool) {
+func xpath_result(q *Context, curno, dactfile int, filename, xmlall string, isDactX bool, xmlparts []string, prefix string, global bool) {
 
 	fout := func(err error, s string) {
 		s2 := fmt.Sprintf("<li>FOUT bij parsen van XML: %s\n<pre>%s</pre></li>\n", html.EscapeString(err.Error()), html.EscapeString(s))
@@ -1778,15 +1787,12 @@ $('ol').append(%q);
 		fmt.Fprint(&buf, " ")
 	}
 
-	if strings.HasPrefix(dactfile, dir.Data+"/") {
-		dactfile = strings.Replace(dactfile, dir.Data, "$$", 1)
-	}
-
-	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;names=true&amp;mwu=false&amp;arch=%s&amp;file=%s&amp;global=%v&amp;marknodes=%s&amp;ud1=%s&amp;ud2=%s\" class=\"ico\" target=\"_blank\">&#10020;</a>\n",
+	fmt.Fprintf(&buf, "\n<a href=\"tree?db=%s&amp;mwu=false&amp;arch=%d&amp;filename=%s&amp;global=%v&amp;x=%v&amp;marknodes=%s&amp;ud1=%s&amp;ud2=%s\" class=\"ico\" target=\"_blank\">&#10020;</a>\n",
 		prefix,
-		html.EscapeString(dactfile),
+		dactfile,
 		html.EscapeString(filename),
 		global,
+		isDactX,
 		strings.Join(ids, ","),
 		strings.Join(ud1, "|"),
 		strings.Join(ud2, "|"))
@@ -1935,25 +1941,26 @@ func xpath_do_search(q *Context, query string, prefix string, methode string, of
 		return
 	}
 
-	dactfiles := make([]string, 0)
+	dactfiles := make([]dactfileType, 0)
 	global := false
 	if strings.Contains(owner, "@") {
-		dactfiles = append(dactfiles, filepath.Join(dir.Data, "data", prefix, "data.dact"))
+		dactfiles = append(dactfiles, dactfileType{id: -1, arch: filepath.Join(dir.Data, "data", prefix, "data.dact")})
 	} else {
 		global = true
-		rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
+		rows, errval = sqlDB.Query(fmt.Sprintf("SELECT `id`,`arch` FROM `%s_c_%s_arch` ORDER BY `id`", Cfg.Prefix, prefix))
 		if logerr(errval) {
 			return
 		}
 		for rows.Next() {
 			var s string
-			errval = rows.Scan(&s)
+			var i int
+			errval = rows.Scan(&i, &s)
 			if logerr(errval) {
 				rows.Close()
 				return
 			}
 			if strings.HasSuffix(s, ".dact") {
-				dactfiles = append(dactfiles, s)
+				dactfiles = append(dactfiles, dactfileType{id: i, arch: s})
 			}
 		}
 		errval = rows.Err()
@@ -1990,7 +1997,7 @@ $('#ol').before('<div class="warning">Zoeken naar <b>Universal Dependencies</b> 
 	found := false
 	curno = 0
 	filename := ""
-	curdac := ""
+	curdac := -1
 	xmlall := ""
 	xmlparts := make([]string, 0)
 	fullquery := query
@@ -2017,12 +2024,12 @@ $('#ol').before('<div class="warning">Zoeken naar <b>Universal Dependencies</b> 
 
 		dactname := ""
 		if len(dactfiles) > 1 {
-			dactname = path.Base(dactfile) + "//"
+			dactname = path.Base(dactfile.arch) + "//"
 		}
 
 		if Cfg.Dactx && methode == "dx" {
 			if i == 0 {
-				if _, err := os.Stat(dactfile + "x"); err != nil {
+				if _, err := os.Stat(dactfile.arch + "x"); err != nil {
 					methode = "std"
 					methode2 = "std"
 					if doHtml {
@@ -2033,7 +2040,7 @@ $('#ol').before('<div class="warning">Geen ge&euml;xpandeerde indexnodes beschik
 				}
 			}
 			if methode == "dx" {
-				dactfile += "x"
+				dactfile.arch += "x"
 			}
 		}
 
@@ -2051,13 +2058,13 @@ $('#loading span').html('%.1f%%');
 			}
 		}
 
-		errval = bugtest(dactfile, queryparts[0])
+		errval = bugtest(dactfile.arch, queryparts[0])
 		if errval != nil {
 			return
 		}
 
 		var db *dbxml.Db
-		db, errval = dbxml.OpenRead(dactfile)
+		db, errval = dbxml.OpenRead(dactfile.arch)
 		if logerr(errval) {
 			return
 		}
@@ -2096,7 +2103,7 @@ $('#loading span').html('%.1f%%');
 				if found && curno > offset && curno <= offset+xpathmax {
 					found = false
 					if doHtml {
-						xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
+						xpath_result(q, curno, curdac, filename, xmlall, methode == "dx", xmlparts, prefix, global)
 					}
 					xmlparts = xmlparts[0:0]
 				}
@@ -2107,7 +2114,7 @@ $('#loading span').html('%.1f%%');
 						continue
 					}
 				}
-				curdac = dactfile
+				curdac = dactfile.id
 				filename = name
 				newdoc = true
 				if gettextcount {
@@ -2272,7 +2279,7 @@ $('#loading span').html('%.1f%%');
 		if found && curno > offset && curno <= offset+xpathmax {
 			found = false
 			if doHtml {
-				xpath_result(q, curno, curdac, filename, xmlall, xmlparts, prefix, global)
+				xpath_result(q, curno, curdac, filename, xmlall, methode == "dx", xmlparts, prefix, global)
 			}
 			xmlparts = xmlparts[0:0]
 		}

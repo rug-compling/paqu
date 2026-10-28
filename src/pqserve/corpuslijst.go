@@ -41,7 +41,7 @@ func corpuslijst(q *Context) {
 			"AND `i`.`owner` != \"manual\" "+
 			"ORDER BY 2", Cfg.Prefix, Cfg.Prefix, q.user, q.user))
 	if err != nil {
-		http.Error(q.w, err.Error(), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -53,7 +53,7 @@ func corpuslijst(q *Context) {
 		var datum time.Time
 		err := rows.Scan(&id, &title, &lines, &owner, &datum)
 		if err != nil {
-			http.Error(q.w, err.Error(), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
@@ -283,14 +283,14 @@ func corsave(q *Context) {
 
 	data, err := ioutil.ReadAll(q.r.Body)
 	if err != nil {
-		http.Error(q.w, html.EscapeString(err.Error()), http.StatusInternalServerError)
+		http.Error(q.w, "Data error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
 
 	_, err = sqlDB.Exec(fmt.Sprintf("DELETE FROM `%s_ignore` WHERE `user` = %q", Cfg.Prefix, q.user))
 	if err != nil {
-		http.Error(q.w, html.EscapeString(err.Error()), http.StatusInternalServerError)
+		http.Error(q.w, "Database error", http.StatusInternalServerError)
 		logerr(err)
 		return
 	}
@@ -298,7 +298,7 @@ func corsave(q *Context) {
 	for _, id := range strings.Fields(string(data)) {
 		_, err = sqlDB.Exec(fmt.Sprintf("INSERT INTO `%s_ignore` (`user`, `prefix`) VALUES (%q, %q)", Cfg.Prefix, q.user, id))
 		if err != nil {
-			http.Error(q.w, html.EscapeString(err.Error()), http.StatusInternalServerError)
+			http.Error(q.w, "Database error", http.StatusInternalServerError)
 			logerr(err)
 			return
 		}
